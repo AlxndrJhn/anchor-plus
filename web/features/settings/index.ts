@@ -4,6 +4,7 @@ export { DateTimeSection } from "./components/date-time-section";
 export { DevicesSection } from "./components/devices-section";
 export { EditorSection } from "./components/editor-section";
 export { ImportExportSection } from "./components/import-export-section";
+export { LanguageSection } from "./components/language-section";
 export { NoteLocksSection } from "./components/note-locks-section";
 export { PasswordSection } from "./components/password-section";
 export { PhoneSection } from "./components/phone-section";

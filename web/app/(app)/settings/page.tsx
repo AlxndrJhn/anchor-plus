@@ -10,6 +10,7 @@ import {
   DevicesSection,
   EditorSection,
   ImportExportSection,
+  LanguageSection,
   NoteLocksSection,
   PasswordSection,
   PhoneSection,
@@ -37,6 +38,7 @@ export default function SettingsPage() {
         <div className="grid min-w-0 gap-8">
           <ProfileSection />
           <AppearanceSection />
+          <LanguageSection />
           <DateTimeSection />
           <EditorSection />
           <QuickActionsSection />

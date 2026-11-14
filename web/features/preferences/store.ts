@@ -6,6 +6,7 @@ import type {
   QuickActionSetup,
 } from "@/features/notes/quick-actions";
 import type { CustomTheme } from "@/lib/design/custom-theme";
+import type { LanguagePreference } from "@/lib/i18n/locales";
 import type { DateDisplay, TimeDisplay, WeekStart } from "./date-time";
 
 export type ViewMode = "masonry" | "grid" | "list";
@@ -24,6 +25,8 @@ interface UIPreferences {
   style?: AppStyle;
   /** Colours pasted as JSON in Settings, over the colour scheme. */
   customTheme?: CustomTheme;
+  /** The app’s language; unset follows the browser’s. */
+  language?: LanguagePreference;
   /** How dates read across the app; unset follows the browser's language. */
   dateDisplay?: DateDisplay;
   /** 12 or 24 hours; unset follows the browser's language. */

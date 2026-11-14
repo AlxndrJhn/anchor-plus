@@ -6,6 +6,7 @@ import {
   HardDriveDownload,
   Info,
   KeyRound,
+  Languages,
   LayoutPanelTop,
   Lock,
   LockKeyhole,
@@ -25,6 +26,7 @@ import { onUserScroll } from "@/lib/user-scroll";
 const ALL_SECTIONS = [
   { id: "profile", label: "Profile", icon: UserRound },
   { id: "appearance", label: "Appearance", icon: SunMoon },
+  { id: "language", label: "Language", icon: Languages },
   { id: "date-time", label: "Date and time", icon: CalendarClock },
   { id: "editor", label: "Editor", icon: PencilLine },
   { id: "quick-actions", label: "Quick actions", icon: LayoutPanelTop },
