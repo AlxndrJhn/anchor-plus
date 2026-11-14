@@ -58,13 +58,20 @@ function CopyAddress({ label, value }: { label: string; value: string }) {
 }
 
 /** What to ask whoever runs the provider for, ready to paste in a message. */
-function providerRequest(providerName: string, callbackUrl: string) {
+function providerRequest(
+  providerName: string,
+  callbackUrl: string,
+  postLogoutRedirectUrl: string,
+  backchannelLogoutUrl: string,
+) {
   return [
     `Could you add Anchor+ as an OIDC client in ${providerName}? In Pocket ID, that’s OIDC Clients → Add OIDC Client.`,
     "",
     "- Name: Anchor+",
     `- Callback URLs: ${callbackUrl}`,
     `  and ${PHONE_CALLBACK_URL} (for the phone app)`,
+    `- Logout callback URL (post-logout redirect URI): ${postLogoutRedirectUrl}`,
+    `- Back-channel logout URL, if it has one: ${backchannelLogoutUrl}`,
     "- Public client: yes, with PKCE (the phone app can’t keep a secret)",
     "",
     "Then send me its client ID and the issuer URL (your Pocket ID’s address). Thanks!",
@@ -80,6 +87,8 @@ type OidcForm = Required<
     | "clientId"
     | "mobileClientId"
     | "disableInternalAuth"
+    | "providerLogout"
+    | "logoutUrl"
   >
 > & {
   clientSecret: string;
@@ -104,6 +113,8 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
             clientId: settings.clientId ?? "",
             mobileClientId: settings.mobileClientId ?? "",
             disableInternalAuth: settings.disableInternalAuth,
+            providerLogout: settings.providerLogout ?? true,
+            logoutUrl: settings.logoutUrl ?? "",
             clientSecret: "",
             clearSecret: false,
           }
@@ -114,6 +125,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
   const [errors, setErrors] = React.useState<{
     issuer?: string;
     client?: string;
+    logout?: string;
   }>({});
   React.useEffect(() => setForm(saved), [saved]);
   const test = useMutation({
@@ -184,8 +196,13 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
       fieldErrors.issuer = "Enter a full URL, like https://auth.example.com.";
     if (form.enabled && !form.clientId.trim())
       fieldErrors.client = "Enter the client ID.";
+    if (
+      form.logoutUrl.trim() &&
+      !/^https?:\/\/\S+$/i.test(form.logoutUrl.trim())
+    )
+      fieldErrors.logout = "Enter a full URL, or leave it empty.";
     setErrors(fieldErrors);
-    if (fieldErrors.issuer || fieldErrors.client) return;
+    if (fieldErrors.issuer || fieldErrors.client || fieldErrors.logout) return;
     const dto: UpdateOidcSettingsDto = {
       enabled: form.enabled,
       providerName: form.providerName.trim(),
@@ -193,6 +210,8 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
       clientId: form.clientId.trim(),
       mobileClientId: form.mobileClientId.trim(),
       disableInternalAuth: form.disableInternalAuth,
+      providerLogout: form.providerLogout,
+      logoutUrl: form.logoutUrl.trim(),
     };
     if (form.clientSecret.trim()) dto.clientSecret = form.clientSecret.trim();
     else if (form.clearSecret) dto.clearClientSecret = true;
@@ -405,6 +424,51 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                 }
               />
             </Row>
+            <Row className="grid gap-3.5">
+              <div className="flex items-center gap-3.5">
+                <div className="grid min-w-50 flex-1 gap-0.5">
+                  <label
+                    htmlFor="oidc-logout"
+                    className="font-semibold text-ui"
+                  >
+                    Sign out of {providerName} too
+                  </label>
+                  <span className="text-meta text-muted-foreground">
+                    Signing out of Anchor+ on the web goes on to {providerName}
+                    ’s sign-out, then back to the sign-in page.
+                  </span>
+                </div>
+                <Switch
+                  id="oidc-logout"
+                  checked={form.providerLogout}
+                  disabled={locked}
+                  onCheckedChange={(providerLogout) =>
+                    updateForm({ providerLogout })
+                  }
+                />
+              </div>
+              {form.providerLogout && (
+                <div className="grid grid-cols-2 items-start gap-3.5 max-md:grid-cols-1">
+                  <Field
+                    label="Sign-out URL"
+                    aside="Optional"
+                    error={errors.logout}
+                    help={`Leave empty to use the end_session_endpoint ${providerName} publishes.`}
+                  >
+                    <Input
+                      value={form.logoutUrl}
+                      readOnly={locked}
+                      inputMode="url"
+                      placeholder="From the provider’s discovery"
+                      onChange={(e) => {
+                        updateForm({ logoutUrl: e.target.value });
+                        setErrors((prev) => ({ ...prev, logout: undefined }));
+                      }}
+                    />
+                  </Field>
+                </div>
+              )}
+            </Row>
             <Row className="block">
               <div className="grid gap-1.5 rounded-lg bg-muted px-3.5 py-3">
                 <b className="font-semibold text-meta">Callback URLs</b>
@@ -428,13 +492,34 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                   Public Client and PKCE so the phone app can sign in too, and
                   copy its client ID here.
                 </FieldDescription>
+                <b className="mt-2 font-semibold text-meta">Sign-out URLs</b>
+                <CopyAddress
+                  label="Post-logout redirect URL"
+                  value={settings.postLogoutRedirectUrl}
+                />
+                <CopyAddress
+                  label="Back-channel logout URL"
+                  value={settings.backchannelLogoutUrl}
+                />
+                <FieldDescription>
+                  Add the first as a post-logout redirect URI (Logout Callback
+                  URL in Pocket ID), so {providerName} sends people back after
+                  signing out there. Give the second as the back-channel logout
+                  URL, if {providerName} has one, so signing out there signs out
+                  of Anchor+ too, on phones as well.
+                </FieldDescription>
                 <Button
                   variant="secondary"
                   size="sm"
                   className="justify-self-start"
                   onClick={() =>
                     copyText(
-                      providerRequest(providerName, settings.callbackUrl),
+                      providerRequest(
+                        providerName,
+                        settings.callbackUrl,
+                        settings.postLogoutRedirectUrl,
+                        settings.backchannelLogoutUrl,
+                      ),
                     ).then(
                       () =>
                         toast.success(

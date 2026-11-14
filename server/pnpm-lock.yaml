@@ -239,6 +239,9 @@ importers:
       helmet:
         specifier: ^8.3.0
         version: 8.3.0
+      jose:
+        specifier: ^6.2.14
+        version: 6.2.14
       multer:
         specifier: ^2.5.0
         version: 2.5.0

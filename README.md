@@ -374,6 +374,8 @@ The [desktop app](#desktop-app) installs with winget too.
    | `OIDC_CLIENT_SECRET` | No | — | OIDC client secret. Omit for public client (PKCE) |
    | `OIDC_MOBILE_CLIENT_ID` | No | `OIDC_CLIENT_ID` | A separate public client for the phone app |
    | `DISABLE_INTERNAL_AUTH` | No | `false` | Hide local login form when OIDC is enabled (OIDC-only mode) |
+   | `OIDC_PROVIDER_LOGOUT` | No | `true` | After signing out of Anchor+ on the web, sign out at the provider too (see [Signing out](#signing-out)) |
+   | `OIDC_LOGOUT_URL` | No | — | The provider's sign-out page, in place of its `end_session_endpoint` |
 
 3. **Start the container:**
 
@@ -860,6 +862,43 @@ services:
 #### Admin UI Configuration
 
 Alternatively, configure OIDC via the admin panel (Settings → OIDC Authentication) when the three env vars are not all set.
+
+#### Signing out
+
+Sign-out can be shared with the provider in either direction, or both, or neither.
+
+**Anchor+ → provider (RP-initiated logout).** After someone who signed in through the provider signs out of Anchor+ on the web, the browser goes on to the provider's `end_session_endpoint` (from its discovery document) with `id_token_hint`, `client_id` and `post_logout_redirect_uri`, and the provider sends them back to the Anchor+ sign-in page. This is on by default. Add this as a post-logout redirect URI in the provider:
+
+```
+{APP_URL}/login
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_PROVIDER_LOGOUT` | `true` | `false` keeps sign-out in Anchor+ only |
+| `OIDC_LOGOUT_URL` | — | The provider's sign-out page, in place of its `end_session_endpoint` (for a provider that doesn't publish one); the same parameters are added |
+
+Without the env vars, the same two are under **Admin → Sign-in → Single sign-on** (**Sign out of … too** and **Sign-out URL**). Sessions signed in before this update, and those signed in with a password or passkey, sign out of Anchor+ only.
+
+**Provider → Anchor+ (back-channel logout).** When the provider's session ends, it can post a logout token ([OpenID Connect Back-Channel Logout 1.0](https://openid.net/specs/openid-connect-backchannel-1_0.html)) to Anchor+, which checks it (signature against the provider's JWKS, `iss`, `aud`, the logout event, `sid`/`sub`, age and replay) and signs out the matching sessions within the access token's 15 minutes. Turn it on by giving the provider this back-channel logout URL:
+
+```
+{APP_URL}/api/auth/oidc/backchannel-logout
+```
+
+- A token with a `sid` signs out the browser sessions signed in with that provider session; a token with only a `sub` signs out all of that person's provider sessions.
+- The phone app signs in without handing Anchor+ an ID token, so its sessions have no `sid`; they follow the person and sign out on any back-channel logout for them, including the one that follows signing out of Anchor+ on the web when both directions are on.
+- Sessions signed in with a password or passkey are left alone.
+
+Where to put the URLs:
+
+| Provider | Post-logout redirect URI | Back-channel logout URL |
+|----------|--------------------------|-------------------------|
+| Pocket ID | OIDC client → **Logout Callback URLs** | Not offered at the time of writing |
+| Authentik | Provider → **Redirect URIs** (type *Post Logout*) | Provider → **Logout URI** with **Logout Method** *Back-channel* |
+| Keycloak | Client → **Valid post logout redirect URIs** | Client → **Backchannel logout URL**, **Backchannel logout session required** on |
+
+Field names change between provider versions; look for the post-logout redirect and back-channel logout settings of the client. Both URLs are listed, ready to copy, under **Admin → Sign-in → Single sign-on**.
 
 #### OIDC Providers with a Private CA
 

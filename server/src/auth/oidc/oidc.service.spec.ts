@@ -136,6 +136,25 @@ describe('OidcService redirects', () => {
       expect((await finishSignIn(redirect)).redirectUrl).toBe('/');
     });
 
+    it('remembers the provider’s session and ID token for signing out', async () => {
+      oidcClientService.exchangeCodeForTokens.mockResolvedValueOnce({
+        access_token: 'idp-token',
+        id_token: 'id.token.value',
+        claims: () => ({
+          sub: 'sub-1',
+          sid: 'sid-1',
+          email: 'pat@example.com',
+        }),
+      } as never);
+      await finishSignIn('/');
+      expect(authService.createTokenPair).toHaveBeenCalledWith(
+        'user-1',
+        'pat@example.com',
+        undefined,
+        { viaOidc: true, oidcSid: 'sid-1', oidcIdToken: 'id.token.value' },
+      );
+    });
+
     it('returns to the stored path', async () => {
       expect((await finishSignIn('/notes/abc?x=1#y')).redirectUrl).toBe(
         '/notes/abc?x=1#y',

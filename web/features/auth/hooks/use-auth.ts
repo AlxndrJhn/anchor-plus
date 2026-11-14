@@ -91,12 +91,16 @@ export function useAuth() {
   } = useAuthStore();
 
   const logout = useCallback(async () => {
+    let providerLogoutUrl: string | undefined;
     try {
-      await revokeRefreshToken(getRefreshToken());
+      ({ providerLogoutUrl } = await revokeRefreshToken(getRefreshToken()));
     } catch {
       // Sign out locally anyway.
     }
     clearAuth({ hasSignedOut: true });
+    // Signed in through the provider: sign out there too, which comes back
+    // to the sign-in page.
+    if (providerLogoutUrl) window.location.assign(providerLogoutUrl);
   }, [clearAuth]);
 
   return {

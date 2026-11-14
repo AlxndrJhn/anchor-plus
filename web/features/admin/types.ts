@@ -75,6 +75,14 @@ export interface OidcSettings {
   mobileClientId?: string;
   callbackUrl: string;
   disableInternalAuth: boolean;
+  /** Signing out of Anchor+ on the web goes on to the provider's sign-out. */
+  providerLogout: boolean;
+  /** In place of the provider's end_session_endpoint. */
+  logoutUrl?: string;
+  /** Where the provider sends people back after signing out there. */
+  postLogoutRedirectUrl: string;
+  /** Where the provider posts back-channel logout tokens. */
+  backchannelLogoutUrl: string;
   isLocked: boolean;
   source: "env" | "database" | "default";
 }
@@ -92,6 +100,8 @@ export interface UpdateOidcSettingsDto {
   clearClientSecret?: boolean;
   mobileClientId?: string;
   disableInternalAuth?: boolean;
+  providerLogout?: boolean;
+  logoutUrl?: string;
 }
 
 export interface SecondFactorSettings {

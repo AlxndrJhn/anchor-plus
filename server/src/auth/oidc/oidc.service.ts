@@ -124,10 +124,20 @@ export class OidcService {
         );
       }
 
-      // Generate access and refresh tokens
+      // Generate access and refresh tokens, remembering the provider's
+      // session for signing out there and for its back-channel logout.
+      const sid = (
+        tokenResponse as { claims?: () => { sid?: unknown } | undefined }
+      ).claims?.()?.sid;
       const tokens = await this.authService.createTokenPair(
         user.id,
         user.email,
+        undefined,
+        {
+          viaOidc: true,
+          oidcSid: typeof sid === 'string' && sid ? sid : null,
+          oidcIdToken: tokenResponse.id_token ?? null,
+        },
       );
 
       return {
@@ -220,7 +230,14 @@ export class OidcService {
       );
     }
 
-    const tokens = await this.authService.createTokenPair(user.id, user.email);
+    // The phone holds no ID token here, so its session follows the person's
+    // back-channel logout rather than one provider session.
+    const tokens = await this.authService.createTokenPair(
+      user.id,
+      user.email,
+      undefined,
+      { viaOidc: true, oidcSid: null, oidcIdToken: null },
+    );
 
     return {
       access_token: tokens.access_token,
