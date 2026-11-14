@@ -60,6 +60,7 @@ import '../../reminders/domain/reminder_preferences.dart';
 import '../../reminders/presentation/reminder_preferences_controller.dart';
 import '../../reminders/presentation/time_wheel.dart';
 import '../../server/data/server_info_provider.dart';
+import '../../server/presentation/server_addresses_screen.dart';
 import '../../sync/data/sync_compatibility.dart';
 import '../../sync/presentation/compatibility_messages.dart';
 import 'custom_theme_sheet.dart';
@@ -134,8 +135,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               gap,
               if (isLocalOnly)
                 const _ServerSection()
-              else
+              else ...[
+                const _ServerAddressesSection(),
+                gap,
                 _AccountSection(user: user),
+              ],
               gap,
               if (canSelfUpdate) ...[const _UpdatesSection(), gap],
               _HelpSection(version: _version),
@@ -803,6 +807,36 @@ class _ServerSection extends StatelessWidget {
             subtitle: l10n.settingsConnectServerHelp,
             showChevron: true,
             onTap: () => context.push(AppRoutes.serverConfig),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The server's addresses, and the one in use.
+class _ServerAddressesSection extends ConsumerWidget {
+  const _ServerAddressesSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final url = ref.watch(serverUrlProvider);
+    final count = ref.watch(serverAddressesProvider).value?.all.length ?? 1;
+    return Section(
+      label: l10n.settingsServer,
+      child: GroupedList(
+        children: [
+          GroupedListTile(
+            icon: LucideIcons.server,
+            label: l10n.settingsServerAddresses,
+            subtitle: url == null
+                ? null
+                : count > 1
+                ? l10n.settingsServerAddressInUse(displayServerAddress(url))
+                : displayServerAddress(url),
+            showChevron: true,
+            onTap: () => context.push(AppRoutes.serverAddresses),
           ),
         ],
       ),

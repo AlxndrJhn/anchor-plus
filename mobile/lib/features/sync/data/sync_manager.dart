@@ -31,6 +31,11 @@ class SyncManager extends _$SyncManager {
   bool _rerunRequested = false;
   bool _isForeground = true;
 
+  /// Whether the next sync asks all of the server's addresses again rather
+  /// than trusting the one that answered last: on start, back from the
+  /// background, on another network, and after a failed sync.
+  bool _recheckAddress = true;
+
   /// Set while signing out, until the next user signs in.
   bool _isStopped = false;
   Future<bool>? _activeSync;
@@ -55,7 +60,15 @@ class SyncManager extends _$SyncManager {
       connectivityStreamProvider,
       (previous, next) {
         next.whenData((results) {
-          if (isOnlineFromResults(results) && _wasOffline) {
+          final previousResults = previous?.value;
+          final isOtherNetwork =
+              previousResults != null &&
+              !_sameResults(previousResults, results);
+          if (isOtherNetwork) _recheckAddress = true;
+          final hasOtherAddresses =
+              ref.read(serverAddressesProvider).value?.hasOthers ?? false;
+          if (isOnlineFromResults(results) &&
+              (_wasOffline || (isOtherNetwork && hasOtherAddresses))) {
             requestSync();
           }
 
@@ -87,8 +100,14 @@ class SyncManager extends _$SyncManager {
     return false; // isSyncing
   }
 
+  static bool _sameResults(
+    List<ConnectivityResult> a,
+    List<ConnectivityResult> b,
+  ) => a.toSet().containsAll(b) && b.toSet().containsAll(a);
+
   void _onResume() {
     _isForeground = true;
+    _recheckAddress = true;
     _applyLiveUpdates();
     requestSync();
   }
@@ -158,6 +177,7 @@ class SyncManager extends _$SyncManager {
   Future<bool> _runSyncLoop() async {
     state = true;
     var isSynced = false;
+    var hasTriedAnotherAddress = false;
     try {
       do {
         _rerunRequested = false;
@@ -171,6 +191,12 @@ class SyncManager extends _$SyncManager {
             error: e,
             stackTrace: stack,
           );
+          _recheckAddress = true;
+          if (!hasTriedAnotherAddress && await _movedToAnotherAddress(e)) {
+            hasTriedAnotherAddress = true;
+            _rerunRequested = true;
+            continue;
+          }
         }
         if (!isSynced) break;
       } while (_rerunRequested &&
@@ -182,6 +208,18 @@ class SyncManager extends _$SyncManager {
       _activeSync = null;
     }
     return isSynced;
+  }
+
+  /// After a sync that couldn't reach the server: whether another of its
+  /// addresses answers, and is now in use.
+  Future<bool> _movedToAnotherAddress(Object error) async {
+    if (error is! DioException || error.response != null) return false;
+    final addresses = ref.read(serverAddressesProvider.notifier);
+    final before = ref.read(serverAddressesProvider).value;
+    if (before == null || !before.hasOthers) return false;
+    final now = await addresses.check(force: true);
+    _recheckAddress = false;
+    return now != null && now != before.active;
   }
 
   /// Waits for the running sync and starts no more until the next sign-in.
@@ -203,6 +241,11 @@ class SyncManager extends _$SyncManager {
       );
       return false;
     }
+
+    await ref
+        .read(serverAddressesProvider.notifier)
+        .check(force: _recheckAddress);
+    _recheckAddress = false;
 
     if (!await _isProtocolSupported()) return false;
 

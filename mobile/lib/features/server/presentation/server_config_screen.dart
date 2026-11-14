@@ -162,11 +162,12 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
   /// the first request. Read now: the switch may outlive this screen.
   Future<void> Function() _switchTo(String url) {
     final headers = ref.read(savedServerHeadersProvider.notifier);
-    final serverConfig = ref.read(serverConfigProvider.notifier);
+    final addresses = ref.read(serverAddressesProvider.notifier);
     final text = _headers.text;
     return () async {
       await headers.save(url, text);
-      await serverConfig.setServerUrl(url);
+      // One of the server's own addresses keeps the others.
+      await addresses.connect(url);
     };
   }
 

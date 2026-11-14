@@ -43,7 +43,7 @@ final class SyncManagerProvider extends $NotifierProvider<SyncManager, bool> {
   }
 }
 
-String _$syncManagerHash() => r'd214a838c2c232cc0025806097234cc3a1ea600a';
+String _$syncManagerHash() => r'd9d68b19ccf5c250b0716fbf48a15efb4c98d243';
 
 /// Runs syncs one at a time.
 

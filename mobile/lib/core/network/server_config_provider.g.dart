@@ -33,7 +33,7 @@ final class ServerConfigProvider
   ServerConfig create() => ServerConfig();
 }
 
-String _$serverConfigHash() => r'9b3d428457be5e8eb3a9d688284353318bb9a84b';
+String _$serverConfigHash() => r'b1cea5373c056e027b3546f55e4efae3da5d3a65';
 
 abstract class _$ServerConfig extends $AsyncNotifier<String?> {
   FutureOr<String?> build();
@@ -53,12 +53,71 @@ abstract class _$ServerConfig extends $AsyncNotifier<String?> {
   }
 }
 
+/// Every address of the server, and which one is in use.
+
+@ProviderFor(ServerAddresses)
+final serverAddressesProvider = ServerAddressesProvider._();
+
+/// Every address of the server, and which one is in use.
+final class ServerAddressesProvider
+    extends $AsyncNotifierProvider<ServerAddresses, ServerAddressList?> {
+  /// Every address of the server, and which one is in use.
+  ServerAddressesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'serverAddressesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$serverAddressesHash();
+
+  @$internal
+  @override
+  ServerAddresses create() => ServerAddresses();
+}
+
+String _$serverAddressesHash() => r'61bfb3ac06e0c6ffdb6295965f58b4bd47a17df0';
+
+/// Every address of the server, and which one is in use.
+
+abstract class _$ServerAddresses extends $AsyncNotifier<ServerAddressList?> {
+  FutureOr<ServerAddressList?> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<ServerAddressList?>, ServerAddressList?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<ServerAddressList?>, ServerAddressList?>,
+              AsyncValue<ServerAddressList?>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// The address requests go to: whichever of the server's addresses
+/// answered last.
+
 @ProviderFor(serverUrl)
 final serverUrlProvider = ServerUrlProvider._();
+
+/// The address requests go to: whichever of the server's addresses
+/// answered last.
 
 final class ServerUrlProvider
     extends $FunctionalProvider<String?, String?, String?>
     with $Provider<String?> {
+  /// The address requests go to: whichever of the server's addresses
+  /// answered last.
   ServerUrlProvider._()
     : super(
         from: null,
@@ -92,7 +151,7 @@ final class ServerUrlProvider
   }
 }
 
-String _$serverUrlHash() => r'd4257305921fa0bbecbe8621dc4adc024d756f1c';
+String _$serverUrlHash() => r'cf60df526c229293029f16cdb8f4d2581a5dea66';
 
 @ProviderFor(AllowSelfSignedCert)
 final allowSelfSignedCertProvider = AllowSelfSignedCertProvider._();
@@ -190,12 +249,14 @@ abstract class _$SavedServerHeaders extends $AsyncNotifier<ServerHeaders?> {
   }
 }
 
-/// The extra headers to send to the server in use.
+/// The extra headers to send to the server in use, on whichever of its
+/// addresses.
 
 @ProviderFor(serverHeaders)
 final serverHeadersProvider = ServerHeadersProvider._();
 
-/// The extra headers to send to the server in use.
+/// The extra headers to send to the server in use, on whichever of its
+/// addresses.
 
 final class ServerHeadersProvider
     extends
@@ -205,7 +266,8 @@ final class ServerHeadersProvider
           Map<String, String>
         >
     with $Provider<Map<String, String>> {
-  /// The extra headers to send to the server in use.
+  /// The extra headers to send to the server in use, on whichever of its
+  /// addresses.
   ServerHeadersProvider._()
     : super(
         from: null,
@@ -240,4 +302,4 @@ final class ServerHeadersProvider
   }
 }
 
-String _$serverHeadersHash() => r'08f899bf284b3ad3830fd505d05f3e0169a7e252';
+String _$serverHeadersHash() => r'7b43360622d805df19265964b88a01163a92536f';

@@ -6246,5 +6246,121 @@
   "scanFromGallery": "From gallery",
   "@scanFromGallery": {
     "description": "Button on a scan's screen that adds pages from photos already on the phone."
+  },
+  "settingsServer": "Server",
+  "@settingsServer": {
+    "description": "Settings section header for the server this phone syncs with."
+  },
+  "settingsServerAddresses": "Addresses",
+  "@settingsServerAddresses": {
+    "description": "Settings row under Server that opens the list of the server's addresses."
+  },
+  "settingsServerAddressInUse": "In use: {address}",
+  "@settingsServerAddressInUse": {
+    "description": "Under the Addresses row in Settings when the server has several addresses: the one requests go to now.",
+    "placeholders": {
+      "address": {
+        "type": "String",
+        "example": "192.168.1.20:3000"
+      }
+    }
+  },
+  "serverAddressesTitle": "Server addresses",
+  "@serverAddressesTitle": {
+    "description": "Title of the screen listing the addresses of the one server this phone syncs with."
+  },
+  "serverAddressesOrder": "Tried in this order",
+  "@serverAddressesOrder": {
+    "description": "Section header above the list of the server's addresses, in the order the app tries them."
+  },
+  "serverAddressesHelp": "Add more addresses for this same server, like its address at home and one through a VPN for when you’re away. The app tries them in order and uses the first that answers. Your notes and account are the same on every address.",
+  "@serverAddressesHelp": {
+    "description": "Explanation under the list of server addresses."
+  },
+  "serverAddressesMain": "Main address",
+  "@serverAddressesMain": {
+    "description": "Under the first address in the list of server addresses: the one the server was connected with."
+  },
+  "serverAddressesInUse": "In use",
+  "@serverAddressesInUse": {
+    "description": "Under the address in the list of server addresses that requests go to now."
+  },
+  "serverAddressesMainInUse": "Main address · In use",
+  "@serverAddressesMainInUse": {
+    "description": "Under the first address in the list of server addresses when it is also the one in use."
+  },
+  "serverAddressesMoveUp": "Move {address} up",
+  "@serverAddressesMoveUp": {
+    "description": "Screen reader label of the button that tries this address earlier.",
+    "placeholders": {
+      "address": {
+        "type": "String",
+        "example": "anchor.example.ts.net"
+      }
+    }
+  },
+  "serverAddressesMoveDown": "Move {address} down",
+  "@serverAddressesMoveDown": {
+    "description": "Screen reader label of the button that tries this address later.",
+    "placeholders": {
+      "address": {
+        "type": "String",
+        "example": "anchor.example.ts.net"
+      }
+    }
+  },
+  "serverAddressesRemove": "Remove {address}",
+  "@serverAddressesRemove": {
+    "description": "Screen reader label of the button that takes this address off the list.",
+    "placeholders": {
+      "address": {
+        "type": "String",
+        "example": "anchor.example.ts.net"
+      }
+    }
+  },
+  "serverAddressesAdd": "Add address",
+  "@serverAddressesAdd": {
+    "description": "Section header and button on the server addresses screen that add another address of the same server."
+  },
+  "serverAddressesAddHint": "http://192.168.1.20:3000",
+  "@serverAddressesAddHint": {
+    "description": "Example shown in the empty field for another server address."
+  },
+  "serverAddressesAlreadyAdded": "This address is already in the list",
+  "@serverAddressesAlreadyAdded": {
+    "description": "Error under the new address field when the address is already one of the server's."
+  },
+  "serverAddressesCheck": "Check addresses now",
+  "@serverAddressesCheck": {
+    "description": "Button that asks every server address at once and uses the first that answers."
+  },
+  "serverAddressesChecking": "Checking…",
+  "@serverAddressesChecking": {
+    "description": "The Check addresses now button while the addresses are being asked."
+  },
+  "serverAddressesUsing": "Using {address}",
+  "@serverAddressesUsing": {
+    "description": "Message after checking the server addresses: the one now in use.",
+    "placeholders": {
+      "address": {
+        "type": "String",
+        "example": "192.168.1.20:3000"
+      }
+    }
+  },
+  "serverAddressesNoneAnswered": "No address answered. Still using {address}",
+  "@serverAddressesNoneAnswered": {
+    "description": "Message after checking the server addresses when none of them answered.",
+    "placeholders": {
+      "address": {
+        "type": "String",
+        "example": "192.168.1.20:3000"
+      }
+    }
+  },
+  "serverAddressesNone": "No server connected.",
+  "@serverAddressesNone": {
+    "description": "Shown on the server addresses screen when no server is connected."
   }
 }

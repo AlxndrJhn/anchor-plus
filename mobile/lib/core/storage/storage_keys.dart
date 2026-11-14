@@ -2,6 +2,13 @@ class StorageKeys {
   StorageKeys._();
 
   static const serverUrl = 'server_url';
+
+  /// Further addresses of the same server, as a JSON list, tried in order
+  /// after [serverUrl].
+  static const serverOtherUrls = 'server_other_urls';
+
+  /// The address of the server that last answered.
+  static const serverActiveUrl = 'server_active_url';
   static const localOnly = 'local_only';
   static const allowSelfSignedCert = 'allow_self_signed_cert';
   static const serverHeaders = 'server_headers';
@@ -42,6 +49,8 @@ class StorageKeys {
   /// fails and it reads key by key.
   static const all = [
     serverUrl,
+    serverOtherUrls,
+    serverActiveUrl,
     localOnly,
     allowSelfSignedCert,
     serverHeaders,
