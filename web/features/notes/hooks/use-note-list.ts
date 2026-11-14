@@ -17,7 +17,6 @@ import {
   filtersFromParams,
   matchesFilters,
   type NoteFilters,
-  showsInList,
   writeFilterParams,
 } from "../note-filters";
 import { matchesSearch } from "../search";
@@ -45,12 +44,11 @@ interface Finding {
   term: string;
   filters: NoteFilters;
   activeFilters: number;
-  withInvisible: boolean;
 }
 
 function findAndSort(
   notes: Note[],
-  { term, filters, activeFilters, withInvisible }: Finding,
+  { term, filters, activeFilters }: Finding,
   sortBy: SortBy,
   sortOrder: SortOrder,
 ) {
@@ -59,9 +57,7 @@ function findAndSort(
       ? notes.filter(
           (note) => matchesSearch(note, term) && matchesFilters(note, filters),
         )
-      : withInvisible
-        ? notes
-        : notes.filter((note) => showsInList(note, false));
+      : notes;
   return [...found].sort(compareNotes(sortBy, sortOrder));
 }
 
@@ -69,12 +65,9 @@ export function useNoteList(
   notes: Note[],
   {
     pinnedFirst = false,
-    // The trash lists invisible notes too, so they can be put back.
-    withInvisible = false,
     archived,
   }: {
     pinnedFirst?: boolean;
-    withInvisible?: boolean;
     archived?: {
       notes: Note[];
       isSearchOnly: boolean;
@@ -126,8 +119,8 @@ export function useNoteList(
   const lastPick = React.useRef<string | null>(null);
 
   const finding = React.useMemo(
-    () => ({ term, filters, activeFilters, withInvisible }),
-    [term, filters, activeFilters, withInvisible],
+    () => ({ term, filters, activeFilters }),
+    [term, filters, activeFilters],
   );
   const visible = React.useMemo(
     () => findAndSort(notes, finding, sortBy, sortOrder),

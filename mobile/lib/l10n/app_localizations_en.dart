@@ -4318,52 +4318,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteNewCamera => 'Camera note';
 
   @override
-  String get actionMakeInvisible => 'Make invisible';
-
-  @override
-  String get actionMakeVisible => 'Make visible';
-
-  @override
-  String get noteInvisibleHelp => 'Only a search finds it';
-
-  @override
-  String notesMadeInvisible(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count notes made invisible. Search finds them.',
-      one: 'Note made invisible. Search finds it.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String notesMadeVisible(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count notes made visible',
-      one: 'Note made visible',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get notesLockFreezeOrHide => 'Lock, freeze or make invisible';
-
-  @override
-  String get notesLockOrHide => 'Lock or make invisible';
-
-  @override
-  String get cardInvisible => 'Invisible';
-
-  @override
-  String get filterIs => 'Is';
-
-  @override
-  String get filterInvisible => 'Invisible';
-
-  @override
   String get actionReminder => 'Reminder';
 
   @override

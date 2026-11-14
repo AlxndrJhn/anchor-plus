@@ -233,11 +233,10 @@ export class NoteSharesService {
       data: { isDeleted: true },
     });
 
-    // Their own pin, archive, invisibility, reminder and tags go too, or they
+    // Their own pin, archive, reminder and tags go too, or they
     // come back on a re-share.
     await tx.notePin.deleteMany({ where: { noteId, userId } });
     await tx.noteArchive.deleteMany({ where: { noteId, userId } });
-    await tx.noteInvisible.deleteMany({ where: { noteId, userId } });
     await tx.noteReminder.deleteMany({ where: { noteId, userId } });
     await reconcileUserTags(tx, noteId, userId, []);
 

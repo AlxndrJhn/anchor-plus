@@ -123,7 +123,6 @@ class _NoteCardState extends ConsumerState<NoteCard>
       if (isHidden) l10n.cardLocked,
       if (note.isLocked && !isHidden) l10n.cardUnlocked,
       if (note.isFrozen) l10n.cardFrozen,
-      if (note.isInvisible) l10n.cardInvisible,
       if (note.imagePreviewData.isNotEmpty && !isHidden)
         l10n.cardPictures(note.imagePreviewData.length),
       for (final tag in widget.tags) l10n.tagSheetLabel(tag.name),

@@ -5654,58 +5654,6 @@
   "@noteNewCamera": {
     "description": "Option in the menu shown when holding the New note button: opens a new note and takes a picture straight into its text."
   },
-  "actionMakeInvisible": "Make invisible",
-  "@actionMakeInvisible": {
-    "description": "Option for a note (or picked notes): keep it out of this person’s lists; only a search or the Invisible filter finds it. Only for this person, like a lock."
-  },
-  "actionMakeVisible": "Make visible",
-  "@actionMakeVisible": {
-    "description": "Option for an invisible note (or picked notes that all are): list it again."
-  },
-  "noteInvisibleHelp": "Only a search finds it",
-  "@noteInvisibleHelp": {
-    "description": "Under Make invisible in a note’s menu: an invisible note stays out of the lists, only a search or a filter brings it up."
-  },
-  "notesMadeInvisible": "{count, plural, =1{Note made invisible. Search finds it.} other{{count} notes made invisible. Search finds them.}}",
-  "@notesMadeInvisible": {
-    "description": "Toast after notes were made invisible, with an Undo button.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "notesMadeVisible": "{count, plural, =1{Note made visible} other{{count} notes made visible}}",
-  "@notesMadeVisible": {
-    "description": "Toast after invisible notes were made visible again, with an Undo button.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
-  "notesLockFreezeOrHide": "Lock, freeze or make invisible",
-  "@notesLockFreezeOrHide": {
-    "description": "Title of the menu behind the Lock button of the selection bar, when it offers Lock, Freeze and Make invisible."
-  },
-  "notesLockOrHide": "Lock or make invisible",
-  "@notesLockOrHide": {
-    "description": "Title of the menu behind the Lock button of the selection bar, when it offers Lock and Make invisible (none of the picked notes can be frozen)."
-  },
-  "cardInvisible": "Invisible",
-  "@cardInvisible": {
-    "description": "Tooltip of the crossed-out eye on an invisible note’s card (found by a search or a filter), and read out with the card."
-  },
-  "filterIs": "Is",
-  "@filterIs": {
-    "description": "Section label in the filter sheet, above Invisible: notes that are so."
-  },
-  "filterInvisible": "Invisible",
-  "@filterInvisible": {
-    "description": "Filter choice: only the notes this person made invisible (kept out of the lists)."
-  },
   "actionReminder": "Reminder",
   "@actionReminder": {
     "description": "Menu item and quick action: sets or changes the note's reminder."

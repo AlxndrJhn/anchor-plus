@@ -220,33 +220,6 @@ export const demos: Demo[] = [
       "Try it: freeze a note, then try to type in it or move it to the trash.",
   },
   {
-    slug: "invisible",
-    title: "Invisible notes",
-    summary:
-      "An invisible note stays out of your lists; only a search finds it.",
-    seed: base,
-    start: "/notes",
-    steps: [
-      openNote("App ideas", "Open a note to tuck away."),
-      ...fromMoreMenu("Make invisible", "More › Make invisible."),
-      { click: "Back", say: "Back in the list, the note is gone…" },
-      { wait: 1200 },
-      {
-        type: "plant",
-        into: searchBox,
-        reveal: ["Search"],
-        say: "…but a search still finds it.",
-      },
-      { wait: 1200 },
-      { click: "Clear search" },
-      { click: "Filter notes", say: "Filter › Invisible lists all of them." },
-      inPopup("Invisible"),
-      { wait: 1500 },
-    ],
-    outro:
-      "Try it: make a note invisible, then find it with a search or Filter › Invisible.",
-  },
-  {
     slug: "copy",
     title: "Make a copy",
     summary: "Copy a note, with its pictures and attachments.",

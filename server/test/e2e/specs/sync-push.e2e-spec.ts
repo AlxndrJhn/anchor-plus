@@ -145,6 +145,26 @@ describe('sync push', () => {
     ).toMatchObject({ userId: user.id, title: 'device-born', version: 1 });
   });
 
+  // Older apps still send the dropped invisible flag; it is stripped, not refused.
+  it('ignores a retired isInvisible flag from older apps', async () => {
+    const id = crypto.randomUUID();
+    const res = await user.sync.push([
+      { type: 'note', id, title: 'old app', content: null, isInvisible: true },
+    ]);
+    expect(res.results).toEqual([
+      { type: 'note', id, status: 'applied', version: 1 },
+    ]);
+
+    await user.http
+      .patch(`/api/notes/${id}`)
+      .send({ title: 'old web', baseVersion: 1, isInvisible: false })
+      .expect(200);
+    await user.http
+      .post('/api/notes')
+      .send({ title: 'old create', isInvisible: true })
+      .expect(201);
+  });
+
   it('refuses an id that is not a UUID, which would name a folder outside attachments', async () => {
     await user.http
       .post('/api/sync')

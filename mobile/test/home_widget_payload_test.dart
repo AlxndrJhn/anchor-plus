@@ -101,16 +101,6 @@ void main() {
       expect(item['snippet'], 'Locked');
     });
 
-    test('leaves invisible notes off the home screen', () {
-      final payload = buildHomeWidgetPayload([
-        _note(id: 'shown'),
-        _note(id: 'hidden').copyWith(isInvisible: true),
-      ], loggedIn: true);
-
-      final ids = (_decode(payload)['notes'] as List).map((n) => n['id']);
-      expect(ids, ['shown']);
-    });
-
     test('preserves the given note order', () {
       final payload = buildHomeWidgetPayload([
         _note(id: 'pinned', isPinned: true),

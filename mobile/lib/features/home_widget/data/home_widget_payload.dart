@@ -32,16 +32,14 @@ const _maxSnippetChars = 160;
 /// Notes are expected in display order (pinned first, then most recent).
 /// Titles are passed through as stored; the native side hides blank ones.
 /// The home screen shows without unlocking the app: a locked note's text
-/// never goes there, [lockedText] ("Locked") stands in for it. Invisible
-/// notes stay off it, as they stay out of the lists.
+/// never goes there, [lockedText] ("Locked") stands in for it.
 String buildHomeWidgetPayload(
   List<Note> notes, {
   required bool loggedIn,
   String? lockedText,
 }) {
   final locked = lockedText ?? deviceL10n().cardLocked;
-  final shown = notes.where((note) => !note.isInvisible);
-  final items = shown.take(homeWidgetMaxNotes).map((note) {
+  final items = notes.take(homeWidgetMaxNotes).map((note) {
     final palette = AnchorBackgrounds.of(note.background).palette;
     final light = AnchorColors.light.notes[palette]!;
     final dark = AnchorColors.dark.notes[palette]!;

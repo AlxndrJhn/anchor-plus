@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -189,13 +189,7 @@ class AppDatabase extends _$AppDatabase {
         );
       }
       if (from < 18) {
-        final existing = await customSelect(
-          'PRAGMA table_info(notes)',
-        ).map((row) => row.read<String>('name')).get();
-        if (!existing.contains('is_invisible')) {
-          // Null, not known, until the feed resends the notes.
-          await migrator.addColumn(notes, notes.isInvisible);
-        }
+        // Invisible notes came here; their column went again in 20.
         await (update(syncState)..where((tbl) => tbl.cursor.isNotNull())).write(
           const SyncStateCompanion(cursor: Value(null)),
         );
@@ -211,6 +205,15 @@ class AppDatabase extends _$AppDatabase {
         await (update(syncState)..where((tbl) => tbl.cursor.isNotNull())).write(
           const SyncStateCompanion(cursor: Value(null)),
         );
+      }
+      if (from < 20) {
+        // Invisible notes are gone; drop their column where 18 added it.
+        final existing = await customSelect(
+          'PRAGMA table_info(notes)',
+        ).map((row) => row.read<String>('name')).get();
+        if (existing.contains('is_invisible')) {
+          await customStatement('ALTER TABLE notes DROP COLUMN is_invisible');
+        }
       }
     },
   );

@@ -11,7 +11,6 @@ class NoteFilters {
     this.checklist = false,
     this.reminder = false,
     this.secret = false,
-    this.invisible = false,
   });
 
   /// A background id (a colour or a pattern).
@@ -23,9 +22,6 @@ class NoteFilters {
   /// Something that looks like a key, token, id or password ([containsSecret]).
   final bool secret;
 
-  /// Made invisible by this person ([Note.isInvisible]).
-  final bool invisible;
-
   static const none = NoteFilters();
 
   int get count =>
@@ -33,8 +29,7 @@ class NoteFilters {
       (picture ? 1 : 0) +
       (checklist ? 1 : 0) +
       (reminder ? 1 : 0) +
-      (secret ? 1 : 0) +
-      (invisible ? 1 : 0);
+      (secret ? 1 : 0);
 
   bool get isEmpty => count == 0;
 
@@ -44,14 +39,12 @@ class NoteFilters {
     bool? checklist,
     bool? reminder,
     bool? secret,
-    bool? invisible,
   }) => NoteFilters(
     background: background != null ? background() : this.background,
     picture: picture ?? this.picture,
     checklist: checklist ?? this.checklist,
     reminder: reminder ?? this.reminder,
     secret: secret ?? this.secret,
-    invisible: invisible ?? this.invisible,
   );
 
   bool matches(Note note) =>
@@ -59,8 +52,7 @@ class NoteFilters {
       (!picture || note.imagePreviewData.isNotEmpty) &&
       (!checklist || hasChecklist(note)) &&
       (!reminder || note.hasReminder) &&
-      (!secret || hasSecret(note)) &&
-      (!invisible || note.isInvisible);
+      (!secret || hasSecret(note));
 
   @override
   bool operator ==(Object other) =>
@@ -69,12 +61,11 @@ class NoteFilters {
       other.picture == picture &&
       other.checklist == checklist &&
       other.reminder == reminder &&
-      other.secret == secret &&
-      other.invisible == invisible;
+      other.secret == secret;
 
   @override
   int get hashCode =>
-      Object.hash(background, picture, checklist, reminder, secret, invisible);
+      Object.hash(background, picture, checklist, reminder, secret);
 }
 
 final _checklistAttribute = RegExp(r'"list"\s*:\s*"(?:un)?checked"');
@@ -89,8 +80,3 @@ bool hasSecret(Note note) =>
     containsSecret(note.title) ||
     containsSecret(plainTextOf(note.content)) ||
     containsSecret(note.pictureText);
-
-/// An invisible note stays out of the lists; only a search or a filter
-/// brings it up.
-bool showsInList(Note note, {required bool searching}) =>
-    searching || !note.isInvisible;

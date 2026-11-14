@@ -47,7 +47,6 @@ Actions"; the workflow is `.github/workflows/pages.yml`, and
 | A note with a public link says so: a globe on its card, and in the open note whether anyone with the link can view or edit it | ✓ | ✓ |
 | Make a copy of a note, with its pictures and attachments | ✓ | ✓ |
 | Freeze a note: nobody can change, trash or delete it until its owner unfreezes it (freezing needs a connection) | ✓ | ✓ |
-| Make a note invisible: it stays out of your lists and only a search finds it; filter by "Invisible" to list them | ✓ | ✓ |
 | Send a note to other apps as text (checklists as ☐/☑) | ✓ | ✓ |
 | Change the colour of many selected notes at once | ✓ | ✓ |
 | Tick checklist items straight from the notes list | ✓ | ✓ |

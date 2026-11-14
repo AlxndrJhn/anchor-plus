@@ -300,8 +300,7 @@ void main() {
     });
   });
 
-  test('a database from before invisible notes gains the column, not known '
-      'yet, and re-downloads the feed', () async {
+  test('a database from schema 17 re-downloads the feed', () async {
     await withDatabase((db) async {
       await db
           .into(db.syncState)
@@ -309,15 +308,41 @@ void main() {
       await db
           .into(db.notes)
           .insert(NotesCompanion.insert(id: 'n1', title: 'Kept'));
-      await dropColumns(db, ['is_invisible']);
       await db.customStatement('PRAGMA user_version = 17');
     });
 
     await withDatabase((db) async {
-      final row = await db.select(db.notes).getSingle();
-      expect(row.isInvisible, isNull);
+      expect((await db.select(db.notes).getSingle()).title, 'Kept');
       final state = await db.select(db.syncState).getSingle();
       expect(state.cursor, isNull);
+    });
+  });
+
+  test('a database with invisible notes loses their column and keeps its '
+      'notes', () async {
+    await withDatabase((db) async {
+      await db
+          .into(db.syncState)
+          .insert(const SyncStateCompanion(cursor: Value('cursor-19')));
+      await db
+          .into(db.notes)
+          .insert(NotesCompanion.insert(id: 'n1', title: 'Kept'));
+      await db.customStatement(
+        'ALTER TABLE notes ADD COLUMN is_invisible INTEGER NULL',
+      );
+      await db.customStatement('UPDATE notes SET is_invisible = 1');
+      await db.customStatement('PRAGMA user_version = 19');
+    });
+
+    await withDatabase((db) async {
+      final columns = await db
+          .customSelect('PRAGMA table_info(notes)')
+          .map((row) => row.read<String>('name'))
+          .get();
+      expect(columns, isNot(contains('is_invisible')));
+      expect((await db.select(db.notes).getSingle()).title, 'Kept');
+      // Nothing else changed, so the feed carries on where it was.
+      expect((await db.select(db.syncState).getSingle()).cursor, 'cursor-19');
     });
   });
 

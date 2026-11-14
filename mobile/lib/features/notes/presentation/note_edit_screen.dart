@@ -75,7 +75,6 @@ import 'multi_shot_camera_screen.dart';
 import 'note_actions.dart';
 import 'note_editor_controller.dart';
 import 'note_freeze_actions.dart';
-import 'note_invisible_actions.dart';
 import 'note_labels.dart';
 import 'note_morph_route.dart';
 import 'notes_controller.dart';
@@ -680,9 +679,6 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
       canAddPictures: editor != null && !isTrashed,
       canFreeze: opened == null || (opened.isOwner && opened.isActive),
       isFrozen: opened?.isFrozen ?? false,
-      // Notes not in the trash can be made invisible.
-      canMakeInvisible: !isTrashed,
-      isInvisible: opened?.isInvisible ?? false,
     );
     if (action == null || !mounted) return;
     await _run(action);
@@ -783,10 +779,6 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
         await unlockOpenNote(context, ref, note);
       case NoteAction.freeze:
         await _setFrozen(isFrozen: !note.isFrozen);
-      case NoteAction.invisible:
-        await setNotesInvisible(context, ref, [
-          note.id,
-        ], isInvisible: !note.isInvisible);
       case NoteAction.trash:
         await _trash();
       default:

@@ -58,17 +58,4 @@ void main() {
       const NoteFilters(picture: true),
     );
   });
-
-  test('invisible notes stay out of the list until a search or filter', () {
-    const hidden = Note(id: 'h', title: 'Diary', isInvisible: true);
-    const plain = Note(id: 'p', title: 'Plain');
-    expect(showsInList(hidden, searching: false), isFalse);
-    expect(showsInList(hidden, searching: true), isTrue);
-    expect(showsInList(plain, searching: false), isTrue);
-
-    const invisible = NoteFilters(invisible: true);
-    expect(invisible.count, 1);
-    expect(invisible.matches(hidden), isTrue);
-    expect(invisible.matches(plain), isFalse);
-  });
 }

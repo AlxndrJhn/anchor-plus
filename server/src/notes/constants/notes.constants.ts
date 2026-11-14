@@ -79,15 +79,6 @@ export const noteLockInclude = (userId: string) =>
     },
   }) as const;
 
-// Include whether the requesting user made the note invisible.
-export const noteInvisibleInclude = (userId: string) =>
-  ({
-    invisibles: {
-      where: { userId },
-      select: { userId: true },
-    },
-  }) as const;
-
 // Include the requesting user's archive state.
 export const noteArchiveInclude = (userId: string) =>
   ({

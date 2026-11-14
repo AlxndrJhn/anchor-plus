@@ -43,7 +43,6 @@ import { LockDialog } from "@/features/notes/components/lock/lock-dialog";
 import { LockGate } from "@/features/notes/components/lock/lock-gate";
 import type { PictureActions } from "@/features/notes/components/note-editor";
 import { useApplyFreeze } from "@/features/notes/hooks/use-note-freeze";
-import { useApplyInvisible } from "@/features/notes/hooks/use-note-invisible";
 import {
   useApplyLock,
   useUnlockedIds,
@@ -163,7 +162,6 @@ function NoteEditor({
   const lock = note?.lock ?? null;
   const applyLock = useApplyLock();
   const applyFreeze = useApplyFreeze();
-  const applyInvisible = useApplyInvisible();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { articleRef, scrollRef } = useEditorChrome({
     noteId,
@@ -500,30 +498,6 @@ function NoteEditor({
           ),
       );
 
-  const invisible = !!note?.isInvisible;
-  const setInvisible = (isInvisible: boolean) =>
-    applyInvisible([noteId], isInvisible).then(
-      () =>
-        toast.success(
-          isInvisible
-            ? "Note made invisible; search finds it"
-            : "Note made visible",
-          {
-            undo: () =>
-              void applyInvisible([noteId], !isInvisible).catch(() =>
-                toast.error("Couldn’t undo that"),
-              ),
-          },
-        ),
-      () =>
-        toast.error(
-          navigator.onLine
-            ? `Couldn’t make the note ${isInvisible ? "invisible" : "visible"}`
-            : `Making it ${isInvisible ? "invisible" : "visible"} needs a connection`,
-          { retry: () => setInvisible(isInvisible) },
-        ),
-    );
-
   const trashed = note?.state === "trashed";
   const saveRefused =
     saveFailure?.httpStatus === 403 || saveFailure?.httpStatus === 404;
@@ -637,12 +611,6 @@ function NoteEditor({
               isOwner && !trashed && !editor.isOfflineCopy
                 ? () => freeze(!editor.isFrozen)
                 : undefined
-            }
-            invisible={invisible}
-            onToggleInvisible={
-              isNew || trashed || editor.isOfflineCopy
-                ? undefined
-                : () => setInvisible(!invisible)
             }
             onSend={async () => {
               try {

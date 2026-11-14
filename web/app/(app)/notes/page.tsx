@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
   ArchiveRestore,
-  EyeOff,
   Hash,
   Images,
   Lock,
@@ -59,7 +58,6 @@ import {
   isOwnFrozen,
   useApplyFreeze,
 } from "@/features/notes/hooks/use-note-freeze";
-import { useApplyInvisible } from "@/features/notes/hooks/use-note-invisible";
 import { useNoteList } from "@/features/notes/hooks/use-note-list";
 import { useRefreshNotes } from "@/features/notes/hooks/use-refresh-notes";
 import { matchesFilters } from "@/features/notes/note-filters";
@@ -376,32 +374,6 @@ function NotesView({ tagId }: { tagId: string | null }) {
     );
   };
 
-  const applyInvisible = useApplyInvisible();
-  const allInvisible = chosen.length > 0 && chosen.every((n) => n.isInvisible);
-  const invisibleChosen = () => {
-    const isInvisible = !allInvisible;
-    const ids = chosen
-      .filter((n) => !!n.isInvisible !== isInvisible)
-      .map((n) => n.id);
-    list.stopPicking();
-    applyInvisible(ids, isInvisible).then(
-      () =>
-        toast.success(
-          `${plural(ids.length, "note")} ${isInvisible ? "made invisible" : "made visible"}`,
-          {
-            undo: () =>
-              void applyInvisible(ids, !isInvisible).catch(() =>
-                toast.error("Couldn’t undo that"),
-              ),
-          },
-        ),
-      () =>
-        toast.error(
-          `Couldn’t make ${ids.length === 1 ? "the note" : "the notes"} ${isInvisible ? "invisible" : "visible"}`,
-        ),
-    );
-  };
-
   const newNote = newNoteHref("/notes", tagId);
   useShortcuts({
     c: () => router.push(newNote),
@@ -691,12 +663,6 @@ function NotesView({ tagId }: { tagId: string | null }) {
             label: "Print",
             icon: <Printer aria-hidden />,
             onClick: () => printNoteList(chosen),
-          },
-          {
-            key: "invisible",
-            label: allInvisible ? "Make visible" : "Make invisible",
-            icon: <EyeOff aria-hidden />,
-            onClick: invisibleChosen,
           },
           allArchived
             ? {

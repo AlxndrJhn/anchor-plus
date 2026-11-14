@@ -19,13 +19,11 @@ import { ownedTagIds, reconcileUserTags } from '../notes/utils/note-tags.util';
 import { setNoteArchive } from '../notes/utils/note-archive.util';
 import { setNotePosition } from '../notes/utils/note-order.util';
 import { setNoteLock } from '../notes/utils/note-lock.util';
-import { setNoteInvisible } from '../notes/utils/note-invisible.util';
 import {
   NOTE_INCLUDE_TAGS,
   NOTE_INCLUDE_SHARES,
   NOTE_INCLUDE_ATTACHMENT_COUNT,
   noteArchiveInclude,
-  noteInvisibleInclude,
   noteLockInclude,
   noteOrderInclude,
   notePinInclude,
@@ -271,16 +269,10 @@ export class SyncApplyService {
         change.position,
       );
       const locked = await setNoteLock(tx, userId, change.id, change.lock);
-      const hidden = await setNoteInvisible(
-        tx,
-        userId,
-        change.id,
-        change.isInvisible,
-      );
       const tagged =
         change.tagIds !== undefined &&
         (await reconcileUserTags(tx, change.id, userId, change.tagIds));
-      if (archived || moved || locked || hidden || tagged) {
+      if (archived || moved || locked || tagged) {
         await this.syncEmitter.emit(tx, noteEmissions([userId], change.id));
       }
     });
@@ -350,7 +342,6 @@ export class SyncApplyService {
       await setNoteArchive(tx, userId, change.id, change.isArchived);
       await setNotePosition(tx, userId, change.id, change.position);
       await setNoteLock(tx, userId, change.id, change.lock);
-      await setNoteInvisible(tx, userId, change.id, change.isInvisible);
 
       if (change.revisions?.length) {
         await this.noteRevisions.recordClient(
@@ -388,7 +379,6 @@ export class SyncApplyService {
         ...noteArchiveInclude(userId),
         ...noteOrderInclude(userId),
         ...noteLockInclude(userId),
-        ...noteInvisibleInclude(userId),
       },
     });
     if (!note) {

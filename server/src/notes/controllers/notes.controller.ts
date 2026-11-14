@@ -17,7 +17,6 @@ import { BulkActionDto } from '../dto/bulk-action.dto';
 import { BulkPinDto } from '../dto/bulk-pin.dto';
 import { BulkLockDto, NoteLockDto } from '../dto/note-lock.dto';
 import { BulkFreezeDto, NoteFreezeDto } from '../dto/note-freeze.dto';
-import { BulkInvisibleDto, NoteInvisibleDto } from '../dto/note-invisible.dto';
 import { BulkTagsDto } from '../dto/bulk-tags.dto';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { AuthGuard } from '../../auth/auth.guard';
@@ -87,15 +86,6 @@ export class NotesController {
     return this.notesService.setFrozen(userId, id, dto.isFrozen);
   }
 
-  @Patch(':id/invisible')
-  setInvisible(
-    @CurrentUser('id') userId: string,
-    @Param('id') id: string,
-    @Body() dto: NoteInvisibleDto,
-  ) {
-    return this.notesService.setInvisible(userId, id, dto.isInvisible);
-  }
-
   @Post(':id/copy')
   copy(@CurrentUser('id') userId: string, @Param('id') id: string) {
     return this.notesService.copy(userId, id);
@@ -162,18 +152,6 @@ export class NotesController {
   @Post('bulk/freeze')
   bulkFreeze(@CurrentUser('id') userId: string, @Body() dto: BulkFreezeDto) {
     return this.notesService.bulkSetFrozen(userId, dto.noteIds, dto.isFrozen);
-  }
-
-  @Post('bulk/invisible')
-  bulkInvisible(
-    @CurrentUser('id') userId: string,
-    @Body() dto: BulkInvisibleDto,
-  ) {
-    return this.notesService.bulkSetInvisible(
-      userId,
-      dto.noteIds,
-      dto.isInvisible,
-    );
   }
 
   @Post('bulk/tags')

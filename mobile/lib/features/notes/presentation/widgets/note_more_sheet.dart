@@ -32,8 +32,6 @@ Future<NoteAction?> showNoteMoreSheet(
   bool canAddPictures = false,
   bool canFreeze = false,
   bool isFrozen = false,
-  bool canMakeInvisible = false,
-  bool isInvisible = false,
 }) {
   final l10n = context.l10n;
   SheetChoice<NoteAction> plain(NoteAction action) {
@@ -118,13 +116,6 @@ Future<NoteAction?> showNoteMoreSheet(
         icon: LucideIcons.snowflake,
         label: isFrozen ? l10n.actionUnfreeze : l10n.actionFreeze,
         subtitle: isFrozen ? null : l10n.noteFreezeHelp,
-      ),
-    if (canMakeInvisible)
-      SheetChoice(
-        value: NoteAction.invisible,
-        icon: isInvisible ? LucideIcons.eye : LucideIcons.eyeOff,
-        label: isInvisible ? l10n.actionMakeVisible : l10n.actionMakeInvisible,
-        subtitle: isInvisible ? null : l10n.noteInvisibleHelp,
       ),
     null,
     if (canArchive)

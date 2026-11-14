@@ -4,7 +4,6 @@ import {
   filtersFromParams,
   hasChecklist,
   matchesFilters,
-  showsInList,
   writeFilterParams,
 } from "./note-filters";
 import type { Note } from "./types";
@@ -82,17 +81,8 @@ describe("note filters", () => {
       expect(matchesFilters(note(), { [key]: all[key] })).toBe(false);
   });
 
-  it("keeps invisible notes out of the list until a search or filter", () => {
-    const hidden = note({ isInvisible: true });
-    expect(showsInList(hidden, false)).toBe(false);
-    expect(showsInList(hidden, true)).toBe(true);
-    expect(showsInList(note(), false)).toBe(true);
-
-    expect(matchesFilters(hidden, { invisible: true })).toBe(true);
-    expect(matchesFilters(note(), { invisible: true })).toBe(false);
-    const params = new URLSearchParams();
-    writeFilterParams(params, { invisible: true });
-    expect(params.toString()).toBe("invisible=1");
-    expect(filtersFromParams(params)).toEqual({ invisible: true });
+  it("ignores filters no longer offered, such as an old invisible=1", () => {
+    const params = new URLSearchParams("invisible=1&reminder=1");
+    expect(filtersFromParams(params)).toEqual({ reminder: true });
   });
 });

@@ -378,86 +378,27 @@ void main() {
     });
   });
 
-  group('invisible notes', () {
-    Map<String, dynamic> applied(String id) => response(
-      results: [
-        {'type': 'note', 'id': id, 'status': 'applied', 'version': 2},
-      ],
-    );
+  test('a server still sending isInvisible is fine, and a push never '
+      'carries it', () async {
+    await insertNote(id: 'mine', version: 1);
+    stub([
+      response(
+        results: [
+          {'type': 'note', 'id': 'mine', 'status': 'applied', 'version': 2},
+        ],
+        entries: [
+          noteEntry({...serverNoteJson('theirs'), 'isInvisible': true}),
+        ],
+        nextCursor: 'cursor-1',
+      ),
+    ]);
 
-    Future<void> setInvisible(String id, bool? isInvisible) =>
-        (db.update(db.notes)..where((tbl) => tbl.id.equals(id))).write(
-          NotesCompanion(isInvisible: Value(isInvisible)),
-        );
+    await service.run();
 
-    test('goes up with the note, and not while unknown here', () async {
-      await insertNote(id: 'hidden', version: 1);
-      await setInvisible('hidden', true);
-      await insertNote(id: 'shown', version: 1);
-      await setInvisible('shown', false);
-      await insertNote(id: 'unknown', version: 1);
-      stub([
-        response(
-          results: [
-            for (final id in ['hidden', 'shown', 'unknown'])
-              {'type': 'note', 'id': id, 'status': 'applied', 'version': 2},
-          ],
-        ),
-      ]);
-
-      await service.run();
-
-      final sent = {for (final c in changesOf(0)) c['id']: c};
-      expect(sent['hidden']!['isInvisible'], isTrue);
-      expect(sent['shown']!['isInvisible'], isFalse);
-      expect(sent['unknown']!.containsKey('isInvisible'), isFalse);
-    });
-
-    test('the feed brings it, and a server without it keeps what is '
-        'here', () async {
-      await insertNote(id: 'kept', isSynced: true, version: 1);
-      await setInvisible('kept', true);
-      stub([
-        response(
-          entries: [
-            noteEntry({...serverNoteJson('hidden'), 'isInvisible': true}),
-            noteEntry(serverNoteJson('kept'), seq: '2'),
-          ],
-          nextCursor: 'cursor-1',
-        ),
-      ]);
-
-      await service.run();
-
-      expect((await note('hidden'))!.isInvisible, isTrue);
-      expect((await note('kept'))!.isInvisible, isTrue);
-    });
-
-    test('an edit waiting to go up takes what it didn\'t know, and keeps '
-        'its own change', () async {
-      await insertNote(id: 'unknown', version: 1);
-      await insertNote(id: 'mine', version: 1);
-      await setInvisible('mine', true);
-      stub([
-        response(
-          entries: [
-            noteEntry({...serverNoteJson('unknown'), 'isInvisible': true}),
-            noteEntry({
-              ...serverNoteJson('mine'),
-              'isInvisible': false,
-            }, seq: '2'),
-          ],
-          nextCursor: 'cursor-1',
-        ),
-        applied('unknown'),
-        applied('mine'),
-      ]);
-
-      await service.run();
-
-      expect((await note('unknown'))!.isInvisible, isTrue);
-      expect((await note('mine'))!.isInvisible, isTrue);
-    });
+    expect((await note('theirs'))!.title, 'Server title');
+    final sent = changesOf(0).single;
+    expect(sent['id'], 'mine');
+    expect(sent.containsKey('isInvisible'), isFalse);
   });
 
   group('frozen notes', () {

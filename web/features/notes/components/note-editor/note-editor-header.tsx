@@ -13,8 +13,6 @@ import {
   CloudOff,
   Copy,
   Ellipsis,
-  Eye,
-  EyeOff,
   History,
   ImagePlus,
   Images,
@@ -108,10 +106,6 @@ interface NoteEditorHeaderProps {
   frozen: boolean;
   /** Freezes or unfreezes it; absent for those who don't own it. */
   onToggleFreeze?: () => void;
-  /** Invisible to this person: only search finds it. */
-  invisible: boolean;
-  /** Makes it invisible or visible again; absent while that can't be done. */
-  onToggleInvisible?: () => void;
   /** Hands the note to another app (or copies it as text). */
   onSend: () => void;
   /** Opens the print dialog with the note. */
@@ -347,14 +341,6 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
               label: props.frozen ? "Unfreeze" : "Freeze",
               icon: <Snowflake />,
               run: props.onToggleFreeze,
-            }
-          : null;
-      case "invisible":
-        return props.onToggleInvisible
-          ? {
-              label: props.invisible ? "Make visible" : "Make invisible",
-              icon: props.invisible ? <Eye /> : <EyeOff />,
-              run: props.onToggleInvisible,
             }
           : null;
       case "archive":

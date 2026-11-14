@@ -54,7 +54,6 @@ export interface SeedNote {
   pinned?: boolean;
   archived?: boolean;
   frozen?: boolean;
-  invisible?: boolean;
   trashed?: boolean;
   lock?: "tap" | "pin" | "pattern" | "biometric";
   /** How long ago it was last edited, in minutes; sets the order. */
@@ -105,7 +104,6 @@ export function buildData(seed: Seed): {
       position: null,
       positionedAt: null,
       lock: note.lock ?? null,
-      isInvisible: !!note.invisible,
       reminder: null,
     };
     data.notes.push(stored);

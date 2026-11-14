@@ -36,7 +36,6 @@ extension QuickActionLabels on QuickAction {
     QuickAction.copy => const [NoteAction.copy],
     QuickAction.lock => const [NoteAction.lock, NoteAction.removeLock],
     QuickAction.freeze => const [NoteAction.freeze],
-    QuickAction.invisible => const [NoteAction.invisible],
     QuickAction.addImage => const [NoteAction.addImage],
     QuickAction.takePicture => const [NoteAction.takePicture],
     QuickAction.takeSeveral => const [NoteAction.takeSeveral],

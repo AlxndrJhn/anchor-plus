@@ -93,7 +93,7 @@ void main() {
   test('a local file without the newer columns still moves over', () async {
     await writeLocalNotes();
     await withDatabase(localFile, (db) async {
-      await db.customStatement('ALTER TABLE notes DROP COLUMN is_invisible');
+      await db.customStatement('ALTER TABLE notes DROP COLUMN public_link');
     });
 
     await withDatabase(
@@ -104,7 +104,7 @@ void main() {
     await withDatabase(accountFile, (db) async {
       final moved = (await db.select(db.notes).get()).single;
       expect(moved.title, 'Groceries');
-      expect(moved.isInvisible, isNull);
+      expect(moved.publicLink, isNull);
     });
   });
 }

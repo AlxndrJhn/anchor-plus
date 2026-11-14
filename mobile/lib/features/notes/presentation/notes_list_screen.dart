@@ -45,7 +45,6 @@ import '../domain/note.dart';
 import '../domain/note_dates.dart';
 import 'note_actions.dart';
 import 'note_folder.dart';
-import 'note_invisible_actions.dart';
 import 'note_labels.dart';
 import 'notes_controller.dart';
 import 'notes_list_controller.dart';
@@ -389,7 +388,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
     }
     final fadeOut = context.motion(AnchorTokens.motionDurationExit);
     // [chosen] is what the person picked: the action, or one from its menu
-    // (Lock's holds Freeze and Make invisible).
+    // (Lock's holds Freeze).
     Future<void> beforeChange(NoteAction chosen) async {
       final leaving = _leavingAfter(chosen, selectedNotes, shown);
       _selection.end();
@@ -425,14 +424,6 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         action == NoteAction.lock ||
         action == NoteAction.freeze) {
       return const [];
-    }
-    if (action == NoteAction.invisible) {
-      // A search or a filter still lists them; otherwise they go.
-      final searching =
-          ref.read(searchQueryProvider).trim().isNotEmpty ||
-          !ref.read(noteFiltersControllerProvider).isEmpty;
-      if (searching || makesVisible(selectedNotes)) return const [];
-      return [for (final note in selectedNotes) note.id];
     }
     if (action == NoteAction.merge) {
       // Merged into the first, the others go to the trash.

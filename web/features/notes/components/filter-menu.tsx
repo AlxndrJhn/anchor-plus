@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, EyeOff, Filter, Hash, Image, ListChecks } from "lucide-react";
+import { Bell, Filter, Hash, Image, ListChecks } from "lucide-react";
 import type * as React from "react";
 import { TopBarButton } from "@/components/layout/app-page";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ const BACKGROUND_CHOICES = [
 const chipClass =
   "inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-border border-solid bg-card px-3 text-ui text-foreground transition-colors duration-(--duration-hover) hover:bg-muted aria-pressed:border-transparent aria-pressed:bg-foreground aria-pressed:text-card [&_svg]:size-4";
 
-/** Narrows the list to notes with a colour, a tag, pictures, checklists or reminders, or to invisible ones. */
+/** Narrows the list to notes with a colour, a tag, pictures, checklists or reminders. */
 export function FilterMenu({
   list,
   showTags = true,
@@ -83,21 +83,6 @@ export function FilterMenu({
                 {kind.label}
               </button>
             ))}
-          </div>
-        </div>
-
-        <div>
-          <h2 className={headingClass}>Is</h2>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              aria-pressed={!!filters.invisible}
-              className={chipClass}
-              onClick={() => set({ invisible: !filters.invisible })}
-            >
-              <EyeOff aria-hidden />
-              Invisible
-            </button>
           </div>
         </div>
 

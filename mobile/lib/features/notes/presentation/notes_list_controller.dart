@@ -13,7 +13,6 @@ import '../../tags/presentation/tags_controller.dart';
 import '../domain/flowchart.dart';
 import '../domain/note.dart';
 import '../domain/note_blocks.dart';
-import '../domain/note_filters.dart';
 import 'note_folder.dart';
 import 'notes_controller.dart';
 import 'notes_view_options.dart';
@@ -103,11 +102,7 @@ VisibleNotes visibleNotes(Ref ref) {
   final filters = ref.watch(noteFiltersControllerProvider);
   // Filters search too: they bring in matching archived notes, open.
   final isSearching = words.isNotEmpty || !filters.isEmpty;
-  // Invisible notes stay out of the lists until a search or a filter brings
-  // them up; the trash still lists them, so they can be put back.
-  final searching = isSearching || folder == NoteFolder.trash;
   bool matches(Note note) {
-    if (!showsInList(note, searching: searching)) return false;
     // Locked notes too, by what's in them: a lock only keeps a note's text
     // off the screen until it's opened, it isn't a secret store.
     if (!filters.matches(note)) return false;

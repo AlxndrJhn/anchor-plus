@@ -421,34 +421,6 @@ void main() {
     });
   });
 
-  group('invisible notes', () {
-    test('a new note is visible; made invisible it goes up', () async {
-      await repo.createNote(const Note(id: 'n1', title: 'Diary'));
-      expect((await repo.getNote('n1'))!.isInvisible, isFalse);
-
-      await repo.setInvisible(['n1'], isInvisible: true);
-
-      final row = await (db.select(
-        db.notes,
-      )..where((tbl) => tbl.id.equals('n1'))).getSingle();
-      expect(row.isInvisible, isTrue);
-      expect(row.isSynced, isFalse);
-      expect((await repo.getNote('n1'))!.isInvisible, isTrue);
-    });
-
-    test('stays invisible through an edit', () async {
-      await insertNote(id: 'n1', title: 'Diary');
-      await repo.setInvisible(['n1'], isInvisible: true);
-      final note = (await repo.getNote('n1'))!;
-
-      await repo.updateNote(note.copyWith(title: 'Changed'));
-
-      final after = (await repo.getNote('n1'))!;
-      expect(after.title, 'Changed');
-      expect(after.isInvisible, isTrue);
-    });
-  });
-
   group('frozen notes', () {
     Future<void> freeze(String id) => repo.markFrozen([id], isFrozen: true);
 

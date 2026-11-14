@@ -13,7 +13,6 @@ import 'package:anchor/features/notes/presentation/note_folder.dart';
 import 'package:anchor/features/notes/presentation/notes_controller.dart';
 import 'package:anchor/features/notes/presentation/notes_list_screen.dart';
 import 'package:anchor/features/notes/presentation/notes_view_options.dart';
-import 'package:anchor/features/notes/presentation/widgets/card_registry.dart';
 import 'package:anchor/features/notes/presentation/widgets/note_card.dart';
 import 'package:anchor/features/notes/presentation/widgets/pull_to_refresh.dart';
 import 'package:anchor/features/picture_search/picture_search.dart';
@@ -956,68 +955,6 @@ void main() {
         findsOneWidget,
       );
       await tester.pump(const Duration(seconds: 11));
-    });
-
-    testWidgets('Make invisible, behind Lock, takes the picked cards off '
-        'the list, with Undo', (tester) async {
-      when(
-        () => repo.setInvisible(any(), isInvisible: any(named: 'isInvisible')),
-      ).thenAnswer((_) async {});
-      await pumpList(tester, notesNamed('Note', 3));
-      await tester.tap(find.bySemanticsLabel('Select notes'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Note 0'));
-      await tester.tap(find.text('Note 2'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.bySemanticsLabel('Lock'));
-      await tester.pumpAndSettle();
-      expect(find.text('Lock, freeze or make invisible'), findsOneWidget);
-      await tester.tap(find.text('Make invisible'));
-      for (var i = 0; i < 10; i++) {
-        await tester.pump(const Duration(milliseconds: 100));
-      }
-
-      verify(
-        () => repo.setInvisible(['Note0', 'Note2'], isInvisible: true),
-      ).called(1);
-      expect(find.text('2 selected'), findsNothing);
-      expect(CardRegistry.leaving.value, containsAll(['Note0', 'Note2']));
-      expect(
-        find.textContaining('2 notes made invisible', findRichText: true),
-        findsOneWidget,
-      );
-      CardRegistry.stay(['Note0', 'Note2']);
-      await tester.tap(find.text('Undo'));
-      await tester.pump();
-      verify(
-        () => repo.setInvisible(['Note0', 'Note2'], isInvisible: false),
-      ).called(1);
-      await tester.pump(const Duration(seconds: 11));
-    });
-
-    testWidgets('an invisible note stays out of the list; a search finds it, '
-        'marked, and the Invisible filter lists it', (tester) async {
-      await pumpList(tester, [
-        Note(
-          id: 'i',
-          title: 'Diary',
-          content: delta('dear diary'),
-          isInvisible: true,
-          updatedAt: DateTime.utc(2026, 8, 21),
-        ),
-        ...notesNamed('Note', 2),
-      ]);
-
-      expect(find.text('Diary'), findsNothing);
-      expect(find.text('Note 0'), findsOneWidget);
-
-      await tester.tap(find.bySemanticsLabel('Search notes'));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(EditableText).first, 'diary');
-      await tester.pumpAndSettle();
-      expect(find.text('Diary'), findsOneWidget);
-      expect(find.byKey(const ValueKey('card-invisible')), findsOneWidget);
     });
 
     testWidgets('a frozen card shows a snowflake, and deleting it does '
