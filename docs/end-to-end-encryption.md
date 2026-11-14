@@ -2,13 +2,10 @@
 
 Status: design, not built yet (2026-11-13)
 
-Every new account is encrypted end to end by default. Notes, tags, pictures and files are
+Every account is encrypted end to end, always. Notes, tags, pictures and files are
 encrypted on the device before they leave it, and the server only stores and passes on
 ciphertext. Nobody who runs a server, hosted or self-hosted, can read what people write.
-
-People who would rather have the server-side features (server search, OCR and picture
-search on the server, the hosted MCP connector, a password reset by the admin) can turn
-encryption off for their account. See [On by default, can be turned off](#on-by-default-can-be-turned-off).
+There is no setting to turn it off, for people or for server admins.
 
 This document says what gets encrypted, how keys work, what each feature becomes, what
 stays visible to the server, and the order to build it in.
@@ -26,8 +23,8 @@ stays visible to the server, and the order to build it in.
   picture search keep working.
 - Losing a password does not mean losing notes, as long as the person kept their
   recovery key or still has a signed-in device.
-- Turning encryption off is a deliberate choice by the person, made on their own device.
-  A server can never switch an account to plain text by itself.
+- Clients never upload note content in plain text, whatever the server asks for, so a
+  modified server can't quietly switch an account back to plain text.
 
 **What the server still sees** (metadata, needed to sync and share)
 
@@ -47,59 +44,6 @@ but each costs a server feature, so it is left out of the first version.
   published source, reproducible builds, and a notice in the web app that says so.
 - A device that is itself compromised.
 - Someone the note is shared with keeping a copy.
-
-## On by default, can be turned off
-
-Each account has an encryption mode: **encrypted** (the default) or **not encrypted**.
-
-| | Encrypted (default) | Not encrypted |
-|---|---|---|
-| Server can read notes | No | Yes |
-| Search | On the device | On the server, as today |
-| OCR and picture search | On the device | On the server, as today |
-| MCP connector | Local bridge on your computer | Hosted endpoint, as today |
-| Forgotten password | Another sign-in method, a device or the recovery key | Admin reset works, nothing is lost |
-| Recovery key at sign-up | Required | None |
-
-**Signing up**: encryption is on. Below it, "Turn off end-to-end encryption" opens a
-short explanation of what changes (the table above, in plain words) and asks for
-confirmation. Someone who turns it off skips the recovery-key step.
-
-**Switching later**, in Settings:
-
-- **Turning it on** runs the same move as for existing accounts (see
-  [Moving existing accounts](#moving-existing-accounts)).
-- **Turning it off** decrypts everything on the device and uploads it as plain text.
-  It needs the password or the recovery key to confirm and says what the server will be
-  able to read afterwards. When it's done, the wrapped keys stay so the person can still
-  open notes shared with them.
-
-**The server can't downgrade an account.** The mode lives in the account's encrypted
-settings as well as on the server. A client that knows its account is encrypted refuses
-to upload plain text, whatever the server says, until the person turns encryption off on
-that device. Other signed-in devices then show a notice that encryption was turned off,
-from which device and when.
-
-**Mixed sharing.** A note follows its owner's mode:
-
-- An encrypted owner sharing with someone who has no keys yet (they turned encryption
-  off before keys existed): that person is asked to set up keys the next time they open
-  Anchor+ (a device key and their password, no recovery key needed), and the share shows
-  as pending until then. Their server-side search and MCP can't read that note.
-- A not-encrypted owner sharing with an encrypted person: the note stays in plain text,
-  and the encrypted person sees it marked "Not end-to-end encrypted".
-
-**Server admins** set two options (environment variables and the admin page):
-
-- `E2EE_DEFAULT` (`on` by default): whether new accounts start encrypted.
-- `E2EE_ALLOW_OPT_OUT` (`true` by default): whether people may turn it off. The hosted
-  service keeps both defaults. A self-hosted family server might set the default to `off`,
-  and a privacy-focused one might forbid opting out.
-
-**Cost of keeping both**: the server keeps its search, OCR, picture search, export and MCP
-code for not-encrypted accounts, and the clients carry the device-side versions for
-encrypted ones. Every feature that reads notes has to handle both, and tests run in both
-modes.
 
 ## Cryptography
 
@@ -198,10 +142,9 @@ carries the key.
 ### Notes
 
 Title, Quill content (text, checklists, formatting, inline picture references) are
-encrypted together as the note's **body**. Encrypted notes store `Note.body` (ciphertext)
-and `Note.keys` (the wrapped note keys) and leave `Note.title` and `Note.content` empty;
-notes of not-encrypted accounts keep using `title` and `content`. `Note.encrypted` says
-which. Colour, state, version and timestamps stay as they are.
+encrypted together as the note's **body**. `Note.title` and `Note.content` are replaced
+by `Note.body` (ciphertext) and `Note.keys` (the wrapped note keys). Colour, state,
+version and timestamps stay as they are.
 
 ### Sync
 
@@ -244,8 +187,7 @@ Both run on the device, and their results are stored encrypted with the picture:
 - **Picture search**: the SigLIP model through `onnxruntime-web` on web and desktop.
   On mobile, pictures added there get their vector the next time a web or desktop client
   of the same account is open; a mobile model comes later.
-- The server's `picture-text.service.ts` and `picture-search/` stay for not-encrypted
-  accounts and skip encrypted pictures.
+- The server's `picture-text.service.ts` and `picture-search/` are removed.
 
 ### Pictures and files
 
@@ -290,14 +232,10 @@ key. Revoking a link rotates the note key, as with people.
 
 ### MCP and API tokens
 
-The server can't read encrypted notes, so for encrypted accounts the hosted MCP endpoint
-(`server/src/mcp`) answers with an explanation instead. Not-encrypted accounts keep the
-hosted endpoint; it skips encrypted notes shared with them.
-
-Encrypted accounts use the **MCP bridge**: a program on the person's own computer that
-signs in like another device, holds keys, syncs, decrypts on that computer and serves
-the same MCP tools to AI assistants. It works for not-encrypted accounts too, so there's
-one local tool for everyone.
+The server can't read notes, so the hosted MCP endpoint (`server/src/mcp`) goes away.
+In its place comes the **MCP bridge**: a program on the person's own computer that signs
+in like another device, holds keys, syncs, decrypts on that computer and serves the same
+MCP tools to AI assistants.
 
 #### Where it runs
 
@@ -348,17 +286,17 @@ rewrap every note key and tag name, and sign the other devices in again.
   itself with the same SigLIP model (downloaded on first use, about 100 MB).
 - **Reading**: the Delta-to-Markdown and attachment code in `server/src/mcp`
   (`note-markdown.util.ts`, `attachment-content.util.ts`) moves to a shared package that
-  the server and the bridge both use. Pictures are resized on the computer with sharp
+  the bridge and the clients' Markdown export both use. Pictures are resized on the computer with sharp
   before they go to the assistant.
 - **Writing**: creating, updating, appending to and trashing notes encrypt with the
   note key (a new key for a new note) and sync like any client edit. If someone is
   editing that note live, the bridge sends its change through the live-editing relay, so
   nothing gets overwritten.
 - **Locked notes** behave as today: the assistant sees the title, not the text.
-- **Tools**: the same names and arguments as the hosted endpoint (`list_notes`,
+- **Tools**: the same names and arguments as today's hosted endpoint (`list_notes`,
   `get_note`, `create_note`, `update_note`, `append_to_note`, `trash_note`,
-  `list_tags`, `create_tag`, `get_attachment`), so switching between them changes
-  nothing in prompts or skills.
+  `list_tags`, `create_tag`, `get_attachment`), so moving to the bridge changes nothing
+  in prompts or skills.
 
 #### What it means for privacy
 
@@ -376,15 +314,12 @@ rewrap every note key and tag name, and sign the other devices in again.
 
 Assistants that run in the browser or on a phone need an internet URL. Any URL the
 bridge exposes would carry decrypted notes through whatever relays it, so there's no
-built-in relay in the first version. People who want this anyway can:
+built-in relay. People who want this anyway can run the bridge's HTTP mode on a server
+they control and put it behind their own HTTPS and login (for example on a home server
+that's always on), knowing that server then holds keys.
 
-- turn encryption off for their account and use the hosted endpoint, or
-- run the bridge's HTTP mode on a server they control and put it behind their own
-  HTTPS and login (for example on a home server that's always on), knowing that server
-  then holds keys.
-
-A relay through the Anchor+ server is possible later, as an explicit opt-in that says the
-server will see what the assistant reads.
+A relay through the Anchor+ server is ruled out: the server would see what the assistant
+reads, which breaks the promise that it never sees notes.
 
 ### Reminders
 
@@ -393,18 +328,15 @@ decrypted data. There is no server push to leak titles through.
 
 ### Self-hosting and the browser-only mode
 
-Self-hosted servers run the same code, with the same defaults. Their admin can change the
-default or forbid opting out (see `E2EE_DEFAULT` and `E2EE_ALLOW_OPT_OUT` above). The
-browser-only mode (`web/lib/local-backend`, `ANCHOR_MODE=local`) never sends anything
+Self-hosted servers run the same code, so they're encrypted end to end too, with no
+option to turn it off. The browser-only mode (`web/lib/local-backend`, `ANCHOR_MODE=local`) never sends anything
 anywhere and stays as it is.
 
 ## Moving existing accounts
 
 1. After the update, the next time someone opens a client they're asked to set up
    encryption: save the recovery key, and choose password, passkey or device unlock.
-   Where opting out is allowed, "Not now" keeps the account as it is and Settings offers
-   it again later. Existing accounts are never switched without the person's action,
-   whatever `E2EE_DEFAULT` says.
+   It can be put off during the transition period, but not skipped.
 2. The client downloads every note, tag, revision and file, encrypts them and uploads
    the ciphertext, note by note, resuming if interrupted.
 3. When the last item is done, the server deletes the plaintext columns, server-made
@@ -415,7 +347,9 @@ anywhere and stays as it is.
 Notes shared between an encrypted and a not-yet-encrypted account are encrypted when
 their owner moves. Until the owner has moved, the other person sees them as before.
 
-The server refuses plaintext writes from an account while it is encrypted.
+The server refuses plaintext writes from an account once it has moved, and, after a
+transition period announced in the release notes, from everyone. Accounts that haven't
+moved by then are read-only until their owner opens a client and finishes the move.
 
 ## Build order
 
@@ -432,19 +366,18 @@ Each step is its own PR and leaves the app working.
    and device linking through sign-in codes. Accounts get keys but nothing is encrypted
    yet.
 4. **Encrypted notes, tags and files**: sync carries ciphertext; new accounts are
-   encrypted unless they opt out; existing accounts are offered the move described above.
-   The account mode, `E2EE_DEFAULT` and `E2EE_ALLOW_OPT_OUT` arrive here.
-5. **Live editing as an ordering relay** for encrypted notes; the server keeps merging
-   edits for not-encrypted ones.
-6. **Sharing and share links** with wrapped note keys, fingerprints, key rotation and
-   mixed-mode sharing.
+   encrypted from the start; existing accounts move as described above.
+5. **Live editing as an ordering relay**.
+6. **Sharing and share links** with wrapped note keys, fingerprints and key rotation.
 7. **MCP bridge**, in three PRs:
    1. The standalone `@anchor-plus/mcp` command with stdio, all-notes and read-only
       access, and the Markdown code moved into a shared package.
    2. The desktop app switch and local HTTP.
    3. Tag-limited access and account-key rotation.
-8. **Turning encryption off**, with the downgrade protection and the notice on other
-   devices.
+
+   The hosted MCP endpoint is removed in step 8, so people can switch to the bridge first.
+8. **Clean-up**: drop the plaintext columns, the server's OCR, picture search, Markdown
+   and MCP code, and refuse plaintext writes.
 
 ## Open questions
 
@@ -452,8 +385,6 @@ Each step is its own PR and leaves the app working.
   with more passes if 64 MiB is too slow.
 - Picture search on mobile: which model, or keep relying on a web or desktop client.
 - Should colour, reminder times and the share graph be encrypted in a later version?
-- Should the hosted service show not-encrypted accounts a reminder to turn encryption on,
-  and how often?
+- How long the transition period for existing accounts should be, on the hosted service
+  and on self-hosted servers.
 - Should the MCP bridge also come as a single binary, for people without Node?
-- Is an opt-in relay for web and phone assistants worth building, given that the server
-  would see what the assistant reads?
