@@ -50,9 +50,6 @@ import {
 } from "../../emoji-data";
 import { EmojiPicker } from "./emoji-picker";
 
-type ColorName = "Black" | "Red" | "Orange" | "Green" | "Blue" | "Purple";
-type SizeName = "Thin" | "Medium" | "Thick";
-
 const TOOLS: { tool: DrawTool; icon: React.ReactNode }[] = [
   { tool: "pen", icon: <Pen /> },
   { tool: "marker", icon: <Highlighter /> },
@@ -384,8 +381,8 @@ export function DrawingDialog({
                   key={each.value}
                   type="button"
                   aria-pressed={color === each.value}
-                  aria-label={t(`color.${each.name as ColorName}`)}
-                  title={t(`color.${each.name as ColorName}`)}
+                  aria-label={each.name}
+                  title={each.name}
                   tabIndex={showsColor ? undefined : -1}
                   onClick={() => setColor(each.value)}
                   className={cn(
@@ -399,10 +396,10 @@ export function DrawingDialog({
             </div>
             <div className="flex items-center gap-0.5">
               {DRAW_SIZES.map((each) => (
-                <Tip key={each.name} label={t(`size.${each.name as SizeName}`)}>
+                <Tip key={each.name} label={each.name}>
                   <IconButton
                     size="sm"
-                    label={t(`size.${each.name as SizeName}`)}
+                    label={each.name}
                     aria-pressed={size === each.value}
                     onClick={() => setSize(each.value)}
                   >

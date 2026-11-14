@@ -18,19 +18,6 @@
       "text": "Text",
       "emoji": "Emoji"
     },
-    "color": {
-      "Black": "Schwarz",
-      "Red": "Rot",
-      "Orange": "Orange",
-      "Green": "Grün",
-      "Blue": "Blau",
-      "Purple": "Violett"
-    },
-    "size": {
-      "Thin": "Dünn",
-      "Medium": "Mittel",
-      "Thick": "Dick"
-    },
     "undoWithKey": "Rückgängig ({key})",
     "redoWithKey": "Wiederholen ({key})",
     "clear": "Leeren",

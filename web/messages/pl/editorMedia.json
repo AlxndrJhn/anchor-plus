@@ -18,19 +18,6 @@
       "text": "Tekst",
       "emoji": "Emoji"
     },
-    "color": {
-      "Black": "Czarny",
-      "Red": "Czerwony",
-      "Orange": "Pomarańczowy",
-      "Green": "Zielony",
-      "Blue": "Niebieski",
-      "Purple": "Fioletowy"
-    },
-    "size": {
-      "Thin": "Cienki",
-      "Medium": "Średni",
-      "Thick": "Gruby"
-    },
     "undoWithKey": "Cofnij ({key})",
     "redoWithKey": "Ponów ({key})",
     "clear": "Wyczyść",
