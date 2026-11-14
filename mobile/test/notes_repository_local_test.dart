@@ -130,6 +130,18 @@ void main() {
       expect(notes.map((n) => n.id), ['pinned-old', 'newest', 'old']);
     });
 
+    test("adds up a note's text and attachments into its size", () async {
+      await insertNote(id: 'n1', title: 'Café');
+      await insertImageAttachment('a1', 'n1');
+      await insertImageAttachment('a2', 'n1', type: 'audio');
+      await insertImageAttachment('gone', 'n1', syncStatus: 'pending_delete');
+
+      final notes = await repo.watchNotes().first;
+
+      // "Café" is 5 bytes; each attachment 100, the deleted one not counted.
+      expect(notes.single.storageSize, 5 + 100 + 100);
+    });
+
     test('orders notes sharing a timestamp by id, descending', () async {
       final sameMoment = DateTime.utc(2026, 7, 2);
       for (final id in ['n-b', 'n-d', 'n-a', 'n-c']) {

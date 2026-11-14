@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:drift/drift.dart' as drift;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -134,6 +135,7 @@ class NotesRepository {
 
     final previewsOf = <String, List<NoteImagePreview>>{};
     final fileIdsOf = <String, Set<String>>{};
+    final attachedBytesOf = <String, int>{};
     // The text read from each picture, by attachment.
     final pictureTextsOf = <String, Map<String, String>>{};
     final files =
@@ -153,6 +155,10 @@ class NotesRepository {
     for (final file in files) {
       final attachmentId = file.serverAttachmentId ?? file.id;
       final isNew = (fileIdsOf[file.noteId] ??= {}).add(attachmentId);
+      if (isNew) {
+        attachedBytesOf[file.noteId] =
+            (attachedBytesOf[file.noteId] ?? 0) + file.fileSize;
+      }
       final pictureText = file.pictureText;
       if (pictureText != null && pictureText.isNotEmpty) {
         (pictureTextsOf[file.noteId] ??= {})[attachmentId] = pictureText;
@@ -178,6 +184,7 @@ class NotesRepository {
           tagIds: tagIdsOf[row.id] ?? const [],
           imagePreviews: previewsOf[row.id] ?? const [],
           attachmentCount: fileIdsOf[row.id]?.length ?? 0,
+          attachedBytes: attachedBytesOf[row.id] ?? 0,
           pictureText: pictureTextsOf[row.id]?.values.join('\n\n') ?? '',
         ),
     ];
@@ -665,6 +672,7 @@ Note noteFromRow(
   List<String> tagIds = const [],
   List<NoteImagePreview> imagePreviews = const [],
   int attachmentCount = 0,
+  int attachedBytes = 0,
   String pictureText = '',
 }) {
   return Note(
@@ -699,6 +707,10 @@ Note noteFromRow(
     reminderSlot: row.reminderSlot,
     imagePreviewData: imagePreviews,
     attachmentCount: attachmentCount,
+    storageSize:
+        utf8.encode(row.title).length +
+        utf8.encode(row.content ?? '').length +
+        attachedBytes,
     pictureText: pictureText,
     reminder: row.reminderAt == null
         ? null

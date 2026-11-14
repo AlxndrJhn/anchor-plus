@@ -5350,6 +5350,24 @@ abstract class AppLocalizations {
   /// **'Title'**
   String get viewTitle;
 
+  /// Sort option: orders notes by how much space they take on the server, their text and attachments together.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get viewSize;
+
+  /// Sort direction for sizes, the notes taking the most space first. Short: one of two tabs in a row.
+  ///
+  /// In en, this message translates to:
+  /// **'Largest first'**
+  String get viewLargestFirst;
+
+  /// Sort direction for sizes, the notes taking the least space first. Short: one of two tabs in a row.
+  ///
+  /// In en, this message translates to:
+  /// **'Smallest first'**
+  String get viewSmallestFirst;
+
   /// Sort direction for titles, alphabetical. Short: one of two tabs in a row.
   ///
   /// In en, this message translates to:

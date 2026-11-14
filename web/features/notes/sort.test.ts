@@ -116,6 +116,24 @@ describe("compareNotes by title", () => {
   });
 });
 
+describe("compareNotes by size", () => {
+  const sized = (id: string, storageSize?: number) => ({
+    ...note(id, "2026-01-01T00:00:00.000Z"),
+    storageSize,
+  });
+  const notes = [sized("1", 200), sized("2"), sized("3", 5_000_000)];
+  const ids = (sortOrder: SortOrder) =>
+    [...notes].sort(compareNotes("size", sortOrder)).map((n) => n.id);
+
+  it("puts the largest first", () => {
+    expect(ids("desc")).toEqual(["3", "1", "2"]);
+  });
+
+  it("puts the smallest first, a note without a size as empty", () => {
+    expect(ids("asc")).toEqual(["2", "1", "3"]);
+  });
+});
+
 describe("dragged notes in newest-first order", () => {
   const n = (
     id: string,

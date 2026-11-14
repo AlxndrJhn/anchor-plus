@@ -50,6 +50,25 @@ void main() {
     expect(order(notes, byTitleDesc), ['n-a', 'n-z']);
   });
 
+  test('size puts the largest first, or the smallest', () {
+    final sized = [
+      note('n-s').copyWith(storageSize: 10),
+      note('n-l').copyWith(storageSize: 5000),
+    ];
+
+    expect(order(sized, const NotesViewOptions(sortOption: SortOption.size)), [
+      'n-l',
+      'n-s',
+    ]);
+    expect(
+      order(
+        sized,
+        const NotesViewOptions(sortOption: SortOption.size, isAscending: true),
+      ),
+      ['n-s', 'n-l'],
+    );
+  });
+
   test('title order ignores spaces around a title', () {
     final spaced = [note('n-z', title: ' Zulu'), note('n-a', title: 'Alpha ')];
 

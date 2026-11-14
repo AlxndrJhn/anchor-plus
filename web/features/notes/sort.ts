@@ -4,7 +4,13 @@ import type { Note } from "./types";
 
 export type SortableNote = Pick<
   Note,
-  "id" | "title" | "createdAt" | "updatedAt" | "position" | "positionedAt"
+  | "id"
+  | "title"
+  | "createdAt"
+  | "updatedAt"
+  | "position"
+  | "positionedAt"
+  | "storageSize"
 >;
 
 /**
@@ -67,6 +73,8 @@ export const compareNotes =
     } else if (sortBy === "createdAt") {
       comparison =
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    } else if (sortBy === "size") {
+      comparison = (a.storageSize ?? 0) - (b.storageSize ?? 0);
     }
 
     const ordered = sortOrder === "asc" ? comparison : -comparison;

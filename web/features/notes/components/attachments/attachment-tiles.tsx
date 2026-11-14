@@ -11,6 +11,7 @@ import {
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { fetchAttachmentBlob } from "../../api";
+import { fileSize } from "../../file-size";
 import { useAttachmentBlob } from "../../hooks/use-attachment-blob";
 import type { NoteAttachment } from "../../types";
 
@@ -275,13 +276,6 @@ export function VoiceCard({
       )}
     </div>
   );
-}
-
-/** “820 KB”, “3.4 MB”. */
-export function fileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
 /** Any other file: its name and size, and a button that downloads it. */
