@@ -47,6 +47,8 @@ Map<String, dynamic> lineAttributesOf(LineKind kind) => {
   Attribute.blockQuote.key: kind == LineKind.quote ? true : null,
   Attribute.codeBlock.key: kind == LineKind.code ? true : null,
   if (!kind.isList) Attribute.indent.key: null,
+  // Code keeps to the left.
+  if (kind == LineKind.code) Attribute.align.key: null,
 };
 
 final _clearedFormats = [
@@ -88,6 +90,35 @@ extension EditorFormat on QuillController {
       change.retain(1, attributes);
       cursor = newline + 1;
     }
+    compose(change, selection, ChangeSource.local);
+  }
+
+  /// The caret's line's alignment.
+  LineAlign get lineAlign {
+    final line = document.queryChild(selection.start).node;
+    return line is Line
+        ? LineAlign.of(line.style.attributes[Attribute.align.key]?.value)
+        : LineAlign.left;
+  }
+
+  /// [align] on the selected lines, but not on code. A selection ending at
+  /// the very start of a line leaves that line out.
+  void setLineAlign(LineAlign align) {
+    final lines = parseDocumentLines(document);
+    final first = lineIndexAt(lines, selection.start);
+    var last = lineIndexAt(lines, selection.end);
+    if (first < 0 || last < 0) return;
+    if (last > first && selection.end == lines[last].startOffset) last--;
+    final change = Delta();
+    var cursor = 0;
+    for (final line in lines.sublist(first, last + 1)) {
+      if (lineKindOf(line.newlineAttributes) == LineKind.code) continue;
+      final newline = line.startOffset + line.length - 1;
+      if (newline > cursor) change.retain(newline - cursor);
+      change.retain(1, {Attribute.align.key: align.value});
+      cursor = newline + 1;
+    }
+    if (change.isEmpty) return;
     compose(change, selection, ChangeSource.local);
   }
 

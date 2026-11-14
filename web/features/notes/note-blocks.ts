@@ -1,5 +1,10 @@
 import { orderedPreviewMarker, parseStoredContent } from "./quill";
-import { deltaToLines, indentOf } from "./quill-lines";
+import {
+  type Alignment,
+  alignmentOf,
+  deltaToLines,
+  indentOf,
+} from "./quill-lines";
 import { isFont, isHexColor } from "./text-style";
 
 export interface InlineRun {
@@ -38,6 +43,8 @@ export interface NoteBlock {
   line?: number;
   /** An ordered item's marker: “1.”, “a.”, “i.”. */
   marker?: string;
+  /** Set when not left; never on code. */
+  align?: Exclude<Alignment, "left">;
 }
 
 const HEADERS: Record<number, BlockType> = { 1: "h1", 2: "h2", 3: "h3" };
@@ -75,6 +82,8 @@ export function deltaToBlocks(content: string | null | undefined): NoteBlock[] {
     const attrs = line.newlineOp.attributes ?? {};
     const level = indentOf(line);
     const runs = runsOf(line.contentOps);
+    const alignment = alignmentOf(attrs.align);
+    const align = alignment === "left" ? undefined : alignment;
     let type: BlockType = "p";
     if (attrs["code-block"]) type = "code";
     else if (typeof attrs.header === "number" && HEADERS[attrs.header])
@@ -103,6 +112,7 @@ export function deltaToBlocks(content: string | null | undefined): NoteBlock[] {
         level,
         runs,
         marker: orderedPreviewMarker(count, level),
+        ...(align && { align }),
       });
       continue;
     }
@@ -113,6 +123,7 @@ export function deltaToBlocks(content: string | null | undefined): NoteBlock[] {
       runs,
       done: type === "check" ? attrs.list === "checked" : undefined,
       line: type === "check" ? lineIndex : undefined,
+      ...(align && { align }),
     });
   }
   return blocks;

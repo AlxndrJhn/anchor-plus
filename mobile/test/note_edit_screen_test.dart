@@ -1854,6 +1854,7 @@ void main() {
         'Italic',
         'Underline',
         'Strikethrough',
+        'Align left',
         'Hide keyboard',
       ]);
 
@@ -1882,6 +1883,32 @@ void main() {
       await settle(tester);
       expect(editorController(tester).lineKind, LineKind.h2);
       expect(barButton('Line styles'), findsNothing);
+    });
+
+    testWidgets('Align in Aa steps the line through center, right, justify '
+        'and back to left, and shows where it stands', (tester) async {
+      await startWriting(tester);
+      await tester.tap(tool('Text styles'));
+      await settle(tester);
+
+      Object? align() => editorController(
+        tester,
+      ).document.toDelta().toJson().last['attributes']?['align'];
+      for (final (label, next) in [
+        ('Align left', 'center'),
+        ('Align center', 'right'),
+        ('Align right', 'justify'),
+        ('Justify', null),
+      ]) {
+        await tester.tap(tool(label));
+        await settle(tester);
+        expect(align(), next);
+      }
+      expect(
+        tester.getSemantics(tool('Align left')),
+        isSemantics(isToggled: false),
+      );
+      expect(barButton('Line styles'), findsOneWidget);
     });
 
     testWidgets('in code, Aa holds no text tools', (tester) async {

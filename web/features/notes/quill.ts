@@ -2,6 +2,8 @@ import Delta from "quill-delta";
 import { FLOWCHART_EMBED, flowchartText, parseFlowchart } from "./flowcharts";
 import { buildChecklistStepMove } from "./quill-checklist";
 import {
+  type Alignment,
+  buildAlignDelta,
   buildListIndentDelta,
   deltaToLines,
   getLineLength,
@@ -123,6 +125,7 @@ export const QUILL_FORMATS = [
   "indent",
   "blockquote",
   "code-block",
+  "align", // center, right or justify; a line block's text-align
   "link",
   "highlight",
   "color",
@@ -177,6 +180,37 @@ export function getTextFormat(
     pos = next;
   }
   return common ?? quill.getFormat(index, length);
+}
+
+/** Lays the selected lines, or the caret's, out `align`; code stays left. */
+export function setLineAlign(
+  quill: QuillInstance,
+  align: Alignment,
+  range = quill.getSelection(true),
+) {
+  if (!range) return;
+  const delta = buildAlignDelta(
+    quill.getContents(),
+    range.index,
+    range.length,
+    align,
+  );
+  if (!delta) return;
+  quill.updateContents(delta, "user");
+  quill.setSelection(range.index, range.length, "silent");
+}
+
+/** Ctrl/⌘+Shift and a letter, as in Google Docs and Word. */
+function alignBinding(key: number, align: Alignment) {
+  return {
+    key,
+    shortKey: true,
+    shiftKey: true,
+    handler(this: { quill: QuillInstance }, range: Range) {
+      setLineAlign(this.quill, align, range);
+      return false;
+    },
+  };
 }
 
 export function isInCodeBlock(quill: QuillInstance, range: Range): boolean {
@@ -852,6 +886,11 @@ export const QUILL_MODULES = {
           return false;
         },
       },
+      // By key code, so they work whatever the keyboard's layout and Shift.
+      "align left": alignBinding(76, "left"), // L
+      "align center": alignBinding(69, "center"), // E
+      "align right": alignBinding(82, "right"), // R
+      "align justify": alignBinding(74, "justify"), // J
       "move item up": {
         key: "ArrowUp",
         altKey: true,

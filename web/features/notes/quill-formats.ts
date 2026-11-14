@@ -230,6 +230,11 @@ export function registerNoteFormats(Quill: QuillStatic) {
   }
   Quill.register(ScanEmbed, true);
 
+  // A line's alignment, written as its text-align (Quill's default is a
+  // class), so a copy keeps it in other apps and a paste brings it in.
+  const AlignStyle = Quill.import("attributors/style/align");
+  Quill.register(AlignStyle, true);
+
   // A font for the selected text, written as its font-family.
   const FontStyle = Quill.import("attributors/style/font") as {
     whitelist: string[] | null;
@@ -529,7 +534,14 @@ type ClipboardQuill = {
   history: { cutoff: () => void };
 };
 
-const LINE_FORMATS = ["header", "list", "blockquote", "indent", "code-block"];
+const LINE_FORMATS = [
+  "header",
+  "list",
+  "blockquote",
+  "indent",
+  "code-block",
+  "align",
+];
 
 const COPY_MARK = '<span data-anchor-copy=""></span>';
 
@@ -540,13 +552,16 @@ const clearing = (formats: Formats): Formats =>
 const pick = (formats: Formats, keep: (key: string) => boolean): Formats =>
   Object.fromEntries(Object.entries(formats).filter(([key]) => keep(key)));
 
+/** The pasted lines after the first, which keep the line's alignment too. */
 function nextLineOf(line: Formats): Formats {
+  const align = line.align ? { align: line.align } : {};
   if (line.list)
     return {
       list: line.list === "checked" ? "unchecked" : line.list,
       ...(line.indent ? { indent: line.indent } : {}),
+      ...align,
     };
-  return line.blockquote ? { blockquote: true } : {};
+  return line.blockquote ? { blockquote: true, ...align } : align;
 }
 
 function nextLineChange(line: Formats): Formats | null {

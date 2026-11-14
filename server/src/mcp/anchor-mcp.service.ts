@@ -398,8 +398,9 @@ export class AnchorMcpService {
             if (current.lock) throw locked();
             if (!markdownCanCarry(current.content)) {
               throw new HttpException(
-                'This note has pictures in its text, colours, fonts or ' +
-                  'highlights that markdown cannot carry, so its text ' +
+                'This note has pictures in its text, colours, fonts, ' +
+                  'highlights or aligned paragraphs that markdown cannot ' +
+                  'carry, so its text ' +
                   'cannot be replaced. Use append_to_note, or change it in ' +
                   'Anchor.',
                 HttpStatus.UNPROCESSABLE_ENTITY,

@@ -91,10 +91,13 @@ class _EditorToolbarState extends State<EditorToolbar> {
               );
               Widget tool(EditorTool tool) {
                 final name = tool.highlightName;
+                final isAlign = tool == EditorTool.align;
                 return EditorToolButton(
                   key: ValueKey(tool),
-                  icon: tool.icon,
-                  label: tool.labelIn(context.l10n),
+                  icon: isAlign ? alignIcon(model.align) : tool.icon,
+                  label: isAlign
+                      ? alignLabelIn(context.l10n, model.align)
+                      : tool.labelIn(context.l10n),
                   swatch: name == null
                       ? null
                       : (
@@ -152,6 +155,7 @@ bool _isToggle(EditorTool tool) => switch (tool) {
   EditorTool.underline ||
   EditorTool.strikethrough ||
   EditorTool.highlight ||
-  EditorTool.textStyle => true,
+  EditorTool.textStyle ||
+  EditorTool.align => true,
   _ => tool.highlightName != null,
 };

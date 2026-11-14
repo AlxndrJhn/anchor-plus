@@ -69,4 +69,23 @@ describe('markdownCanCarry', () => {
       ),
     ).toBe(false);
   });
+
+  it('refuses aligned lines, but not left ones', () => {
+    expect(
+      markdownCanCarry(
+        delta([
+          { insert: 'x' },
+          { insert: '\n', attributes: { align: 'center' } },
+        ]),
+      ),
+    ).toBe(false);
+    expect(
+      markdownCanCarry(
+        delta([
+          { insert: 'x' },
+          { insert: '\n', attributes: { align: 'left' } },
+        ]),
+      ),
+    ).toBe(true);
+  });
 });

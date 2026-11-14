@@ -201,3 +201,40 @@ export function buildListIndentDelta(
 
   return ops.length ? { ops } : null;
 }
+
+/** How a line lies between the note's edges; "left" is never stored. */
+export const ALIGNMENTS = ["left", "center", "right", "justify"] as const;
+export type Alignment = (typeof ALIGNMENTS)[number];
+
+/** A line's stored `align` as an Alignment; anything else is left. */
+export function alignmentOf(value: unknown): Alignment {
+  return value === "center" || value === "right" || value === "justify"
+    ? value
+    : "left";
+}
+
+/**
+ * Delta that gives the lines intersecting the selection [index,
+ * index+length] `align`. Code lines stay as they are. Null when nothing
+ * changes.
+ */
+export function buildAlignDelta(
+  currentDelta: { ops: QuillOp[] },
+  index: number,
+  length: number,
+  align: Alignment,
+): { ops: QuillOp[] } | null {
+  const selEnd = length > 0 ? index + length : index + 1;
+  const ops = lineFormatOps(
+    deltaToLines(currentDelta.ops),
+    (line, _, start) => {
+      const attributes = line.newlineOp.attributes ?? {};
+      const inRange =
+        start < selEnd && index <= start + getLineLength(line) - 1;
+      if (!inRange || attributes["code-block"]) return null;
+      if (alignmentOf(attributes.align) === align) return null;
+      return { align: align === "left" ? null : align };
+    },
+  );
+  return ops.length ? { ops } : null;
+}

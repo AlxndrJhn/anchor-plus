@@ -38,8 +38,9 @@ import {
   LIST_FORMATS,
   toggleTextFormat,
 } from "../../quill";
-import { buildListIndentDelta } from "../../quill-lines";
+import { alignmentOf, buildListIndentDelta } from "../../quill-lines";
 import type { UndoRedoAction } from "../../undo-shortcuts";
+import { AlignButton } from "./align-tools";
 import {
   HighlightSplitButton,
   hasHighlight,
@@ -94,6 +95,9 @@ function toggleBlock(quill: QuillInstance, key: "blockquote" | "code-block") {
   const on = key === "code-block" ? "plain" : true;
   quill.format(key, current[key] ? false : on, "user");
   quill.format("indent", false, "user");
+  // Code keeps to the left.
+  if (key === "code-block" && !current[key])
+    quill.format("align", false, "user");
 }
 
 interface QuillToolbarProps {
@@ -379,6 +383,11 @@ export function QuillToolbar({
       {toolButton("Indent (Tab)", <IndentIncrease />, () => changeIndent(1), {
         disabled: !canIndent,
       })}
+      <AlignButton
+        getQuill={getQuill}
+        current={alignmentOf(format.align)}
+        disabled={isInCode}
+      />
       {divider}
       {toolButton(
         "Quote",

@@ -104,4 +104,35 @@ void main() {
     expect(html, contains('<pre>a = 1\nb = 2</pre>'));
     expect(html, isNot(contains('class="title"')));
   });
+
+  test('aligned lines print aligned', () {
+    final html = _html([
+      PrintableNote(
+        title: '',
+        content: _content([
+          {'insert': 'Title'},
+          {
+            'insert': '\n',
+            'attributes': {'header': 1, 'align': 'center'},
+          },
+          {'insert': 'Signed'},
+          {
+            'insert': '\n',
+            'attributes': {'align': 'right'},
+          },
+          {'insert': 'item'},
+          {
+            'insert': '\n',
+            'attributes': {'list': 'bullet', 'align': 'justify'},
+          },
+          {'insert': 'plain\n'},
+        ]),
+      ),
+    ]);
+
+    expect(html, contains('<h2 dir="auto" style="text-align:center">Title'));
+    expect(html, contains('<p dir="auto" style="text-align:right">Signed'));
+    expect(html, contains('style="--lvl:0;text-align:justify"'));
+    expect(html, contains('<p dir="auto">plain</p>'));
+  });
 }
