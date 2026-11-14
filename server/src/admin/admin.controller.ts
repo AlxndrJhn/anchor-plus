@@ -23,6 +23,10 @@ import { UpdateRegistrationModeDto } from './dto/update-registration-mode.dto';
 import { UpdateOidcSettingsDto } from './dto/update-oidc-settings.dto';
 import { UpdateSecondFactorDto } from './dto/update-second-factor.dto';
 import { TestOidcIssuerDto } from './dto/test-oidc-issuer.dto';
+import {
+  CreateOidcProviderDto,
+  UpdateOidcProviderDto,
+} from './dto/oidc-provider.dto';
 
 @Controller('api/admin')
 @UseGuards(AdminGuard)
@@ -114,6 +118,24 @@ export class AdminController {
   @Patch('settings/oidc')
   updateOidcSettings(@Body() dto: UpdateOidcSettingsDto) {
     return this.adminService.updateOidcSettings(dto);
+  }
+
+  @Post('settings/oidc/providers')
+  createOidcProvider(@Body() dto: CreateOidcProviderDto) {
+    return this.adminService.createOidcProvider(dto);
+  }
+
+  @Patch('settings/oidc/providers/:id')
+  updateOidcProvider(
+    @Param('id') id: string,
+    @Body() dto: UpdateOidcProviderDto,
+  ) {
+    return this.adminService.updateOidcProvider(id, dto);
+  }
+
+  @Delete('settings/oidc/providers/:id')
+  deleteOidcProvider(@Param('id') id: string) {
+    return this.adminService.deleteOidcProvider(id);
   }
 
   @Get('settings/second-factor')

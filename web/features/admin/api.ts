@@ -2,12 +2,14 @@ import { api } from "@/lib/api/client";
 import type {
   AdminStats,
   AdminUser,
+  CreateOidcProviderDto,
   CreateUserDto,
   OidcIssuerTest,
   OidcSettings,
   RegistrationSettings,
   ResetPasswordResponse,
   SecondFactorSettings,
+  UpdateOidcProviderDto,
   UpdateOidcSettingsDto,
   UpdateRegistrationModeDto,
   UpdateUserDto,
@@ -96,6 +98,31 @@ export async function updateOidcSettings(
 ): Promise<OidcSettings> {
   return api
     .patch("api/admin/settings/oidc", { json: data })
+    .json<OidcSettings>();
+}
+
+export async function createOidcProvider(
+  data: CreateOidcProviderDto,
+): Promise<OidcSettings> {
+  return api
+    .post("api/admin/settings/oidc/providers", { json: data })
+    .json<OidcSettings>();
+}
+
+export async function updateOidcProvider(
+  id: string,
+  data: UpdateOidcProviderDto,
+): Promise<OidcSettings> {
+  return api
+    .patch(`api/admin/settings/oidc/providers/${encodeURIComponent(id)}`, {
+      json: data,
+    })
+    .json<OidcSettings>();
+}
+
+export async function deleteOidcProvider(id: string): Promise<OidcSettings> {
+  return api
+    .delete(`api/admin/settings/oidc/providers/${encodeURIComponent(id)}`)
     .json<OidcSettings>();
 }
 

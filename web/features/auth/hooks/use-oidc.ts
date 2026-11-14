@@ -11,6 +11,7 @@ import { exchangeOidcCode, getOidcConfig } from "../api";
 import { useAuthStore } from "../store";
 import type { OidcConfig } from "../types";
 import { getSafeRedirectUrl } from "../utils/redirect";
+import { FIRST_PROVIDER_ID } from "../utils/sign-in-providers";
 
 export function useOidcConfig() {
   return useQuery<OidcConfig>({
@@ -22,12 +23,35 @@ export function useOidcConfig() {
   });
 }
 
+/** The provider the last sign-in went to, to offer it again if it fails. */
+const LAST_PROVIDER_KEY = "oidc-last-provider";
+
+export function lastSignInProvider(): string | null {
+  try {
+    return sessionStorage.getItem(LAST_PROVIDER_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export function useOidcLogin() {
   return {
-    initiate: (redirectUrl?: string) => {
+    initiate: (redirectUrl?: string, providerId?: string) => {
       const url = new URL("/api/auth/oidc/initiate", window.location.origin);
       if (redirectUrl) {
         url.searchParams.set("redirect", getSafeRedirectUrl(redirectUrl));
+      }
+      // The first provider is the server's default, so older servers work.
+      if (providerId && providerId !== FIRST_PROVIDER_ID) {
+        url.searchParams.set("provider", providerId);
+      }
+      try {
+        sessionStorage.setItem(
+          LAST_PROVIDER_KEY,
+          providerId ?? FIRST_PROVIDER_ID,
+        );
+      } catch {
+        // Only for offering the same provider again.
       }
       window.location.href = url.toString();
     },

@@ -328,7 +328,7 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
                     </TableCell>
                     <TableCell dim>
                       {user.authMethod === "oidc"
-                        ? providerName
+                        ? (user.authProvider ?? providerName)
                         : t("password")}
                     </TableCell>
                     <TableCell numeric>{user._count?.notes ?? 0}</TableCell>

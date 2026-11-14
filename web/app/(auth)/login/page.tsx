@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input, PasswordInput } from "@/components/ui/input";
 import {
+  lastSignInProvider,
   useLogin,
   useOidcCallback,
   useOidcConfig,
@@ -37,6 +38,7 @@ import {
   serverSignInError,
   signInError,
 } from "@/features/auth/utils/sign-in-error";
+import { signInProviders } from "@/features/auth/utils/sign-in-providers";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { focusOnArrival } from "@/lib/platform";
 
@@ -62,6 +64,7 @@ export default function LoginPage() {
   const [canUsePasskey, setCanUsePasskey] = React.useState(false);
   React.useEffect(() => setCanUsePasskey(browserSupportsWebAuthn()), []);
 
+  const providers = signInProviders(oidc.data);
   const providerName = oidc.data?.providerName || tAuth("providerFallback");
   const isProviderOnly =
     !!oidc.data?.enabled && !!oidc.data?.disableInternalAuth;
@@ -69,10 +72,14 @@ export default function LoginPage() {
     signInError(login.error, providerName) ??
     signInError(passkeyLogin.error, providerName);
 
-  const signInWithProvider = () => {
+  const signInWithProvider = (providerId?: string) => {
     const returnTo = getSafeRedirectUrl(searchParams.get("returnTo") || "/");
-    initiate(returnTo !== "/" ? returnTo : undefined);
+    initiate(returnTo !== "/" ? returnTo : undefined, providerId);
   };
+  // A failed sign-in offers the provider it went to again.
+  const retryProvider =
+    providers.find((p) => p.id === lastSignInProvider()) ?? providers.at(0);
+  const retryName = retryProvider?.name || providerName;
 
   if (oidcCallback.isProcessing)
     return (
@@ -97,7 +104,7 @@ export default function LoginPage() {
         text={
           failure.by === "provider"
             ? t("providerSentBack", {
-                provider: providerName,
+                provider: retryName,
                 providerOnly: isProviderOnly ? "yes" : "no",
               })
             : serverSignInError(failure.status, isProviderOnly)
@@ -105,15 +112,19 @@ export default function LoginPage() {
       >
         {failure.by === "provider" && (
           <p className="m-0 -mt-1.5 mb-1 text-muted-foreground text-small">
-            {t("providerSaid", { provider: providerName })}{" "}
+            {t("providerSaid", { provider: retryName })}{" "}
             <code className="rounded-[5px] bg-foreground/7 px-1.25 py-px font-mono text-foreground">
               {failure.message}
             </code>
           </p>
         )}
-        <Button size="lg" className="w-full" onClick={signInWithProvider}>
+        <Button
+          size="lg"
+          className="w-full"
+          onClick={() => signInWithProvider(retryProvider?.id)}
+        >
           <KeyRound aria-hidden />
-          {t("tryAgainWith", { provider: providerName })}
+          {t("tryAgainWith", { provider: retryName })}
         </Button>
         <Button
           size="lg"
@@ -141,17 +152,20 @@ export default function LoginPage() {
   return (
     <>
       <AuthHeading title={t("welcomeTitle")} sub={t("welcomeSub")} />
-      {oidc.data?.enabled && (
+      {providers.length > 0 && (
         <>
-          <Button
-            size="lg"
-            variant="secondary"
-            className="w-full"
-            onClick={signInWithProvider}
-          >
-            <KeyRound aria-hidden />
-            {t("continueWith", { provider: providerName })}
-          </Button>
+          {providers.map((provider) => (
+            <Button
+              key={provider.id}
+              size="lg"
+              variant="secondary"
+              className="w-full"
+              onClick={() => signInWithProvider(provider.id)}
+            >
+              <KeyRound aria-hidden />
+              {t("continueWith", { provider: provider.name })}
+            </Button>
+          ))}
           {!isProviderOnly && <OrDivider />}
         </>
       )}

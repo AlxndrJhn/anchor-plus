@@ -70,8 +70,7 @@ class AuthRepository {
     final data = await _authService.login(email, password, code: code);
     // Past the admin's deadline a password alone only sets up a passkey or
     // authenticator app, which happens on the web.
-    final secondFactor =
-        (data['user'] as Map<String, dynamic>)['secondFactor'];
+    final secondFactor = (data['user'] as Map<String, dynamic>)['secondFactor'];
     if (secondFactor is Map && secondFactor['blocked'] == true) {
       await _authService.revokeRefreshToken(data['refresh_token'] as String?);
       throw const SecondFactorSetupFailure();
@@ -174,12 +173,17 @@ class AuthRepository {
     return user;
   }
 
-  /// Returns null if the user cancelled.
-  Future<User?> loginWithOidc() async {
+  /// Signs in with one provider, the first when none is named. Returns null
+  /// if the user cancelled.
+  Future<User?> loginWithOidc({String? providerId}) async {
     final config = await _authService.getOidcConfig();
-    final issuerUrl = config.issuerUrl;
-    final clientId = config.clientId;
-    if (!config.enabled ||
+    final providers = config.signInProviders;
+    final provider = providerId == null
+        ? providers.firstOrNull
+        : providers.where((p) => p.id == providerId).firstOrNull;
+    final issuerUrl = provider?.issuerUrl;
+    final clientId = provider?.clientId;
+    if (provider == null ||
         issuerUrl == null ||
         issuerUrl.isEmpty ||
         clientId == null ||
@@ -224,7 +228,10 @@ class AuthRepository {
     }
 
     return _saveSession(
-      await _authService.exchangeOidcMobileToken(idpAccessToken),
+      await _authService.exchangeOidcMobileToken(
+        idpAccessToken,
+        providerId: provider.id,
+      ),
     );
   }
 }

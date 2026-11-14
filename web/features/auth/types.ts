@@ -59,12 +59,24 @@ export interface UpdateProfileDto {
   name?: string | null;
 }
 
+/** A sign-in provider people can pick on the sign-in page. */
+export interface OidcProviderOption {
+  /** Its slug; "default" for the first one. */
+  id: string;
+  name: string;
+  issuerUrl?: string;
+  clientId?: string;
+}
+
 export interface OidcConfig {
+  /** The top-level fields describe the first provider. */
   enabled: boolean;
   providerName: string;
   issuerUrl?: string;
   clientId?: string;
   disableInternalAuth: boolean;
+  /** Every provider that's on; missing from servers before there were several. */
+  providers?: OidcProviderOption[];
 }
 
 export interface OidcExchangeResponse {
@@ -105,8 +117,10 @@ export interface SecurityStatus {
   passwordSignIn: boolean;
   twoStep: boolean;
   recoveryCodesLeft: number;
-  /** Connected to the single sign-on provider. */
+  /** Connected to a single sign-on provider. */
   providerLinked: boolean;
+  /** The providers it's connected to, by ID; missing from older servers. */
+  linkedProviders?: string[];
   passkeys: Passkey[];
   secondFactor?: SecondFactorStatus | null;
 }

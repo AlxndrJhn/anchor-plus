@@ -263,7 +263,7 @@ export class AuthService {
         passwordSignIn: true,
         totpSecret: true,
         totpRecoveryCodes: true,
-        oidcSubject: true,
+        oidcIdentities: { select: { issuer: true } },
         passkeys: {
           select: { id: true, name: true, createdAt: true, lastUsedAt: true },
           orderBy: { createdAt: 'asc' },
@@ -276,7 +276,11 @@ export class AuthService {
       passwordSignIn: user.passwordSignIn,
       twoStep: !!user.totpSecret,
       recoveryCodesLeft: user.totpRecoveryCodes.length,
-      providerLinked: !!user.oidcSubject,
+      providerLinked: user.oidcIdentities.length > 0,
+      /** The sign-in providers this account is connected to, by ID. */
+      linkedProviders: await this.oidcConfigService.getProviderIdsForIssuers(
+        user.oidcIdentities.map((link) => link.issuer),
+      ),
       passkeys: user.passkeys,
       secondFactor: await this.secondFactorService.getStatus(userId),
     };

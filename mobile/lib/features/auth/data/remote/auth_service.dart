@@ -141,13 +141,19 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> exchangeOidcMobileToken(String accessToken) =>
-      _send(
-        () => _dio.post(
-          '/api/auth/oidc/exchange/mobile',
-          data: {'access_token': accessToken},
-        ),
-      );
+  /// The first provider goes without its ID, so older servers take it too.
+  Future<Map<String, dynamic>> exchangeOidcMobileToken(
+    String accessToken, {
+    String providerId = firstOidcProviderId,
+  }) => _send(
+    () => _dio.post(
+      '/api/auth/oidc/exchange/mobile',
+      data: {
+        'access_token': accessToken,
+        if (providerId != firstOidcProviderId) 'provider': providerId,
+      },
+    ),
+  );
 
   /// Settings' magic login on the web: a one-time code for this phone.
   Future<Map<String, dynamic>> redeemMagicLogin(String code) => _send(

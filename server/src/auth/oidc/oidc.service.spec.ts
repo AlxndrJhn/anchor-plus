@@ -12,8 +12,14 @@ import type { OidcAuthResult } from './oidc.types';
 describe('OidcService redirects', () => {
   const APP_URL = 'https://notes.example.com';
 
+  const providers: Record<string, { id: string; issuerUrl: string }> = {
+    default: { id: 'default', issuerUrl: 'https://id.example.com/' },
+    work: { id: 'work', issuerUrl: 'https://sso.example.org/realms/staff' },
+  };
   const oidcConfigService = {
     getAppUrl: vi.fn(() => APP_URL),
+    getProvider: vi.fn((id: string) => Promise.resolve(providers[id])),
+    isEnabled: vi.fn(() => Promise.resolve(true)),
   };
   const oidcClientService = {
     generateState: vi.fn(() => 'state-1'),
@@ -75,17 +81,23 @@ describe('OidcService redirects', () => {
 
   const storedRedirect = () => oidcStateService.storeState.mock.lastCall?.[2];
 
-  const finishCallback = (redirectUrl?: string, linkUserId?: string) => {
+  const finishCallback = (
+    redirectUrl?: string,
+    linkUserId?: string,
+    { sentTo = 'default', cameBackTo = 'default' } = {},
+  ) => {
     oidcStateService.getState.mockReturnValue({
       state: 'state-1',
       codeVerifier: 'verifier',
       redirectUrl,
       linkUserId,
+      providerId: sentTo,
       expiresAt: Date.now() + 60_000,
     });
     return service.handleCallback(
       `${APP_URL}/api/auth/oidc/callback?code=c&state=state-1`,
       'state-1',
+      cameBackTo,
     );
   };
   const finishSignIn = (redirectUrl: string) =>
@@ -156,9 +168,70 @@ describe('OidcService redirects', () => {
       expect(oidcUserService.linkUser).toHaveBeenCalledWith(
         'user-1',
         expect.objectContaining({ subject: 'sub-1' }),
+        { issuer: 'https://id.example.com', isPrimary: true },
       );
       expect(oidcUserService.findOrCreateUser).not.toHaveBeenCalled();
       expect(authService.createTokenPair).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with several providers', () => {
+    it('sends the sign-in to the provider asked for', async () => {
+      await service.getAuthorizationUrl(undefined, undefined, 'work');
+      expect(oidcStateService.storeState.mock.lastCall?.[4]).toBe('work');
+      expect(oidcClientService.buildAuthorizationUrl).toHaveBeenCalledWith(
+        'state-1',
+        'challenge',
+        'work',
+      );
+    });
+
+    it('turns down a provider that is not set up', async () => {
+      await expect(
+        service.getAuthorizationUrl(undefined, undefined, 'nope'),
+      ).rejects.toThrow(BadRequestException);
+      expect(oidcStateService.storeState).not.toHaveBeenCalled();
+    });
+
+    it('links the account under that provider’s issuer', async () => {
+      await finishCallback('/', undefined, {
+        sentTo: 'work',
+        cameBackTo: 'work',
+      });
+      expect(oidcClientService.exchangeCodeForTokens).toHaveBeenCalledWith(
+        expect.any(URL),
+        'state-1',
+        'verifier',
+        'work',
+      );
+      expect(oidcUserService.findOrCreateUser).toHaveBeenCalledWith(
+        expect.objectContaining({ subject: 'sub-1' }),
+        { issuer: 'https://sso.example.org/realms/staff', isPrimary: false },
+      );
+    });
+
+    it('turns down a sign-in that comes back to another provider’s callback', async () => {
+      await expect(
+        finishCallback('/', undefined, {
+          sentTo: 'work',
+          cameBackTo: 'default',
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(oidcStateService.deleteState).toHaveBeenCalledWith('state-1');
+      expect(oidcClientService.exchangeCodeForTokens).not.toHaveBeenCalled();
+    });
+
+    it('signs the phone in with the provider it names', async () => {
+      await service.exchangeMobileToken('idp-token', 'work');
+      expect(oidcClientService.fetchUserInfo).toHaveBeenCalledWith(
+        'idp-token',
+        undefined,
+        'work',
+      );
+      expect(oidcUserService.findOrCreateUser).toHaveBeenCalledWith(
+        expect.anything(),
+        { issuer: 'https://sso.example.org/realms/staff', isPrimary: false },
+      );
     });
   });
 });

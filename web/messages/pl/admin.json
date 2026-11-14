@@ -187,5 +187,31 @@
     "copyRequest": "Skopiuj prośbę do administratora {provider}",
     "unsaved": "Masz niezapisane zmiany w logowaniu jednokrotnym.",
     "discard": "Odrzuć"
+  },
+  "otherProviders": {
+    "title": "Więcej dostawców",
+    "description": "Każdy ma własny przycisk „Kontynuuj przez …” i własny adres zwrotny. Jedno konto można połączyć z kilkoma.",
+    "addOne": "Dodaj dostawcę",
+    "add": "Dodaj dostawcę",
+    "added": "Dodano dostawcę",
+    "saved": "Zapisano dostawcę",
+    "addFailed": "Nie udało się dodać dostawcy",
+    "saveFailed": "Nie udało się zapisać dostawcy",
+    "removed": "Usunięto dostawcę",
+    "removeFailed": "Nie udało się usunąć dostawcy",
+    "removing": "Usuwanie…",
+    "idInvalid": "Użyj małych liter, cyfr i myślników, najwyżej 32 znaków.",
+    "idTaken": "Inny dostawca ma ten identyfikator.",
+    "namePlaceholder": "Keycloak w pracy",
+    "id": "Identyfikator",
+    "idHelpNew": "Trafia do adresu zwrotnego, więc później nie da się go zmienić.",
+    "idHelpFixed": "Nie da się go zmienić, bo jest w adresie zwrotnym.",
+    "secretHelp": "Zostaw puste dla klienta publicznego, z którego może korzystać też aplikacja na telefon.",
+    "phoneClientIdHelp": "Klient publiczny tylko dla aplikacji na telefon. Zostaw puste, aby użyć identyfikatora klienta.",
+    "showOnSignIn": "Pokazuj na stronie logowania",
+    "fromServer": "Ustawione na serwerze",
+    "callbackUrl": "Adres zwrotny {provider}",
+    "removeTitle": "Usunąć {provider}?",
+    "removeDescription": "Jego przycisk zniknie ze strony logowania. Połączone konta pozostaną połączone i znów będą się nim logować, jeśli dodasz go ponownie z tym samym adresem wystawcy."
   }
 }

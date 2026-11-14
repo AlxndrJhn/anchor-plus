@@ -10,8 +10,7 @@ describe('SecondFactorService', () => {
   let passwordOnly: boolean;
   let user: {
     totpSecret: string | null;
-    oidcSubject: string | null;
-    _count: { passkeys: number };
+    _count: { passkeys: number; oidcIdentities: number };
   };
   let service: SecondFactorService;
 
@@ -43,7 +42,7 @@ describe('SecondFactorService', () => {
     vi.clearAllMocks();
     setting = null;
     passwordOnly = true;
-    user = { totpSecret: null, oidcSubject: null, _count: { passkeys: 0 } };
+    user = { totpSecret: null, _count: { passkeys: 0, oidcIdentities: 0 } };
     service = new SecondFactorService(prisma as unknown as PrismaService);
   });
   afterEach(() => vi.useRealTimers());
@@ -99,7 +98,7 @@ describe('SecondFactorService', () => {
     });
 
     it('sends someone with single sign-on to it', async () => {
-      user.oidcSubject = 'sub-1';
+      user._count.oidcIdentities = 1;
       await expect(service.checkPasswordSignIn('u1')).rejects.toThrow(
         /sign-in provider/,
       );

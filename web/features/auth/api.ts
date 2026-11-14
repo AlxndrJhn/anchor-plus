@@ -200,7 +200,11 @@ export async function regenerateRecoveryCodes(
 }
 
 /** The provider's sign-in page that connects this account to it. */
-export async function startProviderLink(): Promise<string> {
-  const { url } = await api.post("api/auth/oidc/link").json<{ url: string }>();
+export async function startProviderLink(providerId?: string): Promise<string> {
+  const { url } = await api
+    .post("api/auth/oidc/link", {
+      json: providerId ? { provider: providerId } : {},
+    })
+    .json<{ url: string }>();
   return url;
 }

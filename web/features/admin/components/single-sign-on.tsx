@@ -25,41 +25,10 @@ import { getOidcSettings, testOidcIssuer, updateOidcSettings } from "../api";
 import { adminKeys } from "../queries";
 import type { OidcIssuerTest, UpdateOidcSettingsDto } from "../types";
 import { cardClass, LockNote } from "./admin-parts";
+import { CopyAddress } from "./copy-address";
+import { OtherProviders } from "./other-providers";
 
 const PHONE_CALLBACK_URL = "anchor://oidc/callback";
-
-function CopyAddress({ label, value }: { label: string; value: string }) {
-  const t = useTranslations("admin.singleSignOn");
-  const tc = useTranslations("common");
-  const [copied, setCopied] = React.useState(false);
-  React.useEffect(() => {
-    if (!copied) return;
-    const timer = window.setTimeout(() => setCopied(false), 1500);
-    return () => window.clearTimeout(timer);
-  }, [copied]);
-  return (
-    <Input
-      readOnly
-      mono
-      aria-label={label}
-      value={value}
-      boxClassName="bg-card"
-      end={
-        <InputButton
-          aria-label={t("copyLabel", { label })}
-          onClick={() =>
-            copyText(value).then(
-              () => setCopied(true),
-              () => toast.error(t("copyAddressFailed")),
-            )
-          }
-        >
-          {copied ? tc("copied") : tc("copy")}
-        </InputButton>
-      }
-    />
-  );
-}
 
 /** What to ask whoever runs the provider for, ready to paste in a message. */
 function providerRequest(providerName: string, callbackUrl: string) {
@@ -449,6 +418,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
           </>
         )}
       </div>
+      {settings.providers && <OtherProviders providers={settings.providers} />}
       {saveBar.mounted && (
         <div
           role="status"

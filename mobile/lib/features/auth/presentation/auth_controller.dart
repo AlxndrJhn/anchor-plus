@@ -80,9 +80,7 @@ class AuthController extends _$AuthController {
   /// signed out.
   Future<void> login(String email, String password, {String? code}) async {
     await _signedIn(
-      await ref
-          .read(authRepositoryProvider)
-          .login(email, password, code: code),
+      await ref.read(authRepositoryProvider).login(email, password, code: code),
     );
   }
 
@@ -104,8 +102,10 @@ class AuthController extends _$AuthController {
   }
 
   /// Returns false when the user cancelled.
-  Future<bool> loginWithOidc() async {
-    final user = await ref.read(authRepositoryProvider).loginWithOidc();
+  Future<bool> loginWithOidc({String? providerId}) async {
+    final user = await ref
+        .read(authRepositoryProvider)
+        .loginWithOidc(providerId: providerId);
     if (user == null) return false;
     await _signedIn(user);
     return true;

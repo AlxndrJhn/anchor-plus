@@ -67,51 +67,69 @@ enum RevisionCause {
 }
 
 model User {
-  id                   String           @id @default(uuid())
-  email                String           @unique
-  password             String?
-  name                 String
-  profileImage         String?
-  apiToken             String?          @unique
-  isAdmin              Boolean          @default(false)
-  status               UserStatus       @default(active)
-  plan                 Plan             @default(free)
+  id                  String           @id @default(uuid())
+  email               String           @unique
+  password            String?
+  name                String
+  profileImage        String?
+  apiToken            String?          @unique
+  isAdmin             Boolean          @default(false)
+  status              UserStatus       @default(active)
+  plan                Plan             @default(free)
   /// An admin's own storage limit for this account, in MB, in place of the
   /// plan's; null follows the plan.
-  storageQuotaMb       Int?
-  oidcSubject          String?          @unique
+  storageQuotaMb      Int?
   /// Opted in to finding notes by what their pictures show.
-  pictureSearch        Boolean          @default(false)
+  pictureSearch       Boolean          @default(false)
   /// The PIN and the pattern that open notes locked with them, hashed
   /// ("pbkdf2-sha256$iterations$salt$hash"); one of each for all notes.
-  lockPin              String?
-  lockPattern          String?
+  lockPin             String?
+  lockPattern         String?
   /// The authenticator app's shared secret (base32) once two-step sign-in is
   /// on, the time step of the last code used, and the one-time recovery codes,
   /// hashed (sha256 hex).
-  totpSecret           String?
-  totpLastStep         Int?
-  totpRecoveryCodes    String[]         @default([])
+  totpSecret          String?
+  totpLastStep        Int?
+  totpRecoveryCodes   String[]         @default([])
   /// Off once the person signs in with passkeys only.
-  passwordSignIn       Boolean          @default(true)
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
-  notes                Note[]
-  tags                 Tag[]
-  sharedNotes          NoteShare[]      @relation("SharedBy")
-  notesSharedWithMe    NoteShare[]      @relation("SharedWith")
-  refreshTokens        RefreshToken[]
-  uploadedAttachments  NoteAttachment[]
-  uploadedFiles        NoteFile[]
-  notePins             NotePin[]
-  noteArchives         NoteArchive[]
-  noteOrders           NoteOrder[]
-  noteLocks            NoteLock[]
-  syncState            SyncState?
-  changeLog            ChangeLog[]
-  noteRevisions        NoteRevision[]
-  noteReminders        NoteReminder[]
-  passkeys             Passkey[]
+  passwordSignIn      Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  notes               Note[]
+  tags                Tag[]
+  sharedNotes         NoteShare[]      @relation("SharedBy")
+  notesSharedWithMe   NoteShare[]      @relation("SharedWith")
+  refreshTokens       RefreshToken[]
+  uploadedAttachments NoteAttachment[]
+  uploadedFiles       NoteFile[]
+  notePins            NotePin[]
+  noteArchives        NoteArchive[]
+  noteOrders          NoteOrder[]
+  noteLocks           NoteLock[]
+  syncState           SyncState?
+  changeLog           ChangeLog[]
+  noteRevisions       NoteRevision[]
+  noteReminders       NoteReminder[]
+  passkeys            Passkey[]
+  oidcIdentities      OidcIdentity[]
+}
+
+/// An account at a sign-in provider (OIDC) that signs its owner in: the
+/// provider's issuer and the account's subject there. One person can have one
+/// per provider.
+model OidcIdentity {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// The issuer URL as configured, without a trailing slash. Empty for links
+  /// made while Anchor+ had a single provider, until that provider (now the
+  /// first one) signs the person in again and claims them.
+  issuer    String
+  subject   String
+  createdAt DateTime @default(now())
+
+  @@unique([issuer, subject])
+  @@index([userId])
 }
 
 /// A WebAuthn credential that signs its owner in without a password.
@@ -142,31 +160,31 @@ model Settings {
 }
 
 model Note {
-  id          String      @id @default(uuid())
-  title       String
-  content     String?
-  background  String?
-  state       NoteState   @default(active)
-  version     Int         @default(1)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  stateChangedAt DateTime @default(now())
+  id             String           @id @default(uuid())
+  title          String
+  content        String?
+  background     String?
+  state          NoteState        @default(active)
+  version        Int              @default(1)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  stateChangedAt DateTime         @default(now())
   // Frozen by its owner: nobody can change, trash or delete it until it's
   // unfrozen.
-  isFrozen    Boolean     @default(false)
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tags        Tag[]
-  sharedWith  NoteShare[]
-  shareLink   NoteShareLink?
-  attachments NoteAttachment[]
-  files       NoteFile[]
-  pins        NotePin[]
-  archives    NoteArchive[]
-  orders      NoteOrder[]
-  locks       NoteLock[]
-  reminders   NoteReminder[]
-  revisions   NoteRevision[]
+  isFrozen       Boolean          @default(false)
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags           Tag[]
+  sharedWith     NoteShare[]
+  shareLink      NoteShareLink?
+  attachments    NoteAttachment[]
+  files          NoteFile[]
+  pins           NotePin[]
+  archives       NoteArchive[]
+  orders         NoteOrder[]
+  locks          NoteLock[]
+  reminders      NoteReminder[]
+  revisions      NoteRevision[]
 
   @@index([userId])
   @@index([state, stateChangedAt])
@@ -246,35 +264,35 @@ model NoteArchive {
 }
 
 model Tag {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
   color     String?
   /// Where the person dragged it among their tags; unplaced tags come
   /// after the placed ones, by name.
   position  Float?
-  isDeleted Boolean   @default(false)
-  version   Int       @default(1)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  isDeleted Boolean  @default(false)
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   notes     Note[]
 
   // (userId, name) uniqueness is enforced for active tags via a partial index in migration
 }
 
 model NoteShare {
-  id              String         @id @default(uuid())
-  noteId          String
-  note            Note           @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  id               String              @id @default(uuid())
+  noteId           String
+  note             Note                @relation(fields: [noteId], references: [id], onDelete: Cascade)
   sharedWithUserId String
-  sharedWithUser  User           @relation("SharedWith", fields: [sharedWithUserId], references: [id], onDelete: Cascade)
-  permission      NoteSharePermission
-  sharedByUserId  String
-  sharedByUser    User           @relation("SharedBy", fields: [sharedByUserId], references: [id], onDelete: Cascade)
-  isDeleted       Boolean        @default(false)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  sharedWithUser   User                @relation("SharedWith", fields: [sharedWithUserId], references: [id], onDelete: Cascade)
+  permission       NoteSharePermission
+  sharedByUserId   String
+  sharedByUser     User                @relation("SharedBy", fields: [sharedByUserId], references: [id], onDelete: Cascade)
+  isDeleted        Boolean             @default(false)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
   @@unique([noteId, sharedWithUserId])
   @@index([noteId])
@@ -294,12 +312,12 @@ model NoteShareLink {
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id         String   @id @default(uuid())
+  token      String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
   // One sign-in on one device: refreshing hands the new token the same
   // session, with when it began and what the device said it was.
   sessionId  String   @default(dbgenerated("(gen_random_uuid())::text"))
@@ -353,7 +371,7 @@ model NoteRevision {
 }
 
 model NoteAttachment {
-  id               String         @id @default(uuid())
+  id               String            @id @default(uuid())
   noteId           String
   uploadedByUserId String
   type             AttachmentType
@@ -361,16 +379,16 @@ model NoteAttachment {
   storedFilename   String
   mimeType         String
   fileSize         Int
-  position         Int            @default(0)
+  position         Int               @default(0)
   /// The text read from a picture, for search; null until it's been read.
   text             String?
   /// When the picture was read (with or without finding text).
   textReadAt       DateTime?
   embedding        PictureEmbedding?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  note             Note           @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  uploadedByUser   User           @relation(fields: [uploadedByUserId], references: [id], onDelete: Cascade)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  note             Note              @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  uploadedByUser   User              @relation(fields: [uploadedByUserId], references: [id], onDelete: Cascade)
 
   @@index([noteId])
   @@index([uploadedByUserId])

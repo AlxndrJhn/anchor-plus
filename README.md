@@ -375,6 +375,7 @@ The [desktop app](#desktop-app) installs with winget too.
    | `OIDC_CLIENT_SECRET` | No | — | OIDC client secret. Omit for public client (PKCE) |
    | `OIDC_MOBILE_CLIENT_ID` | No | `OIDC_CLIENT_ID` | A separate public client for the phone app |
    | `DISABLE_INTERNAL_AUTH` | No | `false` | Hide local login form when OIDC is enabled (OIDC-only mode) |
+   | `OIDC_<N>_ISSUER_URL`, `OIDC_<N>_CLIENT_ID`, … | No | — | More OIDC providers, numbered from 2. See [Several providers](#several-providers) |
 
 3. **Start the container:**
 
@@ -804,6 +805,7 @@ Anchor supports OpenID Connect (OIDC) authentication for simplified credential m
 - Auto link existing users by email
 - Connect an existing account from Settings, whatever its email
 - Test the issuer URL from the admin settings before saving
+- Several providers at once (say a home Pocket ID and a work Keycloak), each with its own sign-in button
 
 ### Pocket ID
 
@@ -868,7 +870,50 @@ services:
 
 #### Admin UI Configuration
 
-Alternatively, configure OIDC via the admin panel (Settings → OIDC Authentication) when the three env vars are not all set.
+Alternatively, configure OIDC via the admin panel (**Admin → Sign-in → Single sign-on**) when the three env vars are not all set.
+
+#### Several providers
+
+Anchor+ can offer more than one provider, for example a home Pocket ID next to a work Keycloak, or an old and a new provider while you move between them. The sign-in pages on the web and the phone show a **Continue with …** button for each one that's on.
+
+The provider set up as above (with `OIDC_ISSUER_URL` and friends, or in the admin panel) is the first one. It keeps its callback URL, `{APP_URL}/api/auth/oidc/callback`, so an existing setup needs no change when you upgrade. Each further provider has an ID (lowercase letters, numbers and dashes) and its own callback URL:
+
+```
+{APP_URL}/api/auth/oidc/callback/<id>
+```
+
+plus `anchor://oidc/callback` for the phone app, as for the first one.
+
+Add them in **Admin → Sign-in → Single sign-on → More providers**, which shows each one's callback URL, or with numbered environment variables, from 2 up:
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `OIDC_<N>_ISSUER_URL` | Yes | — | Base URL of the provider |
+| `OIDC_<N>_CLIENT_ID` | Yes | — | Client ID |
+| `OIDC_<N>_CLIENT_SECRET` | No | — | Client secret. Omit for a public client (PKCE) |
+| `OIDC_<N>_MOBILE_CLIENT_ID` | No | `OIDC_<N>_CLIENT_ID` | A separate public client for the phone app |
+| `OIDC_<N>_PROVIDER_NAME` | No | `"OIDC Provider"` | Name on the sign-in button |
+| `OIDC_<N>_ID` | No | `oidc-<N>` | The ID in its callback URL |
+| `OIDC_<N>_ENABLED` | No | `true` | `false` hides it from the sign-in pages |
+
+```yaml
+    environment:
+      # The first provider, as before
+      - OIDC_ENABLED=true
+      - OIDC_PROVIDER_NAME=Pocket ID
+      - OIDC_ISSUER_URL=https://pocketid.example.com
+      - OIDC_CLIENT_ID=your-client-id
+      # A second one; its callback URL is https://notes.example.com/api/auth/oidc/callback/work
+      - OIDC_2_ID=work
+      - OIDC_2_PROVIDER_NAME=Work Keycloak
+      - OIDC_2_ISSUER_URL=https://sso.example.org/realms/staff
+      - OIDC_2_CLIENT_ID=anchor-plus
+      - OIDC_2_CLIENT_SECRET=your-client-secret
+```
+
+Providers from the environment can't be changed in the admin panel, and win over one added there with the same ID. `DISABLE_INTERNAL_AUTH` (or **Only sign in with …**) applies whichever providers are on.
+
+Accounts are linked to a provider by its issuer URL and the person's subject there, so one person can connect several providers to one account (**Settings → Sign-in security → Connect**), and the same subject at two providers stays two people. Signing in with a new provider whose verified email matches an account links it to that account, as with the first provider. Links made before Anchor+ supported several providers belong to the first one. Removing a provider keeps its links: add it back with the same issuer URL and its people sign in to their accounts again.
 
 #### OIDC Providers with a Private CA
 
