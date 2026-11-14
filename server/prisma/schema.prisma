@@ -107,7 +107,6 @@ model User {
   noteArchives         NoteArchive[]
   noteOrders           NoteOrder[]
   noteLocks            NoteLock[]
-  noteInvisibles       NoteInvisible[]
   syncState            SyncState?
   changeLog            ChangeLog[]
   noteRevisions        NoteRevision[]
@@ -166,7 +165,6 @@ model Note {
   archives    NoteArchive[]
   orders      NoteOrder[]
   locks       NoteLock[]
-  invisibles  NoteInvisible[]
   reminders   NoteReminder[]
   revisions   NoteRevision[]
 
@@ -220,19 +218,6 @@ model NoteLock {
   updatedAt DateTime     @updatedAt
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   note      Note         @relation(fields: [noteId], references: [id], onDelete: Cascade)
-
-  @@id([userId, noteId])
-  @@index([noteId])
-}
-
-// A note this person made invisible: it stays out of their lists and only
-// turns up when they search. Like pins, each person's own.
-model NoteInvisible {
-  userId    String
-  noteId    String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
   @@id([userId, noteId])
   @@index([noteId])

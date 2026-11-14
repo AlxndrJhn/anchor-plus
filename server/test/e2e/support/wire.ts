@@ -20,7 +20,6 @@ export interface NoteOnWire {
   reminder?: ReminderOnWire | null;
   lock?: 'tap' | 'pin' | 'pattern' | 'biometric' | null;
   isFrozen: boolean;
-  isInvisible?: boolean;
   shareIds?: string[];
   publicLink?: 'viewer' | 'editor' | null;
   sharedBy?: {

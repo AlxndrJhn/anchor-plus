@@ -148,8 +148,6 @@ abstract class Note with _$Note {
     // Frozen by its owner: nobody can change, trash or delete it. The
     // server's say; it is never sent up.
     @Default(false) bool isFrozen,
-    // Made invisible by this person: left out of the lists, found by search.
-    @Default(false) bool isInvisible,
     @Default(true) bool isSynced,
     // The OS notification id this note's reminder occupies.
     int? reminderSlot,

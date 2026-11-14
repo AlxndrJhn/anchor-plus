@@ -258,7 +258,6 @@ export class LocalServer {
       position: note.position,
       positionedAt: note.positionedAt,
       lock: note.lock,
-      isInvisible: note.isInvisible,
       ...(note.state === "trashed"
         ? { stateChangedAt: note.stateChangedAt }
         : {}),
@@ -338,9 +337,6 @@ export class LocalServer {
       case "PATCH lock":
         note.lock = (body.lock as NoteLockKind | null) ?? null;
         return { id, lock: note.lock };
-      case "PATCH invisible":
-        note.isInvisible = !!body.isInvisible;
-        return { id, isInvisible: note.isInvisible };
       case "PATCH freeze": {
         const isFrozen = !!body.isFrozen;
         if (isFrozen && note.state !== "active")
@@ -379,7 +375,6 @@ export class LocalServer {
       position: null,
       positionedAt: null,
       lock: null,
-      isInvisible: false,
       reminder: null,
     };
     this.setReminder(note, body.reminder as NoteReminderInput | null);
@@ -539,9 +534,6 @@ export class LocalServer {
           break;
         case "lock":
           note.lock = (body.lock as NoteLockKind | null) ?? null;
-          break;
-        case "invisible":
-          note.isInvisible = !!body.isInvisible;
           break;
         case "freeze": {
           const isFrozen = !!body.isFrozen;

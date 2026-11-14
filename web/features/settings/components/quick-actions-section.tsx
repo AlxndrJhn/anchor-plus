@@ -11,7 +11,6 @@ import {
   CirclePlus,
   ClipboardPaste,
   Copy,
-  EyeOff,
   History,
   ImagePlus,
   Images,
@@ -67,7 +66,6 @@ const ACTIONS: Record<QuickAction, { label: string; icon: React.ReactNode }> = {
   background: { label: "Background", icon: <Palette /> },
   lock: { label: "Lock", icon: <Lock /> },
   freeze: { label: "Freeze", icon: <Snowflake /> },
-  invisible: { label: "Make invisible", icon: <EyeOff /> },
   archive: { label: "Archive", icon: <Archive /> },
   trash: { label: "Move to trash", icon: <Trash2 /> },
 };

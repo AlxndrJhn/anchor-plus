@@ -199,7 +199,7 @@ describe('SyncHydratorService', () => {
       expect.objectContaining({ id: 'a1', noteId: 'n1', position: 0 }),
     ]);
     expect(entries[1].op).toBe('remove');
-    // The invisible note is not even queried for.
+    // The gone note is not even queried for.
     expect(attachmentFindMany).toHaveBeenCalledTimes(1);
     expect(attachmentFindMany).toHaveBeenCalledWith(
       expect.objectContaining({

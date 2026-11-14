@@ -93,8 +93,7 @@ export class AnchorMcpService {
         title: 'List notes',
         description:
           'Lists notes, newest first, with a snippet of each. Searches ' +
-          'titles, text and the text in pictures when a query is given; ' +
-          'invisible notes only show up in a search.',
+          'titles, text and the text in pictures when a query is given.',
         inputSchema: z.object({
           query: z.string().optional().describe('Text to search for'),
           tag: z.string().optional().describe('Only notes with this tag'),
@@ -125,9 +124,7 @@ export class AnchorMcpService {
             );
             // The server's search reads every note's text; a locked one is
             // found by its title alone, as in the apps.
-            notes = query
-              ? notes.filter((n) => matches(n, query))
-              : notes.filter((note) => !note.isInvisible);
+            if (query) notes = notes.filter((n) => matches(n, query));
           } else {
             notes =
               scope === 'archive'
@@ -135,11 +132,6 @@ export class AnchorMcpService {
                 : await this.notesService.findTrashed(userId);
             if (tagId) notes = notes.filter((n) => n.tagIds.includes(tagId));
             if (query) notes = notes.filter((n) => matches(n, query));
-            // Invisible notes stay out of the archive unless searched for;
-            // the trash lists them, so they can be put back.
-            else if (scope === 'archive') {
-              notes = notes.filter((n) => !n.isInvisible);
-            }
           }
 
           const page = notes.slice(0, limit);
@@ -563,7 +555,6 @@ function flags(note: TransformedNote) {
     ...(note.state === 'trashed' ? { trashed: true } : {}),
     ...(note.isFrozen ? { frozen: true } : {}),
     ...(note.lock ? { locked: true } : {}),
-    ...(note.isInvisible ? { invisible: true } : {}),
     ...(note.permission !== 'owner' ? { sharedWithYou: note.permission } : {}),
   };
 }

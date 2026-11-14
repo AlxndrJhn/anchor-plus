@@ -19,7 +19,6 @@ export type QuickAction =
   | "background"
   | "lock"
   | "freeze"
-  | "invisible"
   | "archive"
   | "trash";
 
@@ -29,7 +28,7 @@ export const MORE_GROUPS: readonly (readonly QuickAction[])[] = [
   ["addImage", "takePicture", "takeSeveral"],
   ["checkboxes", "uncheckAll", "deleteChecked", "sortByName"],
   ["share", "send", "print", "copy"],
-  ["history", "background", "lock", "freeze", "invisible"],
+  ["history", "background", "lock", "freeze"],
   ["archive", "trash"],
 ];
 

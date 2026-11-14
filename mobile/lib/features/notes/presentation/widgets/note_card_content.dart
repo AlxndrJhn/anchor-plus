@@ -414,17 +414,6 @@ class _Footer extends StatelessWidget {
             color: muted,
           ),
         ),
-      // Found by a search or a filter; it stays out of the lists.
-      if (note.isInvisible)
-        Tooltip(
-          key: const ValueKey('card-invisible'),
-          message: context.l10n.cardInvisible,
-          child: Icon(
-            LucideIcons.eyeOff,
-            size: 13, // off-scale: card footer
-            color: muted,
-          ),
-        ),
       if (note.isFrozen)
         Tooltip(
           key: const ValueKey('card-frozen'),

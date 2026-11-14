@@ -18,7 +18,6 @@ enum QuickAction {
   background,
   lock,
   freeze,
-  invisible,
   archive,
   trash;
 

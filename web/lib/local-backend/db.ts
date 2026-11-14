@@ -25,7 +25,6 @@ export interface StoredNote {
   position: number | null;
   positionedAt: string | null;
   lock: NoteLockKind | null;
-  isInvisible: boolean;
   reminder: NoteReminder | null;
 }
 

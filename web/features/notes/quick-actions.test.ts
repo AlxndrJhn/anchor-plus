@@ -36,7 +36,16 @@ describe("quick actions", () => {
     expect(groups[0]).toEqual(["addImage", "takePicture"]);
     expect(groups.flat()).not.toContain("takeSeveral");
     expect(groups.flat()).not.toContain("trash");
-    expect(groups.at(-1)).toEqual(["history", "lock", "freeze", "invisible"]);
+    expect(groups.at(-1)).toEqual(["history", "lock", "freeze"]);
+  });
+
+  it("drop actions that were removed from a saved setup", () => {
+    expect(
+      tidySetup({ bar: ["invisible", "pin"], hidden: ["invisible"] }, "wide"),
+    ).toEqual({ bar: ["pin"], hidden: [] });
+    expect(
+      decodeSetup("anchor-quick-actions 1\nbar: invisible,pin\noff:", "wide"),
+    ).toEqual({ bar: ["pin"], hidden: [] });
   });
 
   it("copy and paste as the Android app does", () => {

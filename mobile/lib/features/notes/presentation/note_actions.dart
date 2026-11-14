@@ -28,7 +28,6 @@ import '../domain/note_merge.dart';
 import 'editor/checklist_lines.dart';
 import 'note_folder.dart';
 import 'note_freeze_actions.dart';
-import 'note_invisible_actions.dart';
 import 'notes_controller.dart';
 import 'notes_view_options.dart';
 import 'print_notes.dart';
@@ -47,7 +46,6 @@ enum NoteAction {
   lock,
   removeLock,
   freeze,
-  invisible,
   merge,
   addImage,
   takePicture,
@@ -106,14 +104,6 @@ enum NoteAction {
     NoteAction.freeze => (
       icon: LucideIcons.snowflake,
       label: l10n.actionFreeze,
-    ),
-    NoteAction.invisible when makesVisible(notes) => (
-      icon: LucideIcons.eye,
-      label: l10n.actionMakeVisible,
-    ),
-    NoteAction.invisible => (
-      icon: LucideIcons.eyeOff,
-      label: l10n.actionMakeInvisible,
     ),
     NoteAction.merge => (icon: LucideIcons.merge, label: l10n.actionMerge),
     NoteAction.addImage => (
@@ -209,39 +199,34 @@ class NoteActions {
       case NoteAction.background:
         await setBackground(notes, beforeChange: beforeChange);
       case NoteAction.lock:
-        // Freezing and Make invisible sit with Lock, so the bar still fits a
-        // narrow phone.
+        // Freezing sits with Lock, so the bar still fits a narrow phone.
         final isUnfreezing = unfreezesAll(notes);
         final canFreeze =
             !ref.read(isLocalOnlyProvider) &&
             freezableIdsOf(notes, isFreezing: !isUnfreezing).isNotEmpty;
         final l10n = context.l10n;
-        final invisible = NoteAction.invisible.iconAndLabelFor(notes, l10n);
-        final choice = await showChoiceSheet<NoteAction>(
-          context,
-          title: canFreeze ? l10n.notesLockFreezeOrHide : l10n.notesLockOrHide,
-          choices: [
-            SheetChoice(
-              value: NoteAction.lock,
-              icon: LucideIcons.lock,
-              label: NoteAction.lock.iconAndLabelFor(notes, l10n).label,
-              showChevron: true,
-            ),
-            if (canFreeze)
-              SheetChoice(
-                value: NoteAction.freeze,
-                icon: LucideIcons.snowflake,
-                label: isUnfreezing ? l10n.actionUnfreeze : l10n.actionFreeze,
-                subtitle: isUnfreezing ? null : l10n.noteFreezeHelp,
-              ),
-            SheetChoice(
-              value: NoteAction.invisible,
-              icon: invisible.icon,
-              label: invisible.label,
-              subtitle: makesVisible(notes) ? null : l10n.noteInvisibleHelp,
-            ),
-          ],
-        );
+        final choice = !canFreeze
+            ? NoteAction.lock
+            : await showChoiceSheet<NoteAction>(
+                context,
+                title: l10n.notesLockOrFreeze,
+                choices: [
+                  SheetChoice(
+                    value: NoteAction.lock,
+                    icon: LucideIcons.lock,
+                    label: NoteAction.lock.iconAndLabelFor(notes, l10n).label,
+                    showChevron: true,
+                  ),
+                  SheetChoice(
+                    value: NoteAction.freeze,
+                    icon: LucideIcons.snowflake,
+                    label: isUnfreezing
+                        ? l10n.actionUnfreeze
+                        : l10n.actionFreeze,
+                    subtitle: isUnfreezing ? null : l10n.noteFreezeHelp,
+                  ),
+                ],
+              );
         if (!context.mounted) return;
         if (choice == NoteAction.lock) {
           await lockSelectedNotes(
@@ -259,13 +244,6 @@ class NoteActions {
                 : () => beforeChosen(choice),
           );
         }
-      case NoteAction.invisible:
-        final isInvisible = !makesVisible(notes);
-        final ids = invisibleIdsOf(notes, isInvisible: isInvisible);
-        if (ids.isEmpty) return;
-        await beforeChange?.call();
-        if (!context.mounted) return;
-        await setNotesInvisible(context, ref, ids, isInvisible: isInvisible);
       case NoteAction.freeze:
         final isFreezing = !unfreezesAll(notes);
         final ids = freezableIdsOf(notes, isFreezing: isFreezing);

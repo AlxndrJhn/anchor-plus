@@ -26,11 +26,20 @@ void main() {
   test('a copied setup pastes back as it was', () {
     const setup = QuickActionSetup(
       bar: [QuickAction.pin, QuickAction.send],
-      hidden: {QuickAction.freeze, QuickAction.invisible},
+      hidden: {QuickAction.freeze, QuickAction.lock},
     );
     final pasted = QuickActionSetup.decode(setup.encode())!;
     expect(pasted.bar, setup.bar);
     expect(pasted.hidden, setup.hidden);
+  });
+
+  test('invisible, from versions with invisible notes, is left out', () {
+    expect(QuickAction.decode('invisible,pin'), [QuickAction.pin]);
+    final pasted = QuickActionSetup.decode(
+      'anchor-quick-actions 1\nbar: invisible, pin\noff: invisible, copy',
+    )!;
+    expect(pasted.bar, [QuickAction.pin]);
+    expect(pasted.hidden, {QuickAction.copy});
   });
 
   test('other text on the clipboard is no setup', () {

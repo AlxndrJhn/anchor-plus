@@ -156,20 +156,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _isInvisibleMeta = const VerificationMeta(
-    'isInvisible',
-  );
-  @override
-  late final GeneratedColumn<bool> isInvisible = GeneratedColumn<bool>(
-    'is_invisible',
-    aliasedName,
-    true,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_invisible" IN (0, 1))',
-    ),
-  );
   static const VerificationMeta _isSyncedMeta = const VerificationMeta(
     'isSynced',
   );
@@ -419,7 +405,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     positionedAt,
     lock,
     isFrozen,
-    isInvisible,
     isSynced,
     version,
     localRev,
@@ -533,15 +518,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
       context.handle(
         _isFrozenMeta,
         isFrozen.isAcceptableOrUnknown(data['is_frozen']!, _isFrozenMeta),
-      );
-    }
-    if (data.containsKey('is_invisible')) {
-      context.handle(
-        _isInvisibleMeta,
-        isInvisible.isAcceptableOrUnknown(
-          data['is_invisible']!,
-          _isInvisibleMeta,
-        ),
       );
     }
     if (data.containsKey('is_synced')) {
@@ -764,10 +740,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_frozen'],
       )!,
-      isInvisible: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_invisible'],
-      ),
       isSynced: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_synced'],
@@ -871,7 +843,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   final DateTime? positionedAt;
   final String? lock;
   final bool isFrozen;
-  final bool? isInvisible;
   final bool isSynced;
   final int? version;
   final int localRev;
@@ -906,7 +877,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     this.positionedAt,
     this.lock,
     required this.isFrozen,
-    this.isInvisible,
     required this.isSynced,
     this.version,
     required this.localRev,
@@ -958,9 +928,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       map['lock'] = Variable<String>(lock);
     }
     map['is_frozen'] = Variable<bool>(isFrozen);
-    if (!nullToAbsent || isInvisible != null) {
-      map['is_invisible'] = Variable<bool>(isInvisible);
-    }
     map['is_synced'] = Variable<bool>(isSynced);
     if (!nullToAbsent || version != null) {
       map['version'] = Variable<int>(version);
@@ -1041,9 +1008,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           : Value(positionedAt),
       lock: lock == null && nullToAbsent ? const Value.absent() : Value(lock),
       isFrozen: Value(isFrozen),
-      isInvisible: isInvisible == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isInvisible),
       isSynced: Value(isSynced),
       version: version == null && nullToAbsent
           ? const Value.absent()
@@ -1116,7 +1080,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       positionedAt: serializer.fromJson<DateTime?>(json['positionedAt']),
       lock: serializer.fromJson<String?>(json['lock']),
       isFrozen: serializer.fromJson<bool>(json['isFrozen']),
-      isInvisible: serializer.fromJson<bool?>(json['isInvisible']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       version: serializer.fromJson<int?>(json['version']),
       localRev: serializer.fromJson<int>(json['localRev']),
@@ -1160,7 +1123,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       'positionedAt': serializer.toJson<DateTime?>(positionedAt),
       'lock': serializer.toJson<String?>(lock),
       'isFrozen': serializer.toJson<bool>(isFrozen),
-      'isInvisible': serializer.toJson<bool?>(isInvisible),
       'isSynced': serializer.toJson<bool>(isSynced),
       'version': serializer.toJson<int?>(version),
       'localRev': serializer.toJson<int>(localRev),
@@ -1198,7 +1160,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     Value<DateTime?> positionedAt = const Value.absent(),
     Value<String?> lock = const Value.absent(),
     bool? isFrozen,
-    Value<bool?> isInvisible = const Value.absent(),
     bool? isSynced,
     Value<int?> version = const Value.absent(),
     int? localRev,
@@ -1233,7 +1194,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     positionedAt: positionedAt.present ? positionedAt.value : this.positionedAt,
     lock: lock.present ? lock.value : this.lock,
     isFrozen: isFrozen ?? this.isFrozen,
-    isInvisible: isInvisible.present ? isInvisible.value : this.isInvisible,
     isSynced: isSynced ?? this.isSynced,
     version: version.present ? version.value : this.version,
     localRev: localRev ?? this.localRev,
@@ -1288,9 +1248,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           : this.positionedAt,
       lock: data.lock.present ? data.lock.value : this.lock,
       isFrozen: data.isFrozen.present ? data.isFrozen.value : this.isFrozen,
-      isInvisible: data.isInvisible.present
-          ? data.isInvisible.value
-          : this.isInvisible,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       version: data.version.present ? data.version.value : this.version,
       localRev: data.localRev.present ? data.localRev.value : this.localRev,
@@ -1362,7 +1319,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           ..write('positionedAt: $positionedAt, ')
           ..write('lock: $lock, ')
           ..write('isFrozen: $isFrozen, ')
-          ..write('isInvisible: $isInvisible, ')
           ..write('isSynced: $isSynced, ')
           ..write('version: $version, ')
           ..write('localRev: $localRev, ')
@@ -1402,7 +1358,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     positionedAt,
     lock,
     isFrozen,
-    isInvisible,
     isSynced,
     version,
     localRev,
@@ -1441,7 +1396,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           other.positionedAt == this.positionedAt &&
           other.lock == this.lock &&
           other.isFrozen == this.isFrozen &&
-          other.isInvisible == this.isInvisible &&
           other.isSynced == this.isSynced &&
           other.version == this.version &&
           other.localRev == this.localRev &&
@@ -1478,7 +1432,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   final Value<DateTime?> positionedAt;
   final Value<String?> lock;
   final Value<bool> isFrozen;
-  final Value<bool?> isInvisible;
   final Value<bool> isSynced;
   final Value<int?> version;
   final Value<int> localRev;
@@ -1514,7 +1467,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     this.positionedAt = const Value.absent(),
     this.lock = const Value.absent(),
     this.isFrozen = const Value.absent(),
-    this.isInvisible = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.version = const Value.absent(),
     this.localRev = const Value.absent(),
@@ -1551,7 +1503,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     this.positionedAt = const Value.absent(),
     this.lock = const Value.absent(),
     this.isFrozen = const Value.absent(),
-    this.isInvisible = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.version = const Value.absent(),
     this.localRev = const Value.absent(),
@@ -1589,7 +1540,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     Expression<DateTime>? positionedAt,
     Expression<String>? lock,
     Expression<bool>? isFrozen,
-    Expression<bool>? isInvisible,
     Expression<bool>? isSynced,
     Expression<int>? version,
     Expression<int>? localRev,
@@ -1626,7 +1576,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
       if (positionedAt != null) 'positioned_at': positionedAt,
       if (lock != null) 'lock': lock,
       if (isFrozen != null) 'is_frozen': isFrozen,
-      if (isInvisible != null) 'is_invisible': isInvisible,
       if (isSynced != null) 'is_synced': isSynced,
       if (version != null) 'version': version,
       if (localRev != null) 'local_rev': localRev,
@@ -1666,7 +1615,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     Value<DateTime?>? positionedAt,
     Value<String?>? lock,
     Value<bool>? isFrozen,
-    Value<bool?>? isInvisible,
     Value<bool>? isSynced,
     Value<int?>? version,
     Value<int>? localRev,
@@ -1703,7 +1651,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
       positionedAt: positionedAt ?? this.positionedAt,
       lock: lock ?? this.lock,
       isFrozen: isFrozen ?? this.isFrozen,
-      isInvisible: isInvisible ?? this.isInvisible,
       isSynced: isSynced ?? this.isSynced,
       version: version ?? this.version,
       localRev: localRev ?? this.localRev,
@@ -1769,9 +1716,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     }
     if (isFrozen.present) {
       map['is_frozen'] = Variable<bool>(isFrozen.value);
-    }
-    if (isInvisible.present) {
-      map['is_invisible'] = Variable<bool>(isInvisible.value);
     }
     if (isSynced.present) {
       map['is_synced'] = Variable<bool>(isSynced.value);
@@ -1857,7 +1801,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
           ..write('positionedAt: $positionedAt, ')
           ..write('lock: $lock, ')
           ..write('isFrozen: $isFrozen, ')
-          ..write('isInvisible: $isInvisible, ')
           ..write('isSynced: $isSynced, ')
           ..write('version: $version, ')
           ..write('localRev: $localRev, ')
@@ -4885,7 +4828,6 @@ typedef $$NotesTableCreateCompanionBuilder =
       Value<DateTime?> positionedAt,
       Value<String?> lock,
       Value<bool> isFrozen,
-      Value<bool?> isInvisible,
       Value<bool> isSynced,
       Value<int?> version,
       Value<int> localRev,
@@ -4923,7 +4865,6 @@ typedef $$NotesTableUpdateCompanionBuilder =
       Value<DateTime?> positionedAt,
       Value<String?> lock,
       Value<bool> isFrozen,
-      Value<bool?> isInvisible,
       Value<bool> isSynced,
       Value<int?> version,
       Value<int> localRev,
@@ -5017,11 +4958,6 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
 
   ColumnFilters<bool> get isFrozen => $composableBuilder(
     column: $table.isFrozen,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isInvisible => $composableBuilder(
-    column: $table.isInvisible,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5200,11 +5136,6 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isInvisible => $composableBuilder(
-    column: $table.isInvisible,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<bool> get isSynced => $composableBuilder(
     column: $table.isSynced,
     builder: (column) => ColumnOrderings(column),
@@ -5360,11 +5291,6 @@ class $$NotesTableAnnotationComposer
   GeneratedColumn<bool> get isFrozen =>
       $composableBuilder(column: $table.isFrozen, builder: (column) => column);
 
-  GeneratedColumn<bool> get isInvisible => $composableBuilder(
-    column: $table.isInvisible,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
 
@@ -5499,7 +5425,6 @@ class $$NotesTableTableManager
                 Value<DateTime?> positionedAt = const Value.absent(),
                 Value<String?> lock = const Value.absent(),
                 Value<bool> isFrozen = const Value.absent(),
-                Value<bool?> isInvisible = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<int?> version = const Value.absent(),
                 Value<int> localRev = const Value.absent(),
@@ -5535,7 +5460,6 @@ class $$NotesTableTableManager
                 positionedAt: positionedAt,
                 lock: lock,
                 isFrozen: isFrozen,
-                isInvisible: isInvisible,
                 isSynced: isSynced,
                 version: version,
                 localRev: localRev,
@@ -5573,7 +5497,6 @@ class $$NotesTableTableManager
                 Value<DateTime?> positionedAt = const Value.absent(),
                 Value<String?> lock = const Value.absent(),
                 Value<bool> isFrozen = const Value.absent(),
-                Value<bool?> isInvisible = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<int?> version = const Value.absent(),
                 Value<int> localRev = const Value.absent(),
@@ -5609,7 +5532,6 @@ class $$NotesTableTableManager
                 positionedAt: positionedAt,
                 lock: lock,
                 isFrozen: isFrozen,
-                isInvisible: isInvisible,
                 isSynced: isSynced,
                 version: version,
                 localRev: localRev,

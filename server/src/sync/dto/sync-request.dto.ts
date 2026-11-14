@@ -106,11 +106,6 @@ export class SyncNoteChangeDto extends SyncChangeBaseDto {
   @IsOptional()
   lock?: NoteLockKind | null;
 
-  // Per-user too: kept out of this person's lists, found only by search.
-  @IsBoolean()
-  @IsOptional()
-  isInvisible?: boolean;
-
   // Owner only: freezes the note (true) or unfreezes it (false).
   @IsBoolean()
   @IsOptional()

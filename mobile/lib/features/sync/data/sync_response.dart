@@ -125,8 +125,6 @@ class SyncServerNote {
     this.lock,
     this.hasFrozenField = false,
     this.isFrozen = false,
-    this.hasInvisibleField = false,
-    this.isInvisible = false,
     this.publicLink,
   });
 
@@ -155,9 +153,6 @@ class SyncServerNote {
       // Servers without freezing leave it out: keep what is here.
       hasFrozenField: json.containsKey('isFrozen'),
       isFrozen: json['isFrozen'] as bool? ?? false,
-      // Servers without invisible notes leave it out: keep what is here.
-      hasInvisibleField: json.containsKey('isInvisible'),
-      isInvisible: json['isInvisible'] as bool? ?? false,
       tagIds: (json['tagIds'] as List?)?.cast<String>() ?? const [],
       permission: json['permission'] as String? ?? NotePermission.owner.name,
       shareIds: (json['shareIds'] as List?)?.cast<String>() ?? const [],
@@ -193,11 +188,6 @@ class SyncServerNote {
 
   /// Frozen by its owner; the server's say, never sent up.
   final bool isFrozen;
-  final bool hasInvisibleField;
-
-  /// Kept out of this person's lists (their own, like a lock); only
-  /// meaningful when [hasInvisibleField].
-  final bool isInvisible;
   final List<String> tagIds;
   final String permission;
   final List<String> shareIds;

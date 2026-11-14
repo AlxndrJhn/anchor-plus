@@ -28,11 +28,6 @@ class Notes extends Table {
   // Frozen by its owner: nobody can change, trash or delete it until it's
   // unfrozen. The server's say, like sharing: it is never sent up.
   BoolColumn get isFrozen => boolean().withDefault(const Constant(false))();
-  // Made invisible by this person: left out of the lists, found by search.
-  // Personal like a lock, and goes up with the note. Null means not known
-  // yet (a database from before it, until the feed brings the note again):
-  // nothing is sent for it.
-  BoolColumn get isInvisible => boolean().nullable()();
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   // The server version this note was written against; null until it exists there.
   IntColumn get version => integer().nullable()();

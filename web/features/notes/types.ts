@@ -102,11 +102,6 @@ export interface Note {
   lock?: NoteLockKind | null;
   /** Frozen by its owner: nobody can change, trash or delete it. */
   isFrozen?: boolean;
-  /**
-   * This person made it invisible: it stays out of their lists, and only a
-   * search (or the Invisible filter) finds it.
-   */
-  isInvisible?: boolean;
 }
 
 /** The ways a person can lock a note for themselves. */

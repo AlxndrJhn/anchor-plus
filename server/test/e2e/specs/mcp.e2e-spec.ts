@@ -236,36 +236,17 @@ describe('mcp', () => {
     });
   });
 
-  it('searches, and leaves invisible notes to searches', async () => {
+  it('lists every note, and searches', async () => {
     await user.notes.create({ title: 'Seen', content: null });
-    const hidden = await user.notes.create({ title: 'Hidden', content: null });
-    await user.http
-      .patch(`/api/notes/${hidden.id}/invisible`)
-      .send({ isInvisible: true })
-      .expect(200);
+    await user.notes.create({ title: 'Other', content: null });
 
     const all = await json<{ notes: NoteResult[] }>('list_notes');
-    expect(all.notes.map((n) => n.title)).toEqual(['Seen']);
+    expect(all.notes.map((n) => n.title).sort()).toEqual(['Other', 'Seen']);
 
     const found = await json<{ notes: NoteResult[] }>('list_notes', {
-      query: 'hid',
+      query: 'oth',
     });
-    expect(found.notes.map((n) => n.title)).toEqual(['Hidden']);
-
-    // Nor does the archive list it until it is searched for.
-    await user.http
-      .post('/api/notes/bulk/archive')
-      .send({ noteIds: [hidden.id] })
-      .expect(201);
-    const archived = await json<{ notes: NoteResult[] }>('list_notes', {
-      scope: 'archive',
-    });
-    expect(archived.notes).toEqual([]);
-    const foundArchived = await json<{ notes: NoteResult[] }>('list_notes', {
-      scope: 'archive',
-      query: 'hid',
-    });
-    expect(foundArchived.notes.map((n) => n.title)).toEqual(['Hidden']);
+    expect(found.notes.map((n) => n.title)).toEqual(['Other']);
   });
 
   it('changes a note, refusing a stale version', async () => {

@@ -11,8 +11,6 @@ export interface NoteFilters {
   picture?: boolean;
   checklist?: boolean;
   reminder?: boolean;
-  /** Only the notes this person made invisible. */
-  invisible?: boolean;
 }
 
 export const FILTER_PARAMS = {
@@ -21,7 +19,6 @@ export const FILTER_PARAMS = {
   picture: "picture",
   checklist: "checklist",
   reminder: "reminder",
-  invisible: "invisible",
 } as const satisfies Record<keyof NoteFilters, string>;
 
 export const NO_FILTERS: NoteFilters = {};
@@ -37,7 +34,6 @@ export function filtersFromParams(params: {
   if (params.get(FILTER_PARAMS.picture) === "1") filters.picture = true;
   if (params.get(FILTER_PARAMS.checklist) === "1") filters.checklist = true;
   if (params.get(FILTER_PARAMS.reminder) === "1") filters.reminder = true;
-  if (params.get(FILTER_PARAMS.invisible) === "1") filters.invisible = true;
   return filters;
 }
 
@@ -77,15 +73,6 @@ export function matchesFilters(note: Note, f: NoteFilters) {
     (!f.tagId || !!note.tagIds?.includes(f.tagId)) &&
     (!f.picture || hasPicture(note)) &&
     (!f.checklist || hasChecklist(note)) &&
-    (!f.reminder || !!note.reminder) &&
-    (!f.invisible || !!note.isInvisible)
+    (!f.reminder || !!note.reminder)
   );
-}
-
-/**
- * An invisible note stays out of the lists; only a search or a filter
- * brings it up.
- */
-export function showsInList(note: Note, searching: boolean) {
-  return searching || !note.isInvisible;
 }

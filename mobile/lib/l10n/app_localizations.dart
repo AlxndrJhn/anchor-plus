@@ -6412,66 +6412,6 @@ abstract class AppLocalizations {
   /// **'Camera note'**
   String get noteNewCamera;
 
-  /// Option for a note (or picked notes): keep it out of this person’s lists; only a search or the Invisible filter finds it. Only for this person, like a lock.
-  ///
-  /// In en, this message translates to:
-  /// **'Make invisible'**
-  String get actionMakeInvisible;
-
-  /// Option for an invisible note (or picked notes that all are): list it again.
-  ///
-  /// In en, this message translates to:
-  /// **'Make visible'**
-  String get actionMakeVisible;
-
-  /// Under Make invisible in a note’s menu: an invisible note stays out of the lists, only a search or a filter brings it up.
-  ///
-  /// In en, this message translates to:
-  /// **'Only a search finds it'**
-  String get noteInvisibleHelp;
-
-  /// Toast after notes were made invisible, with an Undo button.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Note made invisible. Search finds it.} other{{count} notes made invisible. Search finds them.}}'**
-  String notesMadeInvisible(int count);
-
-  /// Toast after invisible notes were made visible again, with an Undo button.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Note made visible} other{{count} notes made visible}}'**
-  String notesMadeVisible(int count);
-
-  /// Title of the menu behind the Lock button of the selection bar, when it offers Lock, Freeze and Make invisible.
-  ///
-  /// In en, this message translates to:
-  /// **'Lock, freeze or make invisible'**
-  String get notesLockFreezeOrHide;
-
-  /// Title of the menu behind the Lock button of the selection bar, when it offers Lock and Make invisible (none of the picked notes can be frozen).
-  ///
-  /// In en, this message translates to:
-  /// **'Lock or make invisible'**
-  String get notesLockOrHide;
-
-  /// Tooltip of the crossed-out eye on an invisible note’s card (found by a search or a filter), and read out with the card.
-  ///
-  /// In en, this message translates to:
-  /// **'Invisible'**
-  String get cardInvisible;
-
-  /// Section label in the filter sheet, above Invisible: notes that are so.
-  ///
-  /// In en, this message translates to:
-  /// **'Is'**
-  String get filterIs;
-
-  /// Filter choice: only the notes this person made invisible (kept out of the lists).
-  ///
-  /// In en, this message translates to:
-  /// **'Invisible'**
-  String get filterInvisible;
-
   /// Menu item and quick action: sets or changes the note's reminder.
   ///
   /// In en, this message translates to:
