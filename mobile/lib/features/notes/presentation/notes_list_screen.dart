@@ -53,6 +53,7 @@ import 'widgets/app_drawer.dart';
 import 'widgets/card_body.dart';
 import 'widgets/card_registry.dart';
 import 'widgets/drawer_host.dart';
+import 'widgets/file_icons.dart';
 import 'widgets/list_title.dart';
 import 'widgets/note_card.dart';
 import 'widgets/note_cards_loading.dart';
@@ -650,6 +651,9 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         index: index,
         status: folder == NoteFolder.trash
             ? trashDaysLeftLabel(note.updatedAt, context.l10n)
+            // Sorted by size, each card says how much it takes.
+            : options.sortOption == SortOption.size
+            ? fileSizeLabel(note.storageSize, context.l10n.localeName)
             : null,
         onTap: () => isSelecting ? _selection.toggle(note) : _open(note),
         onLongPress: () =>

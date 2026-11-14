@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  AttachmentType,
   NoteLockKind,
   NoteSharePermission,
   NoteState,
@@ -67,7 +68,13 @@ interface NoteRow {
     };
   }>;
   _count: { attachments: number; files: number };
-  attachments: Array<{ id: string; text: string | null }>;
+  attachments: Array<{
+    id: string;
+    text: string | null;
+    type: AttachmentType;
+    fileSize: number;
+  }>;
+  files: Array<{ fileSize: number }>;
 }
 
 // ChangeLog rows have no FK on entityId, so a row can outlive its entity. Any

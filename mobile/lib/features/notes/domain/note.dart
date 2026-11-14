@@ -153,6 +153,9 @@ abstract class Note with _$Note {
     int? reminderSlot,
     @Default([]) List<NoteImagePreview> imagePreviewData,
     @Default(0) int attachmentCount,
+    // The bytes the note takes on the server: its title and text, and every
+    // picture, recording and file attached to it.
+    @Default(0) int storageSize,
     // The text read from the note's pictures, for search.
     @Default('') String pictureText,
   }) = _Note;

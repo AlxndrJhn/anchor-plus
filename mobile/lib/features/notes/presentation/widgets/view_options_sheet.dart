@@ -25,6 +25,7 @@ class _ViewOptionsSheet extends ConsumerWidget {
     final notifier = ref.read(notesViewOptionsProvider.notifier);
     final sort = options.sortOption;
     final byTitle = sort == SortOption.title;
+    final bySize = sort == SortOption.size;
     final l10n = context.l10n;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -100,6 +101,15 @@ class _ViewOptionsSheet extends ConsumerWidget {
                         notifier.setSort(SortOption.title, isAscending: true);
                       },
                     ),
+                    GroupedListTile(
+                      icon: LucideIcons.hardDrive,
+                      label: l10n.viewSize,
+                      checked: bySize,
+                      onTap: () {
+                        if (bySize) return;
+                        notifier.setSort(SortOption.size, isAscending: false);
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -113,6 +123,11 @@ class _ViewOptionsSheet extends ConsumerWidget {
                       ? [
                           Segment(value: true, label: l10n.viewAtoZ),
                           Segment(value: false, label: l10n.viewZtoA),
+                        ]
+                      : bySize
+                      ? [
+                          Segment(value: false, label: l10n.viewLargestFirst),
+                          Segment(value: true, label: l10n.viewSmallestFirst),
                         ]
                       : [
                           Segment(value: false, label: l10n.viewNewestFirst),
