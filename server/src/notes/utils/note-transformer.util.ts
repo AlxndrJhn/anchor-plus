@@ -1,4 +1,5 @@
 import {
+  AttachmentType,
   NoteLockKind,
   NoteSharePermission,
   ReminderRecurrence,
@@ -45,6 +46,11 @@ export interface TransformedNote {
   stateChangedAt?: string;
   attachmentCount?: number;
   imagePreviewIds?: string[];
+  /**
+   * The bytes the note takes on the server: its title and text, and every
+   * picture, recording and file attached to it. Absent means "not loaded".
+   */
+  storageSize?: number;
   /** The text read from the note's pictures, for search; absent if none. */
   pictureText?: string;
   // Absent means "not loaded"; null means "this user has no reminder".
@@ -90,7 +96,28 @@ interface NoteWithIncludes {
   }>;
   shareLink?: { permission: NoteSharePermission } | null;
   _count?: { attachments?: number; files?: number };
-  attachments?: Array<{ id: string; text?: string | null }>;
+  // Only pictures, unless a type is given.
+  attachments?: Array<{
+    id: string;
+    text?: string | null;
+    type?: AttachmentType;
+    fileSize?: number;
+  }>;
+  files?: Array<{ fileSize: number }>;
+}
+
+// The bytes a note takes on the server: its text and its attachments.
+function storageSizeOf(
+  note: { title: string; content: string | null },
+  attachments: Array<{ fileSize?: number }>,
+  files: Array<{ fileSize: number }>,
+): number {
+  let size =
+    Buffer.byteLength(note.title, 'utf8') +
+    Buffer.byteLength(note.content ?? '', 'utf8');
+  for (const attachment of attachments) size += attachment.fileSize ?? 0;
+  for (const file of files) size += file.fileSize;
+  return size;
 }
 
 // Convert Date to ISO string
@@ -110,6 +137,7 @@ export function transformNote(
     shareLink,
     _count,
     attachments,
+    files,
     pins,
     archives,
     orders,
@@ -118,6 +146,10 @@ export function transformNote(
     stateChangedAt,
     ...rest
   } = note;
+
+  const pictures = attachments?.filter(
+    (a) => a.type === undefined || a.type === AttachmentType.image,
+  );
 
   // Determine if user is owner or shared user
   const isOwner = note.userId === userId;
@@ -150,10 +182,14 @@ export function transformNote(
     updatedAt: toISOString(rest.updatedAt),
     permission,
     attachmentCount: (_count?.attachments ?? 0) + (_count?.files ?? 0),
-    imagePreviewIds: attachments?.slice(0, 4).map((a) => a.id) ?? [],
+    imagePreviewIds: pictures?.slice(0, 4).map((a) => a.id) ?? [],
   };
 
-  const pictureText = attachments
+  if (attachments) {
+    transformed.storageSize = storageSizeOf(note, attachments, files ?? []);
+  }
+
+  const pictureText = pictures
     ?.map((a) => a.text)
     .filter(Boolean)
     .join('\n\n');

@@ -68,9 +68,12 @@
     "oldestFirst": "Oldest first",
     "aToZ": "A to Z",
     "zToA": "Z to A",
+    "largestFirst": "Largest first",
+    "smallestFirst": "Smallest first",
     "lastEdited": "Last edited",
     "dateCreated": "Date created",
-    "title": "Title"
+    "title": "Title",
+    "size": "Size"
   },
   "filterMenu": {
     "filterActiveLabel": "Filter, {count} on",

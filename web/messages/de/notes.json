@@ -68,9 +68,12 @@
     "oldestFirst": "Älteste zuerst",
     "aToZ": "A bis Z",
     "zToA": "Z bis A",
+    "largestFirst": "Größte zuerst",
+    "smallestFirst": "Kleinste zuerst",
     "lastEdited": "Zuletzt bearbeitet",
     "dateCreated": "Erstellungsdatum",
-    "title": "Titel"
+    "title": "Titel",
+    "size": "Größe"
   },
   "filterMenu": {
     "filterActiveLabel": "Filter, {count} aktiv",

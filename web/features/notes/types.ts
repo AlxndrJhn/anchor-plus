@@ -91,6 +91,11 @@ export interface Note {
   };
   attachmentCount?: number;
   imagePreviewIds?: string[];
+  /**
+   * The bytes the note takes on the server: its text, and every picture,
+   * recording and file attached to it.
+   */
+  storageSize?: number;
   /** The text read from the note's pictures, which search also looks in. */
   pictureText?: string;
   reminder?: NoteReminder | null;

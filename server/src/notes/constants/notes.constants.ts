@@ -43,13 +43,14 @@ export const NOTE_INCLUDE_ATTACHMENT_COUNT = {
   _count: {
     select: { attachments: true, files: true },
   },
-  // Every picture: the first few show on the card, and the text read from
-  // all of them is searched.
+  // Every attachment: the first few pictures show on the card, the text read
+  // from all of them is searched, and their sizes add up to the space the
+  // note takes on the server.
   attachments: {
-    where: { type: 'image' },
-    select: { id: true, text: true },
+    select: { id: true, text: true, type: true, fileSize: true },
     orderBy: { position: 'asc' as const },
   },
+  files: { select: { fileSize: true } },
 } as const;
 
 // Include the requesting user's pin state.

@@ -47,6 +47,8 @@ const json = (body: unknown, status = 200) =>
   });
 
 const now = () => new Date().toISOString();
+const encoder = new TextEncoder();
+const utf8Length = (text: string) => encoder.encode(text).length;
 
 interface Request {
   method: string;
@@ -254,6 +256,10 @@ export class LocalServer {
       shareIds: [],
       attachmentCount: attachments.length,
       imagePreviewIds: pictures.slice(0, 4).map((a) => a.id),
+      storageSize:
+        utf8Length(note.title) +
+        utf8Length(note.content ?? "") +
+        attachments.reduce((sum, a) => sum + a.fileSize, 0),
       reminder: note.reminder,
       position: note.position,
       positionedAt: note.positionedAt,

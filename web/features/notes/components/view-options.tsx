@@ -4,6 +4,7 @@ import {
   ALargeSmall,
   CalendarPlus,
   Check,
+  HardDrive,
   LayoutDashboard,
   LayoutGrid,
   PencilLine,
@@ -33,7 +34,13 @@ interface ViewOptionsProps {
   onShowPictures: (show: boolean) => void;
 }
 
-type OrderLabel = "newestFirst" | "oldestFirst" | "aToZ" | "zToA";
+type OrderLabel =
+  | "newestFirst"
+  | "oldestFirst"
+  | "aToZ"
+  | "zToA"
+  | "largestFirst"
+  | "smallestFirst";
 
 const ORDER_OPTIONS: Record<SortBy, [SortOrder, OrderLabel][]> = {
   updatedAt: [
@@ -47,6 +54,10 @@ const ORDER_OPTIONS: Record<SortBy, [SortOrder, OrderLabel][]> = {
   title: [
     ["asc", "aToZ"],
     ["desc", "zToA"],
+  ],
+  size: [
+    ["desc", "largestFirst"],
+    ["asc", "smallestFirst"],
   ],
 };
 
@@ -131,6 +142,7 @@ const SORT_CHOICES = [
   ["updatedAt", "lastEdited", PencilLine],
   ["createdAt", "dateCreated", CalendarPlus],
   ["title", "title", ALargeSmall],
+  ["size", "size", HardDrive],
 ] as const;
 
 function SortChoices({

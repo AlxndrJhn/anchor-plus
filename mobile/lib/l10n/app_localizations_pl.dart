@@ -3647,6 +3647,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get viewTitle => 'Tytuł';
 
   @override
+  String get viewSize => 'Rozmiar';
+
+  @override
+  String get viewLargestFirst => 'Największe najpierw';
+
+  @override
+  String get viewSmallestFirst => 'Najmniejsze najpierw';
+
+  @override
   String get viewAtoZ => 'A do Z';
 
   @override
