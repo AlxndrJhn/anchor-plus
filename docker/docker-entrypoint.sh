@@ -83,16 +83,32 @@ if [ "$USE_EMBEDDED_POSTGRES" = "1" ]; then
   fi
 
   # Ensure data directory permissions
-  mkdir -p "$PGDATA"
-  chown -R postgres:postgres "$PGDATA"
+  mkdir -p "$PGDATA" /run/postgresql
+  chown -R postgres:postgres "$PGDATA" /run/postgresql
   chmod 700 "$PGDATA"
-  
-  # Set postgres environment
-  export POSTGRES_USER="$PG_USER"
-  export POSTGRES_PASSWORD="$PG_PASSWORD"
-  export POSTGRES_DB="$PG_DATABASE"
-  
-  /usr/local/bin/docker-entrypoint.sh postgres \
+  chmod 3775 /run/postgresql
+
+  # A new database, set up as the postgres image's entrypoint did before:
+  # PG_USER as the superuser with PG_PASSWORD, password logins from other
+  # hosts, and the PG_DATABASE database.
+  if [ ! -s "$PGDATA/PG_VERSION" ]; then
+    echo "[anchor] Creating the database..."
+    pwfile=$(mktemp)
+    printf '%s\n' "$PG_PASSWORD" > "$pwfile"
+    chown postgres "$pwfile"
+    su-exec postgres initdb --username="$PG_USER" --pwfile="$pwfile" >/dev/null
+    rm -f "$pwfile"
+    printf '\nhost all all all scram-sha-256\n' >> "$PGDATA/pg_hba.conf"
+    su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses='' -p ${PG_PORT}" -w start >/dev/null
+    su-exec postgres psql -v ON_ERROR_STOP=1 -q --no-psqlrc -p "${PG_PORT}" \
+      --username "$PG_USER" --dbname postgres --set db="$PG_DATABASE" <<'EOSQL'
+SELECT 'CREATE DATABASE ' || quote_ident(:'db')
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = :'db') \gexec
+EOSQL
+    su-exec postgres pg_ctl -D "$PGDATA" -m fast -w stop >/dev/null
+  fi
+
+  su-exec postgres postgres \
     -c listen_addresses=127.0.0.1 \
     -p "${PG_PORT}" &
   POSTGRES_PID=$!

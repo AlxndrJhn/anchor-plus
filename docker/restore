@@ -68,6 +68,6 @@ echo "[restore] Bringing the database up to this release..." >&2
 # Starts again from the entrypoint, which reads the restored sign-in secret.
 echo "[restore] Done; Anchor restarts now. If it doesn't come back (no restart policy), run: docker compose up -d" >&2
 if [ "$USE_EMBEDDED_POSTGRES" = "1" ]; then
-  su postgres -c "pg_ctl -D '$PGDATA' stop -m fast" >/dev/null
+  su-exec postgres pg_ctl -D "$PGDATA" stop -m fast >/dev/null
 fi
 (sleep 1; kill -TERM 1) >/dev/null 2>&1 &
