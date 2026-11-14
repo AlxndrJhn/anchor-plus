@@ -31,6 +31,7 @@ export interface OidcProviderSettings {
   clientId?: string;
   hasClientSecret: boolean;
   mobileClientId?: string;
+  logoutUrl?: string;
   callbackUrl: string;
   source: 'env' | 'database';
 }
@@ -52,6 +53,7 @@ export interface OidcProviderInput {
   clientId?: string;
   clientSecret?: string;
   mobileClientId?: string;
+  logoutUrl?: string;
 }
 
 @Injectable()
@@ -94,6 +96,7 @@ export class OidcConfigService {
         enabled: false,
         providerName: 'OIDC Provider',
         disableInternalAuth: false,
+        providerLogout: false,
       };
     }
 
@@ -107,6 +110,12 @@ export class OidcConfigService {
       this.configService.get<string>('OIDC_PROVIDER_NAME') || 'OIDC Provider';
     const disableInternalAuth =
       this.getBooleanEnv('DISABLE_INTERNAL_AUTH', false) ?? false;
+    // On unless turned off; the Docker entrypoint passes unset as empty.
+    const providerLogout =
+      this.configService.get<string>('OIDC_PROVIDER_LOGOUT')?.toLowerCase() !==
+      'false';
+    const logoutUrl =
+      this.configService.get<string>('OIDC_LOGOUT_URL') || undefined;
 
     return {
       enabled: true,
@@ -116,6 +125,8 @@ export class OidcConfigService {
       clientSecret,
       mobileClientId,
       disableInternalAuth,
+      providerLogout,
+      logoutUrl,
     };
   }
 
@@ -128,6 +139,8 @@ export class OidcConfigService {
       'oidc_client_secret',
       'oidc_mobile_client_id',
       'oidc_disable_internal_auth',
+      'oidc_provider_logout',
+      'oidc_logout_url',
     ]);
 
     const enabled =
@@ -138,6 +151,7 @@ export class OidcConfigService {
         enabled: false,
         providerName: 'OIDC Provider',
         disableInternalAuth: false,
+        providerLogout: false,
       };
     }
 
@@ -157,6 +171,10 @@ export class OidcConfigService {
     const disableInternalAuth =
       dbSettings.get('oidc_disable_internal_auth')?.toLowerCase() === 'true' ||
       false;
+    // On unless turned off.
+    const providerLogout =
+      dbSettings.get('oidc_provider_logout')?.toLowerCase() !== 'false';
+    const logoutUrl = dbSettings.get('oidc_logout_url') || undefined;
 
     return {
       enabled: true,
@@ -166,6 +184,8 @@ export class OidcConfigService {
       clientSecret,
       mobileClientId,
       disableInternalAuth,
+      providerLogout,
+      logoutUrl,
     };
   }
 
@@ -186,6 +206,16 @@ export class OidcConfigService {
     return providerId === PRIMARY_OIDC_PROVIDER_ID
       ? base
       : `${base}/${encodeURIComponent(providerId)}`;
+  }
+
+  /** Where the provider sends people back after signing out there. */
+  getPostLogoutRedirectUrl(): string {
+    return `${this.getAppUrl()}/login`;
+  }
+
+  /** Where the provider posts its back-channel logout tokens. */
+  getBackchannelLogoutUrl(): string {
+    return `${this.getAppUrl()}/api/auth/oidc/backchannel-logout`;
   }
 
   /**
@@ -211,6 +241,7 @@ export class OidcConfigService {
         clientId: primary.clientId,
         clientSecret: primary.clientSecret,
         mobileClientId: primary.mobileClientId,
+        logoutUrl: primary.logoutUrl,
         source: this.isLockedByEnv() ? 'env' : 'database',
       },
     ];
@@ -285,6 +316,7 @@ export class OidcConfigService {
       clientId: provider.clientId,
       hasClientSecret: !!provider.clientSecret,
       mobileClientId: provider.mobileClientId,
+      logoutUrl: provider.logoutUrl,
       callbackUrl: this.getOidcCallbackUrl(provider.id),
       source: provider.source,
     };
@@ -314,6 +346,7 @@ export class OidcConfigService {
       clientId: input.clientId?.trim(),
       clientSecret: input.clientSecret?.trim() || undefined,
       mobileClientId: input.mobileClientId?.trim() || undefined,
+      logoutUrl: input.logoutUrl?.trim() || undefined,
       source: 'database',
     });
     await this.saveProviders([...(await this.getSavedProviders()), provider]);
@@ -348,6 +381,10 @@ export class OidcConfigService {
         input.mobileClientId !== undefined
           ? input.mobileClientId.trim() || undefined
           : current.mobileClientId,
+      logoutUrl:
+        input.logoutUrl !== undefined
+          ? input.logoutUrl.trim() || undefined
+          : current.logoutUrl,
     });
     saved[index] = provider;
     await this.saveProviders(saved);
@@ -448,6 +485,10 @@ export class OidcConfigService {
     mobileClientId?: string;
     callbackUrl: string;
     disableInternalAuth: boolean;
+    providerLogout: boolean;
+    logoutUrl?: string;
+    postLogoutRedirectUrl: string;
+    backchannelLogoutUrl: string;
     isLocked: boolean;
     source: 'env' | 'database' | 'default';
     providers: OidcProviderSettings[];
@@ -469,6 +510,10 @@ export class OidcConfigService {
       disableInternalAuth: config.enabled
         ? config.disableInternalAuth
         : await this.getDisableInternalAuth(),
+      providerLogout: config.providerLogout,
+      logoutUrl: config.logoutUrl,
+      postLogoutRedirectUrl: this.getPostLogoutRedirectUrl(),
+      backchannelLogoutUrl: this.getBackchannelLogoutUrl(),
       isLocked: locked,
       source: locked ? 'env' : 'database',
       providers: others.map((p) => this.toSettings(p)),
@@ -486,6 +531,8 @@ export class OidcConfigService {
     clientSecret?: string;
     mobileClientId?: string;
     disableInternalAuth?: boolean;
+    providerLogout?: boolean;
+    logoutUrl?: string;
   }): Promise<void> {
     if (this.isLockedByEnv()) {
       throw new ForbiddenException(
@@ -517,6 +564,15 @@ export class OidcConfigService {
         'oidc_disable_internal_auth',
         String(settings.disableInternalAuth),
       );
+    }
+    if (settings.providerLogout !== undefined) {
+      await this.setDbSetting(
+        'oidc_provider_logout',
+        String(settings.providerLogout),
+      );
+    }
+    if (settings.logoutUrl !== undefined) {
+      await this.setDbSetting('oidc_logout_url', settings.logoutUrl);
     }
   }
 

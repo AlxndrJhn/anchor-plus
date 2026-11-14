@@ -137,7 +137,7 @@
   "singleSignOn": {
     "copyAddressFailed": "Die Adresse konnte nicht kopiert werden",
     "copyLabel": "{label} kopieren",
-    "request": "Könntest du Anchor+ als OIDC-Client in {provider} hinzufügen? In Pocket ID findest du das unter OIDC Clients → Add OIDC Client.\n\n- Name: Anchor+\n- Callback-URLs: {callbackUrl}\n  und {phoneUrl} (für die Handy-App)\n- Öffentlicher Client: ja, mit PKCE (die Handy-App kann kein Geheimnis bewahren)\n\nSchick mir dann die Client-ID und die Issuer-URL (die Adresse deiner Pocket-ID-Instanz). Danke!",
+    "request": "Könntest du Anchor+ als OIDC-Client in {provider} hinzufügen? In Pocket ID findest du das unter OIDC Clients → Add OIDC Client.\n\n- Name: Anchor+\n- Callback-URLs: {callbackUrl}\n  und {phoneUrl} (für die Handy-App)\n- Logout-Callback-URL (Post-Logout-Redirect-URI): {postLogoutUrl}\n- Back-Channel-Logout-URL, falls vorhanden: {backchannelUrl}\n- Öffentlicher Client: ja, mit PKCE (die Handy-App kann kein Geheimnis bewahren)\n\nSchick mir dann die Client-ID und die Issuer-URL (die Adresse deiner Pocket-ID-Instanz). Danke!",
     "testFailed": "Die Issuer-URL konnte nicht getestet werden",
     "saved": "Single-Sign-on-Einstellungen gespeichert",
     "saveFailed": "Single Sign-on konnte nicht gespeichert werden",
@@ -186,7 +186,20 @@
     "requestCopyFailed": "Die Anfrage konnte nicht kopiert werden",
     "copyRequest": "Anfrage für den Admin von {provider} kopieren",
     "unsaved": "Du hast ungespeicherte Änderungen am Single Sign-on.",
-    "discard": "Verwerfen"
+    "discard": "Verwerfen",
+    "logoutUrlInvalid": "Gib eine vollständige URL ein oder lass das Feld leer.",
+    "providerLogout": "Auch von {provider} abmelden",
+    "providerLogoutHelp": "Wer sich im Web von Anchor+ abmeldet, wird weiter zur Abmeldung bei {provider} geleitet und dann zurück zur Anmeldeseite.",
+    "logoutUrl": "Abmelde-URL",
+    "logoutUrlHelp": "Leer lassen, um den end_session_endpoint zu nutzen, den {provider} veröffentlicht.",
+    "logoutUrlPlaceholder": "Aus der Discovery des Anbieters",
+    "logoutUrls": "Abmelde-URLs",
+    "postLogoutCallback": "Post-Logout-Redirect-URL",
+    "backchannelLogout": "Back-Channel-Logout-URL",
+    "logoutUrlsHelp": "Füge die erste als Post-Logout-Redirect-URI hinzu (in Pocket ID: Logout Callback URL), damit {provider} nach der Abmeldung dort zurückleitet. Gib die zweite als Back-Channel-Logout-URL an, falls {provider} eine hat, damit eine Abmeldung dort auch von Anchor+ abmeldet, auch auf Handys.",
+    "providerLogoutAny": "Auch beim Anbieter abmelden",
+    "providerLogoutAnyHelp": "Wer sich im Web von Anchor+ abmeldet, wird weiter zur Abmeldung bei dem Anbieter geleitet, mit dem er sich angemeldet hat, und dann zurück zur Anmeldeseite.",
+    "logoutUrlsShared": "Alle Anbieter unten nutzen dieselben beiden."
   },
   "otherProviders": {
     "title": "Weitere Anbieter",
@@ -212,6 +225,7 @@
     "fromServer": "Auf dem Server festgelegt",
     "callbackUrl": "Callback-URL für {provider}",
     "removeTitle": "{provider} entfernen?",
-    "removeDescription": "Die Schaltfläche verschwindet von der Anmeldeseite. Verbundene Konten bleiben verbunden und melden sich wieder damit an, wenn du den Anbieter mit derselben Issuer-URL erneut hinzufügst."
+    "removeDescription": "Die Schaltfläche verschwindet von der Anmeldeseite. Verbundene Konten bleiben verbunden und melden sich wieder damit an, wenn du den Anbieter mit derselben Issuer-URL erneut hinzufügst.",
+    "logoutUrlHelp": "Leer lassen, um den end_session_endpoint zu nutzen, den er veröffentlicht. Er nutzt dieselbe Post-Logout-Redirect- und Back-Channel-Logout-URL wie der erste Anbieter."
   }
 }

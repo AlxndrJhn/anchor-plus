@@ -263,6 +263,34 @@ describe('OidcConfigService with several providers', () => {
     expect(cleared[0].clientSecret).toBeUndefined();
   });
 
+  it('saves, shows and clears a provider’s sign-out URL', async () => {
+    const { oidc, upsert } = service(
+      {},
+      saved({ ...work, logoutUrl: 'https://sso.example.org/logout' }),
+    );
+    expect((await oidc.getProvider('work'))?.logoutUrl).toBe(
+      'https://sso.example.org/logout',
+    );
+    expect((await oidc.getOidcSettings()).providers?.[0]).toMatchObject({
+      logoutUrl: 'https://sso.example.org/logout',
+    });
+    await oidc.updateProvider('work', { logoutUrl: '' });
+    const cleared = JSON.parse(
+      (upsert.mock.calls[0][0] as { update: { value: string } }).update.value,
+    ) as { logoutUrl?: string }[];
+    expect(cleared[0].logoutUrl).toBeUndefined();
+  });
+
+  it('gives the first provider the sign-out URL of the single sign-on settings', async () => {
+    const { oidc } = service({
+      ...lockedEnv,
+      OIDC_LOGOUT_URL: 'https://id.example.com/logout',
+    });
+    expect((await oidc.getProvider('default'))?.logoutUrl).toBe(
+      'https://id.example.com/logout',
+    );
+  });
+
   it('won’t change or remove the first provider or one from the environment', async () => {
     vi.stubEnv('OIDC_2_ISSUER_URL', 'https://env.example.net');
     vi.stubEnv('OIDC_2_CLIENT_ID', 'env');
@@ -276,5 +304,71 @@ describe('OidcConfigService with several providers', () => {
     await expect(oidc.deleteProvider('nope')).rejects.toThrow(
       NotFoundException,
     );
+  });
+});
+
+describe('OidcConfigService sign-out', () => {
+  it('signs out at the provider unless turned off', async () => {
+    expect((await service(lockedEnv).oidc.getConfig()).providerLogout).toBe(
+      true,
+    );
+    expect((await service({}, savedDb).oidc.getConfig()).providerLogout).toBe(
+      true,
+    );
+    // The Docker entrypoint exports unset variables as empty strings.
+    const blank = service({
+      ...lockedEnv,
+      OIDC_PROVIDER_LOGOUT: '',
+      OIDC_LOGOUT_URL: '',
+    });
+    expect(await blank.oidc.getConfig()).toMatchObject({
+      providerLogout: true,
+      logoutUrl: undefined,
+    });
+  });
+
+  it('turns signing out at the provider off from the environment', async () => {
+    const { oidc } = service({
+      ...lockedEnv,
+      OIDC_PROVIDER_LOGOUT: 'false',
+      OIDC_LOGOUT_URL: 'https://id.example.com/logout',
+    });
+    expect(await oidc.getConfig()).toMatchObject({
+      providerLogout: false,
+      logoutUrl: 'https://id.example.com/logout',
+    });
+  });
+
+  it('reads both from the saved settings', async () => {
+    const { oidc } = service(
+      {},
+      {
+        ...savedDb,
+        oidc_provider_logout: 'false',
+        oidc_logout_url: 'https://id.example.com/logout',
+      },
+    );
+    expect(await oidc.getOidcSettings()).toMatchObject({
+      providerLogout: false,
+      logoutUrl: 'https://id.example.com/logout',
+      postLogoutRedirectUrl: 'https://notes.example.com/login',
+      backchannelLogoutUrl:
+        'https://notes.example.com/api/auth/oidc/backchannel-logout',
+    });
+  });
+
+  it('saves both', async () => {
+    const { oidc, upsert } = service();
+    await oidc.setOidcSettings({ providerLogout: false, logoutUrl: '' });
+    expect(upsert).toHaveBeenCalledWith({
+      where: { key: 'oidc_provider_logout' },
+      update: { value: 'false' },
+      create: { key: 'oidc_provider_logout', value: 'false' },
+    });
+    expect(upsert).toHaveBeenCalledWith({
+      where: { key: 'oidc_logout_url' },
+      update: { value: '' },
+      create: { key: 'oidc_logout_url', value: '' },
+    });
   });
 });

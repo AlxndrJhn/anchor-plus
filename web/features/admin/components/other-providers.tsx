@@ -52,6 +52,7 @@ interface ProviderForm {
   clientSecret: string;
   clearSecret: boolean;
   mobileClientId: string;
+  logoutUrl: string;
 }
 
 const emptyForm: ProviderForm = {
@@ -63,6 +64,7 @@ const emptyForm: ProviderForm = {
   clientSecret: "",
   clearSecret: false,
   mobileClientId: "",
+  logoutUrl: "",
 };
 
 async function messageOf(error: Error): Promise<string | undefined> {
@@ -102,6 +104,7 @@ function ProviderEditor({
           issuerUrl: provider.issuerUrl ?? "",
           clientId: provider.clientId ?? "",
           mobileClientId: provider.mobileClientId ?? "",
+          logoutUrl: provider.logoutUrl ?? "",
         }
       : emptyForm,
   );
@@ -111,6 +114,7 @@ function ProviderEditor({
     id?: string;
     issuer?: string;
     client?: string;
+    logout?: string;
   }>({});
   const update = (patch: Partial<ProviderForm>) =>
     setForm((prev) => ({ ...prev, ...patch }));
@@ -149,6 +153,9 @@ function ProviderEditor({
     if (!/^https?:\/\/\S+$/i.test(issuerUrl))
       fieldErrors.issuer = ts("issuerInvalid");
     if (!form.clientId.trim()) fieldErrors.client = ts("clientRequired");
+    const logoutUrl = form.logoutUrl.trim();
+    if (logoutUrl && !/^https?:\/\/\S+$/i.test(logoutUrl))
+      fieldErrors.logout = ts("logoutUrlInvalid");
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length) return;
     const dto: UpdateOidcProviderDto & { id: string } = {
@@ -158,6 +165,7 @@ function ProviderEditor({
       issuerUrl,
       clientId: form.clientId.trim(),
       mobileClientId: form.mobileClientId.trim(),
+      logoutUrl,
     };
     if (form.clientSecret.trim()) dto.clientSecret = form.clientSecret.trim();
     else if (form.clearSecret) dto.clientSecret = "";
@@ -300,6 +308,24 @@ function ProviderEditor({
           <Input
             value={form.mobileClientId}
             onChange={(e) => update({ mobileClientId: e.target.value })}
+          />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 items-start gap-3.5 max-md:grid-cols-1">
+        <Field
+          label={ts("logoutUrl")}
+          aside={ts("optional")}
+          error={errors.logout}
+          help={t("logoutUrlHelp")}
+        >
+          <Input
+            value={form.logoutUrl}
+            inputMode="url"
+            placeholder={ts("logoutUrlPlaceholder")}
+            onChange={(e) => {
+              update({ logoutUrl: e.target.value });
+              setErrors((prev) => ({ ...prev, logout: undefined }));
+            }}
           />
         </Field>
       </div>

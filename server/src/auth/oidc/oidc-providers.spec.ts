@@ -67,6 +67,24 @@ describe('parseEnvOidcProviders', () => {
     expect(provider.enabled).toBe(false);
   });
 
+  it('reads a sign-out URL, and ignores one that isn’t a URL', () => {
+    const { providers, errors } = parseEnvOidcProviders({
+      OIDC_2_ISSUER_URL: 'https://id.example.com',
+      OIDC_2_CLIENT_ID: 'web',
+      OIDC_2_LOGOUT_URL: 'https://id.example.com/logout',
+      OIDC_3_ISSUER_URL: 'https://three.example.com',
+      OIDC_3_CLIENT_ID: 'three',
+      OIDC_3_LOGOUT_URL: 'nope',
+    });
+    expect(providers.map((p) => p.logoutUrl)).toEqual([
+      'https://id.example.com/logout',
+      undefined,
+    ]);
+    expect(errors).toEqual([
+      'OIDC_3_LOGOUT_URL must be an http(s) URL; ignored.',
+    ]);
+  });
+
   it('skips incomplete or clashing ones and says why', () => {
     const { providers, errors } = parseEnvOidcProviders({
       OIDC_2_ISSUER_URL: 'not a url',
@@ -104,6 +122,7 @@ describe('parseStoredOidcProviders', () => {
       clientId: 'anchor',
       clientSecret: 'shh',
       mobileClientId: undefined,
+      logoutUrl: 'https://auth.lab.example.net/logout',
       source: 'database' as const,
     };
     expect(

@@ -48,8 +48,9 @@ function isHttpUrl(value: string): boolean {
  *
  *   OIDC_2_ISSUER_URL, OIDC_2_CLIENT_ID (both needed), OIDC_2_CLIENT_SECRET,
  *   OIDC_2_MOBILE_CLIENT_ID, OIDC_2_PROVIDER_NAME, OIDC_2_ID (the slug in
- *   its callback URL, `oidc-2` if not set) and OIDC_2_ENABLED (on unless
- *   "false").
+ *   its callback URL, `oidc-2` if not set), OIDC_2_ENABLED (on unless
+ *   "false") and OIDC_2_LOGOUT_URL (its sign-out page, if it publishes no
+ *   end_session_endpoint).
  *
  * Returns them in number order, with a message for each one left out.
  */
@@ -89,6 +90,11 @@ export function parseEnvOidcProviders(
       errors.push(`${prefix}ID "${id}" is used twice; skipped.`);
       continue;
     }
+    let logoutUrl = get('LOGOUT_URL');
+    if (logoutUrl && !isHttpUrl(logoutUrl)) {
+      errors.push(`${prefix}LOGOUT_URL must be an http(s) URL; ignored.`);
+      logoutUrl = undefined;
+    }
     seen.add(id);
     providers.push({
       id,
@@ -98,6 +104,7 @@ export function parseEnvOidcProviders(
       clientId,
       clientSecret: get('CLIENT_SECRET'),
       mobileClientId: get('MOBILE_CLIENT_ID'),
+      logoutUrl,
       source: 'env',
     });
   }
@@ -113,6 +120,7 @@ export interface StoredOidcProvider {
   clientId: string;
   clientSecret?: string;
   mobileClientId?: string;
+  logoutUrl?: string;
 }
 
 /** The providers added in the admin UI; anything unreadable is left out. */
@@ -149,6 +157,7 @@ export function parseStoredOidcProviders(
       clientId: entry.clientId,
       clientSecret: entry.clientSecret || undefined,
       mobileClientId: entry.mobileClientId || undefined,
+      logoutUrl: entry.logoutUrl || undefined,
       source: 'database',
     });
   }
@@ -168,5 +177,6 @@ export function toStoredOidcProvider(
     ...(provider.mobileClientId
       ? { mobileClientId: provider.mobileClientId }
       : {}),
+    ...(provider.logoutUrl ? { logoutUrl: provider.logoutUrl } : {}),
   };
 }

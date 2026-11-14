@@ -137,7 +137,7 @@
   "singleSignOn": {
     "copyAddressFailed": "Nie udało się skopiować adresu",
     "copyLabel": "Kopiuj: {label}",
-    "request": "Czy możesz dodać Anchor+ jako klienta OIDC w {provider}? W Pocket ID jest to OIDC Clients → Add OIDC Client.\n\n- Nazwa: Anchor+\n- Adresy zwrotne (callback): {callbackUrl}\n  oraz {phoneUrl} (dla aplikacji na telefon)\n- Klient publiczny: tak, z PKCE (aplikacja na telefon nie utrzyma sekretu)\n\nPotem wyślij mi jego identyfikator klienta i adres wystawcy (adres Twojego Pocket ID). Dzięki!",
+    "request": "Czy możesz dodać Anchor+ jako klienta OIDC w {provider}? W Pocket ID jest to OIDC Clients → Add OIDC Client.\n\n- Nazwa: Anchor+\n- Adresy zwrotne (callback): {callbackUrl}\n  oraz {phoneUrl} (dla aplikacji na telefon)\n- Adres zwrotny po wylogowaniu (post-logout redirect URI): {postLogoutUrl}\n- Adres wylogowania back-channel, jeśli jest: {backchannelUrl}\n- Klient publiczny: tak, z PKCE (aplikacja na telefon nie utrzyma sekretu)\n\nPotem wyślij mi jego identyfikator klienta i adres wystawcy (adres Twojego Pocket ID). Dzięki!",
     "testFailed": "Nie udało się przetestować adresu wystawcy",
     "saved": "Zapisano ustawienia logowania jednokrotnego",
     "saveFailed": "Nie udało się zapisać logowania jednokrotnego",
@@ -186,7 +186,20 @@
     "requestCopyFailed": "Nie udało się skopiować prośby",
     "copyRequest": "Skopiuj prośbę do administratora {provider}",
     "unsaved": "Masz niezapisane zmiany w logowaniu jednokrotnym.",
-    "discard": "Odrzuć"
+    "discard": "Odrzuć",
+    "logoutUrlInvalid": "Wpisz pełny adres URL albo zostaw puste.",
+    "providerLogout": "Wyloguj też z {provider}",
+    "providerLogoutHelp": "Wylogowanie z Anchor+ w przeglądarce prowadzi dalej do wylogowania w {provider}, a potem z powrotem na stronę logowania.",
+    "logoutUrl": "Adres wylogowania",
+    "logoutUrlHelp": "Zostaw puste, aby użyć end_session_endpoint publikowanego przez {provider}.",
+    "logoutUrlPlaceholder": "Z discovery dostawcy",
+    "logoutUrls": "Adresy wylogowania",
+    "postLogoutCallback": "Adres zwrotny po wylogowaniu",
+    "backchannelLogout": "Adres wylogowania back-channel",
+    "logoutUrlsHelp": "Dodaj pierwszy jako adres zwrotny po wylogowaniu (w Pocket ID: Logout Callback URL), żeby {provider} odsyłał ludzi z powrotem po wylogowaniu. Drugi podaj jako adres wylogowania back-channel, jeśli {provider} go ma, żeby wylogowanie tam wylogowywało też z Anchor+, również na telefonach.",
+    "providerLogoutAny": "Wyloguj też u dostawcy",
+    "providerLogoutAnyHelp": "Wylogowanie z Anchor+ w przeglądarce prowadzi dalej do wylogowania u dostawcy, przez którego nastąpiło logowanie, a potem z powrotem na stronę logowania.",
+    "logoutUrlsShared": "Wszyscy dostawcy poniżej używają tych samych dwóch."
   },
   "otherProviders": {
     "title": "Więcej dostawców",
@@ -212,6 +225,7 @@
     "fromServer": "Ustawione na serwerze",
     "callbackUrl": "Adres zwrotny {provider}",
     "removeTitle": "Usunąć {provider}?",
-    "removeDescription": "Jego przycisk zniknie ze strony logowania. Połączone konta pozostaną połączone i znów będą się nim logować, jeśli dodasz go ponownie z tym samym adresem wystawcy."
+    "removeDescription": "Jego przycisk zniknie ze strony logowania. Połączone konta pozostaną połączone i znów będą się nim logować, jeśli dodasz go ponownie z tym samym adresem wystawcy.",
+    "logoutUrlHelp": "Zostaw puste, aby użyć publikowanego przez niego end_session_endpoint. Używa tych samych adresów zwrotnego po wylogowaniu i wylogowania back-channel co pierwszy dostawca."
   }
 }

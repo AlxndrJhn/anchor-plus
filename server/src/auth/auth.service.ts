@@ -45,6 +45,7 @@ import {
 } from './constants/auth.constants';
 import { currentUserAgent } from '../common/utils/request-context';
 import { describeDevice, trimUserAgent } from './utils/device-label.util';
+import type { OidcSessionLink } from './oidc/oidc.types';
 
 @Injectable()
 export class AuthService {
@@ -713,8 +714,23 @@ export class AuthService {
   async createTokenPair(
     userId: string,
     email: string,
-    session?: { sessionId: string; signedInAt: Date; userAgent: string | null },
+    session?: {
+      sessionId: string;
+      signedInAt: Date;
+      userAgent: string | null;
+    } & { [K in keyof OidcSessionLink]?: OidcSessionLink[K] | null },
+    oidc?: OidcSessionLink,
   ) {
+    // A refresh carries the provider's session over from the token it replaces.
+    const link: OidcSessionLink | undefined =
+      oidc ??
+      (session?.oidcProvider
+        ? {
+            oidcProvider: session.oidcProvider,
+            oidcSid: session.oidcSid ?? null,
+            oidcIdToken: session.oidcIdToken ?? null,
+          }
+        : undefined);
     const payload = { email, sub: userId };
 
     // Generate access token (short-lived)
@@ -736,6 +752,11 @@ export class AuthService {
           signedInAt: session.signedInAt,
         }),
         userAgent: trimUserAgent(currentUserAgent()) ?? session?.userAgent,
+        ...(link && {
+          oidcProvider: link.oidcProvider,
+          oidcSid: link.oidcSid ?? null,
+          oidcIdToken: link.oidcIdToken ?? null,
+        }),
       },
     });
 
