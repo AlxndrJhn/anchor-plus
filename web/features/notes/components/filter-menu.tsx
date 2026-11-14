@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, Filter, Hash, Image, ListChecks } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { TopBarButton } from "@/components/layout/app-page";
 import { Button } from "@/components/ui/button";
@@ -15,17 +16,18 @@ import { BACKGROUNDS } from "@/lib/design/tokens";
 import { cn } from "@/lib/utils";
 import type { NoteList } from "../hooks/use-note-list";
 import type { NoteFilters } from "../note-filters";
+import { useBackgroundName } from "./background-picker";
 
 const headingClass = "m-0 mb-2 text-label text-muted-foreground uppercase";
 
 const KINDS: {
   key: "picture" | "checklist" | "reminder";
-  label: string;
+  label: "pictures" | "checklists" | "reminders";
   icon: React.ReactNode;
 }[] = [
-  { key: "picture", label: "Pictures", icon: <Image aria-hidden /> },
-  { key: "checklist", label: "Checklists", icon: <ListChecks aria-hidden /> },
-  { key: "reminder", label: "Reminders", icon: <Bell aria-hidden /> },
+  { key: "picture", label: "pictures", icon: <Image aria-hidden /> },
+  { key: "checklist", label: "checklists", icon: <ListChecks aria-hidden /> },
+  { key: "reminder", label: "reminders", icon: <Bell aria-hidden /> },
 ];
 
 const BACKGROUND_CHOICES = [
@@ -45,6 +47,8 @@ export function FilterMenu({
   /** Off in a tag's own view, which is already one tag. */
   showTags?: boolean;
 }) {
+  const t = useTranslations("notes.filterMenu");
+  const backgroundName = useBackgroundName();
   const { filters, activeFilters } = list;
   const { data: tags = [] } = useTags();
   const set = (patch: Partial<NoteFilters>) =>
@@ -57,19 +61,23 @@ export function FilterMenu({
           icon={<Filter aria-hidden />}
           aria-pressed={activeFilters > 0}
           aria-label={
-            activeFilters ? `Filter, ${activeFilters} on` : "Filter notes"
+            activeFilters
+              ? t("filterActiveLabel", { count: activeFilters })
+              : t("filterNotes")
           }
         >
-          {activeFilters ? `Filter · ${activeFilters}` : "Filter"}
+          {activeFilters
+            ? t("filterActive", { count: activeFilters })
+            : t("filter")}
         </TopBarButton>
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        aria-label="Filter notes"
+        aria-label={t("filterNotes")}
         className="grid w-76 max-w-[calc(100vw-2rem)] gap-3.5 p-3.5"
       >
         <div>
-          <h2 className={headingClass}>Has</h2>
+          <h2 className={headingClass}>{t("has")}</h2>
           <div className="flex flex-wrap gap-2">
             {KINDS.map((kind) => (
               <button
@@ -80,14 +88,14 @@ export function FilterMenu({
                 onClick={() => set({ [kind.key]: !filters[kind.key] })}
               >
                 {kind.icon}
-                {kind.label}
+                {t(kind.label)}
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <h2 className={headingClass}>Colour</h2>
+          <h2 className={headingClass}>{t("colour")}</h2>
           <div className="grid grid-cols-6 gap-2">
             {BACKGROUND_CHOICES.map((background) => {
               const chosen = filters.background === background.id;
@@ -96,8 +104,8 @@ export function FilterMenu({
                   key={background.id}
                   type="button"
                   aria-pressed={chosen}
-                  aria-label={background.name}
-                  title={background.name}
+                  aria-label={backgroundName(background)}
+                  title={backgroundName(background)}
                   data-note={background.id}
                   onClick={() =>
                     set({ background: chosen ? undefined : background.id })
@@ -115,7 +123,7 @@ export function FilterMenu({
 
         {showTags && tags.length > 0 && (
           <div>
-            <h2 className={headingClass}>Tag</h2>
+            <h2 className={headingClass}>{t("tag")}</h2>
             <div className="flex max-h-36 flex-wrap gap-2 overflow-y-auto">
               {tags.map((tag) => {
                 const chosen = filters.tagId === tag.id;
@@ -148,7 +156,7 @@ export function FilterMenu({
             className="justify-self-start"
             onClick={() => list.setFilters({})}
           >
-            Clear filters
+            {t("clearFilters")}
           </Button>
         )}
       </PopoverContent>

@@ -2,6 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { HTTPError } from "ky";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FormAlert } from "@/components/ui/field";
@@ -13,6 +14,7 @@ import { useAuthStore } from "@/features/auth/store";
 import { Row, RowText, Section } from "./settings-blocks";
 
 export function PasswordSection() {
+  const t = useTranslations("settings.password");
   const user = useAuthStore((s) => s.user);
   const oidc = useOidcConfig();
   const [currentPassword, setCurrentPassword] = React.useState("");
@@ -30,35 +32,28 @@ export function PasswordSection() {
     onSuccess: () => {
       setCurrentPassword("");
       setNewPassword("");
-      toast.success("Password changed");
+      toast.success(t("changed"));
     },
     onError: (e: Error) => {
       const status = e instanceof HTTPError ? e.response.status : 0;
-      if (status === 403)
-        setCurrentPasswordError("That isn’t your current password.");
+      if (status === 403) setCurrentPasswordError(t("wrongCurrent"));
       else if (status === 400 && /different/i.test(e.message))
-        setNewPasswordError(
-          "Use a password that’s different from your current one.",
-        );
-      else
-        setFormError(
-          status
-            ? "Couldn’t change the password. Try again in a moment."
-            : "Couldn’t reach the server. Check your connection and try again.",
-        );
+        setNewPasswordError(t("mustDiffer"));
+      else setFormError(t(status ? "changeFailed" : "offline"));
     },
   });
 
   const isProviderOnly =
     !!oidc.data?.enabled && !!oidc.data?.disableInternalAuth;
   if (user?.hasPassword === false || isProviderOnly) {
-    const providerName = oidc.data?.providerName || "your sign-in provider";
+    const providerName = oidc.data?.providerName;
+    const named = providerName ? "yes" : "no";
     return (
-      <Section id="password" title="Password">
+      <Section id="password" title={t("title")}>
         <Row>
           <RowText
-            title={`Your password is managed by ${providerName}`}
-            text={`Change it in ${providerName}.`}
+            title={t("managedBy", { named, provider: providerName ?? "" })}
+            text={t("changeIn", { named, provider: providerName ?? "" })}
           />
         </Row>
       </Section>
@@ -66,20 +61,20 @@ export function PasswordSection() {
   }
 
   return (
-    <Section id="password" title="Password">
+    <Section id="password" title={t("title")}>
       <Row className="block">
         <form
           className="grid gap-3.5"
           onSubmit={(e) => {
             e.preventDefault();
             if (newPassword.length < 8)
-              return setNewPasswordError("Use at least 8 characters.");
+              return setNewPasswordError(t("tooShort"));
             setFormError(null);
             passwordChange.mutate({ currentPassword, newPassword });
           }}
         >
           <div className="grid grid-cols-2 items-start gap-3.5 max-md:grid-cols-1">
-            <Field label="Current password" error={currentPasswordError}>
+            <Field label={t("current")} error={currentPasswordError}>
               <PasswordInput
                 value={currentPassword}
                 autoComplete="current-password"
@@ -90,8 +85,8 @@ export function PasswordSection() {
               />
             </Field>
             <Field
-              label="New password"
-              help="At least 8 characters."
+              label={t("new")}
+              help={t("newHelp")}
               error={newPasswordError}
             >
               <PasswordInput
@@ -109,9 +104,9 @@ export function PasswordSection() {
             <Button
               type="submit"
               disabled={!currentPassword || newPassword.length < 8}
-              busy={passwordChange.isPending && "Changing password…"}
+              busy={passwordChange.isPending && t("changing")}
             >
-              Change password
+              {t("change")}
             </Button>
           </div>
         </form>

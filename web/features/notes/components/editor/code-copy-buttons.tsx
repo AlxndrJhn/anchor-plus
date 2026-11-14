@@ -1,8 +1,10 @@
 "use client";
 
 import { Check, Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { copyText } from "@/lib/clipboard";
+import { translate } from "@/lib/i18n";
 
 interface Spot {
   top: number;
@@ -17,11 +19,12 @@ export function CodeCopyButtons({
 }: {
   container: HTMLDivElement | null;
 }) {
+  const t = useTranslations("editorMedia.codeCopy");
   const [spots, setSpots] = React.useState<Spot[]>([]);
   const [hover, setHover] = React.useState(-1);
   const [status, setStatus] = React.useState<{
     index: number;
-    word: string;
+    word: "selected" | "copied";
   } | null>(null);
 
   React.useEffect(() => {
@@ -36,7 +39,10 @@ export function CodeCopyButtons({
         if (!readOnly || el.tabIndex === 0) continue;
         el.tabIndex = 0;
         el.setAttribute("role", "group");
-        el.setAttribute("aria-label", "Code");
+        el.setAttribute(
+          "aria-label",
+          translate("editorMedia.codeCopy")("code"),
+        );
       }
       const box = container.getBoundingClientRect();
       const next = [...container.querySelectorAll<HTMLElement>(BLOCKS)].map(
@@ -102,9 +108,9 @@ export function CodeCopyButtons({
       const sel = getSelection();
       sel?.removeAllRanges();
       sel?.addRange(range);
-      setStatus({ index, word: "Selected" });
+      setStatus({ index, word: "selected" });
     };
-    copyText(text).then(() => setStatus({ index, word: "Copied" }), select);
+    copyText(text).then(() => setStatus({ index, word: "copied" }), select);
   };
 
   return (
@@ -121,7 +127,7 @@ export function CodeCopyButtons({
         >
           {status?.index === i ? <Check aria-hidden /> : <Copy aria-hidden />}
           <span aria-live="polite">
-            {status?.index === i ? status.word : "Copy"}
+            {status?.index === i ? t(status.word) : t("copy")}
           </span>
         </button>
       ))}

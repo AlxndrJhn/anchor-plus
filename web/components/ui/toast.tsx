@@ -1,9 +1,11 @@
 "use client";
 
 import { Check, CircleAlert, Info, LoaderCircle, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { create } from "zustand";
+import { translate } from "@/lib/i18n";
 import { onPageClose } from "@/lib/page-close";
 import { cn } from "@/lib/utils";
 
@@ -62,9 +64,9 @@ const useToastStore = create<ToastState>((set, get) => ({
     const previous = get().current;
     const action =
       options.undo && !options.action
-        ? { label: "Undo", onClick: options.undo }
+        ? { label: translate("common")("undo"), onClick: options.undo }
         : options.retry
-          ? { label: "Try again", onClick: options.retry }
+          ? { label: translate("common")("retry"), onClick: options.retry }
           : options.action;
     const swap = !!previous && previous.id === id && previous.kind === "busy";
     if (previous && !swap) previous.onClose?.();
@@ -76,7 +78,7 @@ const useToastStore = create<ToastState>((set, get) => ({
         action,
         secondaryAction:
           options.undo && options.action
-            ? { label: "Undo", onClick: options.undo }
+            ? { label: translate("common")("undo"), onClick: options.undo }
             : undefined,
         duration: options.duration ?? DURATION[kind],
         serial: ++serial,
@@ -191,6 +193,7 @@ function ToastView({
   leaving?: boolean;
   moved?: boolean;
 }) {
+  const t = useTranslations("layout.ui.toast");
   const dismiss = useToastStore((s) => s.dismiss);
   const finishLeaving = useToastStore((s) => s.finishLeaving);
   const ref = React.useRef<HTMLDivElement>(null);
@@ -301,7 +304,7 @@ function ToastView({
       )}
       <button
         type="button"
-        aria-label="Dismiss"
+        aria-label={t("dismiss")}
         onClick={() => dismiss(item.id)}
         className="grid size-7.5 flex-none cursor-pointer place-items-center rounded-sm bg-transparent text-inverse-foreground/65 hover:bg-inverse-foreground/10 hover:text-inverse-foreground [&_svg]:size-3.75"
       >

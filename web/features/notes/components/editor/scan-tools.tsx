@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, Share2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Delta from "quill-delta";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,8 @@ export const ScanTools = React.forwardRef<
     readOnly?: boolean;
   }
 >(({ getQuill, container, host, load, readOnly }, ref) => {
+  const t = useTranslations("editor.scan");
+  const tc = useTranslations("common");
   const [open, setOpen] = React.useState<Open | null>(null);
   const [busy, setBusy] = React.useState<"pdf" | "share" | null>(null);
   const editor = React.useRef<ScanEditorHandle>(null);
@@ -116,13 +119,12 @@ export const ScanTools = React.forwardRef<
         if (share) await sharePdf(file);
         else downloadFile(file);
       } catch (e) {
-        if ((e as Error)?.name !== "AbortError")
-          toast.error("Couldn’t make the PDF");
+        if ((e as Error)?.name !== "AbortError") toast.error(t("pdfFailed"));
       } finally {
         setBusy(null);
       }
     },
-    [read],
+    [read, t],
   );
 
   React.useImperativeHandle(
@@ -143,7 +145,7 @@ export const ScanTools = React.forwardRef<
 
   const startNew = async (files: File[]) => {
     if (!host || !files.length) return;
-    const toastId = toast.busy("Adding pages…");
+    const toastId = toast.busy(t("addingPages"));
     try {
       const corners = await Promise.all(
         files.map((f) => detectCorners(f).catch(() => null)),
@@ -160,7 +162,7 @@ export const ScanTools = React.forwardRef<
         at: caret.current,
       });
     } catch {
-      toast.error("Couldn’t add the pictures");
+      toast.error(t("addFailed"));
     } finally {
       toast.dismiss(toastId);
     }
@@ -299,10 +301,11 @@ export const ScanTools = React.forwardRef<
           }}
         >
           <DialogHeader>
-            <DialogTitle>{open?.from ? "Edit scan" : "New scan"}</DialogTitle>
+            <DialogTitle>
+              {open?.from ? t("editTitle") : t("newTitle")}
+            </DialogTitle>
             <DialogDescription className="max-md:sr-only">
-              Drag pages to reorder them. Pick Corners to fit the frame to the
-              page, and choose a look for each page.
+              {t("dialogHelp")}
             </DialogDescription>
           </DialogHeader>
           <DialogBody className="min-h-0">
@@ -327,7 +330,7 @@ export const ScanTools = React.forwardRef<
                 className="mr-auto max-md:mr-0"
                 onClick={remove}
               >
-                Remove from note
+                {t("removeFromNote")}
               </Button>
             )}
             <Button
@@ -340,7 +343,7 @@ export const ScanTools = React.forwardRef<
                 if (scan) void download(scan);
               }}
             >
-              <Download /> {busy === "pdf" ? "Making PDF…" : "Download PDF"}
+              <Download /> {busy === "pdf" ? t("makingPdf") : t("downloadPdf")}
             </Button>
             {canSharePdf() && (
               <Button
@@ -353,14 +356,14 @@ export const ScanTools = React.forwardRef<
                   if (scan) void download(scan, true);
                 }}
               >
-                <Share2 /> Share PDF
+                <Share2 /> {t("sharePdf")}
               </Button>
             )}
             <Button type="button" variant="secondary" onClick={cancel}>
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button type="button" onClick={save}>
-              {open?.from ? "Save" : "Add to note"}
+              {open?.from ? tc("save") : t("addToNote")}
             </Button>
           </DialogFooter>
         </DialogContent>

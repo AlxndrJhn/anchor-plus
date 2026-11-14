@@ -35,6 +35,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { IconButton } from "@/components/ui/button";
 import {
@@ -146,6 +147,8 @@ interface ActionSpec {
 type MenuEntry = QuickAction | "removeLock" | "editQuickActions";
 
 export function NoteEditorHeader(props: NoteEditorHeaderProps) {
+  const t = useTranslations("noteEditor.header");
+  const tc = useTranslations("common");
   const router = useRouter();
   const width: BarWidth = useIsPhone() ? "narrow" : "wide";
   const savedSetup = usePreferencesStore((s) => s.editor.quickActions?.[width]);
@@ -167,11 +170,13 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
   const afterMenu = React.useRef<(() => void) | null>(null);
   const late = !!props.reminder && isReminderPast(props.reminder);
   const checkboxesLabel =
-    props.checkboxes === "show" ? "Show checkboxes" : "Hide checkboxes";
-  const trashLabel = props.isOwner ? "Move to trash" : "Remove from my notes";
+    props.checkboxes === "show" ? t("showCheckboxes") : t("hideCheckboxes");
+  const trashLabel = props.isOwner ? t("moveToTrash") : t("removeFromMine");
   const bellLabel = props.reminder
-    ? `${late ? "Late reminder" : "Reminder"}: ${reminderLabel(props.reminder)}`
-    : "Add a reminder";
+    ? t(late ? "lateReminder" : "reminder", {
+        when: reminderLabel(props.reminder),
+      })
+    : t("addReminder");
   const hasChecklist = !!props.checklist;
   const inMenuChecklist = (needsItems: boolean) =>
     hasChecklist && (!needsItems || !!counts?.items);
@@ -185,7 +190,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "pin":
         return props.saved
           ? {
-              label: props.isPinned ? "Unpin" : "Pin",
+              label: props.isPinned ? t("unpin") : t("pin"),
               icon: props.isPinned && inMenu ? <PinOff /> : <Pin />,
               run: props.onTogglePin,
               pressed: props.isPinned,
@@ -208,19 +213,19 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
         return props.readOnly
           ? null
           : {
-              label: "Background",
+              label: t("background"),
               icon: <Palette />,
               run: () => setBackgroundOpen(true),
               popover: "background",
             };
       case "addImage":
         return props.onAddImage
-          ? { label: "Add image", icon: <ImagePlus />, run: props.onAddImage }
+          ? { label: t("addImage"), icon: <ImagePlus />, run: props.onAddImage }
           : null;
       case "takePicture":
         return props.onTakePicture
           ? {
-              label: "Take picture",
+              label: t("takePicture"),
               icon: <Camera />,
               run: props.onTakePicture,
               afterMenu: true,
@@ -229,7 +234,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "takeSeveral":
         return props.onTakeSeveral
           ? {
-              label: "Take several",
+              label: t("takeSeveral"),
               icon: <Images />,
               run: props.onTakeSeveral,
               afterMenu: true,
@@ -246,7 +251,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "uncheckAll":
         return props.checklist && (!inMenu || inMenuChecklist(true))
           ? {
-              label: "Uncheck all",
+              label: t("uncheckAll"),
               icon: <ListRestart />,
               run: props.checklist.uncheckAll,
               disabled: inMenu && counts?.checked === 0,
@@ -255,7 +260,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "deleteChecked":
         return props.checklist && (!inMenu || inMenuChecklist(true))
           ? {
-              label: "Delete checked items",
+              label: t("deleteChecked"),
               icon: <ListX />,
               run: props.checklist.deleteChecked,
               danger: true,
@@ -265,7 +270,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "sortByName":
         return props.checklist && (!inMenu || inMenuChecklist(true))
           ? {
-              label: "Sort A to Z",
+              label: t("sortByName"),
               icon: <ArrowDownAZ />,
               run: props.checklist.sortByName,
               disabled: inMenu && (counts?.items ?? 0) < 2,
@@ -274,7 +279,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "share":
         return props.isOwner && props.saved
           ? {
-              label: props.sharedWithCount ? "Sharing" : "Share",
+              label: props.sharedWithCount ? t("sharing") : t("share"),
               icon: <UserPlus />,
               run: props.onShare,
               needsSave: true,
@@ -283,7 +288,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "send":
         return props.saved
           ? {
-              label: "Send",
+              label: t("send"),
               icon: <Send />,
               run: props.onSend,
               afterMenu: true,
@@ -292,7 +297,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
           : null;
       case "print":
         return {
-          label: "Print",
+          label: t("print"),
           icon: <Printer />,
           run: props.onPrint,
           afterMenu: true,
@@ -300,7 +305,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "copy":
         return props.onCopy && props.saved
           ? {
-              label: "Make a copy",
+              label: t("makeCopy"),
               icon: <Copy />,
               run: props.onCopy,
               needsSave: true,
@@ -309,7 +314,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "history":
         return props.canViewHistory && props.saved
           ? {
-              label: "Version history",
+              label: t("versionHistory"),
               icon: <History />,
               run: props.onHistory,
               afterMenu: true,
@@ -319,7 +324,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "lock":
         return props.saved
           ? {
-              label: props.lock ? "Change lock…" : "Lock…",
+              label: props.lock ? t("changeLock") : t("lock"),
               icon: <Lock />,
               run: props.onLock,
               afterMenu: true,
@@ -329,7 +334,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "removeLock":
         return props.saved && props.lock
           ? {
-              label: "Remove lock",
+              label: t("removeLock"),
               icon: <LockOpen />,
               run: props.onRemoveLock,
               needsSave: true,
@@ -338,7 +343,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "freeze":
         return props.onToggleFreeze
           ? {
-              label: props.frozen ? "Unfreeze" : "Freeze",
+              label: props.frozen ? t("unfreeze") : t("freeze"),
               icon: <Snowflake />,
               run: props.onToggleFreeze,
             }
@@ -346,7 +351,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       case "archive":
         return props.saved
           ? {
-              label: props.isArchived ? "Unarchive" : "Archive",
+              label: props.isArchived ? t("unarchive") : tc("archive"),
               icon: props.isArchived ? <ArchiveRestore /> : <Archive />,
               run: props.isArchived ? props.onUnarchive : props.onArchive,
               needsSave: true,
@@ -364,7 +369,7 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
           : null;
       case "editQuickActions":
         return {
-          label: "Edit quick actions",
+          label: t("editQuickActions"),
           icon: <Settings2 />,
           run: () => router.push("/settings#set-quick-actions"),
           afterMenu: true,
@@ -487,13 +492,13 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       ref={roving.ref}
       className="ed-head"
       role="toolbar"
-      aria-label="Note"
+      aria-label={t("toolbar")}
       onFocus={roving.onFocus}
       onKeyDown={roving.onKeyDown}
     >
       <div className="ed-head-l">
-        <Tip label="Back">
-          <IconButton label="Back" onClick={props.onBack}>
+        <Tip label={tc("back")}>
+          <IconButton label={tc("back")} onClick={props.onBack}>
             <ArrowLeft />
           </IconButton>
         </Tip>
@@ -501,8 +506,8 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
       </div>
       {props.trashed && props.canViewHistory && (
         <div className="ed-head-r">
-          <Tip label="Version history">
-            <IconButton label="Version history" onClick={props.onHistory}>
+          <Tip label={t("versionHistory")}>
+            <IconButton label={t("versionHistory")} onClick={props.onHistory}>
               <History />
             </IconButton>
           </Tip>
@@ -516,9 +521,9 @@ export function NoteEditorHeader(props: NoteEditorHeaderProps) {
               if (open) setCounts(props.checklist?.getCounts() ?? null);
             }}
           >
-            <Tip label="More">
+            <Tip label={tc("more")}>
               <DropdownMenuTrigger asChild>
-                <IconButton label="More">
+                <IconButton label={tc("more")}>
                   <Ellipsis />
                 </IconButton>
               </DropdownMenuTrigger>
@@ -575,31 +580,30 @@ function SaveStatus({
   state: SaveState;
   onRetry: () => void;
 }) {
+  const t = useTranslations("noteEditor.header.save");
   const online = useSyncStatus((s) => s.online);
   if (state === "new") return null;
   const labelClass = "max-md:sr-only";
-  const waitingHint = online
-    ? "The server isn’t answering. Keep this tab open so your changes can be saved."
-    : "You’re offline. Your changes are kept on this device and saved when you’re back online.";
+  const waitingHint = online ? t("serverSilent") : t("offlineHint");
   return (
     <span className="save" aria-live="polite">
       {state === "saved" && (
         <span data-s>
           <Check aria-hidden />
-          <span className={labelClass}>Saved</span>
+          <span className={labelClass}>{t("saved")}</span>
         </span>
       )}
       {state === "saving" && (
         <span data-s>
           <LoaderCircle aria-hidden className="animate-spin" />
-          <span className={labelClass}>Saving…</span>
+          <span className={labelClass}>{t("saving")}</span>
         </span>
       )}
       {state === "offline" && (
         <Tip label={waitingHint}>
           <span data-s>
             <CloudOff aria-hidden />
-            <span className={labelClass}>Waiting to save</span>
+            <span className={labelClass}>{t("waiting")}</span>
             <span className="sr-only">. {waitingHint}</span>
           </span>
         </Tip>
@@ -607,13 +611,13 @@ function SaveStatus({
       {state === "failed" && (
         <span data-s className="font-medium text-late">
           <CircleAlert aria-hidden />
-          <span className={labelClass}>Couldn’t save</span>
+          <span className={labelClass}>{t("failed")}</span>
           <button
             type="button"
             onClick={onRetry}
             className="ml-0.5 cursor-pointer border-0 bg-transparent p-0 font-semibold text-inherit underline decoration-current/35 underline-offset-3 hover:decoration-current"
           >
-            Try again
+            {t("tryAgain")}
           </button>
         </span>
       )}

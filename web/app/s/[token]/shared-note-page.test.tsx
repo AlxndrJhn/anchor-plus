@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getSharedNote, updateSharedNote } from "@/features/notes/api";
 import type { SharedNote } from "@/features/notes/types";
+import { WithIntl } from "@/lib/i18n/test-utils";
 import SharedNotePage from "./shared-note-page";
 
 vi.mock("next/navigation", () => ({
@@ -66,9 +67,11 @@ async function open() {
   root = createRoot(host);
   await act(async () => {
     root?.render(
-      <QueryClientProvider client={client}>
-        <SharedNotePage />
-      </QueryClientProvider>,
+      <WithIntl>
+        <QueryClientProvider client={client}>
+          <SharedNotePage />
+        </QueryClientProvider>
+      </WithIntl>,
     );
   });
   await act(async () => {

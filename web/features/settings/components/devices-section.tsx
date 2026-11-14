@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNowStrict } from "date-fns";
 import { LogOut, Monitor, Smartphone } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { FEATURES } from "@/components/layout/plus-mark";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import {
 } from "@/features/auth/api";
 import type { DeviceSession } from "@/features/auth/types";
 import { useRetry } from "@/lib/hooks/use-retry";
+import { dateLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { handOffScan, TELEPORT_WAIT_MS } from "./scan-handoff";
 import { Row, RowText, Section } from "./settings-blocks";
@@ -32,14 +34,25 @@ const ARRIVAL_MS = 2800;
 export const isPhone = (session: DeviceSession) =>
   /Android|iOS/.test(session.device);
 
-function sessionUse(session: DeviceSession) {
-  const signedIn = `Signed in ${formatDistanceToNowStrict(new Date(session.signedInAt))} ago`;
+function sessionUse(
+  session: DeviceSession,
+  t: ReturnType<typeof useTranslations<"settings.devices">>,
+) {
+  const signedIn = formatDistanceToNowStrict(new Date(session.signedInAt), {
+    locale: dateLocale(),
+  });
   return session.current
-    ? signedIn
-    : `${signedIn}, last active ${formatDistanceToNowStrict(new Date(session.lastActiveAt))} ago`;
+    ? t("signedIn", { signedIn })
+    : t("signedInAndActive", {
+        signedIn,
+        active: formatDistanceToNowStrict(new Date(session.lastActiveAt), {
+          locale: dateLocale(),
+        }),
+      });
 }
 
 export function DevicesSection() {
+  const t = useTranslations("settings.devices");
   const queryClient = useQueryClient();
   const sessions = useQuery({
     queryKey: sessionsKey,
@@ -57,10 +70,10 @@ export function DevicesSection() {
     mutationFn: (session: DeviceSession) => revokeSession(session.id),
     onSuccess: (_, session) => {
       void refresh();
-      toast.success(`Signed out ${session.device}`);
+      toast.success(t("signedOut", { device: session.device }));
     },
     onError: (_, session) =>
-      toast.error(`Couldn’t sign out ${session.device}`, {
+      toast.error(t("signOutFailed", { device: session.device }), {
         retry: () => signOutOne.mutate(session),
       }),
   });
@@ -69,10 +82,10 @@ export function DevicesSection() {
     onSuccess: () => {
       setConfirming(false);
       void refresh();
-      toast.success("Signed out of your other devices");
+      toast.success(t("signedOutOthers"));
     },
     onError: () =>
-      toast.error("Couldn’t sign out your other devices", {
+      toast.error(t("signOutOthersFailed"), {
         retry: () => signOutOthers.mutate(),
       }),
   });
@@ -80,16 +93,12 @@ export function DevicesSection() {
   const others = sessions.data?.filter((session) => !session.current) ?? [];
 
   return (
-    <Section
-      id="devices"
-      title="Devices"
-      description="Where you’re signed in. Sign out a device you don’t use or don’t recognize."
-    >
+    <Section id="devices" title={t("title")} description={t("description")}>
       {sessions.isError || retry.isRetrying ? (
         <Row>
           <LoadFailedRow
             className="flex-1"
-            message="Couldn’t load your devices."
+            message={t("loadFailed")}
             onRetry={retry.retry}
             isRetrying={retry.isRetrying}
           />
@@ -118,18 +127,20 @@ export function DevicesSection() {
                 <RowText
                   title={session.device}
                   saved={
-                    session.current && <Badge tone="ok">This device</Badge>
+                    session.current && (
+                      <Badge tone="ok">{t("thisDevice")}</Badge>
+                    )
                   }
-                  text={sessionUse(session)}
+                  text={sessionUse(session, t)}
                 />
                 {!session.current && (
                   <Button
                     variant="quiet"
-                    aria-label={`Sign out ${session.device}`}
+                    aria-label={t("signOutDevice", { device: session.device })}
                     onClick={() => signOutOne.mutate(session)}
-                    busy={isSigningOut && "Signing out…"}
+                    busy={isSigningOut && t("signingOut")}
                   >
-                    Sign out
+                    {t("signOut")}
                   </Button>
                 )}
               </Row>
@@ -155,12 +166,12 @@ export function DevicesSection() {
           {others.length > 1 && (
             <Row>
               <RowText
-                title="Sign out other devices"
-                text="Every device above except this one."
+                title={t("signOutOthers")}
+                text={t("signOutOthersText")}
               />
               <Button variant="secondary" onClick={() => setConfirming(true)}>
                 <LogOut aria-hidden />
-                Sign out others
+                {t("signOutOthersButton")}
               </Button>
             </Row>
           )}
@@ -169,10 +180,10 @@ export function DevicesSection() {
       <ConfirmationDialog
         open={confirming}
         onOpenChange={(open) => !open && setConfirming(false)}
-        title="Sign out your other devices?"
-        description="Within 15 minutes they’ll be asked to sign in again. This device stays signed in."
-        confirmLabel="Sign out others"
-        busyLabel="Signing out…"
+        title={t("confirmTitle")}
+        description={t("confirmText")}
+        confirmLabel={t("signOutOthersButton")}
+        busyLabel={t("signingOut")}
         variant="destructive"
         isPending={signOutOthers.isPending}
         onConfirm={() => signOutOthers.mutate()}

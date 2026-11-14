@@ -1,1 +1,210 @@
-{}
+{
+  "ui": {
+    "calendar": {
+      "previousMonth": "Poprzedni miesiąc",
+      "nextMonth": "Następny miesiąc"
+    },
+    "selectionBar": {
+      "label": "Zaznaczone notatki",
+      "selectAll": "Zaznacz wszystko",
+      "selected": "Zaznaczono: {count}",
+      "selectNotes": "Zaznacz notatki",
+      "stopKey": "Zakończ zaznaczanie (Esc)",
+      "stop": "Zakończ zaznaczanie"
+    },
+    "toast": {
+      "dismiss": "Zamknij"
+    },
+    "emptyState": {
+      "tryingAgain": "Ponawianie…",
+      "checkConnection": "Sprawdź połączenie i spróbuj ponownie."
+    },
+    "passwordInput": {
+      "hidePassword": "Ukryj hasło",
+      "showPassword": "Pokaż hasło",
+      "hide": "Ukryj",
+      "show": "Pokaż"
+    }
+  },
+  "errors": {
+    "code": "Błąd {id}",
+    "title": "Coś poszło nie tak",
+    "text": "Wystąpił nieoczekiwany błąd. Zwykle pomaga ponowne wczytanie strony. Twoje zapisane notatki są bezpieczne.",
+    "reload": "Wczytaj ponownie",
+    "copyDetails": "Kopiuj szczegóły błędu",
+    "detailsCopied": "Skopiowano szczegóły błędu",
+    "detailsCopyFailed": "Nie udało się skopiować szczegółów"
+  },
+  "missingPage": {
+    "title": "Nie znaleziono strony",
+    "text": "Sprawdź adres lub wróć do swoich notatek.",
+    "goToNotes": "Przejdź do notatek",
+    "searchNotes": "Szukaj notatek"
+  },
+  "api": {
+    "unreachable": "Nie udało się połączyć z serwerem",
+    "uploadFailed": "Przesyłanie nie powiodło się ({status})",
+    "pictureNotLoaded": "Nie udało się wczytać obrazu"
+  },
+  "offline": {
+    "synced": "Znowu online. Wszystkie zmiany zsynchronizowane.",
+    "stillWaiting": "Znowu online. Niektóre zmiany nadal czekają na synchronizację."
+  },
+  "localBackend": {
+    "frozen": "Ta notatka jest zamrożona; najpierw ją odmroź",
+    "noteNotFound": "Nie znaleziono notatki",
+    "noServerToManage": "Nie ma serwera do zarządzania",
+    "needsServer": "Niedostępne bez serwera",
+    "sharingNeedsServer": "Udostępnianie wymaga serwera Anchor",
+    "shareLinksNeedServer": "Linki udostępniania wymagają serwera Anchor",
+    "notInTrash": "Notatki nie ma w koszu",
+    "onlyActiveFrozen": "Zamrozić można tylko aktywne notatki",
+    "noteChanged": "Notatka została zmieniona przez kogoś innego",
+    "revisionNotFound": "Nie znaleziono wersji",
+    "noFile": "Brak pliku",
+    "attachmentNotFound": "Nie znaleziono załącznika",
+    "wrongPin": "Zły PIN",
+    "wrongPattern": "Zły wzór",
+    "notFound": "Nie znaleziono",
+    "tagNotFound": "Nie znaleziono tagu",
+    "tagChanged": "Tag został zmieniony przez kogoś innego",
+    "markdownNeedsServer": "Eksport do Markdown wymaga serwera Anchor"
+  },
+  "customTheme": {
+    "invalidJson": "Nieprawidłowy JSON: {message}",
+    "mustBeObject": "Motyw musi być obiektem JSON, na przykład {example}",
+    "nameString": "name: musi być tekstem",
+    "modeObject": "{mode}: musi być obiektem z kolorami",
+    "notColour": "{path}: {value} nie jest kolorem; użyj #rgb, #rrggbb lub #rrggbbaa",
+    "needOne": "Podaj co najmniej „light” lub „dark”",
+    "unknownKey": "{path}: nieznany klucz; oczekiwany jest jeden z {options}",
+    "unknownKeyGuess": "{path}: nieznany klucz (czy chodziło o „{guess}”?); oczekiwany jest jeden z {options}"
+  },
+  "sidebar": {
+    "sidebar": "Pasek boczny",
+    "newNote": "Nowa notatka",
+    "newNoteKey": "Nowa notatka (N)",
+    "pages": "Strony",
+    "tags": "Tagi",
+    "newTag": "Nowy tag",
+    "tagsLoadFailed": "Nie udało się wczytać tagów",
+    "tagsLoadFailedRetry": "Nie udało się wczytać tagów. Spróbuj ponownie",
+    "noTags": "Brak tagów",
+    "moveTag": "Przenieś {name}",
+    "moveTagHint": "Przeciągnij, aby przenieść, lub użyj klawiszy strzałek",
+    "tagTip": "#{name} · {count, plural, one {# notatka} few {# notatki} many {# notatek} other {# notatki}}",
+    "tagOptions": "Opcje: {name}",
+    "tagMenu": "Tag {name}",
+    "renameTag": "Zmień nazwę",
+    "color": "Kolor",
+    "deleteTag": "Usuń tag",
+    "offline": "Offline",
+    "offlineUnsaved": "Offline · {count, plural, one {# niezapisana zmiana} few {# niezapisane zmiany} many {# niezapisanych zmian} other {# niezapisanej zmiany}}",
+    "expandKey": "Rozwiń pasek boczny ({keys})",
+    "collapseSidebar": "Zwiń pasek boczny",
+    "keepSidebarOpen": "Zostaw pasek otwarty",
+    "expandSidebar": "Rozwiń pasek boczny",
+    "collapse": "Zwiń",
+    "keepOpen": "Zostaw otwarty",
+    "featureDemos": "Pokazy funkcji",
+    "downloads": "Pobieranie",
+    "deleteTagTitle": "Usunąć tag „{name}”?",
+    "deleteTagDescription": "Tag zostanie usunięty z {count, plural, one {# notatki} other {# notatek}}. Twoje notatki nie zostaną usunięte.",
+    "deleteTagUnused": "Żadna notatka nie używa tego tagu.",
+    "deleting": "Usuwanie…",
+    "connectPhoneTip": "Połącz telefon kodem QR",
+    "connectPhone": "Połącz telefon",
+    "viaQrCode": "kodem QR",
+    "hide": "Ukryj",
+    "hidePhoneSetup": "Ukryj konfigurację telefonu",
+    "account": "Konto",
+    "keyboardShortcuts": "Skróty klawiszowe",
+    "admin": "Administracja",
+    "signOut": "Wyloguj się",
+    "theme": "Motyw",
+    "themeLight": "Jasny",
+    "themeDark": "Ciemny",
+    "themeSystem": "Jak system",
+    "colorFailed": "Nie udało się zmienić koloru #{name}",
+    "deleteFailed": "Nie udało się usunąć #{name}",
+    "moveFailed": "Nie udało się przenieść tagu"
+  },
+  "skipLink": {
+    "label": "Przejdź do treści"
+  },
+  "splash": {
+    "loading": "Wczytywanie Anchor+",
+    "connecting": "Łączenie…"
+  },
+  "desktopUpdate": {
+    "restartTip": "Uruchom Anchor+ ponownie, aby zaktualizować do wersji {version}",
+    "restarting": "Ponowne uruchamianie…",
+    "update": "Aktualizuj"
+  },
+  "legalNotice": {
+    "copyright": "© Współtwórcy Anchor i Anchor+. Wolne oprogramowanie na licencji GNU AGPL v3, bez gwarancji.",
+    "sourceCode": "Kod źródłowy",
+    "license": "Licencja"
+  },
+  "serverDown": {
+    "theServer": "Serwer",
+    "title": "Brak połączenia z serwerem",
+    "text": "{host} nie odpowiada. Twoje notatki są bezpieczne na serwerze.",
+    "tryAgain": "Spróbuj ponownie",
+    "connecting": "Łączenie…",
+    "tryingAgainIn": "Kolejna próba za {count, plural, one {# sekundę} few {# sekundy} many {# sekund} other {# sekundy}}",
+    "whatYouCanDo": "Co możesz zrobić",
+    "checkConnection": "Sprawdź połączenie z internetem.",
+    "maybeRestarting": "Serwer może się właśnie restartować. Anchor+ będzie próbować dalej.",
+    "contactAdmin": "Jeśli po kilku minutach nadal nie działa, skontaktuj się z osobą, która prowadzi <b>{host}</b>.",
+    "noAnswer": "Serwer nie odpowiedział na <code>GET /api/auth/me</code>."
+  },
+  "shortcuts": {
+    "title": "Skróty klawiszowe",
+    "or": "lub",
+    "sections": {
+      "anywhere": "Wszędzie",
+      "notes": "Notatki",
+      "focused": "Wskazane lub zaznaczone notatki",
+      "inNote": "W notatce"
+    },
+    "rows": {
+      "newNote": "Nowa notatka",
+      "search": "Szukaj lub przejdź do strony albo tagu po nazwie",
+      "goToPage": "Przejdź do Notatek, Archiwum, Kosza lub Ustawień",
+      "goToTag": "Przejdź do tagu: wpisz kilka jego liter",
+      "toggleSidebar": "Pokaż lub ukryj pasek boczny",
+      "thisDialog": "Te skróty",
+      "moveBetween": "Przechodź między notatkami",
+      "firstOrLast": "Pierwsza lub ostatnia notatka",
+      "open": "Otwórz notatkę",
+      "select": "Zaznacz notatkę",
+      "selectUpTo": "Zaznacz do niej",
+      "newNoteOrList": "Nowa notatka lub lista, gdy żadna notatka nie jest wskazana",
+      "leaveTag": "Opuść tag i wróć do wszystkich notatek",
+      "pin": "Przypnij lub odepnij",
+      "archive": "Archiwizuj lub przywróć z archiwum",
+      "trash": "Przenieś do kosza; w koszu usuń na zawsze",
+      "leaveText": "Opuść tekst; ponownie, aby zamknąć",
+      "backIntoText": "Wróć do tekstu",
+      "closeOrTick": "Zamknij lub zaznacz pozycję listy kontrolnej",
+      "archiveOne": "Archiwizuj",
+      "trashOne": "Przenieś do kosza"
+    }
+  },
+  "tagJump": {
+    "title": "Przejdź do tagu",
+    "tagName": "Nazwa tagu",
+    "placeholder": "Wpisz nazwę tagu",
+    "tags": "Tagi",
+    "noMatch": "Brak pasującego tagu",
+    "noTags": "Brak tagów"
+  },
+  "appPage": {
+    "openMenu": "Otwórz menu",
+    "clearSearch": "Wyczyść wyszukiwanie",
+    "goTo": "Przejdź do",
+    "tag": "Tag",
+    "page": "Strona"
+  }
+}

@@ -10,6 +10,7 @@ import type {
   NoteReminderInput,
   NoteRevisionCause,
 } from "@/features/notes/types";
+import { translate } from "@/lib/i18n";
 import { newId } from "@/lib/id";
 import {
   type Data,
@@ -24,8 +25,7 @@ const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION;
 const REVISION_COLLAPSE_WINDOW_MS = 10 * 60 * 1000;
 const REVISION_PAGE_SIZE = 30;
 const TRASH_RETENTION_DAYS = 30;
-const FROZEN = "This note is frozen; unfreeze it first";
-const NOT_FOUND = "Note not found";
+const lb = () => translate("layout.localBackend");
 
 class HttpError extends Error {
   constructor(
@@ -169,7 +169,7 @@ export class LocalServer {
       case "import":
         return this.import(method, rest, req);
       case "admin":
-        return fail(403, "There is no server to manage");
+        return fail(403, lb()("noServerToManage"));
     }
     return fail(404, `Cannot ${method} /api/${[area, ...rest].join("/")}`);
   }
@@ -218,7 +218,7 @@ export class LocalServer {
       }
       return this.me();
     }
-    return fail(400, "Not available without a server");
+    return fail(400, lb()("needsServer"));
   }
 
   // Notes
@@ -226,7 +226,7 @@ export class LocalServer {
   private find(id: string, { deleted = false } = {}): StoredNote {
     const note = this.data.notes.find((n) => n.id === id);
     if (!note || (!deleted && note.state === "deleted"))
-      return fail(404, NOT_FOUND);
+      return fail(404, lb()("noteNotFound"));
     return note;
   }
 
@@ -304,12 +304,12 @@ export class LocalServer {
     if (action === "shares") {
       this.find(id);
       if (method === "GET") return [];
-      return fail(400, "Sharing needs an Anchor server");
+      return fail(400, lb()("sharingNeedsServer"));
     }
     if (action === "link") {
       this.find(id);
       if (method === "GET") return { link: null };
-      return fail(400, "Share links need an Anchor server");
+      return fail(400, lb()("shareLinksNeedServer"));
     }
 
     const note = this.find(id);
@@ -321,13 +321,13 @@ export class LocalServer {
       case "DELETE ":
         return this.trash(note, req.query.get("trashedAt") ?? undefined);
       case "PATCH restore":
-        if (note.state !== "trashed") fail(404, "Note is not in trash");
+        if (note.state !== "trashed") fail(404, lb()("notInTrash"));
         note.state = "active";
         note.version++;
         note.stateChangedAt = now();
         return this.toNote(note);
       case "DELETE permanent":
-        if (note.isFrozen) fail(403, FROZEN);
+        if (note.isFrozen) fail(403, lb()("frozen"));
         await this.destroy(note);
         return this.toNote(note);
       case "PATCH position":
@@ -340,7 +340,7 @@ export class LocalServer {
       case "PATCH freeze": {
         const isFrozen = !!body.isFrozen;
         if (isFrozen && note.state !== "active")
-          fail(400, "Only active notes can be frozen");
+          fail(400, lb()("onlyActiveFrozen"));
         if (note.isFrozen !== isFrozen) {
           note.isFrozen = isFrozen;
           note.version++;
@@ -383,7 +383,7 @@ export class LocalServer {
   }
 
   private updateNote(note: StoredNote, body: Body) {
-    if (note.state === "deleted") fail(404, NOT_FOUND);
+    if (note.state === "deleted") fail(404, lb()("noteNotFound"));
     const title = body.title as string | undefined;
     const content = body.content as string | null | undefined;
     const background = body.background as string | null | undefined;
@@ -393,14 +393,14 @@ export class LocalServer {
     const changed =
       contentChanged ||
       (background !== undefined && background !== note.background);
-    if (changed && note.isFrozen) fail(403, FROZEN);
+    if (changed && note.isFrozen) fail(403, lb()("frozen"));
     const baseVersion = body.baseVersion as number | undefined;
     if (baseVersion !== undefined && baseVersion !== note.version) {
       if (contentChanged)
         this.recordConflict(note, title ?? note.title, content, baseVersion);
       throw new HttpError(409, {
         statusCode: 409,
-        message: "Note was changed by someone else",
+        message: lb()("noteChanged"),
         serverNote: this.toNote(note),
       });
     }
@@ -448,7 +448,7 @@ export class LocalServer {
   }
 
   private trash(note: StoredNote, trashedAt?: string) {
-    if (note.isFrozen) fail(403, FROZEN);
+    if (note.isFrozen) fail(403, lb()("frozen"));
     if (note.state !== "trashed") {
       note.state = "trashed";
       note.version++;
@@ -643,10 +643,10 @@ export class LocalServer {
       };
     }
     const revision = all.find((r) => r.id === revisionId);
-    if (!revision) return fail(404, "Revision not found");
+    if (!revision) return fail(404, lb()("revisionNotFound"));
     if (method === "POST" && action === "restore") {
-      if (note.state !== "active") fail(404, NOT_FOUND);
-      if (note.isFrozen) fail(403, FROZEN);
+      if (note.state !== "active") fail(404, lb()("noteNotFound"));
+      if (note.isFrozen) fail(403, lb()("frozen"));
       if (revision.title !== note.title || revision.content !== note.content) {
         this.recordRevision(note, "restore");
         note.title = revision.title;
@@ -713,9 +713,9 @@ export class LocalServer {
     const note = this.find(noteId);
     if (!id) {
       if (method === "GET") return this.attachmentsOf(noteId);
-      if (note.isFrozen) fail(403, FROZEN);
+      if (note.isFrozen) fail(403, lb()("frozen"));
       const file = req.form?.get("file");
-      if (!(file instanceof File)) return fail(400, "No file");
+      if (!(file instanceof File)) return fail(400, lb()("noFile"));
       const clientId = req.form?.get("id");
       return this.addAttachment(
         note,
@@ -737,15 +737,15 @@ export class LocalServer {
     const attachment = this.data.attachments.find(
       (a) => a.id === id && a.noteId === noteId,
     );
-    if (!attachment) return fail(404, "Attachment not found");
+    if (!attachment) return fail(404, lb()("attachmentNotFound"));
     if (method === "DELETE") {
-      if (note.isFrozen) fail(403, FROZEN);
+      if (note.isFrozen) fail(403, lb()("frozen"));
       await this.removeAttachment(attachment);
       note.updatedAt = now();
       return { success: true };
     }
     const blob = await this.storage.getFile(id);
-    if (!blob) return fail(404, "Attachment not found");
+    if (!blob) return fail(404, lb()("attachmentNotFound"));
     return new Response(blob, {
       headers: {
         "Content-Type": attachment.mimeType,
@@ -793,13 +793,13 @@ export class LocalServer {
           (await lockSecretMatches(body.current, stored))
         )
       )
-        fail(403, kind === "pin" ? "Wrong PIN" : "Wrong pattern");
+        fail(403, kind === "pin" ? lb()("wrongPin") : lb()("wrongPattern"));
       const hash = await hashLockSecret(secret);
       if (kind === "pin") user.lockPin = hash;
       else user.lockPattern = hash;
       return secrets();
     }
-    return fail(404, "Not found");
+    return fail(404, lb()("notFound"));
   }
 
   // Tags
@@ -858,7 +858,7 @@ export class LocalServer {
       return this.allTags();
     }
     const tag = this.data.tags.find((t) => t.id === id);
-    if (!tag) return fail(404, "Tag not found");
+    if (!tag) return fail(404, lb()("tagNotFound"));
     if (method === "GET") return this.toTag(tag);
     if (method === "DELETE") {
       this.data.tags = this.data.tags.filter((t) => t !== tag);
@@ -873,7 +873,7 @@ export class LocalServer {
       if (body.baseVersion !== undefined && body.baseVersion !== tag.version)
         throw new HttpError(409, {
           statusCode: 409,
-          message: "Tag was changed by someone else",
+          message: lb()("tagChanged"),
           serverTag: this.toTag(tag),
         });
       const changed =
@@ -885,14 +885,13 @@ export class LocalServer {
       tag.updatedAt = now();
       return this.toTag(tag);
     }
-    return fail(404, "Not found");
+    return fail(404, lb()("notFound"));
   }
 
   // Import and export, in the server's "anchor" format.
 
   private async export(format: string | null) {
-    if (format === "markdown")
-      fail(400, "Markdown export needs an Anchor server");
+    if (format === "markdown") fail(400, lb()("markdownNeedsServer"));
     const files: Record<string, Uint8Array> = {};
     const notes = [];
     for (const note of this.data.notes) {
@@ -969,11 +968,12 @@ export class LocalServer {
   }
 
   private async import(method: string, rest: string[], req: Request) {
-    if (method !== "POST" || rest[0] !== "notes") return fail(404, "Not found");
+    if (method !== "POST" || rest[0] !== "notes")
+      return fail(404, lb()("notFound"));
     if (rest[1]) {
       const note = this.find(rest[1]);
       const file = req.form?.get("file");
-      if (!(file instanceof File)) return fail(400, "No file");
+      if (!(file instanceof File)) return fail(400, lb()("noFile"));
       const position = Number(req.form?.get("position") ?? 0);
       return this.addAttachment(note, file, undefined, position);
     }

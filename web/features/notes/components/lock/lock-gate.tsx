@@ -1,6 +1,7 @@
 "use client";
 
 import { Archive, ArrowLeft, Lock, Pin } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { IconButton } from "@/components/ui/button";
 import { Tip } from "@/components/ui/tooltip";
 import { hasTitle } from "../../title";
@@ -26,19 +27,21 @@ export function LockGate({
   /** Absent where the note can't be pinned. */
   onTogglePin?: () => void;
 }) {
-  const title = hasTitle(note.title) ? note.title : "Untitled";
+  const t = useTranslations("noteEditor.lock.gate");
+  const tc = useTranslations("common");
+  const title = hasTitle(note.title) ? note.title : t("untitled");
   return (
     <div className="pg-editor">
       <article
         className="note ed"
         data-note={note.background ?? ""}
-        aria-label="Locked note"
+        aria-label={t("label")}
       >
         <div className="ed-scroll scrollbar-slim">
           <div className="ed-head">
             <div className="ed-head-l">
-              <Tip label="Back">
-                <IconButton label="Back" onClick={onBack}>
+              <Tip label={tc("back")}>
+                <IconButton label={tc("back")} onClick={onBack}>
                   <ArrowLeft />
                 </IconButton>
               </Tip>
@@ -46,9 +49,9 @@ export function LockGate({
             {(onTogglePin || onArchive) && (
               <div className="ed-head-r">
                 {onTogglePin && (
-                  <Tip label={note.isPinned ? "Unpin" : "Pin"}>
+                  <Tip label={note.isPinned ? t("unpin") : t("pin")}>
                     <IconButton
-                      label={note.isPinned ? "Unpin" : "Pin"}
+                      label={note.isPinned ? t("unpin") : t("pin")}
                       aria-pressed={note.isPinned}
                       onClick={onTogglePin}
                       className="aria-pressed:[&_svg]:fill-current"
@@ -58,8 +61,8 @@ export function LockGate({
                   </Tip>
                 )}
                 {onArchive && (
-                  <Tip label="Archive">
-                    <IconButton label="Archive" onClick={onArchive}>
+                  <Tip label={tc("archive")}>
+                    <IconButton label={tc("archive")} onClick={onArchive}>
                       <Archive />
                     </IconButton>
                   </Tip>
@@ -72,9 +75,7 @@ export function LockGate({
               <Lock />
             </span>
             <h1>{title}</h1>
-            <p className="m-0 text-muted-foreground text-ui">
-              This note is locked.
-            </p>
+            <p className="m-0 text-muted-foreground text-ui">{t("locked")}</p>
             <UnlockForm noteId={note.id} kind={note.lock} />
           </div>
         </div>

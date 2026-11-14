@@ -11,6 +11,7 @@ import {
   TriangleAlert,
   Upload,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FieldDescription, FieldError } from "@/components/ui/field";
-import { cn, plural } from "@/lib/utils";
+import { translate } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import type { PickedFile } from "../adapters/zip";
 import { type ImportReport, useImport } from "../hooks/use-import";
 import {
@@ -46,10 +48,15 @@ function pickedName(files: PickedFile[]) {
   const roots = new Set(files.map((f) => f.path.split("/")[0]));
   return roots.size === 1 && files[0].path.includes("/")
     ? [...roots][0]
-    : plural(files.length, "file");
+    : translate("settings.importExport.dialog")("filesCount", {
+        count: files.length,
+      });
 }
 
 export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
+  const t = useTranslations("settings.importExport.dialog");
+  const tc = useTranslations("common");
+  const locale = useLocale();
   const importer = useImport();
   const [name, setName] = React.useState("");
   const [isFolder, setIsFolder] = React.useState(false);
@@ -80,11 +87,8 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
         onEscapeKeyDown={(e) => importer.isRunning && e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Import notes</DialogTitle>
-          <DialogDescription>
-            Import from an Anchor backup, a Google Keep export, or Markdown
-            files.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         <DialogBody className="gap-3">
           {step === "pick" && (
@@ -107,26 +111,39 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                 <div className="grid flex-1 leading-[1.35]">
                   <b className="truncate font-semibold text-ui">{name}</b>
                   <small className="text-muted-foreground text-small">
-                    {parsed.formatLabel}
+                    {t(`formats.${parsed.formatId}`)}
                   </small>
                 </div>
                 <Button variant="quiet" size="sm" onClick={importer.reset}>
-                  Change
+                  {t("change")}
                 </Button>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <Stat count={parsed.notes.length} one="note" />
-                <Stat count={importer.previewTagCount} one="tag" />
-                <Stat count={parsed.attachmentCount} one="attachment" />
+                <Stat
+                  count={parsed.notes.length}
+                  label={t("noteLabel", { count: parsed.notes.length })}
+                />
+                <Stat
+                  count={importer.previewTagCount}
+                  label={t("tagLabel", { count: importer.previewTagCount })}
+                />
+                <Stat
+                  count={parsed.attachmentCount}
+                  label={t("attachmentLabel", {
+                    count: parsed.attachmentCount,
+                  })}
+                />
               </div>
               {isTruncated && (
                 <FieldDescription>
-                  {`Only the first ${MAX_PICKED_FILES.toLocaleString("en-US")} files were read.`}
+                  {t("truncated", {
+                    count: MAX_PICKED_FILES.toLocaleString(locale),
+                  })}
                 </FieldDescription>
               )}
               {parsed.skipped.length > 0 && (
                 <Issues
-                  title={`${plural(parsed.skipped.length, "item")} will be skipped`}
+                  title={t("willBeSkipped", { count: parsed.skipped.length })}
                   items={parsed.skipped}
                 />
               )}
@@ -134,16 +151,16 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                 <CheckRow
                   checked={importer.options.skipExisting}
                   onChange={(v) => importer.setOption("skipExisting", v)}
-                  label="Skip notes that already exist"
-                  hint="Otherwise they are imported as copies."
+                  label={t("skipExisting")}
+                  hint={t("skipExistingHint")}
                 />
               )}
               {parsed.formatId === "markdown" && parsed.hasFolders && (
                 <CheckRow
                   checked={importer.options.folderTags}
                   onChange={(v) => importer.setOption("folderTags", v)}
-                  label="Use folder names as tags"
-                  hint="Nextcloud categories and Obsidian folders become tags."
+                  label={t("folderTags")}
+                  hint={t("folderTagsHint")}
                 />
               )}
             </>
@@ -154,8 +171,14 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
               <div className="flex justify-between font-medium text-control tabular-nums">
                 <span>
                   {progress?.phase === "attachments"
-                    ? `Uploading attachments ${progress.done} of ${progress.total}`
-                    : `Importing notes ${progress?.done ?? 0} of ${progress?.total ?? parsed?.notes.length ?? 0}`}
+                    ? t("uploadingAttachments", {
+                        done: progress.done,
+                        total: progress.total,
+                      })
+                    : t("importingNotes", {
+                        done: progress?.done ?? 0,
+                        total: progress?.total ?? parsed?.notes.length ?? 0,
+                      })}
                 </span>
                 <span>
                   {progress?.total
@@ -166,7 +189,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
               </div>
               <div
                 role="progressbar"
-                aria-label="Import"
+                aria-label={t("progress")}
                 aria-valuemin={0}
                 aria-valuemax={progress?.total ?? 0}
                 aria-valuenow={progress?.done ?? 0}
@@ -185,9 +208,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
               {stopped ? (
                 <FieldError>{importer.runError}</FieldError>
               ) : (
-                <FieldDescription>
-                  Keep this tab open until the import finishes.
-                </FieldDescription>
+                <FieldDescription>{t("keepOpen")}</FieldDescription>
               )}
             </div>
           )}
@@ -197,33 +218,33 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
         <DialogFooter>
           {step === "pick" && (
             <Button variant="quiet" onClick={() => close(false)}>
-              Cancel
+              {tc("cancel")}
             </Button>
           )}
           {step === "preview" && parsed && (
             <>
               <Button variant="quiet" onClick={() => close(false)}>
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button onClick={importer.start} disabled={!parsed.notes.length}>
                 <Upload aria-hidden />
-                Import {plural(parsed.notes.length, "note")}
+                {t("importNotes", { count: parsed.notes.length })}
               </Button>
             </>
           )}
           {stopped && (
             <>
               <Button variant="quiet" onClick={() => close(false)}>
-                Close
+                {tc("close")}
               </Button>
               <Button onClick={importer.retry}>
                 <RotateCw aria-hidden />
-                Try again
+                {tc("retry")}
               </Button>
             </>
           )}
           {step === "report" && (
-            <Button onClick={() => close(false)}>Done</Button>
+            <Button onClick={() => close(false)}>{tc("done")}</Button>
           )}
         </DialogFooter>
       </DialogContent>
@@ -242,6 +263,7 @@ function DropArea({
   error: string | null;
   onFiles: (files: PickedFile[], isTruncated?: boolean) => void;
 }) {
+  const t = useTranslations("settings.importExport.dialog");
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = React.useState(false);
   const errorId = React.useId();
@@ -296,22 +318,20 @@ function DropArea({
         {reading ? (
           <>
             <LoaderCircle aria-hidden className="animate-spin" />
-            <b className="font-semibold text-lead">Reading {name}…</b>
+            <b className="font-semibold text-lead">{t("reading", { name })}</b>
             <span className="text-meta text-muted-foreground">
-              Large exports can take a few seconds.
+              {t("readingHint")}
             </span>
           </>
         ) : (
           <>
             <FileArchive aria-hidden />
-            <b className="font-semibold text-lead">
-              Drop a zip or a folder here
-            </b>
+            <b className="font-semibold text-lead">{t("drop")}</b>
             <span className="text-meta text-muted-foreground">
-              or click to choose files
+              {t("orClick")}
             </span>
             <span className="mt-1 flex flex-wrap justify-center gap-1.5">
-              <Badge className="bg-foreground/5">Anchor backup</Badge>
+              <Badge className="bg-foreground/5">{t("formats.anchor")}</Badge>
               <Badge className="bg-foreground/5">Google Keep</Badge>
               <Badge className="bg-foreground/5">Markdown</Badge>
             </span>
@@ -335,13 +355,11 @@ function DropArea({
   );
 }
 
-function Stat({ count, one }: { count: number; one: string }) {
+function Stat({ count, label }: { count: number; label: string }) {
   return (
     <div className="grid gap-0.5 rounded-xl px-3.5 py-3 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--border)_70%,transparent)]">
       <b className="text-page tabular-nums">{count}</b>
-      <span className="text-muted-foreground text-small">
-        {count === 1 ? one : `${one}s`}
-      </span>
+      <span className="text-muted-foreground text-small">{label}</span>
     </div>
   );
 }
@@ -410,15 +428,16 @@ function Issues({
 }
 
 function Report({ report }: { report: ImportReport }) {
+  const t = useTranslations("settings.importExport.dialog");
   const issueCount = report.issues.length;
   const imported = report.created + report.remapped;
   const pills = [
-    [report.created, "imported"],
-    [report.remapped, "imported as copies"],
-    [report.skipped, "already there"],
-    [report.failed, "failed"],
-    [report.attachmentsUploaded, "attachments uploaded"],
-    [report.attachmentsFailed, "attachments failed"],
+    [report.created, t("pillImported")],
+    [report.remapped, t("pillCopies")],
+    [report.skipped, t("pillSkipped")],
+    [report.failed, t("pillFailed")],
+    [report.attachmentsUploaded, t("pillAttachmentsUploaded")],
+    [report.attachmentsFailed, t("pillAttachmentsFailed")],
   ].filter(([count]) => count) as [number, string][];
   return (
     <>
@@ -431,8 +450,10 @@ function Report({ report }: { report: ImportReport }) {
           <CircleAlert aria-hidden className="text-muted-foreground" />
         )}
         {imported || report.skipped
-          ? `${plural(imported, "note")} imported${issueCount ? `, ${issueCount} need${issueCount === 1 ? "s" : ""} attention` : ""}`
-          : "Nothing was imported"}
+          ? issueCount
+            ? t("reportTitleIssues", { imported, issues: issueCount })
+            : t("reportTitle", { imported })
+          : t("nothingImported")}
       </div>
       {pills.length > 1 && (
         <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">
@@ -451,15 +472,13 @@ function Report({ report }: { report: ImportReport }) {
       )}
       {issueCount > 0 && (
         <Issues
-          title={`${plural(issueCount, "item")} need${issueCount === 1 ? "s" : ""} attention`}
+          title={t("needAttention", { count: issueCount })}
           items={report.issues}
           open
         />
       )}
       {report.restoredTrashed && (
-        <FieldDescription>
-          Notes restored to the trash get a fresh 30 days there.
-        </FieldDescription>
+        <FieldDescription>{t("restoredTrashed")}</FieldDescription>
       )}
     </>
   );

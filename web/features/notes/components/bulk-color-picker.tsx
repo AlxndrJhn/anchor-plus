@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import {
   Popover,
@@ -10,7 +11,6 @@ import {
 import { toast } from "@/components/ui/toast";
 import { eachLimited } from "@/lib/each";
 import { useLastShown } from "@/lib/hooks/use-last-shown";
-import { plural } from "@/lib/utils";
 import { saveNote } from "../api";
 import type { Note } from "../types";
 import { BackgroundPicker } from "./background-picker";
@@ -29,6 +29,8 @@ export function BulkColorPicker({
   onClose,
   onDone,
 }: BulkColorPickerProps) {
+  const t = useTranslations("notes.bulkColorPicker");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const shownAnchor = useLastShown(anchor, !!anchor);
   const anchorRef = React.useMemo(
@@ -86,14 +88,14 @@ export function BulkColorPicker({
         const skipped = notes.length - editable.length;
         toast.success(
           skipped
-            ? `Colour changed on ${plural(editable.length, "note")}; ${plural(skipped, "note")} you can’t change stayed as they were`
-            : `Colour changed on ${plural(editable.length, "note")}`,
+            ? t("changedSkipped", { count: editable.length, skipped })
+            : t("changed", { count: editable.length }),
           {
             undo: () => {
               showBackgrounds(before);
               send(before).then(refresh, () => {
                 refresh();
-                toast.error("Couldn’t undo that");
+                toast.error(tc("couldNotUndo"));
               });
             },
           },
@@ -101,7 +103,7 @@ export function BulkColorPicker({
       },
       () => {
         refresh();
-        toast.error("Couldn’t change the colour", {
+        toast.error(t("couldNotChange"), {
           retry: () => apply(background),
         });
       },
@@ -121,8 +123,7 @@ export function BulkColorPicker({
       >
         {editable.length === 0 ? (
           <p className="m-0 max-w-64 p-3.5 text-muted-foreground text-ui">
-            These notes are shared with you to view, so their colour can’t be
-            changed.
+            {t("viewOnly")}
           </p>
         ) : (
           <BackgroundPicker

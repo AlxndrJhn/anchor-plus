@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogBody,
@@ -7,64 +8,66 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { Messages } from "@/lib/i18n";
 import { isMac } from "@/lib/platform";
 
-// A row: what it does, then its keys; a key list is one way of doing it.
-type Row = [string, string[][]];
+// A row: what it does (a message key), then its keys; a key list is one way of doing it.
+type Shortcuts = Messages["layout"]["shortcuts"];
+type Row = [keyof Shortcuts["rows"], string[][]];
 
-const sections = (mod: string): [string, Row[]][] => [
+const sections = (mod: string): [keyof Shortcuts["sections"], Row[]][] => [
   [
-    "Anywhere",
+    "anywhere",
     [
-      ["New note", [["N"]]],
-      ["Search, or go to a page or tag by name", [["/"], [mod, "K"]]],
-      ["Go to Notes, Archive, Trash or Settings", [["G", "N / A / T / S"]]],
-      ["Go to a tag: type a few letters of it", [["#"]]],
-      ["Show or hide the sidebar", [[mod, "\\"]]],
-      ["These shortcuts", [["?"]]],
+      ["newNote", [["N"]]],
+      ["search", [["/"], [mod, "K"]]],
+      ["goToPage", [["G", "N / A / T / S"]]],
+      ["goToTag", [["#"]]],
+      ["toggleSidebar", [[mod, "\\"]]],
+      ["thisDialog", [["?"]]],
     ],
   ],
   [
-    "Notes",
+    "notes",
     [
       [
-        "Move between notes",
+        "moveBetween",
         [
           ["↑", "↓", "←", "→"],
           ["H", "J", "K", "L"],
         ],
       ],
       [
-        "First or last note",
+        "firstOrLast",
         [
           ["G", "G"],
           ["Shift", "G"],
         ],
       ],
-      ["Open the note", [["Enter"], ["O"]]],
-      ["Select the note", [["X"], ["Space"]]],
-      ["Select up to it", [["Shift", "X"]]],
-      ["New note, or new list, with no note focused", [["C"], ["L"]]],
-      ["Leave a tag for all notes", [["Esc"]]],
+      ["open", [["Enter"], ["O"]]],
+      ["select", [["X"], ["Space"]]],
+      ["selectUpTo", [["Shift", "X"]]],
+      ["newNoteOrList", [["C"], ["L"]]],
+      ["leaveTag", [["Esc"]]],
     ],
   ],
   [
-    "Focused or selected notes",
+    "focused",
     [
-      ["Pin or unpin", [["F"]]],
-      ["Archive or unarchive", [["E"]]],
-      ["Move to trash; in Trash, delete permanently", [["Del"]]],
+      ["pin", [["F"]]],
+      ["archive", [["E"]]],
+      ["trash", [["Del"]]],
     ],
   ],
   [
-    "In a note",
+    "inNote",
     [
-      ["Leave the text; again to close", [["Esc"]]],
-      ["Back into the text", [["I"]]],
-      ["Close, or tick a checklist item", [[mod, "Enter"]]],
-      ["Pin or unpin", [["F"]]],
-      ["Archive", [["E"]]],
-      ["Move to trash", [["Del"], ["#"]]],
+      ["leaveText", [["Esc"]]],
+      ["backIntoText", [["I"]]],
+      ["closeOrTick", [[mod, "Enter"]]],
+      ["pin", [["F"]]],
+      ["archiveOne", [["E"]]],
+      ["trashOne", [["Del"], ["#"]]],
     ],
   ],
 ];
@@ -76,18 +79,19 @@ export function ShortcutsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("layout.shortcuts");
   const mod = isMac() ? "⌘" : "Ctrl";
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="lg" aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Keyboard shortcuts</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
         <DialogBody className="gap-5">
-          {sections(mod).map(([title, rows]) => (
-            <section key={title} className="grid gap-1.5">
+          {sections(mod).map(([section, rows]) => (
+            <section key={section} className="grid gap-1.5">
               <h3 className="m-0 text-label text-muted-foreground uppercase">
-                {title}
+                {t(`sections.${section}`)}
               </h3>
               <dl className="m-0 grid">
                 {rows.map(([what, ways]) => (
@@ -95,14 +99,14 @@ export function ShortcutsDialog({
                     key={what}
                     className="flex items-center justify-between gap-4 border-border/50 border-b py-1.5 last:border-b-0"
                   >
-                    <dt className="text-ui">{what}</dt>
+                    <dt className="text-ui">{t(`rows.${what}`)}</dt>
                     <dd className="m-0 flex shrink-0 items-center gap-1.5 text-muted-foreground text-small">
                       {ways.map((keys, i) => (
                         <span
                           key={keys.join()}
                           className="flex items-center gap-1"
                         >
-                          {i > 0 && <span>or</span>}
+                          {i > 0 && <span>{t("or")}</span>}
                           {keys.map((key, j) => (
                             <kbd key={j}>{key}</kbd>
                           ))}

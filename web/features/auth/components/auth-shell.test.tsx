@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
+import { WithIntl } from "@/lib/i18n/test-utils";
 import { AuthShell } from "./auth-shell";
 
 vi.mock("@/components/layout/brand", () => ({ Brand: () => null }));
@@ -24,7 +25,11 @@ describe("AuthShell", () => {
     document.body.append(host);
     const root = createRoot(host);
     await act(async () => {
-      root.render(<AuthShell>Sign in</AuthShell>);
+      root.render(
+        <WithIntl>
+          <AuthShell>Sign in</AuthShell>
+        </WithIntl>,
+      );
     });
     const link = (name: string) =>
       [...host.querySelectorAll("a")].find((a) => a.textContent === name);

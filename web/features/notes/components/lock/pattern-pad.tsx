@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -20,7 +21,7 @@ const centre = patternDotCentre;
 export function PatternPad({
   onDone,
   disabled,
-  label = "Pattern",
+  label,
   className,
 }: {
   onDone: (
@@ -30,6 +31,7 @@ export function PatternPad({
   label?: string;
   className?: string;
 }) {
+  const t = useTranslations("noteEditor.lock.pattern");
   const ref = React.useRef<SVGSVGElement>(null);
   const [path, setPath] = React.useState<number[]>([]);
   const [pointer, setPointer] = React.useState<{ x: number; y: number } | null>(
@@ -86,7 +88,7 @@ export function PatternPad({
       ref={ref}
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       role="img"
-      aria-label={`${label}: draw a line across the dots`}
+      aria-label={t("label", { label: label ?? t("default") })}
       data-wrong={wrong ? "" : undefined}
       className={cn(
         "pattern-pad aspect-square w-full max-w-60 touch-none select-none",

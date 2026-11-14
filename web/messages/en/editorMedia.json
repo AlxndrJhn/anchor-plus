@@ -1,1 +1,201 @@
-{}
+{
+  "codeCopy": {
+    "code": "Code",
+    "copy": "Copy",
+    "copied": "Copied",
+    "selected": "Selected"
+  },
+  "drawing": {
+    "cleared": "Drawing cleared",
+    "saveFailed": "Couldn’t save the drawing",
+    "titleOnPicture": "Draw on picture",
+    "title": "Draw a picture",
+    "tools": "Drawing tools",
+    "tool": {
+      "pen": "Pen",
+      "marker": "Marker",
+      "eraser": "Eraser",
+      "text": "Text",
+      "emoji": "Emoji"
+    },
+    "color": {
+      "Black": "Black",
+      "Red": "Red",
+      "Orange": "Orange",
+      "Green": "Green",
+      "Blue": "Blue",
+      "Purple": "Purple"
+    },
+    "size": {
+      "Thin": "Thin",
+      "Medium": "Medium",
+      "Thick": "Thick"
+    },
+    "undoWithKey": "Undo ({key})",
+    "redoWithKey": "Redo ({key})",
+    "clear": "Clear",
+    "padText": "Drawing pad: click where the text goes",
+    "padEmoji": "Drawing pad: click where the emoji goes",
+    "padDraw": "Drawing pad: draw with the mouse, a finger or a pen",
+    "textInput": "Text to put on the drawing",
+    "insert": "Insert"
+  },
+  "emoji": {
+    "search": "Search emoji",
+    "categories": "Emoji categories",
+    "category": {
+      "recent": "Recent",
+      "people": "Smileys & people",
+      "nature": "Animals & nature",
+      "food": "Food & drink",
+      "activity": "Activity",
+      "travel": "Travel & places",
+      "objects": "Objects",
+      "symbols": "Symbols",
+      "flags": "Flags"
+    },
+    "loadFailed": "Couldn’t load the emojis",
+    "loading": "Loading emojis…",
+    "none": "No emoji found",
+    "skinTone": "{emoji}: skin tone"
+  },
+  "flowchart": {
+    "edit": "Edit flowchart",
+    "new": "New flowchart",
+    "help": "Drag boxes to move them. Pick a box, then drag one of its dots to another box to join them, or click a dot for the next step. Double-click to write.",
+    "removeFromNote": "Remove from note",
+    "addToNote": "Add to note",
+    "newText": {
+      "box": "Step",
+      "round": "End",
+      "diamond": "Decision"
+    },
+    "tools": "Flowchart tools",
+    "add": {
+      "box": "Add step",
+      "round": "Add start or end",
+      "diamond": "Add decision"
+    },
+    "addAfter": {
+      "box": "Add step after the picked one",
+      "round": "Add start or end after the picked one",
+      "diamond": "Add decision after the picked one"
+    },
+    "shapeLabel": "Shape",
+    "makeIt": {
+      "box": "Make it a step",
+      "round": "Make it a start or end",
+      "diamond": "Make it a decision"
+    },
+    "shape": {
+      "box": "Step",
+      "round": "Start or end",
+      "diamond": "Decision"
+    },
+    "deleteBox": "Delete box",
+    "deleteArrow": "Delete arrow",
+    "deleteWithKey": "{what} (Delete)",
+    "undoWithKey": "Undo ({key})",
+    "redoWithKey": "Redo ({key})",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "fit": "Show the whole chart",
+    "textInBox": "Text in the box",
+    "textOnArrow": "Text on the arrow",
+    "edgeLabel": "Label",
+    "canvasHelp": "{boxes, plural, one {# box} other {# boxes}}, {arrows, plural, one {# arrow} other {# arrows}}. Arrow keys move the picked box, Enter writes in it, Tab adds a step after it, Delete removes it."
+  },
+  "highlight": {
+    "color": {
+      "yellow": "Yellow",
+      "green": "Green",
+      "blue": "Blue",
+      "pink": "Pink",
+      "purple": "Purple"
+    },
+    "withKey": "Highlight ({key})",
+    "colors": "Highlight colors",
+    "withColorKey": "Highlight with {color} ({key})",
+    "backToFormatting": "Back to formatting",
+    "remove": "Remove highlight",
+    "format": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "strike": "Strikethrough"
+    },
+    "formatSelection": "Format selection",
+    "clearFormatting": "Clear formatting"
+  },
+  "inlineImage": {
+    "editCaption": "Edit caption",
+    "addCaption": "Add caption",
+    "caption": "Caption",
+    "cropTitle": "Crop picture",
+    "beingCropped": "Being cropped",
+    "corner": {
+      "nw": "Top left corner",
+      "ne": "Top right corner",
+      "sw": "Bottom left corner",
+      "se": "Bottom right corner"
+    },
+    "reset": "Reset",
+    "crop": "Crop",
+    "changeFailed": "Couldn’t change the picture",
+    "deleted": "Picture deleted",
+    "addFailed": "Couldn’t add the picture",
+    "openFailed": "Couldn’t open the picture",
+    "resizeLabel": "Drag to resize the picture",
+    "resize": "Drag to resize",
+    "menu": "Picture",
+    "viewFull": "View full size",
+    "replace": "Replace…",
+    "cropMenu": "Crop…",
+    "draw": "Draw on it…",
+    "mirrorHorizontally": "Mirror horizontally",
+    "mirrorVertically": "Mirror vertically",
+    "editCaptionMenu": "Edit caption…",
+    "addCaptionMenu": "Add caption…",
+    "fullWidth": "Full width"
+  },
+  "liveImage": {
+    "errorScreenRefused": "No screen was chosen, or sharing it wasn’t allowed.",
+    "errorScreenUnavailable": "This device can’t share its screen here.",
+    "errorCameraRefused": "Using the camera wasn’t allowed. Allow it in the browser’s site settings, then try again.",
+    "errorCameraUnavailable": "No camera could be turned on.",
+    "errorMicRefused": "Using the microphone wasn’t allowed. Allow it in the browser’s site settings, or add it without sound.",
+    "errorMicUnavailable": "No microphone could be turned on.",
+    "addTitle": "Add live image",
+    "addHelp": "Shows a camera or screen of this device in the note, live, on every device that opens it. The video goes straight between the devices, while Anchor is open here.",
+    "whatToShow": "What to show",
+    "camera": "Camera",
+    "cameraHelp": "A camera of this device, turned on while someone watches.",
+    "screen": "Screen or window",
+    "screenHelp": "Shared until you stop it, or close Anchor here.",
+    "cameraN": "Camera {n}",
+    "microphone": "Microphone",
+    "microphoneHelp": "Sends this device’s sound too; you can mute it while it’s live.",
+    "whichMicrophone": "Which microphone",
+    "usualMicrophone": "The usual one",
+    "microphoneN": "Microphone {n}",
+    "opening": "Opening…",
+    "previewHint": "Choose the camera or a screen to see it here.",
+    "chooseScreen": "Choose a screen…",
+    "turnCameraOn": "Turn camera on",
+    "addToNote": "Add to note",
+    "deleted": "Live image deleted",
+    "cropWhenVideo": "Crop it once its video shows",
+    "resizeLabel": "Drag to resize the live image",
+    "resize": "Drag to resize",
+    "menu": "Live image",
+    "cropMenu": "Crop…",
+    "fullWidth": "Full width",
+    "muteMic": "Mute microphone",
+    "unmuteMic": "Unmute microphone",
+    "stopScreen": "Stop sharing the screen",
+    "turnCameraOff": "Turn the camera off",
+    "startFailed": "Couldn’t start the video",
+    "shareAgain": "Share the screen again…",
+    "cropTitle": "Crop live image"
+  }
+}

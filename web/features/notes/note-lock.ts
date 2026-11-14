@@ -1,5 +1,19 @@
 import { create } from "zustand";
+import { translate } from "@/lib/i18n";
 import type { Note, NoteLockKind, NoteLockSecrets } from "./types";
+
+/** A lock choice whose texts follow the language on screen. */
+function lockKind(kind: NoteLockKind) {
+  return {
+    kind,
+    get label() {
+      return translate("noteHooks.noteLock")(`kinds.${kind}.label`);
+    },
+    get description() {
+      return translate("noteHooks.noteLock")(`kinds.${kind}.description`);
+    },
+  };
+}
 
 /** The lock choices, in the order they are offered, the default first. */
 export const LOCK_KINDS: readonly {
@@ -7,18 +21,10 @@ export const LOCK_KINDS: readonly {
   label: string;
   description: string;
 }[] = [
-  {
-    kind: "biometric",
-    label: "Fingerprint or face",
-    description: "On the web, your account password opens it.",
-  },
-  { kind: "pin", label: "PIN", description: "Your notes’ PIN opens it." },
-  {
-    kind: "pattern",
-    label: "Pattern",
-    description: "Your notes’ pattern opens it.",
-  },
-  { kind: "tap", label: "Just a tap", description: "A tap opens it." },
+  lockKind("biometric"),
+  lockKind("pin"),
+  lockKind("pattern"),
+  lockKind("tap"),
 ];
 
 export const lockLabel = (kind: NoteLockKind) =>
@@ -88,6 +94,8 @@ export function unlockMethod(
 
 export const PIN_RULE = /^\d{4,12}$/;
 export const PIN_HINT = "4 to 12 digits.";
+/** PIN_HINT in the language on screen. */
+export const pinHint = () => translate("noteHooks.noteLock")("pinHint");
 export const PATTERN_MIN_DOTS = 4;
 
 export const isValidPin = (pin: string) => PIN_RULE.test(pin);

@@ -1,1 +1,201 @@
-{}
+{
+  "codeCopy": {
+    "code": "Kod",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano",
+    "selected": "Zaznaczono"
+  },
+  "drawing": {
+    "cleared": "Rysunek wyczyszczony",
+    "saveFailed": "Nie udało się zapisać rysunku",
+    "titleOnPicture": "Rysuj na zdjęciu",
+    "title": "Narysuj obraz",
+    "tools": "Narzędzia rysowania",
+    "tool": {
+      "pen": "Pióro",
+      "marker": "Marker",
+      "eraser": "Gumka",
+      "text": "Tekst",
+      "emoji": "Emoji"
+    },
+    "color": {
+      "Black": "Czarny",
+      "Red": "Czerwony",
+      "Orange": "Pomarańczowy",
+      "Green": "Zielony",
+      "Blue": "Niebieski",
+      "Purple": "Fioletowy"
+    },
+    "size": {
+      "Thin": "Cienki",
+      "Medium": "Średni",
+      "Thick": "Gruby"
+    },
+    "undoWithKey": "Cofnij ({key})",
+    "redoWithKey": "Ponów ({key})",
+    "clear": "Wyczyść",
+    "padText": "Pole rysowania: kliknij tam, gdzie ma być tekst",
+    "padEmoji": "Pole rysowania: kliknij tam, gdzie ma być emoji",
+    "padDraw": "Pole rysowania: rysuj myszą, palcem lub rysikiem",
+    "textInput": "Tekst na rysunku",
+    "insert": "Wstaw"
+  },
+  "emoji": {
+    "search": "Szukaj emoji",
+    "categories": "Kategorie emoji",
+    "category": {
+      "recent": "Ostatnie",
+      "people": "Buźki i ludzie",
+      "nature": "Zwierzęta i przyroda",
+      "food": "Jedzenie i picie",
+      "activity": "Aktywności",
+      "travel": "Podróże i miejsca",
+      "objects": "Przedmioty",
+      "symbols": "Symbole",
+      "flags": "Flagi"
+    },
+    "loadFailed": "Nie udało się wczytać emoji",
+    "loading": "Wczytywanie emoji…",
+    "none": "Nie znaleziono emoji",
+    "skinTone": "{emoji}: odcień skóry"
+  },
+  "flowchart": {
+    "edit": "Edytuj schemat blokowy",
+    "new": "Nowy schemat blokowy",
+    "help": "Przeciągaj pola, aby je przesuwać. Wybierz pole i przeciągnij jedną z jego kropek na inne pole, aby je połączyć, albo kliknij kropkę, aby dodać następny krok. Kliknij dwukrotnie, aby pisać.",
+    "removeFromNote": "Usuń z notatki",
+    "addToNote": "Dodaj do notatki",
+    "newText": {
+      "box": "Krok",
+      "round": "Koniec",
+      "diamond": "Decyzja"
+    },
+    "tools": "Narzędzia schematu blokowego",
+    "add": {
+      "box": "Dodaj krok",
+      "round": "Dodaj start lub koniec",
+      "diamond": "Dodaj decyzję"
+    },
+    "addAfter": {
+      "box": "Dodaj krok po wybranym",
+      "round": "Dodaj start lub koniec po wybranym",
+      "diamond": "Dodaj decyzję po wybranym"
+    },
+    "shapeLabel": "Kształt",
+    "makeIt": {
+      "box": "Zmień w krok",
+      "round": "Zmień w start lub koniec",
+      "diamond": "Zmień w decyzję"
+    },
+    "shape": {
+      "box": "Krok",
+      "round": "Start/koniec",
+      "diamond": "Decyzja"
+    },
+    "deleteBox": "Usuń pole",
+    "deleteArrow": "Usuń strzałkę",
+    "deleteWithKey": "{what} (Delete)",
+    "undoWithKey": "Cofnij ({key})",
+    "redoWithKey": "Ponów ({key})",
+    "zoomOut": "Pomniejsz",
+    "zoomIn": "Powiększ",
+    "fit": "Pokaż cały schemat",
+    "textInBox": "Tekst w polu",
+    "textOnArrow": "Tekst na strzałce",
+    "edgeLabel": "Etykieta",
+    "canvasHelp": "{boxes, plural, one {# pole} few {# pola} many {# pól} other {# pola}}, {arrows, plural, one {# strzałka} few {# strzałki} many {# strzałek} other {# strzałki}}. Strzałki przesuwają wybrane pole, Enter pozwala w nim pisać, Tab dodaje po nim krok, Delete je usuwa."
+  },
+  "highlight": {
+    "color": {
+      "yellow": "Żółty",
+      "green": "Zielony",
+      "blue": "Niebieski",
+      "pink": "Różowy",
+      "purple": "Fioletowy"
+    },
+    "withKey": "Wyróżnij ({key})",
+    "colors": "Kolory wyróżnienia",
+    "withColorKey": "Wyróżnij kolorem: {color} ({key})",
+    "backToFormatting": "Wróć do formatowania",
+    "remove": "Usuń wyróżnienie",
+    "format": {
+      "bold": "Pogrubienie",
+      "italic": "Kursywa",
+      "underline": "Podkreślenie",
+      "strike": "Przekreślenie"
+    },
+    "formatSelection": "Formatuj zaznaczenie",
+    "clearFormatting": "Wyczyść formatowanie"
+  },
+  "inlineImage": {
+    "editCaption": "Edytuj podpis",
+    "addCaption": "Dodaj podpis",
+    "caption": "Podpis",
+    "cropTitle": "Przytnij zdjęcie",
+    "beingCropped": "Przycinane zdjęcie",
+    "corner": {
+      "nw": "Lewy górny róg",
+      "ne": "Prawy górny róg",
+      "sw": "Lewy dolny róg",
+      "se": "Prawy dolny róg"
+    },
+    "reset": "Resetuj",
+    "crop": "Przytnij",
+    "changeFailed": "Nie udało się zmienić zdjęcia",
+    "deleted": "Zdjęcie usunięte",
+    "addFailed": "Nie udało się dodać zdjęcia",
+    "openFailed": "Nie udało się otworzyć zdjęcia",
+    "resizeLabel": "Przeciągnij, aby zmienić rozmiar zdjęcia",
+    "resize": "Przeciągnij, aby zmienić rozmiar",
+    "menu": "Zdjęcie",
+    "viewFull": "Zobacz w pełnym rozmiarze",
+    "replace": "Zamień…",
+    "cropMenu": "Przytnij…",
+    "draw": "Rysuj na nim…",
+    "mirrorHorizontally": "Odbij w poziomie",
+    "mirrorVertically": "Odbij w pionie",
+    "editCaptionMenu": "Edytuj podpis…",
+    "addCaptionMenu": "Dodaj podpis…",
+    "fullWidth": "Pełna szerokość"
+  },
+  "liveImage": {
+    "errorScreenRefused": "Nie wybrano ekranu albo udostępnianie nie zostało dozwolone.",
+    "errorScreenUnavailable": "To urządzenie nie może tu udostępnić ekranu.",
+    "errorCameraRefused": "Użycie kamery nie zostało dozwolone. Zezwól na nie w ustawieniach witryny w przeglądarce i spróbuj ponownie.",
+    "errorCameraUnavailable": "Nie udało się włączyć żadnej kamery.",
+    "errorMicRefused": "Użycie mikrofonu nie zostało dozwolone. Zezwól na nie w ustawieniach witryny w przeglądarce albo dodaj obraz bez dźwięku.",
+    "errorMicUnavailable": "Nie udało się włączyć żadnego mikrofonu.",
+    "addTitle": "Dodaj obraz na żywo",
+    "addHelp": "Pokazuje na żywo kamerę lub ekran tego urządzenia w notatce, na każdym urządzeniu, które ją otworzy. Wideo płynie bezpośrednio między urządzeniami, dopóki Anchor jest tu otwarty.",
+    "whatToShow": "Co pokazać",
+    "camera": "Kamera",
+    "cameraHelp": "Kamera tego urządzenia, włączana, gdy ktoś ogląda.",
+    "screen": "Ekran lub okno",
+    "screenHelp": "Udostępniane, dopóki tego nie zatrzymasz lub nie zamkniesz tu Anchor.",
+    "cameraN": "Kamera {n}",
+    "microphone": "Mikrofon",
+    "microphoneHelp": "Wysyła też dźwięk z tego urządzenia; możesz go wyciszyć, gdy obraz jest na żywo.",
+    "whichMicrophone": "Który mikrofon",
+    "usualMicrophone": "Zwykły",
+    "microphoneN": "Mikrofon {n}",
+    "opening": "Otwieranie…",
+    "previewHint": "Wybierz kamerę lub ekran, aby zobaczyć go tutaj.",
+    "chooseScreen": "Wybierz ekran…",
+    "turnCameraOn": "Włącz kamerę",
+    "addToNote": "Dodaj do notatki",
+    "deleted": "Obraz na żywo usunięty",
+    "cropWhenVideo": "Przytnij, gdy pojawi się wideo",
+    "resizeLabel": "Przeciągnij, aby zmienić rozmiar obrazu na żywo",
+    "resize": "Przeciągnij, aby zmienić rozmiar",
+    "menu": "Obraz na żywo",
+    "cropMenu": "Przytnij…",
+    "fullWidth": "Pełna szerokość",
+    "muteMic": "Wycisz mikrofon",
+    "unmuteMic": "Włącz dźwięk mikrofonu",
+    "stopScreen": "Zatrzymaj udostępnianie ekranu",
+    "turnCameraOff": "Wyłącz kamerę",
+    "startFailed": "Nie udało się uruchomić wideo",
+    "shareAgain": "Udostępnij ekran ponownie…",
+    "cropTitle": "Przytnij obraz na żywo"
+  }
+}

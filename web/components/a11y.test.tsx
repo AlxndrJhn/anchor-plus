@@ -16,6 +16,7 @@ import {
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { WithIntl } from "@/lib/i18n/test-utils";
 
 // React's act() warns without it.
 (
@@ -28,7 +29,7 @@ async function render(ui: ReactNode) {
   const host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
-  await act(async () => root?.render(ui));
+  await act(async () => root?.render(<WithIntl>{ui}</WithIntl>));
 }
 
 afterEach(() => {

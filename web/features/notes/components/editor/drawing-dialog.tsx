@@ -10,6 +10,7 @@ import {
   Type,
   Undo2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button, IconButton } from "@/components/ui/button";
 import {
@@ -49,12 +50,15 @@ import {
 } from "../../emoji-data";
 import { EmojiPicker } from "./emoji-picker";
 
-const TOOLS: { tool: DrawTool; label: string; icon: React.ReactNode }[] = [
-  { tool: "pen", label: "Pen", icon: <Pen /> },
-  { tool: "marker", label: "Marker", icon: <Highlighter /> },
-  { tool: "eraser", label: "Eraser", icon: <Eraser /> },
-  { tool: "text", label: "Text", icon: <Type /> },
-  { tool: "emoji", label: "Emoji", icon: <Smile /> },
+type ColorName = "Black" | "Red" | "Orange" | "Green" | "Blue" | "Purple";
+type SizeName = "Thin" | "Medium" | "Thick";
+
+const TOOLS: { tool: DrawTool; icon: React.ReactNode }[] = [
+  { tool: "pen", icon: <Pen /> },
+  { tool: "marker", icon: <Highlighter /> },
+  { tool: "eraser", icon: <Eraser /> },
+  { tool: "text", icon: <Type /> },
+  { tool: "emoji", icon: <Smile /> },
 ];
 
 /**
@@ -75,6 +79,8 @@ export function DrawingDialog({
   onClose: () => void;
   onSave: (file: File) => void;
 }) {
+  const t = useTranslations("editorMedia.drawing");
+  const tc = useTranslations("common");
   const [strokes, setStrokes] = React.useState<Mark[]>([]);
   const [undone, setUndone] = React.useState<Mark[]>([]);
   const [tool, setTool] = React.useState<DrawTool>("pen");
@@ -277,7 +283,7 @@ export function DrawingDialog({
     setUndone([]);
     setStrokes([]);
     const cleared = strokes;
-    toast.success("Drawing cleared", {
+    toast.success(t("cleared"), {
       undo: () => setStrokes(cleared),
     });
   };
@@ -293,7 +299,7 @@ export function DrawingDialog({
     try {
       onSave(await renderDrawing(marks, background));
     } catch {
-      toast.error("Couldn’t save the drawing");
+      toast.error(t("saveFailed"));
       setSaving(false);
     }
   };
@@ -341,21 +347,21 @@ export function DrawingDialog({
       >
         <DialogHeader>
           <DialogTitle>
-            {background ? "Draw on picture" : "Draw a picture"}
+            {background ? t("titleOnPicture") : t("title")}
           </DialogTitle>
         </DialogHeader>
         <DialogBody className="gap-3">
           <div
             role="toolbar"
-            aria-label="Drawing tools"
+            aria-label={t("tools")}
             className="flex flex-wrap items-center gap-x-3 gap-y-2"
           >
             <div className="flex items-center gap-0.5">
               {TOOLS.map((each) => (
-                <Tip key={each.tool} label={each.label}>
+                <Tip key={each.tool} label={t(`tool.${each.tool}`)}>
                   <IconButton
                     size="sm"
-                    label={each.label}
+                    label={t(`tool.${each.tool}`)}
                     aria-pressed={tool === each.tool}
                     onClick={() => {
                       finishTyping();
@@ -378,8 +384,8 @@ export function DrawingDialog({
                   key={each.value}
                   type="button"
                   aria-pressed={color === each.value}
-                  aria-label={each.name}
-                  title={each.name}
+                  aria-label={t(`color.${each.name as ColorName}`)}
+                  title={t(`color.${each.name as ColorName}`)}
                   tabIndex={showsColor ? undefined : -1}
                   onClick={() => setColor(each.value)}
                   className={cn(
@@ -393,10 +399,10 @@ export function DrawingDialog({
             </div>
             <div className="flex items-center gap-0.5">
               {DRAW_SIZES.map((each) => (
-                <Tip key={each.name} label={each.name}>
+                <Tip key={each.name} label={t(`size.${each.name as SizeName}`)}>
                   <IconButton
                     size="sm"
-                    label={each.name}
+                    label={t(`size.${each.name as SizeName}`)}
                     aria-pressed={size === each.value}
                     onClick={() => setSize(each.value)}
                   >
@@ -413,31 +419,33 @@ export function DrawingDialog({
               ))}
             </div>
             <div className="ml-auto flex items-center gap-0.5">
-              <Tip label={`Undo (${modKey}Z)`}>
+              <Tip label={t("undoWithKey", { key: `${modKey}Z` })}>
                 <IconButton
                   size="sm"
-                  label="Undo"
+                  label={tc("undo")}
                   disabled={!strokes.length}
                   onClick={undo}
                 >
                   <Undo2 />
                 </IconButton>
               </Tip>
-              <Tip label={`Redo (${isMac() ? "⇧⌘Z" : "Ctrl+Y"})`}>
+              <Tip
+                label={t("redoWithKey", { key: isMac() ? "⇧⌘Z" : "Ctrl+Y" })}
+              >
                 <IconButton
                   size="sm"
-                  label="Redo"
+                  label={tc("redo")}
                   disabled={!undone.length}
                   onClick={redo}
                 >
                   <Redo2 />
                 </IconButton>
               </Tip>
-              <Tip label="Clear">
+              <Tip label={t("clear")}>
                 <IconButton
                   size="sm"
                   tone="danger"
-                  label="Clear"
+                  label={t("clear")}
                   disabled={!strokes.length}
                   onClick={clear}
                 >
@@ -458,10 +466,10 @@ export function DrawingDialog({
             role="img"
             aria-label={
               tool === "text"
-                ? "Drawing pad: click where the text goes"
+                ? t("padText")
                 : tool === "emoji"
-                  ? "Drawing pad: click where the emoji goes"
-                  : "Drawing pad: draw with the mouse, a finger or a pen"
+                  ? t("padEmoji")
+                  : t("padDraw")
             }
             data-testid="drawing-pad"
             className={cn(
@@ -498,7 +506,7 @@ export function DrawingDialog({
             {typing && (
               <input
                 autoFocus
-                aria-label="Text to put on the drawing"
+                aria-label={t("textInput")}
                 value={typing.text}
                 size={Math.max(4, typing.text.length + 1)}
                 onChange={(e) => setTyping({ ...typing, text: e.target.value })}
@@ -529,15 +537,15 @@ export function DrawingDialog({
         </DialogBody>
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {tc("cancel")}
           </Button>
           <Button
             type="button"
             disabled={!canSave}
-            busy={saving ? "Saving…" : undefined}
+            busy={saving ? tc("saving") : undefined}
             onClick={() => void save()}
           >
-            {background ? "Save" : "Insert"}
+            {background ? tc("save") : t("insert")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { CircleAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
@@ -14,6 +15,7 @@ import { Row, RowText } from "./settings-blocks";
  * device, over the chosen colour scheme.
  */
 export function CustomThemeEditor() {
+  const t = useTranslations("settings.customTheme");
   const scheme = usePreferencesStore((s) => s.ui.colorScheme ?? "anchor");
   const style = usePreferencesStore((s) => s.ui.style ?? "default");
   const customTheme = usePreferencesStore((s) => s.ui.customTheme);
@@ -34,8 +36,8 @@ export function CustomThemeEditor() {
     setUI("customTheme", result.theme);
     toast.success(
       result.theme.name
-        ? `Custom theme “${result.theme.name}” applied`
-        : "Custom theme applied",
+        ? t("appliedToastNamed", { name: result.theme.name })
+        : t("appliedToast"),
     );
   };
 
@@ -51,30 +53,32 @@ export function CustomThemeEditor() {
     setErrors([]);
     try {
       await copyText(json);
-      toast.success("Current theme copied as JSON");
+      toast.success(t("copied"));
     } catch {
-      toast.info("The current theme is in the box below; copy it from there");
+      toast.info(t("copyFailed"));
     }
   };
 
   return (
     <Row className="grid items-start gap-3.5">
       <RowText
-        title="Custom theme"
+        title={t("title")}
         text={
           <>
-            Paste a theme as JSON: colours for light, dark or both. Anything
-            left out keeps the colour scheme’s colour. Kept on this device; the
-            same JSON works in the Android app.
+            {t("text")}
             {customTheme &&
               (style === "lofi"
-                ? " Lo-fi draws in its own greys, so the custom theme waits for another style."
-                : ` Applied${customTheme.name ? `: ${customTheme.name}` : ""}.`)}
+                ? ` ${t("lofiNote")}`
+                : ` ${
+                    customTheme.name
+                      ? t("appliedNamed", { name: customTheme.name })
+                      : t("applied")
+                  }`)}
           </>
         }
       />
       <textarea
-        aria-label="Custom theme JSON"
+        aria-label={t("jsonLabel")}
         aria-invalid={errors.length > 0 || undefined}
         aria-describedby={errors.length ? errorsId : undefined}
         value={text}
@@ -102,13 +106,13 @@ export function CustomThemeEditor() {
       )}
       <div className="flex flex-wrap gap-2">
         <Button onClick={apply} disabled={!text.trim()}>
-          Apply
+          {t("apply")}
         </Button>
         <Button variant="secondary" onClick={reset} disabled={!customTheme}>
-          Reset
+          {t("reset")}
         </Button>
         <Button variant="quiet" onClick={copy}>
-          Copy current theme as JSON
+          {t("copy")}
         </Button>
       </div>
     </Row>

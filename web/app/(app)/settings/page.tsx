@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { AnchorLogo } from "@/components/layout/anchor-logo";
 import { AppPage, PageTitle } from "@/components/layout/app-page";
 import { LegalNotice } from "@/components/layout/legal-notice";
@@ -28,11 +29,12 @@ import { useServerVersion } from "@/lib/hooks/use-server-version";
 import { appMode, basePath, isServerless } from "@/lib/local-backend/mode";
 
 export default function SettingsPage() {
-  useDocumentTitle("Settings");
+  const t = useTranslations("settings.page");
+  useDocumentTitle(t("title"));
   // As in the Android app's About.
   const serverVersion = useServerVersion();
   return (
-    <AppPage title={<PageTitle>Settings</PageTitle>} scrollKey="settings">
+    <AppPage title={<PageTitle>{t("title")}</PageTitle>} scrollKey="settings">
       <div className="grid grid-cols-[176px_minmax(0,640px)] items-start gap-10 pt-1 max-md:grid-cols-[minmax(0,1fr)] max-md:gap-5">
         <SettingsNav />
         <div className="grid min-w-0 gap-8">
@@ -52,7 +54,7 @@ export default function SettingsPage() {
           {/* Just above Devices, where a phone that scans the code shows up. */}
           {!isServerless && <PhoneSection />}
           {!isServerless && <DevicesSection />}
-          <Section id="about" title="About">
+          <Section id="about" title={t("about")}>
             <Row>
               <div className="flex items-center gap-3">
                 <AnchorLogo className="size-10 rounded-md shadow-edge" />
@@ -61,22 +63,22 @@ export default function SettingsPage() {
                     Anchor+ {process.env.NEXT_PUBLIC_APP_VERSION}
                   </b>
                   <span className="text-meta text-muted-foreground">
-                    Your thoughts, secured.
+                    {t("tagline")}
                   </span>
                   {appMode === "local" && (
                     <span className="text-meta text-muted-foreground">
-                      Your notes are kept in this browser only.{" "}
+                      {t("localOnly")}{" "}
                       <a
                         href={`${basePath}/demo/demos`}
                         className="font-semibold text-accent-ink underline decoration-current/35 underline-offset-3 hover:decoration-current"
                       >
-                        Watch the feature demos
+                        {t("watchDemos")}
                       </a>
                     </span>
                   )}
                   {!isServerless && serverVersion && (
                     <span className="text-meta text-muted-foreground">
-                      Server {serverVersion}
+                      {t("serverVersion", { version: serverVersion })}
                     </span>
                   )}
                 </div>

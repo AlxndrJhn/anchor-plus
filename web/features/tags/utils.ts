@@ -1,5 +1,6 @@
 import type * as React from "react";
 import { TAG_COLORS } from "@/lib/design/tokens";
+import { translate } from "@/lib/i18n";
 import type { Tag } from "./types";
 
 type TagColor = (typeof TAG_COLORS)[number];
@@ -25,8 +26,10 @@ export function tagColorStyle(
 
 /** A color's name for people: “Deep purple”. */
 export function tagColorName(stored: string | null | undefined): string {
+  const t = translate("settings.tags.colors");
   const color = findTagColor(stored);
-  if (!color) return stored ?? "No color";
+  if (!color) return stored ?? t("none");
+  if (t.has(color.name as "red")) return t(color.name as "red");
   const words = color.name.replace(/([A-Z])/g, " $1").toLowerCase();
   return words[0].toUpperCase() + words.slice(1);
 }

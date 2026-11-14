@@ -1,18 +1,22 @@
+"use client";
+
 import { ArrowLeft, RotateCw, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AppPage } from "@/components/layout/app-page";
 import { ErrorScreen } from "@/components/layout/error-screen";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function EditorSkeleton() {
+  const t = useTranslations("noteEditor.states");
   return (
     <div className="pg-editor">
       <article
         className="note ed"
         data-note=""
         aria-busy="true"
-        aria-label="Loading note"
+        aria-label={t("loading")}
       >
         <div className="ed-scroll scrollbar-slim">
           <div className="ed-head">
@@ -38,22 +42,23 @@ export function EditorSkeleton() {
 }
 
 export function NoteLoadFailed({ onRetry }: { onRetry: () => void }) {
+  const t = useTranslations("noteEditor.states");
   return (
     <AppPage title={null}>
       <ErrorScreen
         illustration="broken"
-        title="Couldn’t load this note"
-        text="Check your connection, then try again."
+        title={t("loadFailedTitle")}
+        text={t("loadFailedText")}
         actions={
           <>
             <Button onClick={onRetry}>
               <RotateCw aria-hidden />
-              Try again
+              {t("tryAgain")}
             </Button>
             <Button variant="secondary" asChild>
               <Link href="/notes">
                 <ArrowLeft aria-hidden />
-                Back to your notes
+                {t("backToNotes")}
               </Link>
             </Button>
           </>
@@ -64,24 +69,25 @@ export function NoteLoadFailed({ onRetry }: { onRetry: () => void }) {
 }
 
 export function NoteUnavailable() {
+  const t = useTranslations("noteEditor.states");
   return (
     <AppPage title={null}>
       <ErrorScreen
         illustration="note"
-        title="This note isn’t available"
-        text="It may have been deleted, or you no longer have access to it."
+        title={t("unavailableTitle")}
+        text={t("unavailableText")}
         actions={
           <>
             <Button asChild>
               <Link href="/notes">
                 <ArrowLeft aria-hidden />
-                Back to your notes
+                {t("backToNotes")}
               </Link>
             </Button>
             <Button variant="secondary" asChild>
               <Link href="/trash">
                 <Trash2 aria-hidden />
-                Open trash
+                {t("openTrash")}
               </Link>
             </Button>
           </>

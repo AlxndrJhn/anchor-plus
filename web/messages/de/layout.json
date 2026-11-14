@@ -1,1 +1,210 @@
-{}
+{
+  "ui": {
+    "calendar": {
+      "previousMonth": "Voriger Monat",
+      "nextMonth": "Nächster Monat"
+    },
+    "selectionBar": {
+      "label": "Ausgewählte Notizen",
+      "selectAll": "Alle auswählen",
+      "selected": "{count} ausgewählt",
+      "selectNotes": "Notizen auswählen",
+      "stopKey": "Auswahl beenden (Esc)",
+      "stop": "Auswahl beenden"
+    },
+    "toast": {
+      "dismiss": "Schließen"
+    },
+    "emptyState": {
+      "tryingAgain": "Neuer Versuch…",
+      "checkConnection": "Prüfe deine Verbindung und versuche es dann erneut."
+    },
+    "passwordInput": {
+      "hidePassword": "Passwort ausblenden",
+      "showPassword": "Passwort anzeigen",
+      "hide": "Ausblenden",
+      "show": "Anzeigen"
+    }
+  },
+  "errors": {
+    "code": "Fehler {id}",
+    "title": "Etwas ist schiefgelaufen",
+    "text": "Ein unerwarteter Fehler ist aufgetreten. Meist hilft es, die Seite neu zu laden. Deine gespeicherten Notizen sind sicher.",
+    "reload": "Neu laden",
+    "copyDetails": "Fehlerdetails kopieren",
+    "detailsCopied": "Fehlerdetails kopiert",
+    "detailsCopyFailed": "Details konnten nicht kopiert werden"
+  },
+  "missingPage": {
+    "title": "Seite nicht gefunden",
+    "text": "Prüfe die Adresse oder geh zurück zu deinen Notizen.",
+    "goToNotes": "Zu deinen Notizen",
+    "searchNotes": "Notizen durchsuchen"
+  },
+  "api": {
+    "unreachable": "Server nicht erreichbar",
+    "uploadFailed": "Hochladen fehlgeschlagen ({status})",
+    "pictureNotLoaded": "Das Bild konnte nicht geladen werden"
+  },
+  "offline": {
+    "synced": "Wieder online. Alle Änderungen sind synchronisiert.",
+    "stillWaiting": "Wieder online. Einige Änderungen warten noch auf die Synchronisierung."
+  },
+  "localBackend": {
+    "frozen": "Diese Notiz ist eingefroren; hebe das Einfrieren zuerst auf",
+    "noteNotFound": "Notiz nicht gefunden",
+    "noServerToManage": "Es gibt keinen Server zu verwalten",
+    "needsServer": "Ohne Server nicht verfügbar",
+    "sharingNeedsServer": "Teilen braucht einen Anchor-Server",
+    "shareLinksNeedServer": "Freigabe-Links brauchen einen Anchor-Server",
+    "notInTrash": "Die Notiz ist nicht im Papierkorb",
+    "onlyActiveFrozen": "Nur aktive Notizen können eingefroren werden",
+    "noteChanged": "Die Notiz wurde von jemand anderem geändert",
+    "revisionNotFound": "Version nicht gefunden",
+    "noFile": "Keine Datei",
+    "attachmentNotFound": "Anhang nicht gefunden",
+    "wrongPin": "Falsche PIN",
+    "wrongPattern": "Falsches Muster",
+    "notFound": "Nicht gefunden",
+    "tagNotFound": "Tag nicht gefunden",
+    "tagChanged": "Der Tag wurde von jemand anderem geändert",
+    "markdownNeedsServer": "Der Markdown-Export braucht einen Anchor-Server"
+  },
+  "customTheme": {
+    "invalidJson": "Kein gültiges JSON: {message}",
+    "mustBeObject": "Das Design muss ein JSON-Objekt sein, etwa {example}",
+    "nameString": "name: muss ein Text sein",
+    "modeObject": "{mode}: muss ein Objekt mit Farben sein",
+    "notColour": "{path}: {value} ist keine Farbe; verwende #rgb, #rrggbb oder #rrggbbaa",
+    "needOne": "Gib mindestens „light“ oder „dark“ an",
+    "unknownKey": "{path}: unbekannter Schlüssel; erwartet wird einer von {options}",
+    "unknownKeyGuess": "{path}: unbekannter Schlüssel (meintest du „{guess}“?); erwartet wird einer von {options}"
+  },
+  "sidebar": {
+    "sidebar": "Seitenleiste",
+    "newNote": "Neue Notiz",
+    "newNoteKey": "Neue Notiz (N)",
+    "pages": "Seiten",
+    "tags": "Tags",
+    "newTag": "Neuer Tag",
+    "tagsLoadFailed": "Tags konnten nicht geladen werden",
+    "tagsLoadFailedRetry": "Tags konnten nicht geladen werden. Erneut versuchen",
+    "noTags": "Noch keine Tags",
+    "moveTag": "{name} verschieben",
+    "moveTagHint": "Zum Verschieben ziehen oder die Pfeiltasten benutzen",
+    "tagTip": "#{name} · {count, plural, one {# Notiz} other {# Notizen}}",
+    "tagOptions": "Optionen für {name}",
+    "tagMenu": "Tag {name}",
+    "renameTag": "Umbenennen",
+    "color": "Farbe",
+    "deleteTag": "Tag löschen",
+    "offline": "Offline",
+    "offlineUnsaved": "Offline · {count, plural, one {# ungespeicherte Änderung} other {# ungespeicherte Änderungen}}",
+    "expandKey": "Seitenleiste ausklappen ({keys})",
+    "collapseSidebar": "Seitenleiste einklappen",
+    "keepSidebarOpen": "Seitenleiste offen lassen",
+    "expandSidebar": "Seitenleiste ausklappen",
+    "collapse": "Einklappen",
+    "keepOpen": "Offen lassen",
+    "featureDemos": "Funktionsdemos",
+    "downloads": "Downloads",
+    "deleteTagTitle": "Tag „{name}“ löschen?",
+    "deleteTagDescription": "Der Tag wird von {count, plural, one {# Notiz} other {# Notizen}} entfernt. Deine Notizen werden nicht gelöscht.",
+    "deleteTagUnused": "Keine Notiz verwendet diesen Tag.",
+    "deleting": "Wird gelöscht…",
+    "connectPhoneTip": "Handy per QR-Code verbinden",
+    "connectPhone": "Handy verbinden",
+    "viaQrCode": "per QR-Code",
+    "hide": "Ausblenden",
+    "hidePhoneSetup": "Handy-Einrichtung ausblenden",
+    "account": "Konto",
+    "keyboardShortcuts": "Tastenkürzel",
+    "admin": "Verwaltung",
+    "signOut": "Abmelden",
+    "theme": "Design",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "themeSystem": "Wie System",
+    "colorFailed": "Farbe von #{name} konnte nicht geändert werden",
+    "deleteFailed": "#{name} konnte nicht gelöscht werden",
+    "moveFailed": "Tag konnte nicht verschoben werden"
+  },
+  "skipLink": {
+    "label": "Zum Inhalt springen"
+  },
+  "splash": {
+    "loading": "Anchor+ wird geladen",
+    "connecting": "Verbindung wird hergestellt…"
+  },
+  "desktopUpdate": {
+    "restartTip": "Anchor+ neu starten, um auf {version} zu aktualisieren",
+    "restarting": "Wird neu gestartet…",
+    "update": "Aktualisieren"
+  },
+  "legalNotice": {
+    "copyright": "© Die Anchor- und Anchor+-Mitwirkenden. Freie Software unter der GNU AGPL v3, ohne Gewährleistung.",
+    "sourceCode": "Quellcode",
+    "license": "Lizenz"
+  },
+  "serverDown": {
+    "theServer": "Der Server",
+    "title": "Keine Verbindung zum Server",
+    "text": "{host} antwortet nicht. Deine Notizen sind auf dem Server sicher.",
+    "tryAgain": "Erneut versuchen",
+    "connecting": "Verbindung wird hergestellt…",
+    "tryingAgainIn": "Nächster Versuch in {count, plural, one {# Sekunde} other {# Sekunden}}",
+    "whatYouCanDo": "Was du tun kannst",
+    "checkConnection": "Prüfe deine Internetverbindung.",
+    "maybeRestarting": "Vielleicht wird der Server gerade neu gestartet. Anchor+ versucht es weiter.",
+    "contactAdmin": "Ist er nach ein paar Minuten immer noch nicht erreichbar, wende dich an die Person, die <b>{host}</b> betreibt.",
+    "noAnswer": "Der Server hat nicht auf <code>GET /api/auth/me</code> geantwortet."
+  },
+  "shortcuts": {
+    "title": "Tastenkürzel",
+    "or": "oder",
+    "sections": {
+      "anywhere": "Überall",
+      "notes": "Notizen",
+      "focused": "Fokussierte oder ausgewählte Notizen",
+      "inNote": "In einer Notiz"
+    },
+    "rows": {
+      "newNote": "Neue Notiz",
+      "search": "Suchen oder per Name zu einer Seite oder einem Tag springen",
+      "goToPage": "Zu Notizen, Archiv, Papierkorb oder Einstellungen",
+      "goToTag": "Zu einem Tag: ein paar Buchstaben eingeben",
+      "toggleSidebar": "Seitenleiste ein- oder ausblenden",
+      "thisDialog": "Diese Tastenkürzel",
+      "moveBetween": "Zwischen Notizen wechseln",
+      "firstOrLast": "Erste oder letzte Notiz",
+      "open": "Notiz öffnen",
+      "select": "Notiz auswählen",
+      "selectUpTo": "Bis zu ihr auswählen",
+      "newNoteOrList": "Neue Notiz oder neue Liste, wenn keine Notiz fokussiert ist",
+      "leaveTag": "Tag verlassen, zu allen Notizen",
+      "pin": "Anheften oder loslösen",
+      "archive": "Archivieren oder aus dem Archiv holen",
+      "trash": "In den Papierkorb; im Papierkorb endgültig löschen",
+      "leaveText": "Text verlassen; nochmal zum Schließen",
+      "backIntoText": "Zurück in den Text",
+      "closeOrTick": "Schließen oder Eintrag einer Checkliste abhaken",
+      "archiveOne": "Archivieren",
+      "trashOne": "In den Papierkorb"
+    }
+  },
+  "tagJump": {
+    "title": "Zu Tag springen",
+    "tagName": "Tag-Name",
+    "placeholder": "Name eines Tags eingeben",
+    "tags": "Tags",
+    "noMatch": "Kein passender Tag",
+    "noTags": "Noch keine Tags"
+  },
+  "appPage": {
+    "openMenu": "Menü öffnen",
+    "clearSearch": "Suche löschen",
+    "goTo": "Gehe zu",
+    "tag": "Tag",
+    "page": "Seite"
+  }
+}

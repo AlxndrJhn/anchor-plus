@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { licenseUrl, sourceCodeUrl } from "@/lib/source-code";
 import { cn } from "@/lib/utils";
 
@@ -7,17 +8,17 @@ const LINK =
 
 /** The AGPL's notices, and where to get the source of this version. */
 export function LegalNotice({ className }: { className?: string }) {
+  const t = useTranslations("layout.legalNotice");
   return (
     <p className={cn("m-0 text-meta text-muted-foreground", className)}>
-      © The Anchor and Anchor+ contributors. Free software under the GNU AGPL
-      v3, with no warranty.{" "}
+      {t("copyright")}{" "}
       <a
         href={sourceCodeUrl(VERSION)}
         target="_blank"
         rel="noreferrer"
         className={LINK}
       >
-        Source code
+        {t("sourceCode")}
       </a>
       {" · "}
       <a
@@ -26,7 +27,7 @@ export function LegalNotice({ className }: { className?: string }) {
         rel="noreferrer"
         className={LINK}
       >
-        License
+        {t("license")}
       </a>
     </p>
   );

@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useShellStore } from "@/components/layout/shell-store";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
 import { copyText } from "@/lib/clipboard";
 import { usePresence } from "@/lib/hooks/use-presence";
 import { useRetry } from "@/lib/hooks/use-retry";
+import { translate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { getOidcSettings, testOidcIssuer, updateOidcSettings } from "../api";
 import { adminKeys } from "../queries";
@@ -27,6 +29,8 @@ import { cardClass, LockNote } from "./admin-parts";
 const PHONE_CALLBACK_URL = "anchor://oidc/callback";
 
 function CopyAddress({ label, value }: { label: string; value: string }) {
+  const t = useTranslations("admin.singleSignOn");
+  const tc = useTranslations("common");
   const [copied, setCopied] = React.useState(false);
   React.useEffect(() => {
     if (!copied) return;
@@ -42,15 +46,15 @@ function CopyAddress({ label, value }: { label: string; value: string }) {
       boxClassName="bg-card"
       end={
         <InputButton
-          aria-label={`Copy ${label.toLowerCase()}`}
+          aria-label={t("copyLabel", { label })}
           onClick={() =>
             copyText(value).then(
               () => setCopied(true),
-              () => toast.error("Couldn’t copy the address"),
+              () => toast.error(t("copyAddressFailed")),
             )
           }
         >
-          {copied ? "Copied" : "Copy"}
+          {copied ? tc("copied") : tc("copy")}
         </InputButton>
       }
     />
@@ -59,16 +63,11 @@ function CopyAddress({ label, value }: { label: string; value: string }) {
 
 /** What to ask whoever runs the provider for, ready to paste in a message. */
 function providerRequest(providerName: string, callbackUrl: string) {
-  return [
-    `Could you add Anchor+ as an OIDC client in ${providerName}? In Pocket ID, that’s OIDC Clients → Add OIDC Client.`,
-    "",
-    "- Name: Anchor+",
-    `- Callback URLs: ${callbackUrl}`,
-    `  and ${PHONE_CALLBACK_URL} (for the phone app)`,
-    "- Public client: yes, with PKCE (the phone app can’t keep a secret)",
-    "",
-    "Then send me its client ID and the issuer URL (your Pocket ID’s address). Thanks!",
-  ].join("\n");
+  return translate("admin.singleSignOn")("request", {
+    provider: providerName,
+    callbackUrl,
+    phoneUrl: PHONE_CALLBACK_URL,
+  });
 }
 
 type OidcForm = Required<
@@ -87,6 +86,8 @@ type OidcForm = Required<
 };
 
 export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
+  const t = useTranslations("admin.singleSignOn");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const settingsQuery = useQuery({
     queryKey: adminKeys.oidc,
@@ -118,7 +119,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
   React.useEffect(() => setForm(saved), [saved]);
   const test = useMutation({
     mutationFn: testOidcIssuer,
-    onError: () => toast.error("Couldn’t test the issuer URL"),
+    onError: () => toast.error(t("testFailed")),
   });
   const testResult: OidcIssuerTest | undefined =
     test.variables === form?.issuerUrl.trim() ? test.data : undefined;
@@ -143,10 +144,10 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
     onSuccess: (updated) => {
       queryClient.setQueryData(adminKeys.oidc, updated);
       queryClient.invalidateQueries({ queryKey: ["oidc-config"] });
-      toast.success("Single sign-on settings saved");
+      toast.success(t("saved"));
     },
     onError: (_, dto) =>
-      toast.error("Couldn’t save single sign-on", {
+      toast.error(t("saveFailed"), {
         retry: () => save.mutate(dto),
       }),
   });
@@ -154,9 +155,9 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
   if ((settingsQuery.isError && !settings) || settingsRetry.isRetrying)
     return (
       <section className="grid gap-2.5">
-        <h2 className="m-0 px-1 text-title">Single sign-on</h2>
+        <h2 className="m-0 px-1 text-title">{t("title")}</h2>
         <LoadFailedRow
-          message="Couldn’t load the single sign-on settings."
+          message={t("loadFailed")}
           onRetry={settingsRetry.retry}
           isRetrying={settingsRetry.isRetrying}
         />
@@ -173,17 +174,17 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
   const locked = settings.isLocked;
   const updateForm = (patch: Partial<OidcForm>) =>
     setForm((prev) => (prev ? { ...prev, ...patch } : prev));
-  const providerName = form.providerName.trim() || "your provider";
+  const providerName = form.providerName.trim() || t("providerFallback");
   const hasSecret = settings.hasClientSecret && !form.clearSecret;
 
   const submit = () => {
     const fieldErrors: typeof errors = {};
     if (form.enabled && !form.issuerUrl.trim())
-      fieldErrors.issuer = "Enter the issuer URL.";
+      fieldErrors.issuer = t("issuerRequired");
     else if (form.enabled && !/^https?:\/\/\S+$/i.test(form.issuerUrl.trim()))
-      fieldErrors.issuer = "Enter a full URL, like https://auth.example.com.";
+      fieldErrors.issuer = t("issuerInvalid");
     if (form.enabled && !form.clientId.trim())
-      fieldErrors.client = "Enter the client ID.";
+      fieldErrors.client = t("clientRequired");
     setErrors(fieldErrors);
     if (fieldErrors.issuer || fieldErrors.client) return;
     const dto: UpdateOidcSettingsDto = {
@@ -201,15 +202,12 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
 
   return (
     <section className="grid gap-2.5">
-      <SectionHeader
-        title="Single sign-on"
-        description="Let people sign in with your identity provider, like Pocket ID or Authelia (OIDC)."
-      />
+      <SectionHeader title={t("title")} description={t("description")} />
       {locked && (
         <LockNote>
-          Set by <code>OIDC_ENABLED</code>, <code>OIDC_ISSUER_URL</code> and{" "}
-          <code>OIDC_CLIENT_ID</code> on the server. Remove them there to change
-          these here.
+          {t.rich("locked", {
+            code: (chunks) => <code>{chunks}</code>,
+          })}
         </LockNote>
       )}
       <div
@@ -219,10 +217,10 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
         <Row>
           <div className="grid min-w-50 flex-1 gap-0.5">
             <label htmlFor="oidc-on" className="font-semibold text-ui">
-              Sign in with a provider
+              {t("enable")}
             </label>
             <span className="text-meta text-muted-foreground">
-              Adds a “Continue with {providerName}” button to the sign-in page.
+              {t("enableHelp", { provider: providerName })}
             </span>
           </div>
           <Switch
@@ -236,10 +234,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
           <>
             <Row className="grid gap-3.5">
               <div className="grid grid-cols-2 items-start gap-3.5 max-md:grid-cols-1">
-                <Field
-                  label="Provider name"
-                  help="Shown on the sign-in button."
-                >
+                <Field label={t("providerName")} help={t("providerNameHelp")}>
                   <Input
                     value={form.providerName}
                     placeholder="Pocket ID"
@@ -250,7 +245,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                   />
                 </Field>
                 <Field
-                  label="Issuer URL"
+                  label={t("issuerUrl")}
                   error={
                     errors.issuer ??
                     (testResult && !testResult.ok && (
@@ -264,7 +259,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                               updateForm({ issuerUrl: testResult.issuer })
                             }
                           >
-                            Use it
+                            {t("useIt")}
                           </button>
                         )}
                       </>
@@ -273,9 +268,9 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                   help={
                     testResult?.ok
                       ? testResult.supportsPkce
-                        ? `Found ${testResult.issuer}.`
-                        : `Found ${testResult.issuer}, but it doesn’t offer PKCE, which the phone app needs.`
-                      : "Your provider’s address, like https://id.example.com for Pocket ID."
+                        ? t("issuerFound", { issuer: testResult.issuer })
+                        : t("issuerNoPkce", { issuer: testResult.issuer })
+                      : t("issuerHelp")
                   }
                 >
                   <Input
@@ -293,7 +288,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                           disabled={test.isPending}
                           onClick={() => test.mutate(form.issuerUrl.trim())}
                         >
-                          {test.isPending ? "Testing…" : "Test"}
+                          {test.isPending ? t("testing") : t("test")}
                         </InputButton>
                       )
                     }
@@ -301,7 +296,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                 </Field>
               </div>
               <div className="grid grid-cols-2 items-start gap-3.5 max-md:grid-cols-1">
-                <Field label="Client ID" error={errors.client}>
+                <Field label={t("clientId")} error={errors.client}>
                   <Input
                     value={form.clientId}
                     readOnly={locked}
@@ -313,26 +308,28 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                 </Field>
                 {locked ? (
                   <Field
-                    label="Client secret"
-                    aside="Optional"
-                    help="Set on the server."
+                    label={t("clientSecret")}
+                    aside={t("optional")}
+                    help={t("secretOnServer")}
                   >
                     <Input
                       readOnly
                       value=""
-                      placeholder={settings.hasClientSecret ? "Saved" : "None"}
+                      placeholder={
+                        settings.hasClientSecret ? t("secretSaved") : t("none")
+                      }
                     />
                   </Field>
                 ) : hasSecret ? (
                   <Field
-                    label="Client secret"
-                    aside="Optional"
-                    help="The saved secret is never shown."
+                    label={t("clientSecret")}
+                    aside={t("optional")}
+                    help={t("secretNeverShown")}
                   >
                     <Input
                       type="password"
                       value={form.clientSecret}
-                      placeholder="Saved. Type a new one to replace it."
+                      placeholder={t("secretReplace")}
                       onChange={(e) =>
                         updateForm({ clientSecret: e.target.value })
                       }
@@ -342,19 +339,19 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                             updateForm({ clientSecret: "", clearSecret: true })
                           }
                         >
-                          Clear
+                          {t("clear")}
                         </InputButton>
                       }
                     />
                   </Field>
                 ) : (
                   <Field
-                    label="Client secret"
-                    aside="Optional"
+                    label={t("clientSecret")}
+                    aside={t("optional")}
                     help={
                       form.mobileClientId.trim()
-                        ? "Only used for web sign-in. The phone app has its own client below."
-                        : "The Anchor+ phone app needs a public client, so leave this empty if people sign in from their phones, or give the phone app its own client below."
+                        ? t("secretWebOnly")
+                        : t("secretPublicClient")
                     }
                   >
                     <PasswordInput
@@ -362,7 +359,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                       placeholder={
                         form.mobileClientId.trim()
                           ? undefined
-                          : "Leave empty for the phone app"
+                          : t("secretEmptyForPhone")
                       }
                       onChange={(e) =>
                         updateForm({ clientSecret: e.target.value })
@@ -373,9 +370,9 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
               </div>
               <div className="grid grid-cols-2 items-start gap-3.5 max-md:grid-cols-1">
                 <Field
-                  label="Phone app client ID"
-                  aside="Optional"
-                  help="For providers that give each client one sign-in method, like Logto: a public client just for the phone app, with its callback URL. Leave empty to use the client ID above."
+                  label={t("phoneClientId")}
+                  aside={t("optional")}
+                  help={t("phoneClientIdHelp")}
                 >
                   <Input
                     value={form.mobileClientId}
@@ -390,10 +387,10 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
             <Row>
               <div className="grid min-w-50 flex-1 gap-0.5">
                 <label htmlFor="oidc-only" className="font-semibold text-ui">
-                  Only sign in with {providerName}
+                  {t("only", { provider: providerName })}
                 </label>
                 <span className="text-meta text-muted-foreground">
-                  Turns off sign-in and sign-up with email and password.
+                  {t("onlyHelp")}
                 </span>
               </div>
               <Switch
@@ -407,26 +404,26 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
             </Row>
             <Row className="block">
               <div className="grid gap-1.5 rounded-lg bg-muted px-3.5 py-3">
-                <b className="font-semibold text-meta">Callback URLs</b>
+                <b className="font-semibold text-meta">{t("callbackUrls")}</b>
                 <CopyAddress
-                  label="Web callback URL"
+                  label={t("webCallback")}
                   value={settings.callbackUrl}
                 />
                 <CopyAddress
-                  label="Phone app callback URL"
+                  label={t("phoneCallback")}
                   value={PHONE_CALLBACK_URL}
                 />
                 <FieldDescription>
                   {form.mobileClientId.trim()
-                    ? `In ${providerName}, add the first to the main client and the second to the phone app’s.`
-                    : `Add both as callback URLs in ${providerName}.`}{" "}
-                  The first is based on{" "}
-                  <code className="rounded-[5px] bg-foreground/7 px-1.25 py-px font-mono text-foreground text-small">
-                    APP_URL
-                  </code>
-                  . In Pocket ID, that’s OIDC Clients → Add OIDC Client; tick
-                  Public Client and PKCE so the phone app can sign in too, and
-                  copy its client ID here.
+                    ? t("callbackHelpSplit", { provider: providerName })
+                    : t("callbackHelpBoth", { provider: providerName })}{" "}
+                  {t.rich("callbackHelpMore", {
+                    code: (chunks) => (
+                      <code className="rounded-[5px] bg-foreground/7 px-1.25 py-px font-mono text-foreground text-small">
+                        {chunks}
+                      </code>
+                    ),
+                  })}
                 </FieldDescription>
                 <Button
                   variant="secondary"
@@ -438,14 +435,14 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                     ).then(
                       () =>
                         toast.success(
-                          `Copied. Send it to whoever runs ${providerName}.`,
+                          t("requestCopied", { provider: providerName }),
                         ),
-                      () => toast.error("Couldn’t copy the request"),
+                      () => toast.error(t("requestCopyFailed")),
                     )
                   }
                 >
                   <Copy aria-hidden />
-                  Copy a request for your {providerName} admin
+                  {t("copyRequest", { provider: providerName })}
                 </Button>
               </div>
             </Row>
@@ -467,9 +464,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
               : "animate-rise-in",
           )}
         >
-          <span className="flex-1">
-            You have unsaved changes to single sign-on.
-          </span>
+          <span className="flex-1">{t("unsaved")}</span>
           <Button
             variant="quiet"
             size="sm"
@@ -479,15 +474,15 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
               setErrors({});
             }}
           >
-            Discard
+            {t("discard")}
           </Button>
           <Button
             size="sm"
             className="bg-inverse-foreground bg-none text-inverse shadow-none hover:bg-inverse-foreground/90"
             onClick={submit}
-            busy={save.isPending && "Saving…"}
+            busy={save.isPending && tc("saving")}
           >
-            Save
+            {tc("save")}
           </Button>
         </div>
       )}

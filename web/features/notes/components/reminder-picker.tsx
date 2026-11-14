@@ -15,6 +15,7 @@ import {
   Sun,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button, IconButton } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,6 +36,7 @@ import {
   uses12HourClock,
 } from "@/features/preferences";
 import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
+import { dateLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   parseTimeInput,
@@ -68,12 +70,7 @@ const ICONS = {
   week: CalendarRange,
   month: Calendar1,
 } as const;
-const REPEAT_OPTIONS: { value: Repeating; label: string }[] = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
-];
+const REPEAT_OPTIONS: Repeating[] = ["daily", "weekly", "monthly", "yearly"];
 const withTime = (d: Date, hours: number, minutes: number) => {
   const result = new Date(d);
   result.setHours(hours, minutes, 0, 0);
@@ -87,6 +84,8 @@ function ReminderPicker({
   onClose,
   now: fixedNow,
 }: ReminderPickerProps) {
+  const t = useTranslations("notes.reminderPicker");
+  const tc = useTranslations("common");
   const [now] = React.useState(() => fixedNow ?? new Date());
   const presets = React.useMemo(() => presetReminders(now), [now]);
   const [when, setWhen] = React.useState<Date | null>(() =>
@@ -147,14 +146,14 @@ function ReminderPicker({
       <div className="flex items-start gap-2.5 p-0.5 pl-1">
         <div className="grid flex-1 gap-px">
           <PopoverTitle className="font-semibold text-lead">
-            Reminder
+            {t("reminder")}
           </PopoverTitle>
           <PopoverDescription className="text-muted-foreground text-small">
-            Sent to the Anchor+ app on your phone
+            {t("sentToPhone")}
           </PopoverDescription>
         </div>
         {onClose && (
-          <IconButton size="sm" label="Close" onClick={onClose}>
+          <IconButton size="sm" label={tc("close")} onClick={onClose}>
             <X />
           </IconButton>
         )}
@@ -183,7 +182,7 @@ function ReminderPicker({
         data-slot="picker-group"
         className={groupClass}
         role="radiogroup"
-        aria-label="When"
+        aria-label={t("when")}
         onFocus={whenChoices.onFocus}
         onKeyDown={whenChoices.onKeyDown}
       >
@@ -214,7 +213,7 @@ function ReminderPicker({
                   ? formatTime(date)
                   : preset.key === "monday" || preset.key === "month"
                     ? formatShortDate(date)
-                    : `${format(date, "EEE")}, ${formatTime(date)}`}
+                    : `${format(date, "EEE", { locale: dateLocale() })}, ${formatTime(date)}`}
               </span>
               <Tick checked={choice === preset.key} />
             </button>
@@ -229,7 +228,7 @@ function ReminderPicker({
           onClick={pickCustom}
         >
           <CalendarDays aria-hidden />
-          <span>Pick a date</span>
+          <span>{t("pickDate")}</span>
           <span className="ml-auto" />
           <Tick checked={choice === "custom"} />
         </button>
@@ -273,8 +272,10 @@ function ReminderPicker({
                 <Input
                   size="sm"
                   icon={<Clock aria-hidden />}
-                  aria-label="Time"
-                  placeholder={`Type a time, like ${uses12HourClock() ? "4 PM" : "16:00"}`}
+                  aria-label={t("time")}
+                  placeholder={t("typeTime", {
+                    example: uses12HourClock() ? "4 PM" : "16:00",
+                  })}
                   value={typedTime}
                   onChange={(e) => setTypedTime(e.target.value)}
                   onKeyDown={(e) => {
@@ -307,7 +308,7 @@ function ReminderPicker({
         <div className="flex min-h-10.5 items-center gap-3 text-ui [&>svg]:size-4.25 [&>svg]:text-muted-foreground">
           <Repeat aria-hidden />
           <label htmlFor={repeatId} className="flex-1 cursor-pointer">
-            Repeat
+            {t("repeat")}
           </label>
           <Switch
             id={repeatId}
@@ -321,13 +322,16 @@ function ReminderPicker({
           <div className="border-t-0! pb-3">
             <SegmentedControl
               full
-              aria-label="How often"
+              aria-label={t("howOften")}
               value={repeat}
               onValueChange={(value) => {
                 setRepeat(value);
                 setLastRepeat(value);
               }}
-              options={REPEAT_OPTIONS}
+              options={REPEAT_OPTIONS.map((value) => ({
+                value,
+                label: t(value),
+              }))}
               className="[&_button]:px-1.5 [&_button]:text-meta [&_span]:px-1.5 [&_span]:text-meta"
             />
           </div>
@@ -338,7 +342,7 @@ function ReminderPicker({
         {reminder && onRemove && (
           <Button variant="danger" size="sm" onClick={onRemove}>
             <BellOff aria-hidden />
-            Remove
+            {tc("remove")}
           </Button>
         )}
         <Button
@@ -348,7 +352,7 @@ function ReminderPicker({
             when && onSave({ remindAt: toWallClock(when), recurrence: repeat })
           }
         >
-          Save
+          {tc("save")}
         </Button>
       </div>
     </div>
@@ -402,6 +406,7 @@ function TimeList({
   value: Date;
   onChange: (hours: number, minutes: number) => void;
 }) {
+  const t = useTranslations("notes.reminderPicker");
   const listRef = React.useRef<HTMLDivElement>(null);
   React.useLayoutEffect(() => {
     const chosen = listRef.current?.querySelector<HTMLElement>(
@@ -418,7 +423,7 @@ function TimeList({
     <div
       ref={listRef}
       role="group"
-      aria-label="Times"
+      aria-label={t("times")}
       data-slot="time-list"
       className="relative grid max-h-46 grid-cols-3 gap-1.5 overflow-auto p-0.5"
     >

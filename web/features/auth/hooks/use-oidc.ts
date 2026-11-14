@@ -5,6 +5,7 @@ import { HTTPError } from "ky";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/toast";
+import { translate } from "@/lib/i18n";
 import { firstName } from "@/lib/utils";
 import { exchangeOidcCode, getOidcConfig } from "../api";
 import { useAuthStore } from "../store";
@@ -74,7 +75,11 @@ export function useOidcCallback() {
           // GuestGuard navigates once signed in.
           setAuth(result.user, result.access_token, result.refresh_token);
           setInitialized(true);
-          toast.success(`Welcome back, ${firstName(result.user.name)}`);
+          toast.success(
+            translate("auth.toasts")("welcomeBack", {
+              name: firstName(result.user.name),
+            }),
+          );
         })
         .catch((err: unknown) => {
           setFailure({

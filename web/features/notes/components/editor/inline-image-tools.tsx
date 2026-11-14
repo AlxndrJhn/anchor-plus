@@ -11,6 +11,7 @@ import {
   PencilLine,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Delta from "quill-delta";
 import * as React from "react";
 import {
@@ -192,6 +193,8 @@ export const InlineImageTools = React.forwardRef<
     host: InlinePictureHost;
   }
 >(({ getQuill, container, host }, ref) => {
+  const t = useTranslations("editorMedia.inlineImage");
+  const tc = useTranslations("common");
   const [hovered, setHovered] = React.useState<Hovered | null>(null);
   const [menu, setMenu] = React.useState<Menu | null>(null);
   const [captioning, setCaptioning] = React.useState<Menu | null>(null);
@@ -294,7 +297,7 @@ export const InlineImageTools = React.forwardRef<
       dropIfUnused(at.quill, from.image.id);
     } catch (error) {
       if (isStorageFull(error)) toastStorageFull(error);
-      else toast.error("Couldn’t change the picture");
+      else toast.error(t("changeFailed"));
     } finally {
       from.node.removeAttribute("data-busy");
     }
@@ -309,7 +312,7 @@ export const InlineImageTools = React.forwardRef<
       );
       await swap(from, file);
     } catch {
-      toast.error("Couldn’t change the picture");
+      toast.error(t("changeFailed"));
       from.node.removeAttribute("data-busy");
     }
   };
@@ -325,7 +328,7 @@ export const InlineImageTools = React.forwardRef<
     quill.history.cutoff();
     quill.setSelection(index, 0, "silent");
     host.hold(image.id, true);
-    toast.success("Picture deleted", {
+    toast.success(t("deleted"), {
       undo: () => {
         host.hold(image.id, false);
         quill.updateContents(
@@ -445,7 +448,7 @@ export const InlineImageTools = React.forwardRef<
         insertPictures(quill, caretForInsert.current, ids);
     } catch (error) {
       if (isStorageFull(error)) toastStorageFull(error);
-      else toast.error("Couldn’t add the picture");
+      else toast.error(t("addFailed"));
     }
   };
 
@@ -481,8 +484,8 @@ export const InlineImageTools = React.forwardRef<
         <button
           type="button"
           className="nit-grip"
-          aria-label="Drag to resize the picture"
-          title="Drag to resize"
+          aria-label={t("resizeLabel")}
+          title={t("resize")}
           tabIndex={-1}
           style={{ left: hovered.left, top: hovered.top }}
           onPointerDown={startResize}
@@ -503,12 +506,12 @@ export const InlineImageTools = React.forwardRef<
         </DropdownMenuTrigger>
         {shown && (
           <DropdownMenuContent
-            aria-label="Picture"
+            aria-label={t("menu")}
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <DropdownMenuItem onSelect={() => host.view(shown.image.id)}>
               <Expand />
-              View full size
+              {t("viewFull")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
@@ -517,56 +520,56 @@ export const InlineImageTools = React.forwardRef<
               }}
             >
               <ImageUp />
-              Replace…
+              {t("replace")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
                 void host.load(shown.image.id).then(
                   (picture) => setCropping({ menu: shown, picture }),
-                  () => toast.error("Couldn’t open the picture"),
+                  () => toast.error(t("openFailed")),
                 );
               }}
             >
               <Crop />
-              Crop…
+              {t("cropMenu")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
                 void host.load(shown.image.id).then(
                   (picture) => setDrawing({ menu: shown, picture }),
-                  () => toast.error("Couldn’t open the picture"),
+                  () => toast.error(t("openFailed")),
                 );
               }}
             >
               <PencilLine />
-              Draw on it…
+              {t("draw")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => void edit(shown, { mirror: "horizontally" })}
             >
               <FlipHorizontal2 />
-              Mirror horizontally
+              {t("mirrorHorizontally")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => void edit(shown, { mirror: "vertically" })}
             >
               <FlipVertical2 />
-              Mirror vertically
+              {t("mirrorVertically")}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setCaptioning(shown)}>
               <Captions />
-              {shown.image.caption ? "Edit caption…" : "Add caption…"}
+              {shown.image.caption ? t("editCaptionMenu") : t("addCaptionMenu")}
             </DropdownMenuItem>
             {shown.image.width !== undefined && (
               <DropdownMenuItem onSelect={() => setWidth(shown, undefined)}>
                 <Maximize2 />
-                Full width
+                {t("fullWidth")}
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem tone="danger" onSelect={() => remove(shown)}>
               <Trash2 />
-              Delete
+              {tc("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         )}

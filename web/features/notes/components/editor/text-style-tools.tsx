@@ -2,6 +2,7 @@
 
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { Baseline, Pipette } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { menuSurface } from "@/components/ui/dropdown-menu";
 import { Tip } from "@/components/ui/tooltip";
@@ -48,6 +49,7 @@ export function TextStyleButton({
   /** In the selection bubble, which mustn't step aside for its own menu. */
   inBubble?: boolean;
 }) {
+  const t = useTranslations("editor.textStyle");
   const [open, setOpen] = React.useState(false);
   const [range, setRange] = React.useState<Range | null>(null);
   const [current, setCurrent] = React.useState<Record<string, unknown>>({});
@@ -94,13 +96,13 @@ export function TextStyleButton({
 
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
-      <Tip label="Text colour and font">
+      <Tip label={t("button")}>
         <PopoverPrimitive.Trigger asChild>
           <button
             ref={box}
             type="button"
             className={className}
-            aria-label="Text colour and font"
+            aria-label={t("button")}
             aria-disabled={disabled || undefined}
             onMouseDown={keepSelection}
             onClick={(e) => {
@@ -126,12 +128,12 @@ export function TextStyleButton({
             "ts-pop rounded-menu animate-pop-in data-[side=top]:animate-pop-up data-[state=closed]:animate-pop-out",
           )}
         >
-          <div className="ts-head">Text colour</div>
-          <fieldset className="ts-row" aria-label="Text colour">
+          <div className="ts-head">{t("textColor")}</div>
+          <fieldset className="ts-row" aria-label={t("textColor")}>
             <button
               type="button"
               className="ts-dot ts-none"
-              aria-label="Default colour"
+              aria-label={t("defaultColor")}
               aria-pressed={!textColor}
               onMouseDown={keepSelection}
               onClick={() => apply("color", false)}
@@ -149,15 +151,15 @@ export function TextStyleButton({
               />
             ))}
             <ColorField
-              label="Pick a text colour"
+              label={t("pickTextColor")}
               value={textColor ?? "#000000"}
               onPick={(value) => apply("color", value, false)}
             />
           </fieldset>
-          <div className="ts-head">Highlight in any colour</div>
+          <div className="ts-head">{t("highlightAnyColor")}</div>
           <div className="ts-row">
             <ColorField
-              label="Pick a highlight colour"
+              label={t("pickHighlightColor")}
               value={
                 typeof highlight === "string" && highlight.startsWith("#")
                   ? highlight
@@ -167,9 +169,9 @@ export function TextStyleButton({
               wide
             />
           </div>
-          <div className="ts-head">Font</div>
-          <fieldset className="ts-row" aria-label="Font">
-            {[{ name: "Default", value: "" }, ...FONTS].map((font) => (
+          <div className="ts-head">{t("font")}</div>
+          <fieldset className="ts-row" aria-label={t("font")}>
+            {[{ name: t("defaultFont"), value: "" }, ...FONTS].map((font) => (
               <button
                 key={font.name}
                 type="button"
@@ -204,10 +206,11 @@ function ColorField({
   onPick: (value: string) => void;
   wide?: boolean;
 }) {
+  const t = useTranslations("editor.textStyle");
   return (
     <label className={cn("ts-dot ts-pick", wide && "ts-wide")} title={label}>
       <Pipette aria-hidden />
-      {wide && <span>Pick a colour…</span>}
+      {wide && <span>{t("pickColor")}</span>}
       <input
         ref={(input) => {
           if (!input) return;

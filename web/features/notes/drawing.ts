@@ -1,3 +1,4 @@
+import { translate } from "@/lib/i18n";
 // Hand-drawn pictures for the text: strokes kept as data, so undo and redo
 // are just a list, and drawn at any size (the pad's, or the saved file's).
 
@@ -23,19 +24,64 @@ export interface Stroke {
 }
 
 export const DRAW_COLORS = [
-  { name: "Black", value: "#1f1f1f" },
-  { name: "Red", value: "#d93025" },
-  { name: "Orange", value: "#f29900" },
-  { name: "Green", value: "#188038" },
-  { name: "Blue", value: "#1a73e8" },
-  { name: "Purple", value: "#9334e6" },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("colors.black");
+    },
+    value: "#1f1f1f",
+  },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("colors.red");
+    },
+    value: "#d93025",
+  },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("colors.orange");
+    },
+    value: "#f29900",
+  },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("colors.green");
+    },
+    value: "#188038",
+  },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("colors.blue");
+    },
+    value: "#1a73e8",
+  },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("colors.purple");
+    },
+    value: "#9334e6",
+  },
 ] as const;
 
 /** Pen widths, as shares of the pad's width. */
 export const DRAW_SIZES = [
-  { name: "Thin", value: 0.004 },
-  { name: "Medium", value: 0.009 },
-  { name: "Thick", value: 0.02 },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("sizes.thin");
+    },
+    value: 0.004,
+  },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("sizes.medium");
+    },
+    value: 0.009,
+  },
+  {
+    get name() {
+      return translate("noteHooks.drawing")("sizes.thick");
+    },
+    value: 0.02,
+  },
 ] as const;
 
 /** Words or an emoji put on the pad, as shares of its width. */

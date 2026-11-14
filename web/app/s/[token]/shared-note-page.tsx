@@ -13,6 +13,7 @@ import {
   Snowflake,
 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Delta, { type Op } from "quill-delta";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Brand } from "@/components/layout/brand";
@@ -52,6 +53,7 @@ const statusOf = (error: unknown) =>
 
 /** A note opened by its share link: no account, no sidebar. */
 export default function SharedNotePage() {
+  const t = useTranslations("auth.sharedNote");
   const { token } = useParams<{ token: string }>();
   const [live, setLive] = useState(false);
 
@@ -69,10 +71,10 @@ export default function SharedNotePage() {
   });
   useDocumentTitle(
     query.data
-      ? query.data.title?.trim() || "Shared note"
+      ? query.data.title?.trim() || t("title")
       : query.isError
-        ? "Note not available"
-        : "Shared note",
+        ? t("notAvailable")
+        : t("title"),
   );
 
   if (query.isPending) return <EditorSkeleton />;
@@ -83,12 +85,12 @@ export default function SharedNotePage() {
       <Screen>
         <ErrorScreen
           illustration="broken"
-          title="Couldn’t load this note"
-          text="Check your connection, then try again."
+          title={t("loadFailedTitle")}
+          text={t("loadFailedText")}
           actions={
             <Button onClick={() => void query.refetch()}>
               <RotateCw aria-hidden />
-              Try again
+              {t("tryAgain")}
             </Button>
           }
         />
@@ -107,6 +109,7 @@ function SharedNoteEditor({
   note: SharedNote;
   onLive: (isLive: boolean) => void;
 }) {
+  const t = useTranslations("auth.sharedNote");
   const queryClient = useQueryClient();
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content ?? "");
@@ -189,9 +192,7 @@ function SharedNoteEditor({
         };
         if (serverNote) adopt(serverNote);
         setSaveState("saved");
-        toast.error(
-          "Someone else changed this note at the same time; showing their version",
-        );
+        toast.error(t("conflict"));
       } else if (status === 404) {
         setGone(true);
       } else if (status === 403) {
@@ -203,7 +204,7 @@ function SharedNoteEditor({
           token,
         ]);
         if (now) adopt(now);
-        toast.error("This link can no longer change the note");
+        toast.error(t("linkChanged"));
       } else {
         setSaveState("failed");
       }
@@ -322,7 +323,7 @@ function SharedNoteEditor({
       <article
         className={cn("note ed", !canEdit && "ro")}
         data-note={note.background ?? ""}
-        aria-label="Note"
+        aria-label={t("noteLabel")}
       >
         <div className="ed-scroll scrollbar-slim">
           <header className="ed-head">
@@ -337,7 +338,11 @@ function SharedNoteEditor({
                 ) : (
                   <Eye aria-hidden />
                 )}
-                {note.isFrozen ? "Frozen" : canEdit ? "Can edit" : "View only"}
+                {note.isFrozen
+                  ? t("frozen")
+                  : canEdit
+                    ? t("canEdit")
+                    : t("viewOnly")}
               </span>
             </div>
           </header>
@@ -347,15 +352,15 @@ function SharedNoteEditor({
                 className="n-title"
                 rows={1}
                 value={title}
-                aria-label="Title"
-                placeholder="Title"
+                aria-label={t("titleLabel")}
+                placeholder={t("titleLabel")}
                 spellCheck={false}
                 onChange={(e) =>
                   edit({ title: e.target.value.replace(/[\r\n]+/g, " ") })
                 }
               />
             ) : (
-              <h1 className="n-title">{title || "Untitled"}</h1>
+              <h1 className="n-title">{title || t("untitled")}</h1>
             )}
             {files.length > 0 && <SharedFiles token={token} files={files} />}
             <div className={cn("ed-body", !canEdit && "mt-4.5")}>
@@ -383,6 +388,7 @@ function SaveStatus({
   state: SaveState;
   onRetry: () => void;
 }) {
+  const t = useTranslations("auth.sharedNote");
   if (state === "failed")
     return (
       <button
@@ -391,7 +397,7 @@ function SaveStatus({
         onClick={onRetry}
       >
         <CircleAlert aria-hidden />
-        Couldn’t save · Try again
+        {t("saveFailed")}
       </button>
     );
   return (
@@ -399,7 +405,11 @@ function SaveStatus({
       {state === "saving" && (
         <LoaderCircle aria-hidden className="animate-spin" />
       )}
-      {state === "saved" ? "Saved" : state === "saving" ? "Saving…" : "Edited"}
+      {state === "saved"
+        ? t("saved")
+        : state === "saving"
+          ? t("saving")
+          : t("edited")}
     </span>
   );
 }
@@ -479,6 +489,7 @@ function SharedFile({
   token: string;
   file: SharedAttachment;
 }) {
+  const t = useTranslations("auth.sharedNote");
   const [busy, setBusy] = useState(false);
   return (
     <Button
@@ -495,7 +506,7 @@ function SharedFile({
           a.click();
           window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
         } catch {
-          toast.error(`Couldn’t download ${file.originalFilename}`);
+          toast.error(t("downloadFailed", { name: file.originalFilename }));
         } finally {
           setBusy(false);
         }
@@ -529,12 +540,13 @@ function Screen({ children }: { children: React.ReactNode }) {
 }
 
 function LinkGone() {
+  const t = useTranslations("auth.sharedNote");
   return (
     <Screen>
       <ErrorScreen
         illustration="note"
-        title="This link doesn’t open a note"
-        text="Its owner may have turned the link off, or moved the note to the trash."
+        title={t("goneTitle")}
+        text={t("goneText")}
         actions={null}
       />
     </Screen>

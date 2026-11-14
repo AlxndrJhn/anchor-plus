@@ -14,6 +14,7 @@ import {
   Plus,
   Repeat,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { RefObject } from "react";
 import * as React from "react";
 import { createPortal } from "react-dom";
@@ -26,9 +27,14 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "@/components/ui/toast";
 import { Tip } from "@/components/ui/tooltip";
-import { usePreferencesStore } from "@/features/preferences";
+import {
+  formatFullDate,
+  formatShortDate,
+  usePreferencesStore,
+} from "@/features/preferences";
 import { sortTagsByName, type Tag, TagChip, TagPicker } from "@/features/tags";
 import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
+import { translate } from "@/lib/i18n";
 import { useFlip } from "@/lib/use-flip";
 import { cn, shortNames } from "@/lib/utils";
 import {
@@ -58,7 +64,6 @@ import { CameraDialog } from "../attachments/camera-dialog";
 import { canRecordAudio, VoiceRecorder } from "../attachments/voice-recorder";
 import { RichTextEditor, type RichTextEditorHandle } from "../editor";
 import type { InlinePictureHost } from "../editor/inline-image-tools";
-import { formatCardDate } from "../note-card";
 import { useRingOnce } from "../reminder-chip";
 import { ReminderPopoverContent } from "../reminder-picker";
 import { NoteOutline } from "./note-outline";
@@ -120,16 +125,38 @@ export interface PictureActions {
   takePictures: (several: boolean) => void;
 }
 
+type ContentT = ReturnType<typeof useTranslations<"noteEditor.content">>;
+
 /** “Sam”, “Sam and Maya”, “Sam, Maya and 2 others”. */
-function sharedLine(people: Person[]) {
+function sharedLine(people: Person[], t: ContentT) {
   const firstNames = shortNames(people.map((person) => person.name));
-  if (firstNames.length <= 2) return firstNames.join(" and ");
-  if (firstNames.length === 3)
-    return `${firstNames[0]}, ${firstNames[1]} and ${firstNames[2]}`;
-  return `${firstNames[0]}, ${firstNames[1]} and ${firstNames.length - 2} others`;
+  return t("people", {
+    count: firstNames.length,
+    a: firstNames[0],
+    b: firstNames[1] ?? "",
+    c: firstNames[2] ?? "",
+    others: Math.max(0, firstNames.length - 2),
+  });
+}
+
+/** “Edited today”, “Edited yesterday”, “Edited Sep 22”. */
+function editedLine(iso: string, t: ContentT, now = new Date()) {
+  const date = new Date(iso);
+  const startOfDay = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const daysAgo = Math.round((startOfDay(now) - startOfDay(date)) / 86400000);
+  if (daysAgo === 0) return t("editedToday");
+  if (daysAgo === 1) return t("editedYesterday");
+  return t("edited", {
+    date:
+      date.getFullYear() === now.getFullYear()
+        ? formatShortDate(date)
+        : formatFullDate(date),
+  });
 }
 
 export function NoteEditorContent(props: NoteEditorContentProps) {
+  const t = useTranslations("noteEditor.content");
   const root = React.useRef<HTMLDivElement>(null);
   const strip = React.useRef<AttachmentStripHandle>(null);
   const dropping = useFileDrop(root, props.canUpload, (files) =>
@@ -151,7 +178,7 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
         .length,
     [props.content],
   );
-  const edited = props.updatedAt ? formatCardDate(props.updatedAt) : null;
+  const edited = props.updatedAt ? editedLine(props.updatedAt, t) : null;
   const people = props.sharedBy ? [] : props.sharedWith;
   const [hasFiles, setHasFiles] = React.useState(false);
   const [recording, setRecording] = React.useState(false);
@@ -191,7 +218,7 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
         ref={startersRoving.ref}
         className="em-start"
         role="toolbar"
-        aria-label="Start with"
+        aria-label={t("startWith")}
         onFocus={startersRoving.onFocus}
         onKeyDown={startersRoving.onKeyDown}
       >
@@ -202,29 +229,29 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
           }
         >
           <ListChecks aria-hidden />
-          Checklist
+          {t("checklist")}
         </button>
         <button
           type="button"
           onClick={() => props.contentEditorRef?.current?.startList?.("bullet")}
         >
           <List aria-hidden />
-          List
+          {t("list")}
         </button>
         {props.canUpload && (
           <button type="button" onClick={() => strip.current?.pick()}>
             <ImagePlus aria-hidden />
-            Picture or audio
+            {t("pictureOrAudio")}
           </button>
         )}
         {record && (
           <button type="button" onClick={record}>
             <Mic aria-hidden />
-            Record audio
+            {t("recordAudio")}
           </button>
         )}
         <span className="hint">
-          or type <kbd>/</kbd> for more
+          {t.rich("typeSlash", { kbd: () => <kbd>/</kbd> })}
         </span>
       </div>
     );
@@ -302,10 +329,10 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
       {props.readOnlyBar}
       {/* The page's heading while the title is a field (WCAG 1.3.1). */}
       {!props.readOnly && (
-        <h1 className="sr-only">{props.title.trim() || "Untitled"}</h1>
+        <h1 className="sr-only">{props.title.trim() || t("untitled")}</h1>
       )}
       {props.readOnly ? (
-        <h1 className="n-title">{props.title || "Untitled"}</h1>
+        <h1 className="n-title">{props.title || t("untitled")}</h1>
       ) : clean ? (
         <div className="n-head">
           <TitleField
@@ -315,11 +342,13 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
             onKeyDown={onTitleKeyDown}
             onPaste={titleLine.onPaste}
           />
-          <Tip label={formattingOpen ? "Hide formatting" : "Show formatting"}>
+          <Tip
+            label={formattingOpen ? t("hideFormatting") : t("showFormatting")}
+          >
             <button
               type="button"
               className="fold-tb"
-              aria-label="Formatting"
+              aria-label={t("formatting")}
               aria-expanded={formattingOpen}
               onClick={() =>
                 usePreferencesStore
@@ -342,18 +371,9 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
       )}
       {!props.isNew && (edited || props.sharedBy || people.length > 0) && (
         <div className="meta">
-          {edited && (
-            <span>
-              Edited{" "}
-              {edited === "Today" || edited === "Yesterday"
-                ? edited.toLowerCase()
-                : edited}
-            </span>
-          )}
+          {edited && <span>{edited}</span>}
           {edited && <span aria-hidden>·</span>}
-          <span>
-            {words} {words === 1 ? "word" : "words"}
-          </span>
+          <span>{t("words", { count: words })}</span>
           {props.sharedBy && (
             <>
               <span aria-hidden>·</span>
@@ -364,7 +384,7 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
                   src={props.sharedBy.profileImage}
                   size="xs"
                 />
-                Shared by {props.sharedBy.name.split(" ")[0]}
+                {t("sharedBy", { name: props.sharedBy.name.split(" ")[0] })}
               </span>
             </>
           )}
@@ -384,7 +404,7 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
                     />
                   ))}
                 </span>
-                Shared with {sharedLine(people)}
+                {t("sharedWith", { people: sharedLine(people, t) })}
               </span>
             </>
           )}
@@ -464,7 +484,7 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
           onChange={props.onContentChange}
           collab={props.collab}
           onRemoteContent={props.onContentChange}
-          placeholder={props.isNew ? "Start writing" : "Write something"}
+          placeholder={props.isNew ? t("startWriting") : t("writeSomething")}
           readOnly={props.readOnly}
           onAddAttachment={
             props.canUpload ? () => strip.current?.pick() : undefined
@@ -512,7 +532,7 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
           <div className="drop-ov" aria-hidden>
             <span className="drop-label">
               <Paperclip />
-              Drop to attach
+              {t("dropToAttach")}
             </span>
           </div>,
           dropping,
@@ -545,7 +565,11 @@ function useInlinePictures(
         const ids: string[] = [];
         for (const file of files) {
           if (file.size > MAX_ATTACHMENT_SIZE) {
-            toast.error(`Can’t add ${file.name}. Files can be up to 50 MB.`);
+            toast.error(
+              translate("noteEditor.content")("fileTooLarge", {
+                name: file.name,
+              }),
+            );
             continue;
           }
           const saved = await uploadAttachment(note, file);
@@ -603,9 +627,15 @@ function pastedImages(data: DataTransfer) {
       if (file.name && file.name !== "image.png") return [file];
       const ext = file.type.split("/")[1] ?? "png";
       return [
-        new File([file], `Pasted ${stamp}${i ? `-${i}` : ""}.${ext}`, {
-          type: file.type,
-        }),
+        new File(
+          [file],
+          `${translate("noteEditor.content")("pasted", {
+            stamp: `${stamp}${i ? `-${i}` : ""}`,
+          })}.${ext}`,
+          {
+            type: file.type,
+          },
+        ),
       ];
     });
 }
@@ -626,6 +656,7 @@ function TitleField({
   onKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement>;
   onPaste: React.ClipboardEventHandler<HTMLTextAreaElement>;
 }) {
+  const t = useTranslations("noteEditor.content");
   // biome-ignore lint/correctness/useExhaustiveDependencies: the height follows the text.
   React.useLayoutEffect(() => {
     const field = ref.current;
@@ -647,8 +678,8 @@ function TitleField({
       dir="auto"
       rows={1}
       value={value}
-      aria-label="Title"
-      placeholder="Title"
+      aria-label={t("title")}
+      placeholder={t("title")}
       spellCheck={false}
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={onKeyDown}
@@ -717,6 +748,7 @@ function useFileDrop(
 
 /** The note's reminder, which opens the picker to change it. */
 function ReminderChip(props: NoteEditorContentProps) {
+  const t = useTranslations("noteEditor.content");
   const [open, setOpen] = React.useState(false);
   const late = !!props.reminder && isReminderPast(props.reminder);
   const ringBell = useRingOnce(
@@ -726,7 +758,7 @@ function ReminderChip(props: NoteEditorContentProps) {
   if (!props.reminder) return null;
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <Tip label="Change the reminder">
+      <Tip label={t("changeReminder")}>
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -746,7 +778,7 @@ function ReminderChip(props: NoteEditorContentProps) {
             ) : (
               <Bell aria-hidden />
             )}
-            {late && <span className="sr-only">Late: </span>}
+            {late && <span className="sr-only">{t("late")} </span>}
             {reminderLabel(props.reminder)}
           </button>
         </PopoverTrigger>
@@ -765,6 +797,7 @@ function TagRow({
   withReminder,
   ...props
 }: NoteEditorContentProps & { withReminder: boolean }) {
+  const t = useTranslations("noteEditor.content");
   const roving = useRovingFocus<HTMLDivElement>();
   const row = roving.ref;
   const flip = useFlip(row, { pop: true });
@@ -800,13 +833,13 @@ function TagRow({
       ref={row}
       className="n-tags"
       role="toolbar"
-      aria-label="Tags"
+      aria-label={t("tags")}
       onFocus={roving.onFocus}
       onKeyDown={roving.onKeyDown}
     >
       {tagsFailed && (
         <LoadFailedRow
-          message="Couldn’t load tags."
+          message={t("tagsFailed")}
           onRetry={props.onRetryTags}
           isRetrying={props.tagsRetrying}
           className="w-full"
@@ -822,7 +855,7 @@ function TagRow({
             name={tag.name}
             color={tag.color}
             onRemove={props.tagsLocked ? undefined : () => removeTag(tag)}
-            removeLabel={`Remove tag ${tag.name}`}
+            removeLabel={t("removeTag", { name: tag.name })}
           />
         </span>
       ))}
@@ -836,7 +869,7 @@ function TagRow({
               className="inline-flex h-chip cursor-pointer items-center gap-1.5 rounded-pill border-0 bg-transparent px-2.5 text-small text-note-muted hover:bg-note-surface hover:text-foreground max-md:h-7.5 [&_svg]:size-3.5"
             >
               <Plus aria-hidden />
-              Add tag
+              {t("addTag")}
             </button>
           </PopoverTrigger>
           <PopoverContent align="start" className="p-0">

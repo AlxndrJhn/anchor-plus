@@ -1,4 +1,5 @@
 import { stringifyDelta } from "@/features/notes/quill";
+import { translate } from "@/lib/i18n";
 import {
   type CanonicalAttachment,
   type CanonicalNote,
@@ -164,7 +165,9 @@ function extractAttachments(
       if (ref.kind === "image") {
         skipped.push({
           item: ref.target,
-          reason: "Attachment file not found",
+          reason: translate("settings.importExport.adapters")(
+            "attachmentNotFound",
+          ),
         });
       }
       continue;
@@ -179,7 +182,10 @@ function extractAttachments(
       if (ref.kind === "image") {
         skipped.push({
           item: basename(resolved),
-          reason: `Unsupported file type (${basename(resolved).split(".").pop()})`,
+          reason: translate("settings.importExport.adapters")(
+            "unsupportedType",
+            { type: basename(resolved).split(".").pop() ?? "" },
+          ),
         });
       }
       continue;
@@ -230,7 +236,10 @@ export const markdownAdapter: ImportAdapter = {
       const displayName = stem || basename(path);
 
       if (!raw.trim()) {
-        skipped.push({ item: displayName, reason: "Empty file" });
+        skipped.push({
+          item: displayName,
+          reason: translate("settings.importExport.adapters")("emptyFile"),
+        });
         continue;
       }
 
@@ -245,7 +254,7 @@ export const markdownAdapter: ImportAdapter = {
       if (stringifyDelta(contentDelta).length > IMPORT_MAX_CONTENT_LENGTH) {
         skipped.push({
           item: displayName,
-          reason: "Note is too large (over 1 MB of formatted content)",
+          reason: translate("settings.importExport.adapters")("noteTooLarge"),
         });
         continue;
       }

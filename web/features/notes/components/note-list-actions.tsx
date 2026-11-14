@@ -1,6 +1,7 @@
 "use client";
 
 import { CircleCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { SearchField, TopBarButton } from "@/components/layout/app-page";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export function NoteListActions({
   onSearchFocus?: () => void;
   children?: React.ReactNode;
 }) {
+  const t = useTranslations("notes.noteListActions");
   return (
     <>
       <SearchField
@@ -51,7 +53,7 @@ export function NoteListActions({
         aria-pressed={list.picking}
         onClick={list.togglePicking}
       >
-        Select
+        {t("select")}
       </TopBarButton>
       {children}
     </>
@@ -59,12 +61,13 @@ export function NoteListActions({
 }
 
 export function NoSearchResults({ list }: { list: NoteList }) {
+  const t = useTranslations("notes.noteListActions");
   const query = list.query.trim();
   const filtered = list.activeFilters > 0;
   return (
     <EmptyState
       illustration="search"
-      title={query ? `No results for “${query}”` : "No matching notes"}
+      title={query ? t("noResultsFor", { query }) : t("noMatchingNotes")}
       action={
         <Button
           variant="secondary"
@@ -75,16 +78,14 @@ export function NoSearchResults({ list }: { list: NoteList }) {
           }}
         >
           {filtered && query
-            ? "Clear search and filters"
+            ? t("clearSearchAndFilters")
             : filtered
-              ? "Clear filters"
-              : "Clear search"}
+              ? t("clearFilters")
+              : t("clearSearch")}
         </Button>
       }
     >
-      {filtered
-        ? "No note matches every filter."
-        : "Check the spelling or try different words."}
+      {filtered ? t("noMatchEveryFilter") : t("checkSpelling")}
     </EmptyState>
   );
 }

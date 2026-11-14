@@ -1,3 +1,5 @@
+import { translate } from "@/lib/i18n";
+
 /**
  * A flowchart placed in the text: a Delta embed,
  * `{"flowchart": "{\"nodes\":[…],\"edges\":[…]}"}`, written the same way by
@@ -147,14 +149,14 @@ export function starterFlowchart(newId: () => string): Flowchart {
     id: newId(),
     x: 0,
     y: 0,
-    text: "Start",
+    text: translate("noteHooks.flowchart")("start"),
     shape: "round" as const,
   };
   const step = {
     id: newId(),
     x: 0,
     y: FLOW_GAP,
-    text: "Step",
+    text: translate("noteHooks.flowchart")("step"),
     shape: "box" as const,
   };
   return {
@@ -406,7 +408,10 @@ export function flowchartsIn(content: string | null | undefined): Flowchart[] {
 /** A short name for the chart, for screen readers: its first node's text. */
 export function flowchartLabel(chart: Flowchart): string {
   const first = chart.nodes.find((node) => node.text.trim())?.text.trim();
-  return first ? `Flowchart: ${first.replace(/\s+/g, " ")}` : "Flowchart";
+  const t = translate("noteHooks.flowchart");
+  return first
+    ? t("labelWithText", { text: first.replace(/\s+/g, " ") })
+    : t("label");
 }
 
 /** The arrow nearest `point` within `tolerance`, or null. */

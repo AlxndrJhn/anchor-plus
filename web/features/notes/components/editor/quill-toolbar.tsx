@@ -26,6 +26,7 @@ import {
   Undo2,
   Workflow,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Tip } from "@/components/ui/tooltip";
@@ -133,6 +134,7 @@ export function QuillToolbar({
   const [format, setFormat] = useState<Record<string, unknown>>({});
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const t = useTranslations("editor.toolbar");
   const [showColors, setShowColors] = useState(false);
   const [canIndent, setCanIndent] = useState(false);
   const [canOutdent, setCanOutdent] = useState(false);
@@ -237,7 +239,7 @@ export function QuillToolbar({
         ref={colors.ref}
         className="tb"
         role="toolbar"
-        aria-label="Highlight colors"
+        aria-label={t("highlightColors")}
         onFocus={colors.onFocus}
         onKeyDown={colors.onKeyDown}
       >
@@ -255,15 +257,20 @@ export function QuillToolbar({
       ref={formatting.ref}
       className="tb"
       role="toolbar"
-      aria-label="Formatting"
+      aria-label={t("formatting")}
       onFocus={formatting.onFocus}
       onKeyDown={formatting.onKeyDown}
     >
-      {toolButton(`Undo (${modKey}Z)`, <Undo2 />, () => onUndoRedo("undo"), {
-        disabled: !canUndo,
-      })}
       {toolButton(
-        `Redo (${isMac() ? "⇧⌘Z" : "Ctrl+Y"})`,
+        t("undo", { shortcut: `${modKey}Z` }),
+        <Undo2 />,
+        () => onUndoRedo("undo"),
+        {
+          disabled: !canUndo,
+        },
+      )}
+      {toolButton(
+        t("redo", { shortcut: isMac() ? "⇧⌘Z" : "Ctrl+Y" }),
         <Redo2 />,
         () => onUndoRedo("redo"),
         { disabled: !canRedo },
@@ -273,44 +280,34 @@ export function QuillToolbar({
       {(onPictureInText || onDraw || onLiveImage || onFlowchart || onScan) && (
         <>
           {onPictureInText &&
-            toolButton(
-              "Put a picture in the text",
-              <ImageIcon />,
-              onPictureInText,
-            )}
-          {onDraw && toolButton("Draw a picture", <PencilLine />, onDraw)}
-          {onLiveImage &&
-            toolButton(
-              "Add a live image: a camera or screen",
-              <Radio />,
-              onLiveImage,
-            )}
-          {onFlowchart &&
-            toolButton("Add a flowchart", <Workflow />, onFlowchart)}
-          {onScan && toolButton("Scan a document", <ScanLine />, onScan)}
+            toolButton(t("pictureInText"), <ImageIcon />, onPictureInText)}
+          {onDraw && toolButton(t("draw"), <PencilLine />, onDraw)}
+          {onLiveImage && toolButton(t("liveImage"), <Radio />, onLiveImage)}
+          {onFlowchart && toolButton(t("flowchart"), <Workflow />, onFlowchart)}
+          {onScan && toolButton(t("scan"), <ScanLine />, onScan)}
           {divider}
         </>
       )}
       {toolButton(
-        `Bold (${modKey}B)`,
+        t("bold", { shortcut: `${modKey}B` }),
         <Bold />,
         () => quill && toggleInlineFormat(quill, "bold"),
         { active: !!format.bold, toggle: true, disabled: isInCode },
       )}
       {toolButton(
-        `Italic (${modKey}I)`,
+        t("italic", { shortcut: `${modKey}I` }),
         <Italic />,
         () => quill && toggleInlineFormat(quill, "italic"),
         { active: !!format.italic, toggle: true, disabled: isInCode },
       )}
       {toolButton(
-        `Underline (${modKey}U)`,
+        t("underline", { shortcut: `${modKey}U` }),
         <Underline />,
         () => quill && toggleInlineFormat(quill, "underline"),
         { active: !!format.underline, toggle: true, disabled: isInCode },
       )}
       {toolButton(
-        "Strikethrough",
+        t("strikethrough"),
         <Strikethrough />,
         () => quill && toggleInlineFormat(quill, "strike"),
         { active: !!format.strike, toggle: true, disabled: isInCode },
@@ -323,7 +320,7 @@ export function QuillToolbar({
       <TextStyleButton getQuill={getQuill} disabled={isInCode} />
       {divider}
       {toolButton(
-        "Heading 1",
+        t("heading", { level: 1 }),
         <Heading1 />,
         () => quill && toggleHeader(quill, 1),
         {
@@ -332,7 +329,7 @@ export function QuillToolbar({
         },
       )}
       {toolButton(
-        "Heading 2",
+        t("heading", { level: 2 }),
         <Heading2 />,
         () => quill && toggleHeader(quill, 2),
         {
@@ -341,7 +338,7 @@ export function QuillToolbar({
         },
       )}
       {toolButton(
-        "Heading 3",
+        t("heading", { level: 3 }),
         <Heading3 />,
         () => quill && toggleHeader(quill, 3),
         {
@@ -351,50 +348,55 @@ export function QuillToolbar({
       )}
       {divider}
       {toolButton(
-        `Checklist (tick with ${isMac() ? "⌘↵" : "Ctrl+Enter"})`,
+        t("checklist", { shortcut: isMac() ? "⌘↵" : "Ctrl+Enter" }),
         <ListChecks />,
         () => quill && toggleList(quill, "unchecked"),
         { active: isChecklist, toggle: true },
       )}
       {toolButton(
-        "Bullet list",
+        t("bulletList"),
         <List />,
         () => quill && toggleList(quill, "bullet"),
         { active: listValue === LIST_FORMATS.BULLET, toggle: true },
       )}
       {toolButton(
-        "Numbered list",
+        t("numberedList"),
         <ListOrdered />,
         () => quill && toggleList(quill, "ordered"),
         { active: listValue === LIST_FORMATS.ORDERED, toggle: true },
       )}
       {toolButton(
-        "Outdent (Shift+Tab)",
+        t("outdent", { shortcut: "Shift+Tab" }),
         <IndentDecrease />,
         () => changeIndent(-1),
         {
           disabled: !canOutdent,
         },
       )}
-      {toolButton("Indent (Tab)", <IndentIncrease />, () => changeIndent(1), {
-        disabled: !canIndent,
-      })}
+      {toolButton(
+        t("indent", { shortcut: "Tab" }),
+        <IndentIncrease />,
+        () => changeIndent(1),
+        {
+          disabled: !canIndent,
+        },
+      )}
       {divider}
       {toolButton(
-        "Quote",
+        t("quote"),
         <Quote />,
         () => quill && toggleBlock(quill, "blockquote"),
         { active: !!format.blockquote, toggle: true },
       )}
       {toolButton(
-        "Code block",
+        t("codeBlock"),
         <Code />,
         () => quill && toggleBlock(quill, "code-block"),
         { active: !!format["code-block"], toggle: true },
       )}
       {divider}
       {toolButton(
-        `${format.link ? "Edit link" : "Link"} (${modKey}K)`,
+        t(format.link ? "editLink" : "link", { shortcut: `${modKey}K` }),
         <LinkIcon />,
         onOpenLinkDialog,
         {
@@ -404,12 +406,8 @@ export function QuillToolbar({
         },
       )}
       {onAddAttachment &&
-        toolButton(
-          "Add a picture, recording or file",
-          <ImagePlus />,
-          onAddAttachment,
-        )}
-      {onRecordAudio && toolButton("Record audio", <Mic />, onRecordAudio)}
+        toolButton(t("addAttachment"), <ImagePlus />, onAddAttachment)}
+      {onRecordAudio && toolButton(t("recordAudio"), <Mic />, onRecordAudio)}
     </div>
   );
 }

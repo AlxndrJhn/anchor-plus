@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { translate } from "@/lib/i18n";
 import { fetchAttachmentBlob } from "../api";
 
 const CACHE_MS = 10 * 60 * 1000;
@@ -83,7 +84,7 @@ export function useAttachmentBlob(
     error: query.error
       ? query.error instanceof Error
         ? query.error.message
-        : "Failed to load"
+        : translate("noteHooks.attachmentBlob")("failedToLoad")
       : null,
     retry: () => void query.refetch(),
   };

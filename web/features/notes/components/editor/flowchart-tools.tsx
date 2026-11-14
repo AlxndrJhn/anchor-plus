@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Delta from "quill-delta";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,8 @@ export const FlowchartTools = React.forwardRef<
     container: HTMLElement | null;
   }
 >(({ getQuill, container }, ref) => {
+  const t = useTranslations("editorMedia.flowchart");
+  const tc = useTranslations("common");
   const [open, setOpen] = React.useState<Open | null>(null);
   const editor = React.useRef<FlowchartEditorHandle>(null);
   /** Whether the open chart was changed: then only Cancel throws it away. */
@@ -221,13 +224,9 @@ export const FlowchartTools = React.forwardRef<
         }}
       >
         <DialogHeader>
-          <DialogTitle>
-            {open?.from ? "Edit flowchart" : "New flowchart"}
-          </DialogTitle>
+          <DialogTitle>{open?.from ? t("edit") : t("new")}</DialogTitle>
           <DialogDescription className="max-md:sr-only">
-            Drag boxes to move them. Pick a box, then drag one of its dots to
-            another box to join them, or click a dot for the next step.
-            Double-click to write.
+            {t("help")}
           </DialogDescription>
         </DialogHeader>
         <DialogBody className="min-h-0">
@@ -250,14 +249,14 @@ export const FlowchartTools = React.forwardRef<
               className="mr-auto max-md:mr-0"
               onClick={remove}
             >
-              Remove from note
+              {t("removeFromNote")}
             </Button>
           )}
           <Button type="button" variant="secondary" onClick={close}>
-            Cancel
+            {tc("cancel")}
           </Button>
           <Button type="button" onClick={save}>
-            {open?.from ? "Save" : "Add to note"}
+            {open?.from ? tc("save") : t("addToNote")}
           </Button>
         </DialogFooter>
       </DialogContent>

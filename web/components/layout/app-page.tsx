@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { IconButton } from "@/components/ui/button";
 import { menuSurface } from "@/components/ui/dropdown-menu";
@@ -97,10 +98,11 @@ export function AppPage({
 }
 
 function MenuButton() {
+  const t = useTranslations("layout.appPage");
   const setDrawer = useShellStore((s) => s.setDrawer);
   return (
     <IconButton
-      label="Open menu"
+      label={t("openMenu")}
       onClick={() => setDrawer(true)}
       className="-ml-1.5 lg:hidden"
     >
@@ -195,6 +197,8 @@ export const SearchField = React.forwardRef<
     { value, onChange, placeholder, className, autoFocus, onFocus, onBlur },
     forwardedRef,
   ) => {
+    const t = useTranslations("layout.appPage");
+    const tc = useTranslations("common");
     const input = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(
       forwardedRef,
@@ -312,10 +316,10 @@ export const SearchField = React.forwardRef<
             className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-foreground text-ui outline-none placeholder:text-muted-foreground focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden"
           />
           {value ? (
-            <Tip label="Clear search">
+            <Tip label={t("clearSearch")}>
               <button
                 type="button"
-                aria-label="Clear search"
+                aria-label={t("clearSearch")}
                 onClick={() => {
                   onChange("");
                   input.current?.focus();
@@ -334,7 +338,7 @@ export const SearchField = React.forwardRef<
             <div
               id={listId}
               role="listbox"
-              aria-label="Go to"
+              aria-label={t("goTo")}
               className={cn(
                 menuSurface,
                 "absolute inset-x-0 top-full z-(--z-popover) mt-1.5 grid gap-px rounded-menu p-1.5",
@@ -368,7 +372,7 @@ export const SearchField = React.forwardRef<
                     <Icon aria-hidden />
                     <span className="truncate">{target.name}</span>
                     <span className="ml-auto text-muted-foreground text-small">
-                      {target.isTag ? "Tag" : "Page"}
+                      {target.isTag ? t("tag") : t("page")}
                     </span>
                   </div>
                 );
@@ -377,7 +381,7 @@ export const SearchField = React.forwardRef<
           )}
         </label>
         <IconButton
-          label="Search"
+          label={tc("search")}
           className="hidden max-md:inline-grid"
           onClick={() => {
             setOpen(true);

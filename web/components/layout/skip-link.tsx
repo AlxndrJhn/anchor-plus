@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 /** The id of the app's <main>, which the skip link jumps to. */
 export const MAIN_ID = "main";
 
@@ -8,6 +9,7 @@ export const MAIN_ID = "main";
  * 2.4.1). Hidden until focused.
  */
 export function SkipLink() {
+  const t = useTranslations("layout.skipLink");
   return (
     <a
       href={`#${MAIN_ID}`}
@@ -18,7 +20,7 @@ export function SkipLink() {
       }}
       className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-(--z-toast) focus:rounded-md focus:bg-inverse focus:px-3.5 focus:py-2 focus:font-medium focus:text-control focus:text-inverse-foreground focus:shadow-floating"
     >
-      Skip to content
+      {t("label")}
     </a>
   );
 }

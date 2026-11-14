@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import * as React from "react";
 import { IconButton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,15 +15,19 @@ const addDays = (d: Date, n: number) => {
 const endOfDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59);
 
-const WEEKDAY_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
-
 /** How many days a date is past the start of its week. */
 export const daysIntoWeek = (d: Date, weekStartsOn: number) =>
   (d.getDay() - weekStartsOn + 7) % 7;
 
-/** The weekday letters across the top, from the day the week starts on. */
-export const weekdayLetters = (weekStartsOn: number) =>
-  WEEKDAY_LETTERS.map((_, i) => WEEKDAY_LETTERS[(weekStartsOn + i) % 7]);
+/** The weekday letters across the top, from the day the week starts on, in the language. */
+export const weekdayLetters = (weekStartsOn: number, locale = "en") => {
+  const format = new Intl.DateTimeFormat(locale, { weekday: "narrow" });
+  // 1 November 2026 is a Sunday.
+  const letters = Array.from({ length: 7 }, (_, i) =>
+    format.format(new Date(2026, 10, 1 + i)),
+  );
+  return letters.map((_, i) => letters[(weekStartsOn + i) % 7]);
+};
 
 interface CalendarProps {
   value: Date | null;
@@ -40,12 +45,14 @@ export function Calendar({
   noPast = true,
   weekStartsOn = 0,
 }: CalendarProps) {
+  const t = useTranslations("layout.ui.calendar");
+  const locale = useLocale();
   const [month, setMonth] = React.useState(
     () => new Date((value ?? now).getFullYear(), (value ?? now).getMonth(), 1),
   );
   const gridRef = React.useRef<HTMLDivElement>(null);
   const [focusDay, setFocusDay] = React.useState<Date | null>(null);
-  const monthLabel = month.toLocaleDateString("en-US", {
+  const monthLabel = month.toLocaleDateString(locale, {
     month: "long",
     year: "numeric",
   });
@@ -94,7 +101,7 @@ export function Calendar({
       <div className="flex items-center justify-between pb-1">
         <IconButton
           size="sm"
-          label="Previous month"
+          label={t("previousMonth")}
           onClick={() =>
             setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))
           }
@@ -104,7 +111,7 @@ export function Calendar({
         <b className="font-semibold text-ui">{monthLabel}</b>
         <IconButton
           size="sm"
-          label="Next month"
+          label={t("nextMonth")}
           onClick={() =>
             setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))
           }
@@ -119,7 +126,7 @@ export function Calendar({
         aria-label={monthLabel}
         className="grid grid-cols-7 gap-0.5 text-center"
       >
-        {weekdayLetters(weekStartsOn).map((weekday, i) => (
+        {weekdayLetters(weekStartsOn, locale).map((weekday, i) => (
           <span
             key={i}
             aria-hidden
@@ -140,7 +147,7 @@ export function Calendar({
               tabIndex={isSameDay(day, tabStopDay) ? 0 : -1}
               aria-pressed={selected}
               aria-current={isToday ? "date" : undefined}
-              aria-label={day.toLocaleDateString("en-US", {
+              aria-label={day.toLocaleDateString(locale, {
                 weekday: "long",
                 month: "long",
                 day: "numeric",

@@ -27,6 +27,7 @@ import {
   Trash2,
   UserPlus,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button, IconButton } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -48,31 +49,26 @@ import { useIsPhone } from "@/lib/hooks/use-is-phone";
 import { Row, RowText, Section } from "./settings-blocks";
 
 /** As Settings lists them, the same names as on Android. */
-const ACTIONS: Record<QuickAction, { label: string; icon: React.ReactNode }> = {
-  pin: { label: "Pin", icon: <Pin /> },
-  reminder: { label: "Reminder", icon: <Bell /> },
-  addImage: { label: "Add image", icon: <ImagePlus /> },
-  takePicture: { label: "Take picture", icon: <Camera /> },
-  takeSeveral: { label: "Take several", icon: <Images /> },
-  checkboxes: { label: "Checkboxes", icon: <ListChecks /> },
-  uncheckAll: { label: "Uncheck all", icon: <ListRestart /> },
-  deleteChecked: { label: "Delete checked items", icon: <ListX /> },
-  sortByName: { label: "Sort A to Z", icon: <ArrowDownAZ /> },
-  share: { label: "Share", icon: <UserPlus /> },
-  send: { label: "Send", icon: <Send /> },
-  print: { label: "Print", icon: <Printer /> },
-  copy: { label: "Make a copy", icon: <Copy /> },
-  history: { label: "Version history", icon: <History /> },
-  background: { label: "Background", icon: <Palette /> },
-  lock: { label: "Lock", icon: <Lock /> },
-  freeze: { label: "Freeze", icon: <Snowflake /> },
-  archive: { label: "Archive", icon: <Archive /> },
-  trash: { label: "Move to trash", icon: <Trash2 /> },
-};
-
-const WIDTHS: Record<BarWidth, string> = {
-  narrow: "a narrow window, such as a phone",
-  wide: "a wide window",
+const ICONS: Record<QuickAction, React.ReactNode> = {
+  pin: <Pin />,
+  reminder: <Bell />,
+  addImage: <ImagePlus />,
+  takePicture: <Camera />,
+  takeSeveral: <Images />,
+  checkboxes: <ListChecks />,
+  uncheckAll: <ListRestart />,
+  deleteChecked: <ListX />,
+  sortByName: <ArrowDownAZ />,
+  share: <UserPlus />,
+  send: <Send />,
+  print: <Printer />,
+  copy: <Copy />,
+  history: <History />,
+  background: <Palette />,
+  lock: <Lock />,
+  freeze: <Snowflake />,
+  archive: <Archive />,
+  trash: <Trash2 />,
 };
 
 /**
@@ -80,6 +76,7 @@ const WIDTHS: Record<BarWidth, string> = {
  * the bar, in More, or turned off. Set apart for narrow and wide windows.
  */
 export function QuickActionsSection() {
+  const t = useTranslations("settings.quickActions");
   const isPhone = useIsPhone();
   const [width, setWidth] = React.useState<BarWidth>(
     isPhone ? "narrow" : "wide",
@@ -99,44 +96,42 @@ export function QuickActionsSection() {
     setBar(bar);
   };
 
+  const name = (action: QuickAction) => t(`actions.${action}`);
   const label = (action: QuickAction) => (
     <span className="flex min-w-0 flex-1 items-center gap-3 font-medium text-ui [&_svg]:size-4.25 [&_svg]:shrink-0 [&_svg]:text-muted-foreground">
-      {ACTIONS[action].icon}
-      {ACTIONS[action].label}
+      {ICONS[action]}
+      {name(action)}
     </span>
   );
 
   return (
     <Section
       id="quick-actions"
-      title="Quick actions"
-      description="The buttons beside More when a note is open, and what More offers. On this device only."
+      title={t("title")}
+      description={t("description")}
     >
       <Row>
-        <RowText
-          title="Window"
-          text={`What a note shows in ${WIDTHS[width]}.`}
-        />
+        <RowText title={t("window")} text={t("windowText", { width })} />
         <SegmentedControl<BarWidth>
-          aria-label="Window"
+          aria-label={t("window")}
           size="sm"
           value={width}
           onValueChange={setWidth}
           options={[
-            { value: "narrow", label: "Narrow" },
-            { value: "wide", label: "Wide" },
+            { value: "narrow", label: t("narrow") },
+            { value: "wide", label: t("wide") },
           ]}
         />
       </Row>
       <Row className="py-3">
         <RowText
-          title="In the bar"
-          text={`Up to ${MAX_BAR[width]}, beside More, in this order.`}
+          title={t("inBar")}
+          text={t("inBarText", { max: MAX_BAR[width] })}
         />
       </Row>
       {setup.bar.length === 0 && (
         <Row className="py-3 text-meta text-muted-foreground">
-          Nothing in the bar: everything is in More.
+          {t("barEmpty")}
         </Row>
       )}
       {setup.bar.map((action, index) => (
@@ -144,7 +139,7 @@ export function QuickActionsSection() {
           {label(action)}
           <IconButton
             size="sm"
-            label={`Move ${ACTIONS[action].label} up`}
+            label={t("moveUp", { action: name(action) })}
             disabled={index === 0}
             onClick={() => move(index, index - 1)}
           >
@@ -152,7 +147,7 @@ export function QuickActionsSection() {
           </IconButton>
           <IconButton
             size="sm"
-            label={`Move ${ACTIONS[action].label} down`}
+            label={t("moveDown", { action: name(action) })}
             disabled={index === setup.bar.length - 1}
             onClick={() => move(index, index + 1)}
           >
@@ -160,7 +155,7 @@ export function QuickActionsSection() {
           </IconButton>
           <IconButton
             size="sm"
-            label={`Take ${ACTIONS[action].label} out of the bar`}
+            label={t("takeOut", { action: name(action) })}
             onClick={() => setBar(setup.bar.filter((a) => a !== action))}
           >
             <CircleMinus />
@@ -168,10 +163,7 @@ export function QuickActionsSection() {
         </Row>
       ))}
       <Row className="py-3">
-        <RowText
-          title="In More"
-          text="Turned off, an action is in neither the bar nor More."
-        />
+        <RowText title={t("inMore")} text={t("inMoreText")} />
       </Row>
       {QUICK_ACTIONS.filter((a) => !setup.bar.includes(a)).map((action) => {
         const isOn = !setup.hidden.includes(action);
@@ -180,14 +172,14 @@ export function QuickActionsSection() {
             {label(action)}
             <IconButton
               size="sm"
-              label={`Put ${ACTIONS[action].label} in the bar`}
+              label={t("putIn", { action: name(action) })}
               disabled={!isOn || isFull}
               onClick={() => setBar([...setup.bar, action])}
             >
               <CirclePlus />
             </IconButton>
             <Switch
-              aria-label={ACTIONS[action].label}
+              aria-label={name(action)}
               checked={isOn}
               onCheckedChange={(on) =>
                 save({
@@ -208,13 +200,13 @@ export function QuickActionsSection() {
           size="sm"
           onClick={() =>
             copyText(encodeSetup(setup)).then(
-              () => toast.success("Quick actions copied"),
-              () => toast.error("Couldn’t copy them"),
+              () => toast.success(t("copied")),
+              () => toast.error(t("copyFailed")),
             )
           }
         >
           <Copy />
-          Copy setup
+          {t("copy")}
         </Button>
         <Button
           type="button"
@@ -224,15 +216,15 @@ export function QuickActionsSection() {
             const text = await navigator.clipboard.readText().catch(() => null);
             const pasted = decodeSetup(text, width);
             if (!pasted) {
-              toast.error("The clipboard has no copied quick actions");
+              toast.error(t("pasteFailed"));
               return;
             }
             save(pasted);
-            toast.success("Quick actions pasted");
+            toast.success(t("pasted"));
           }}
         >
           <ClipboardPaste />
-          Paste setup
+          {t("paste")}
         </Button>
         <Button
           type="button"
@@ -242,7 +234,7 @@ export function QuickActionsSection() {
           onClick={() => save(undefined)}
         >
           <RotateCcw />
-          Reset
+          {t("reset")}
         </Button>
       </Row>
     </Section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, Info, RotateCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { ErrorScreen } from "@/components/layout/error-screen";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ export function ServerDownScreen({
 }: {
   onRetry: () => Promise<unknown> | unknown;
 }) {
+  const t = useTranslations("layout.serverDown");
   const [countdown, setCountdown] = React.useState({
     round: 0,
     left: RETRY_WAIT_SECONDS[0],
@@ -59,20 +61,20 @@ export function ServerDownScreen({
   }, [secondsLeft, trying, retry]);
 
   const host =
-    typeof window === "undefined" ? "The server" : window.location.host;
+    typeof window === "undefined" ? t("theServer") : window.location.host;
   return (
     <main className="grid min-h-dvh content-center bg-background px-4">
       <ErrorScreen
         illustration="down"
-        title="Can’t connect to the server"
-        text={`${host} isn’t responding. Your notes are safe on the server.`}
+        title={t("title")}
+        text={t("text", { host })}
         actions={
           <Button
             onClick={() => void retry()}
             aria-disabled={connecting || undefined}
           >
             <RotateCw aria-hidden />
-            Try again
+            {t("tryAgain")}
           </Button>
         }
       >
@@ -85,32 +87,36 @@ export function ServerDownScreen({
             turning={connecting}
           />
           {connecting
-            ? "Connecting…"
-            : `Trying again in ${secondsLeft} ${secondsLeft === 1 ? "second" : "seconds"}`}
+            ? t("connecting")
+            : t("tryingAgainIn", { count: secondsLeft })}
         </p>
         <details className="group mt-4 w-full rounded-xl bg-card text-left text-control shadow-[0_0_0_1px_color-mix(in_srgb,var(--border)_60%,transparent)]">
           <summary className="flex cursor-pointer list-none items-center gap-2 rounded-[inherit] px-3.5 py-3 font-semibold [&::-webkit-details-marker]:hidden [&>svg]:size-4 [&>svg]:text-muted-foreground">
             <Info aria-hidden />
-            What you can do
+            {t("whatYouCanDo")}
             <ChevronDown
               aria-hidden
               className="ml-auto transition-transform duration-(--duration-fade) group-open:rotate-180"
             />
           </summary>
           <ul className="m-0 grid gap-1.5 pr-4 pl-10 leading-normal">
-            <li>Check your internet connection.</li>
-            <li>The server may be restarting. Anchor+ will keep trying.</li>
+            <li>{t("checkConnection")}</li>
+            <li>{t("maybeRestarting")}</li>
             <li>
-              If it’s still down after a few minutes, contact the person who
-              runs <b className="font-semibold">{host}</b>.
+              {t.rich("contactAdmin", {
+                host,
+                b: (chunks) => <b className="font-semibold">{chunks}</b>,
+              })}
             </li>
           </ul>
           <p className="m-3.5 mt-3 border-border/55 border-t pt-2.5 text-muted-foreground text-small">
-            The server didn’t answer{" "}
-            <code className="font-mono text-foreground text-small">
-              GET /api/auth/me
-            </code>
-            .
+            {t.rich("noAnswer", {
+              code: (chunks) => (
+                <code className="font-mono text-foreground text-small">
+                  {chunks}
+                </code>
+              ),
+            })}
           </p>
         </details>
       </ErrorScreen>

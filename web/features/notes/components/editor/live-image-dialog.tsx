@@ -1,6 +1,7 @@
 "use client";
 
 import { Camera, Monitor } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +54,8 @@ export function LiveImageDialog({
   onClose: () => void;
   onAdd: (chosen: ChosenSource) => void;
 }) {
+  const t = useTranslations("editorMedia.liveImage");
+  const tc = useTranslations("common");
   const [source, setSource] = React.useState<LiveSource>("camera");
   const [stream, setStream] = React.useState<MediaStream | null>(null);
   const [cameras, setCameras] = React.useState<MediaDeviceInfo[]>([]);
@@ -98,11 +101,11 @@ export function LiveImageDialog({
       setError(
         next === "screen"
           ? refused
-            ? "No screen was chosen, or sharing it wasn’t allowed."
-            : "This device can’t share its screen here."
+            ? t("errorScreenRefused")
+            : t("errorScreenUnavailable")
           : refused
-            ? "Using the camera wasn’t allowed. Allow it in the browser’s site settings, then try again."
-            : "No camera could be turned on.",
+            ? t("errorCameraRefused")
+            : t("errorCameraUnavailable"),
       );
     } finally {
       setIsOpening(false);
@@ -121,11 +124,7 @@ export function LiveImageDialog({
           e instanceof DOMException && e.name === "NotAllowedError";
         kept.current = null;
         setStream(null);
-        setError(
-          refused
-            ? "Using the microphone wasn’t allowed. Allow it in the browser’s site settings, or add it without sound."
-            : "No microphone could be turned on.",
-        );
+        setError(refused ? t("errorMicRefused") : t("errorMicUnavailable"));
         return;
       } finally {
         setIsAdding(false);
@@ -147,38 +146,33 @@ export function LiveImageDialog({
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent size="lg">
         <DialogHeader>
-          <DialogTitle>Add live image</DialogTitle>
-          <DialogDescription>
-            Shows a camera or screen of this device in the note, live, on every
-            device that opens it. The video goes straight between the devices,
-            while Anchor is open here.
-          </DialogDescription>
+          <DialogTitle>{t("addTitle")}</DialogTitle>
+          <DialogDescription>{t("addHelp")}</DialogDescription>
         </DialogHeader>
         <DialogBody>
           <RadioCards
-            aria-label="What to show"
+            aria-label={t("whatToShow")}
             value={source}
             onValueChange={(next) => void choose(next)}
             options={[
               {
                 value: "camera",
-                label: "Camera",
+                label: t("camera"),
                 icon: <Camera />,
-                description:
-                  "A camera of this device, turned on while someone watches.",
+                description: t("cameraHelp"),
                 disabled: !canShowLive("camera"),
               },
               {
                 value: "screen",
-                label: "Screen or window",
+                label: t("screen"),
                 icon: <Monitor />,
-                description: "Shared until you stop it, or close Anchor here.",
+                description: t("screenHelp"),
                 disabled: !canShowLive("screen"),
               },
             ]}
           />
           {source === "camera" && cameras.length > 1 && (
-            <Field label="Camera">
+            <Field label={t("camera")}>
               <select
                 className="h-9 w-full rounded-md border border-input bg-card px-2 text-ui"
                 value={camera ?? ""}
@@ -189,7 +183,7 @@ export function LiveImageDialog({
               >
                 {cameras.map((c, i) => (
                   <option key={c.deviceId} value={c.deviceId}>
-                    {c.label || `Camera ${i + 1}`}
+                    {c.label || t("cameraN", { n: i + 1 })}
                   </option>
                 ))}
               </select>
@@ -197,9 +191,9 @@ export function LiveImageDialog({
           )}
           <div className="flex items-center justify-between gap-3">
             <label htmlFor={micSwitch} className="grid gap-0.5">
-              <span className="font-semibold text-ui">Microphone</span>
+              <span className="font-semibold text-ui">{t("microphone")}</span>
               <span className="text-muted-foreground text-small">
-                Sends this device’s sound too; you can mute it while it’s live.
+                {t("microphoneHelp")}
               </span>
             </label>
             <Switch
@@ -212,16 +206,16 @@ export function LiveImageDialog({
             />
           </div>
           {withMic && mics.length > 1 && (
-            <Field label="Which microphone">
+            <Field label={t("whichMicrophone")}>
               <select
                 className="h-9 w-full rounded-md border border-input bg-card px-2 text-ui"
                 value={mic ?? ""}
                 onChange={(e) => setMic(e.target.value || undefined)}
               >
-                <option value="">The usual one</option>
+                <option value="">{t("usualMicrophone")}</option>
                 {mics.map((m, i) => (
                   <option key={m.deviceId} value={m.deviceId}>
-                    {m.label || `Microphone ${i + 1}`}
+                    {m.label || t("microphoneN", { n: i + 1 })}
                   </option>
                 ))}
               </select>
@@ -232,10 +226,7 @@ export function LiveImageDialog({
               <video ref={preview} muted autoPlay playsInline />
             ) : (
               <span>
-                {error ??
-                  (isOpening
-                    ? "Opening…"
-                    : "Choose the camera or a screen to see it here.")}
+                {error ?? (isOpening ? t("opening") : t("previewHint"))}
               </span>
             )}
           </div>
@@ -246,20 +237,20 @@ export function LiveImageDialog({
               className="justify-self-start"
               onClick={() => void choose(source, camera)}
             >
-              {source === "screen" ? "Choose a screen…" : "Turn camera on"}
+              {source === "screen" ? t("chooseScreen") : t("turnCameraOn")}
             </Button>
           )}
         </DialogBody>
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {tc("cancel")}
           </Button>
           <Button
             type="button"
             disabled={!stream || isAdding}
             onClick={() => void hand()}
           >
-            Add to note
+            {t("addToNote")}
           </Button>
         </DialogFooter>
       </DialogContent>

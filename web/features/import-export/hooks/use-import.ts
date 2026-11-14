@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { HTTPError } from "ky";
 import { useCallback, useRef, useState } from "react";
+import { translate } from "@/lib/i18n";
 import { detectFormat } from "../adapters";
 import { ImportFileError } from "../adapters/types";
 import type { PickedFile } from "../adapters/zip";
@@ -177,15 +178,13 @@ export function useImport() {
       const detected = await detectFormat(files);
       if (isAbandoned()) return;
       if (!detected) {
-        setPickError(
-          "Nothing to import here. Drop an Anchor backup, a Google Takeout zip, or a folder of Markdown (.md) files.",
-        );
+        setPickError(translate("settings.importExport.run")("nothingToImport"));
         return;
       }
       const result = await detected.adapter.parse(detected.zip);
       if (isAbandoned()) return;
       if (!result.notes.length) {
-        setPickError("No importable notes found in this file.");
+        setPickError(translate("settings.importExport.run")("noNotes"));
         return;
       }
       setParsed(result);
@@ -199,7 +198,7 @@ export function useImport() {
       setPickError(
         error instanceof ImportFileError
           ? error.message
-          : "Couldn’t read this file.",
+          : translate("settings.importExport.run")("couldNotRead"),
       );
     } finally {
       if (!isAbandoned()) setIsDetecting(false);
@@ -229,7 +228,7 @@ export function useImport() {
           .filter((result) => result.status === "failed")
           .map((result) => ({
             item: labelOf(result.ref),
-            reason: "Couldn’t import this note",
+            reason: translate("settings.importExport.run")("noteFailed"),
           })),
         ...results
           .filter((result) => result.warning)
@@ -319,17 +318,13 @@ export function useImport() {
     } catch (error) {
       isRunningRef.current = false;
       const done = results.length;
-      const stoppedAt = `The import stopped at ${done} of ${totalNotes} notes; the notes before that are saved.`;
+      const t = translate("settings.importExport.run");
+      const counts = { done, total: totalNotes };
       if (serverUnreachable(error))
         setRunError(
-          `Couldn’t reach the server. ${done ? stoppedAt : "Check your connection, then try again."}`,
+          done ? t("unreachableStopped", counts) : t("unreachableNothing"),
         );
-      else
-        setRunError(
-          done
-            ? `Couldn’t import your notes. ${stoppedAt}`
-            : "Couldn’t import your notes.",
-        );
+      else setRunError(done ? t("failedStopped", counts) : t("failed"));
       return;
     }
 
@@ -359,7 +354,7 @@ export function useImport() {
         } catch {
           failures.push({
             item: upload.filename,
-            reason: "Couldn’t read the file",
+            reason: translate("settings.importExport.run")("fileUnreadable"),
           });
           showProgress();
           continue;
@@ -381,7 +376,7 @@ export function useImport() {
           }
           failures.push({
             item: upload.filename,
-            reason: "Couldn’t upload the attachment",
+            reason: translate("settings.importExport.run")("attachmentFailed"),
           });
         }
         showProgress();
@@ -398,7 +393,10 @@ export function useImport() {
     if (stopped) {
       const done = uploadedRef.current + failures.length;
       setRunError(
-        `Couldn’t reach the server. The import stopped at ${done} of ${uploads.length} attachments; the notes and the attachments before that are saved.`,
+        translate("settings.importExport.run")("attachmentsStopped", {
+          done,
+          total: uploads.length,
+        }),
       );
       return;
     }

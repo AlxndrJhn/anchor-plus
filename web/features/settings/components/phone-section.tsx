@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Download, Link2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { QrImage } from "@/components/ui/qr-image";
@@ -21,30 +22,27 @@ type PhoneTab = "app" | "sign-in";
 type Channel = "stable" | "candidate";
 
 const PANEL_ID = "phone-panel";
-const TABS = [
-  { value: "app", label: "1. Get the app" },
-  { value: "sign-in", label: "2. Sign in" },
-] as const;
 
 /**
  * Connecting a phone, in the order it happens: download the Android app from
  * its GitHub release, then sign in to it with a magic login QR code.
  */
 export function PhoneSection() {
+  const t = useTranslations("settings.phone");
   const [tab, setTab] = React.useState<PhoneTab>("app");
+  const tabs = [
+    { value: "app", label: t("tabApp") },
+    { value: "sign-in", label: t("tabSignIn") },
+  ] as const;
   return (
-    <Section
-      id="phone"
-      title="Connect your phone"
-      description="Install the Anchor+ Android app, then sign in to it without a password."
-    >
+    <Section id="phone" title={t("title")} description={t("description")}>
       <div className="px-4 pt-1.5 max-md:px-2.5">
         <Tabs
           value={tab}
           onValueChange={setTab}
-          tabs={TABS}
+          tabs={tabs}
           panelId={PANEL_ID}
-          aria-label="Connect your phone"
+          aria-label={t("title")}
           className="mb-0"
         />
       </div>
@@ -56,6 +54,7 @@ export function PhoneSection() {
 }
 
 function AppDownloadPanel() {
+  const t = useTranslations("settings.phone");
   const [channel, setChannel] = React.useState<Channel>("stable");
   const releases = useQuery({
     queryKey: ["apk-releases"],
@@ -73,33 +72,31 @@ function AppDownloadPanel() {
 
   const copy = () =>
     copyText(url).then(
-      () => toast.success("Download link copied"),
-      () => toast.error("Couldn’t copy the download link"),
+      () => toast.success(t("linkCopied")),
+      () => toast.error(t("linkCopyFailed")),
     );
 
   return (
     <div className="flex flex-wrap items-start gap-6 px-5 py-4 max-md:p-3.5">
       <div className="w-44 flex-none max-md:mx-auto">
-        <QrImage text={url} label="QR code to download the Android app" />
+        <QrImage text={url} label={t("qrLabel")} />
       </div>
       <div className="grid min-w-50 flex-1 gap-3">
         <div className="grid gap-0.5">
-          <b className="font-semibold text-ui">Download the Android app</b>
+          <b className="font-semibold text-ui">{t("downloadTitle")}</b>
           <span className="text-meta text-muted-foreground leading-[1.45]">
-            Scan the code with your phone’s camera to download the APK, then
-            open it to install. Android may ask you to allow installs from your
-            browser first.
+            {t("downloadText")}
           </span>
         </div>
         {candidate && (
           <SegmentedControl
-            aria-label="Release"
+            aria-label={t("release")}
             size="sm"
             value={channel}
             onValueChange={setChannel}
             options={[
-              { value: "stable", label: "Latest release" },
-              { value: "candidate", label: "Release candidate" },
+              { value: "stable", label: t("latestRelease") },
+              { value: "candidate", label: t("releaseCandidate") },
             ]}
           />
         )}
@@ -108,23 +105,23 @@ function AppDownloadPanel() {
           className="m-0 text-meta text-muted-foreground leading-[1.45]"
         >
           {releases.isPending
-            ? "Looking up the newest version…"
+            ? t("lookingUp")
             : chosen
               ? channel === "candidate" && candidate
-                ? `Anchor+ ${chosen.version}, a preview of the next release. It may still have rough edges.`
-                : `Anchor+ ${chosen.version}`
-              : "The newest release."}
+                ? t("candidateVersion", { version: chosen.version })
+                : t("version", { version: chosen.version })
+              : t("newest")}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="secondary" asChild>
             <a href={url} download>
               <Download aria-hidden />
-              Download APK
+              {t("downloadApk")}
             </a>
           </Button>
           <Button variant="secondary" onClick={copy}>
             <Link2 aria-hidden />
-            Copy link
+            {t("copyLink")}
           </Button>
         </div>
       </div>

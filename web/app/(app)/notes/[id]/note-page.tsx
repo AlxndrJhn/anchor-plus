@@ -8,6 +8,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -107,6 +108,8 @@ function NoteEditor({
   routeId: string;
   onCreated: (id: string) => void;
 }) {
+  const t = useTranslations("notes.notePage");
+  const tc = useTranslations("common");
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -204,7 +207,7 @@ function NoteEditor({
       ]);
       queryClient.invalidateQueries({ queryKey: ["tags"] });
     },
-    onError: () => toast.error("Couldn’t create tag"),
+    onError: () => toast.error(t("couldNotCreateTag")),
   });
 
   const showHistory = (open: boolean) => {
@@ -233,7 +236,7 @@ function NoteEditor({
     showHistory(false);
     document
       .querySelector<HTMLElement>(
-        '.ed-head [aria-label="More"], .ed-head [aria-label="Version history"]',
+        `.ed-head [aria-label="${tc("more")}"], .ed-head [aria-label="${t("versionHistory")}"]`,
       )
       ?.focus({ preventScroll: true });
   };
@@ -248,12 +251,12 @@ function NoteEditor({
     try {
       await bulkPinNotes([noteId], pin);
     } catch {
-      toast.error(pin ? "Couldn’t pin note" : "Couldn’t unpin note");
+      toast.error(pin ? t("couldNotPin") : t("couldNotUnpin"));
       return;
     }
     await Promise.all([editor.refetchNote(), refreshNotes()]);
     if (undoable)
-      toast.success(pin ? "Note pinned" : "Note unpinned", {
+      toast.success(pin ? t("pinned") : t("unpinned"), {
         undo: () => void togglePinLocked(!pin, false),
       });
   };
@@ -268,10 +271,10 @@ function NoteEditor({
     hasTitle(editor.title)
       ? editor.title.trim()
       : isNew
-        ? "New note"
+        ? t("newNote")
         : isLoading
-          ? "Note"
-          : "Untitled",
+          ? t("note")
+          : t("untitled"),
   );
   // I, as in Vim, goes back into the text, where the caret was.
   const resumeTyping = () => {
@@ -456,23 +459,21 @@ function NoteEditor({
     // Locked by this person here, so it stays open.
     useUnlockedNotes.getState().unlock(noteId);
     await applyLock([{ id: noteId, lock }], kind);
-    toast.success(lock ? "Lock changed" : "Note locked");
+    toast.success(lock ? t("lockChanged") : t("locked"));
   };
   const removeLock = () => {
     const was = lock;
     applyLock([{ id: noteId, lock: was }], null).then(
       () =>
-        toast.success("Lock removed", {
+        toast.success(t("lockRemoved"), {
           undo: () =>
             void applyLock([{ id: noteId, lock: null }], was).catch(() =>
-              toast.error("Couldn’t undo that"),
+              toast.error(tc("couldNotUndo")),
             ),
         }),
       () =>
         toast.error(
-          navigator.onLine
-            ? "Couldn’t remove the lock"
-            : "Removing the lock needs a connection",
+          navigator.onLine ? t("couldNotRemoveLock") : t("removeLockOffline"),
           { retry: removeLock },
         ),
     );
@@ -483,17 +484,21 @@ function NoteEditor({
       .then(() => applyFreeze([noteId], isFrozen))
       .then(
         () =>
-          toast.success(isFrozen ? "Note frozen" : "Note unfrozen", {
+          toast.success(isFrozen ? t("frozen") : t("unfrozen"), {
             undo: () =>
               void applyFreeze([noteId], !isFrozen).catch(() =>
-                toast.error("Couldn’t undo that"),
+                toast.error(tc("couldNotUndo")),
               ),
           }),
         () =>
           toast.error(
             navigator.onLine
-              ? `Couldn’t ${isFrozen ? "freeze" : "unfreeze"} the note`
-              : `${isFrozen ? "Freezing" : "Unfreezing"} needs a connection`,
+              ? isFrozen
+                ? t("couldNotFreeze")
+                : t("couldNotUnfreeze")
+              : isFrozen
+                ? t("freezeOffline")
+                : t("unfreezeOffline"),
             { retry: () => freeze(isFrozen) },
           ),
       );
@@ -556,7 +561,7 @@ function NoteEditor({
             ? ""
             : undefined
         }
-        aria-label="Note"
+        aria-label={t("note")}
         onFocus={(e) => {
           if (e.target === editor.titleInputRef.current)
             caretField.current = "title";
@@ -615,9 +620,9 @@ function NoteEditor({
             onSend={async () => {
               try {
                 const sent = await sendNote(editor.title, editor.content);
-                if (sent === "copied") toast.success("Note copied as text");
+                if (sent === "copied") toast.success(t("copiedAsText"));
               } catch {
-                toast.error("Couldn’t send the note");
+                toast.error(t("couldNotSend"));
               }
             }}
             onPrint={() => {
@@ -638,7 +643,7 @@ function NoteEditor({
                   attachmentCount: isNew ? 0 : note?.attachmentCount,
                   locked: lockedOut,
                 },
-              ]).catch(() => toast.error("Couldn’t print the note"));
+              ]).catch(() => toast.error(t("couldNotPrint")));
             }}
             onCopy={
               isNew || trashed
@@ -649,17 +654,15 @@ function NoteEditor({
                       const copy = await copyNote(noteId);
                       queryClient.invalidateQueries({ queryKey: ["notes"] });
                       queryClient.invalidateQueries({ queryKey: ["tags"] });
-                      toast.success("Copy made", {
+                      toast.success(t("copyMade"), {
                         action: {
-                          label: "Open",
+                          label: t("open"),
                           onClick: () => router.push(`/notes/${copy.id}`),
                         },
                       });
                     } catch {
                       toast.error(
-                        navigator.onLine
-                          ? "Couldn’t make a copy"
-                          : "Making a copy needs a connection",
+                        navigator.onLine ? t("couldNotCopy") : t("copyOffline"),
                       );
                     }
                   }
@@ -729,20 +732,20 @@ function NoteEditor({
       <ConfirmationDialog
         open={actions.confirmPermanentDelete}
         onOpenChange={actions.setConfirmPermanentDelete}
-        title="Permanently delete this note?"
-        description="This can’t be undone. People you shared it with will lose access too."
-        confirmLabel="Delete permanently"
-        busyLabel="Deleting…"
+        title={t("deleteForeverTitle")}
+        description={t("deleteForeverDescription")}
+        confirmLabel={t("deleteForever")}
+        busyLabel={t("deleting")}
         isPending={actions.isDeletingPermanently}
         onConfirm={actions.deletePermanently}
       />
       <ConfirmationDialog
         open={actions.confirmLeaveShare}
         onOpenChange={actions.setConfirmLeaveShare}
-        title="Remove this note from your notes?"
-        description="To see it again, its owner has to share it with you again."
-        confirmLabel="Remove"
-        busyLabel="Removing…"
+        title={t("leaveShareTitle")}
+        description={t("leaveShareDescription")}
+        confirmLabel={tc("remove")}
+        busyLabel={t("removing")}
         isPending={actions.isLeavingShare}
         onConfirm={actions.leaveShare}
       />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,8 @@ export function CaptionDialog({
   /** Undefined removes it. */
   onSave: (caption: string | undefined) => void;
 }) {
+  const t = useTranslations("editorMedia.inlineImage");
+  const tc = useTranslations("common");
   const [text, setText] = React.useState(caption);
   React.useEffect(() => {
     if (open) setText(caption);
@@ -43,11 +46,11 @@ export function CaptionDialog({
         >
           <DialogHeader>
             <DialogTitle>
-              {caption ? "Edit caption" : "Add caption"}
+              {caption ? t("editCaption") : t("addCaption")}
             </DialogTitle>
           </DialogHeader>
           <DialogBody>
-            <Field label="Caption">
+            <Field label={t("caption")}>
               <Input
                 autoFocus
                 value={text}
@@ -64,13 +67,13 @@ export function CaptionDialog({
                 className="mr-auto"
                 onClick={() => onSave(undefined)}
               >
-                Remove
+                {tc("remove")}
               </Button>
             )}
             <Button type="button" variant="secondary" onClick={onClose}>
-              Cancel
+              {tc("cancel")}
             </Button>
-            <Button type="submit">Save</Button>
+            <Button type="submit">{tc("save")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -117,11 +120,11 @@ export function moveArea(area: CropArea, dx: number, dy: number): CropArea {
   };
 }
 
-const CORNERS: { corner: Corner; label: string; cursor: string }[] = [
-  { corner: "nw", label: "Top left corner", cursor: "nwse-resize" },
-  { corner: "ne", label: "Top right corner", cursor: "nesw-resize" },
-  { corner: "sw", label: "Bottom left corner", cursor: "nesw-resize" },
-  { corner: "se", label: "Bottom right corner", cursor: "nwse-resize" },
+const CORNERS: { corner: Corner; cursor: string }[] = [
+  { corner: "nw", cursor: "nwse-resize" },
+  { corner: "ne", cursor: "nesw-resize" },
+  { corner: "sw", cursor: "nesw-resize" },
+  { corner: "se", cursor: "nwse-resize" },
 ];
 
 /**
@@ -131,7 +134,7 @@ const CORNERS: { corner: Corner; label: string; cursor: string }[] = [
 export function CropDialog({
   picture,
   initial = WHOLE_PICTURE,
-  title = "Crop picture",
+  title,
   canKeepWhole = false,
   onClose,
   onCrop,
@@ -145,6 +148,8 @@ export function CropDialog({
   onClose: () => void;
   onCrop: (area: CropArea) => void;
 }) {
+  const t = useTranslations("editorMedia.inlineImage");
+  const tc = useTranslations("common");
   const [area, setArea] = React.useState<CropArea>(WHOLE_PICTURE);
   const [url, setUrl] = React.useState<string | null>(null);
   const frame = React.useRef<HTMLDivElement>(null);
@@ -198,7 +203,7 @@ export function CropDialog({
     <Dialog open={!!picture} onOpenChange={(next) => !next && onClose()}>
       <DialogContent size="lg">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>{title ?? t("cropTitle")}</DialogTitle>
         </DialogHeader>
         <DialogBody className="justify-items-center">
           {url && (
@@ -208,7 +213,7 @@ export function CropDialog({
             >
               <img
                 src={url}
-                alt="Being cropped"
+                alt={t("beingCropped")}
                 draggable={false}
                 className="block max-h-[60vh] max-w-full rounded-md"
               />
@@ -230,11 +235,11 @@ export function CropDialog({
                   );
                 }}
               >
-                {CORNERS.map(({ corner, label, cursor }) => (
+                {CORNERS.map(({ corner, cursor }) => (
                   <button
                     key={corner}
                     type="button"
-                    aria-label={label}
+                    aria-label={t(`corner.${corner}`)}
                     className="absolute size-5 rounded-full border-2 border-white bg-accent-strong shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     style={{
                       cursor,
@@ -279,17 +284,17 @@ export function CropDialog({
             disabled={isWhole}
             onClick={() => setArea(WHOLE_PICTURE)}
           >
-            Reset
+            {t("reset")}
           </Button>
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {tc("cancel")}
           </Button>
           <Button
             type="button"
             disabled={isWhole && !canKeepWhole}
             onClick={() => onCrop(area)}
           >
-            Crop
+            {t("crop")}
           </Button>
         </DialogFooter>
       </DialogContent>

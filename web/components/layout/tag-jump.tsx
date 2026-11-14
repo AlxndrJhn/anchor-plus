@@ -2,6 +2,7 @@
 
 import { Hash } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { tagColorStyle } from "@/features/tags";
@@ -19,6 +20,7 @@ export function TagJump({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("layout.tagJump");
   const router = useRouter();
   const tags = useGoToTargets({ pages: false });
   const [query, setQuery] = React.useState("");
@@ -53,18 +55,18 @@ export function TagJump({
         aria-describedby={undefined}
         className="gap-2 px-2 pt-2 pb-2 [--dialog-top:8px]"
       >
-        <DialogTitle className="sr-only">Go to tag</DialogTitle>
+        <DialogTitle className="sr-only">{t("title")}</DialogTitle>
         <label className="flex h-10 items-center gap-2 rounded-md px-2.5 text-muted-foreground focus-within:shadow-[inset_0_0_0_2px_var(--ring)] [&>svg]:size-4">
           <Hash aria-hidden />
           <input
             role="combobox"
-            aria-label="Tag name"
+            aria-label={t("tagName")}
             aria-expanded
             aria-controls={listId}
             aria-activedescendant={shown ? `${listId}-${shown.id}` : undefined}
             autoComplete="off"
             spellCheck={false}
-            placeholder="Type a tag's name"
+            placeholder={t("placeholder")}
             value={query}
             onChange={(e) => type(e.target.value)}
             onKeyDown={(e) => {
@@ -85,7 +87,7 @@ export function TagJump({
         <div
           id={listId}
           role="listbox"
-          aria-label="Tags"
+          aria-label={t("tags")}
           className="grid max-h-80 gap-px overflow-auto"
         >
           {matches.map((tag) => (
@@ -115,7 +117,7 @@ export function TagJump({
           ))}
           {!matches.length && (
             <p className="m-0 px-2.5 py-1.5 text-muted-foreground text-small">
-              {tags.length ? "No tag matches" : "No tags yet"}
+              {tags.length ? t("noMatch") : t("noTags")}
             </p>
           )}
         </div>

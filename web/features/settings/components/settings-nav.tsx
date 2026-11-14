@@ -18,28 +18,29 @@ import {
   SunMoon,
   UserRound,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { isServerless } from "@/lib/local-backend/mode";
 import { glidePill, prefersReducedMotion } from "@/lib/motion";
 import { onUserScroll } from "@/lib/user-scroll";
 
 const ALL_SECTIONS = [
-  { id: "profile", label: "Profile", icon: UserRound },
-  { id: "appearance", label: "Appearance", icon: SunMoon },
-  { id: "language", label: "Language", icon: Languages },
-  { id: "date-time", label: "Date and time", icon: CalendarClock },
-  { id: "editor", label: "Editor", icon: PencilLine },
-  { id: "quick-actions", label: "Quick actions", icon: LayoutPanelTop },
-  { id: "search", label: "Search", icon: Search },
-  { id: "token", label: "API token", icon: KeyRound },
-  { id: "storage", label: "Storage", icon: HardDrive },
-  { id: "data", label: "Import and export", icon: HardDriveDownload },
-  { id: "locks", label: "Note locks", icon: LockKeyhole },
-  { id: "security", label: "Sign-in security", icon: ShieldCheck },
-  { id: "password", label: "Password", icon: Lock },
-  { id: "phone", label: "Connect phone", icon: Smartphone },
-  { id: "devices", label: "Devices", icon: MonitorSmartphone },
-  { id: "about", label: "About", icon: Info },
+  { id: "profile", labelKey: "profile", icon: UserRound },
+  { id: "appearance", labelKey: "appearance", icon: SunMoon },
+  { id: "language", labelKey: "language", icon: Languages },
+  { id: "date-time", labelKey: "dateTime", icon: CalendarClock },
+  { id: "editor", labelKey: "editor", icon: PencilLine },
+  { id: "quick-actions", labelKey: "quickActions", icon: LayoutPanelTop },
+  { id: "search", labelKey: "search", icon: Search },
+  { id: "token", labelKey: "token", icon: KeyRound },
+  { id: "storage", labelKey: "storage", icon: HardDrive },
+  { id: "data", labelKey: "data", icon: HardDriveDownload },
+  { id: "locks", labelKey: "locks", icon: LockKeyhole },
+  { id: "security", labelKey: "security", icon: ShieldCheck },
+  { id: "password", labelKey: "password", icon: Lock },
+  { id: "phone", labelKey: "phone", icon: Smartphone },
+  { id: "devices", labelKey: "devices", icon: MonitorSmartphone },
+  { id: "about", labelKey: "about", icon: Info },
 ] as const;
 
 // Without a server there is no phone sign-in, API token, sign-in security,
@@ -61,6 +62,7 @@ const SECTIONS = ALL_SECTIONS.filter(
 );
 
 export function SettingsNav() {
+  const t = useTranslations("settings.nav");
   const [activeSection, setActiveSection] = React.useState<string>(
     SECTIONS[0].id,
   );
@@ -138,7 +140,7 @@ export function SettingsNav() {
   return (
     <nav
       data-settings-nav
-      aria-label="Settings sections"
+      aria-label={t("sections")}
       className="sticky top-20 isolate grid gap-px max-md:static max-md:-mx-gutter-phone max-md:flex max-md:gap-1.5 max-md:overflow-x-auto max-md:px-gutter-phone max-md:scrollbar-none"
     >
       {SECTIONS.map((section) => (
@@ -159,7 +161,7 @@ export function SettingsNav() {
           className="relative flex h-8.5 items-center gap-2.5 rounded-md px-2.5 font-medium text-muted-foreground text-ui no-underline hover:bg-foreground/6 hover:text-foreground aria-[current=location]:bg-foreground/6 aria-[current=location]:font-semibold aria-[current=location]:text-foreground max-md:h-8 max-md:flex-none max-md:rounded-pill max-md:bg-muted max-md:px-3 [&>svg]:size-4 aria-[current=location]:[&>svg]:text-accent-strong max-md:[&>svg]:hidden"
         >
           <section.icon aria-hidden />
-          {section.label}
+          {t(section.labelKey)}
         </a>
       ))}
     </nav>

@@ -1,6 +1,7 @@
 "use client";
 
 import { RotateCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,7 @@ import {
 import { FieldDescription, FieldError } from "@/components/ui/field";
 import { desktopLocalNotesMoved, takeDesktopLocalNotes } from "@/lib/desktop";
 import { isServerless } from "@/lib/local-backend/mode";
-import { cn, plural } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useImport } from "../hooks/use-import";
 
 /**
@@ -26,6 +27,8 @@ import { useImport } from "../hooks/use-import";
  * makes copies.
  */
 export function LocalNotesMove() {
+  const t = useTranslations("settings.importExport.localMove");
+  const tc = useTranslations("common");
   const importer = useImport();
   const { step, parsed, progress, report, runError, options } = importer;
   const { selectFiles, setOption, start } = importer;
@@ -81,12 +84,10 @@ export function LocalNotesMove() {
       >
         <DialogHeader>
           <DialogTitle>
-            {report ? "Your notes moved" : "Moving your notes"}
+            {report ? t("movedTitle") : t("movingTitle")}
           </DialogTitle>
           <DialogDescription>
-            {report
-              ? "The notes kept on this computer are in your account now, next to the notes already there."
-              : "The notes kept on this computer are going into your account, next to the notes already there."}
+            {report ? t("movedText") : t("movingText")}
           </DialogDescription>
         </DialogHeader>
         <DialogBody className="gap-2">
@@ -95,14 +96,14 @@ export function LocalNotesMove() {
               <div className="flex justify-between font-medium text-control tabular-nums">
                 <span>
                   {progress?.phase === "attachments"
-                    ? `Uploading attachments ${done} of ${total}`
-                    : `Moving notes ${done} of ${total}`}
+                    ? t("uploadingAttachments", { done, total })
+                    : t("movingNotes", { done, total })}
                 </span>
                 <span>{total ? Math.round((done / total) * 100) : 0}%</span>
               </div>
               <div
                 role="progressbar"
-                aria-label="Moving notes"
+                aria-label={t("progress")}
                 aria-valuemin={0}
                 aria-valuemax={total}
                 aria-valuenow={done}
@@ -119,17 +120,15 @@ export function LocalNotesMove() {
               {runError ? (
                 <FieldError>{runError}</FieldError>
               ) : (
-                <FieldDescription>
-                  Keep Anchor+ open until they are in.
-                </FieldDescription>
+                <FieldDescription>{t("keepOpen")}</FieldDescription>
               )}
             </>
           )}
           {report && (
             <FieldDescription>
-              {`${plural(report.created + report.remapped, "note")} moved into your account.`}
+              {t("notesMoved", { count: report.created + report.remapped })}
               {report.failed + report.attachmentsFailed > 0 &&
-                ` ${plural(report.failed + report.attachmentsFailed, "item")} didn’t make it; they stay on this computer and move at the next sign in.`}
+                ` ${t("itemsFailed", { count: report.failed + report.attachmentsFailed })}`}
             </FieldDescription>
           )}
         </DialogBody>
@@ -137,10 +136,12 @@ export function LocalNotesMove() {
           {runError && (
             <Button onClick={importer.retry}>
               <RotateCw aria-hidden />
-              Try again
+              {tc("retry")}
             </Button>
           )}
-          {report && <Button onClick={() => setIsActive(false)}>Done</Button>}
+          {report && (
+            <Button onClick={() => setIsActive(false)}>{tc("done")}</Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

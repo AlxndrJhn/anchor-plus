@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import * as React from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -89,9 +90,9 @@ const RELEASES_HREF =
   "https://github.com/AlxndrJhn/anchor-plus/releases/latest";
 
 const PAGES = [
-  { href: "/notes", label: "Notes", icon: NotebookPen },
-  { href: "/archive", label: "Archive", icon: Archive },
-  { href: "/trash", label: "Trash", icon: Trash2 },
+  { href: "/notes", labelKey: "notes", icon: NotebookPen },
+  { href: "/archive", labelKey: "archive", icon: Archive },
+  { href: "/trash", labelKey: "trash", icon: Trash2 },
 ] as const;
 
 export function newNoteHref(
@@ -178,6 +179,8 @@ export function Sidebar({
   drawer = false,
   onNavigate,
 }: SidebarProps) {
+  const t = useTranslations("layout.sidebar");
+  const tc = useTranslations("common");
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -232,7 +235,7 @@ export function Sidebar({
     onSuccess: (saved) => updateCachedTag(saved.id, { version: saved.version }),
     onError: (_, { tag }, context) => {
       updateCachedTag(tag.id, { color: context?.previousColor });
-      toast.error(`Couldn’t change the color of #${tag.name}`);
+      toast.error(t("colorFailed", { name: tag.name }));
     },
     onSettled: () => {
       if (queryClient.isMutating({ mutationKey: ["tag-color"] }) <= 1)
@@ -249,7 +252,7 @@ export function Sidebar({
       if (tagId === tag.id) router.push("/notes");
       setTagToDelete(null);
     },
-    onError: (_, tag) => toast.error(`Couldn’t delete #${tag.name}`),
+    onError: (_, tag) => toast.error(t("deleteFailed", { name: tag.name })),
   });
 
   const root = React.useRef<HTMLElement>(null);
@@ -327,7 +330,7 @@ export function Sidebar({
         list?.map((t) => ({ ...t, position: ids.indexOf(t.id) })),
       );
     },
-    onError: () => toast.error("Couldn’t move the tag"),
+    onError: () => toast.error(t("moveFailed")),
     onSettled: () => {
       if (queryClient.isMutating({ mutationKey: ["tag-order"] }) <= 1)
         queryClient.invalidateQueries({ queryKey: ["tags"] });
@@ -345,7 +348,7 @@ export function Sidebar({
       ref={root}
       data-folded={folded || undefined}
       data-narrow={isNarrow || undefined}
-      aria-label="Sidebar"
+      aria-label={t("sidebar")}
       className={cn(
         "group/sb relative isolate z-(--z-drawer) flex min-h-0 flex-none flex-col gap-0.5 overflow-hidden bg-sidebar px-3 pt-3 pb-2.5 transition-[width,margin-right,border-radius,box-shadow] duration-(--duration-header) ease-standard data-moving:[&_.truncate]:text-clip",
         drawer
@@ -367,7 +370,7 @@ export function Sidebar({
       </div>
 
       <Tip
-        label={singleKeys ? "New note (N)" : "New note"}
+        label={singleKeys ? t("newNoteKey") : t("newNote")}
         side="right"
         isDisabled={!isNarrow}
         isFocusOnly
@@ -385,7 +388,7 @@ export function Sidebar({
           className="mb-3 flex h-9.5 items-center gap-2 overflow-hidden whitespace-nowrap rounded-md bg-foreground pr-2.5 pl-[11.5px] font-semibold text-card text-ui no-underline shadow-control transition-[background-color,transform] duration-(--duration-hover) hover:bg-[color-mix(in_srgb,var(--foreground)_88%,var(--card))] active:scale-[.98] [&>svg]:size-4.25 [&>svg]:shrink-0"
         >
           <Plus aria-hidden />
-          <span className={labelClass}>New note</span>
+          <span className={labelClass}>{t("newNote")}</span>
           {!drawer && singleKeys && (
             <kbd
               aria-hidden
@@ -397,11 +400,11 @@ export function Sidebar({
         </Link>
       </Tip>
 
-      <nav aria-label="Pages" className="grid gap-px">
-        {PAGES.map(({ href, label: name, icon: Icon }) => (
+      <nav aria-label={t("pages")} className="grid gap-px">
+        {PAGES.map(({ href, labelKey, icon: Icon }) => (
           <Tip
             key={href}
-            label={name}
+            label={tc(labelKey)}
             side="right"
             isDisabled={!isNarrow}
             isFocusOnly
@@ -414,7 +417,7 @@ export function Sidebar({
               className={rowClass}
             >
               <Icon aria-hidden />
-              <span className={labelClass}>{name}</span>
+              <span className={labelClass}>{tc(labelKey)}</span>
             </Link>
           </Tip>
         ))}
@@ -422,13 +425,13 @@ export function Sidebar({
 
       <div className="relative mt-3.5 flex h-7.5 items-center gap-1.5 whitespace-nowrap pr-0.5 pl-[11.5px] text-label text-muted-foreground uppercase">
         <span aria-hidden className={cn("flex-1", hideClass)}>
-          Tags
+          {t("tags")}
         </span>
         <span className={hideClass}>
-          <Tip label="New tag">
+          <Tip label={t("newTag")}>
             <IconButton
               size="sm"
-              label="New tag"
+              label={t("newTag")}
               onClick={() => setTagDialog({ tag: null })}
             >
               <Plus />
@@ -442,22 +445,22 @@ export function Sidebar({
       </div>
 
       <nav
-        aria-label="Tags"
+        aria-label={t("tags")}
         data-tag-list
         className="-mx-1 grid min-h-0 flex-1 content-start gap-px overflow-auto px-1 pb-2 scrollbar-none mask-[linear-gradient(#000_calc(100%-22px),transparent)]"
       >
         {tagsFailed && (
           <>
             <LoadFailedRow
-              message="Couldn’t load tags"
+              message={t("tagsLoadFailed")}
               onRetry={() => tagsQuery.refetch()}
               isRetrying={tagsQuery.isFetching}
               className="mt-0.5 gap-2 py-2 pr-2 pl-[11.5px] group-data-narrow/sb:hidden [&>span]:min-w-fit"
             />
-            <Tip label="Couldn’t load tags. Try again" side="right">
+            <Tip label={t("tagsLoadFailedRetry")} side="right">
               <IconButton
                 size="sm"
-                label="Couldn’t load tags. Try again"
+                label={t("tagsLoadFailedRetry")}
                 aria-busy={tagsQuery.isFetching || undefined}
                 onClick={() => tagsQuery.refetch()}
                 className="hidden justify-self-center group-data-narrow/sb:inline-grid"
@@ -469,7 +472,7 @@ export function Sidebar({
         )}
         {tagsLoaded && sortedTags.length === 0 && (
           <p className="m-0 py-1 pr-2.5 pl-[11.5px] text-muted-foreground text-small group-data-narrow/sb:hidden">
-            No tags yet
+            {t("noTags")}
           </p>
         )}
         {sortedTags.map((tag) => {
@@ -493,8 +496,8 @@ export function Sidebar({
             >
               <button
                 type="button"
-                aria-label={`Move ${tag.name}`}
-                title="Drag to move, or use the arrow keys"
+                aria-label={t("moveTag", { name: tag.name })}
+                title={t("moveTagHint")}
                 {...tagDrag.handleProps(tag)}
                 className={cn(
                   "pointer-events-auto absolute inset-y-0 left-0 z-1 grid w-3 cursor-grab touch-none place-items-center rounded-l-md text-muted-foreground opacity-0 hover:text-foreground focus-visible:opacity-100 group-hover/tag:opacity-100 data-dragging:cursor-grabbing data-dragging:opacity-100 [@media(hover:none)]:opacity-100 [&>svg]:size-3",
@@ -505,7 +508,7 @@ export function Sidebar({
                 <GripVertical aria-hidden />
               </button>
               <Tip
-                label={`#${tag.name} · ${noteCount} ${noteCount === 1 ? "note" : "notes"}`}
+                label={t("tagTip", { name: tag.name, count: noteCount })}
                 side="right"
                 isDisabled={!isNarrow}
                 isFocusOnly
@@ -543,7 +546,7 @@ export function Sidebar({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      aria-label={`Options for ${tag.name}`}
+                      aria-label={t("tagOptions", { name: tag.name })}
                       className={tagMenuButtonClass}
                     >
                       <Ellipsis />
@@ -551,7 +554,7 @@ export function Sidebar({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     className="w-57"
-                    aria-label={`Tag ${tag.name}`}
+                    aria-label={t("tagMenu", { name: tag.name })}
                     onCloseAutoFocus={() => {
                       const openDialog = afterTagMenu.current;
                       afterTagMenu.current = null;
@@ -564,9 +567,11 @@ export function Sidebar({
                       }}
                     >
                       <Pencil />
-                      Rename
+                      {t("renameTag")}
                     </DropdownMenuItem>
-                    <DropdownMenuLabel aria-hidden>Color</DropdownMenuLabel>
+                    <DropdownMenuLabel aria-hidden>
+                      {t("color")}
+                    </DropdownMenuLabel>
                     <MenuPrimitive.RadioGroup
                       value={tag.color?.toUpperCase()}
                       onValueChange={(color) =>
@@ -595,7 +600,7 @@ export function Sidebar({
                       }}
                     >
                       <Trash2 />
-                      Delete tag
+                      {t("deleteTag")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -613,10 +618,7 @@ export function Sidebar({
           >
             <CloudOff aria-hidden />
             <span className={labelClass}>
-              Offline
-              {unsaved
-                ? ` · ${unsaved} unsaved ${unsaved === 1 ? "change" : "changes"}`
-                : ""}
+              {unsaved ? t("offlineUnsaved", { count: unsaved }) : t("offline")}
             </span>
           </div>
         )}
@@ -625,7 +627,7 @@ export function Sidebar({
         )}
         {onToggleFold && (
           <Tip
-            label={`Expand sidebar (${isMac() ? "⌘\\" : "Ctrl+\\"})`}
+            label={t("expandKey", { keys: isMac() ? "⌘\\" : "Ctrl+\\" })}
             side="right"
             isDisabled={!isNarrow}
             isFocusOnly
@@ -634,10 +636,10 @@ export function Sidebar({
               type="button"
               aria-label={
                 !folded
-                  ? "Collapse sidebar"
+                  ? t("collapseSidebar")
                   : isPeeking
-                    ? "Keep sidebar open"
-                    : "Expand sidebar"
+                    ? t("keepSidebarOpen")
+                    : t("expandSidebar")
               }
               aria-keyshortcuts={isMac() ? "Meta+\\" : "Control+\\"}
               onClick={onToggleFold}
@@ -654,7 +656,7 @@ export function Sidebar({
                     isPeeking ? "opacity-0" : "opacity-100",
                   )}
                 >
-                  Collapse
+                  {t("collapse")}
                 </span>
                 <span
                   className={cn(
@@ -662,7 +664,7 @@ export function Sidebar({
                     isPeeking ? "opacity-100" : "opacity-0",
                   )}
                 >
-                  Keep open
+                  {t("keepOpen")}
                 </span>
               </span>
               <kbd
@@ -676,7 +678,7 @@ export function Sidebar({
         )}
         {isDemo && (
           <Tip
-            label="Feature demos"
+            label={t("featureDemos")}
             side="right"
             isDisabled={!isNarrow}
             isFocusOnly
@@ -689,13 +691,13 @@ export function Sidebar({
               className={rowClass}
             >
               <Play aria-hidden />
-              <span className={labelClass}>Feature demos</span>
+              <span className={labelClass}>{t("featureDemos")}</span>
             </Link>
           </Tip>
         )}
         {isDemo && (
           <Tip
-            label="Downloads"
+            label={t("downloads")}
             side="right"
             isDisabled={!isNarrow}
             isFocusOnly
@@ -707,7 +709,7 @@ export function Sidebar({
               className={rowClass}
             >
               <Download aria-hidden />
-              <span className={labelClass}>Downloads</span>
+              <span className={labelClass}>{t("downloads")}</span>
             </a>
           </Tip>
         )}
@@ -733,14 +735,14 @@ export function Sidebar({
       <ConfirmationDialog
         open={!!tagToDelete}
         onOpenChange={(open) => !open && setTagToDelete(null)}
-        title={`Delete tag “${tagToDelete?.name ?? ""}”?`}
+        title={t("deleteTagTitle", { name: tagToDelete?.name ?? "" })}
         description={
           tagToDelete && countNotes(tagToDelete)
-            ? `The tag will be removed from ${countNotes(tagToDelete)} ${countNotes(tagToDelete) === 1 ? "note" : "notes"}. Your notes won’t be deleted.`
-            : "No notes use this tag."
+            ? t("deleteTagDescription", { count: countNotes(tagToDelete) })
+            : t("deleteTagUnused")
         }
-        confirmLabel="Delete tag"
-        busyLabel="Deleting…"
+        confirmLabel={t("deleteTag")}
+        busyLabel={t("deleting")}
         isPending={deleteMutation.isPending}
         onConfirm={() => tagToDelete && deleteMutation.mutate(tagToDelete)}
       />
@@ -770,6 +772,7 @@ function PhoneCrumb({
   isNarrow: boolean;
   onNavigate?: () => void;
 }) {
+  const t = useTranslations("layout.sidebar");
   const pathname = usePathname();
   const [isDismissed, setIsDismissed] = React.useState(true);
   React.useEffect(() => setIsDismissed(readCrumbDismissed()), []);
@@ -792,7 +795,7 @@ function PhoneCrumb({
   return (
     <div className="relative min-w-0">
       <Tip
-        label="Connect phone via QR code"
+        label={t("connectPhoneTip")}
         side="right"
         isDisabled={!isNarrow}
         isFocusOnly
@@ -807,9 +810,9 @@ function PhoneCrumb({
         >
           <QrCode aria-hidden />
           <span className={cn("grid min-w-0 flex-1 leading-tight", fadeClass)}>
-            <span className="truncate">Connect phone</span>
+            <span className="truncate">{t("connectPhone")}</span>
             <span className="truncate font-medium text-meta opacity-80">
-              via QR code
+              {t("viaQrCode")}
             </span>
           </span>
         </Link>
@@ -820,8 +823,8 @@ function PhoneCrumb({
           hideClass,
         )}
       >
-        <Tip label="Hide">
-          <IconButton size="sm" label="Hide phone setup" onClick={dismiss}>
+        <Tip label={t("hide")}>
+          <IconButton size="sm" label={t("hidePhoneSetup")} onClick={dismiss}>
             <X />
           </IconButton>
         </Tip>
@@ -849,6 +852,8 @@ function AccountMenu({
   onNavigate?: () => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("layout.sidebar");
+  const tc = useTranslations("common");
   const router = useRouter();
   const { theme = "system", setTheme } = useTheme();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -895,7 +900,7 @@ function AccountMenu({
         side={opensRight ? "right" : "top"}
         align={opensRight ? "end" : "start"}
         className="w-64"
-        aria-label="Account"
+        aria-label={t("account")}
       >
         <div className="mb-1 flex items-center gap-2.5 rounded-lg bg-foreground/4 p-2.5">
           <Avatar id={user.id} name={user.name} src={user.profileImage} />
@@ -909,7 +914,7 @@ function AccountMenu({
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => goTo("/settings")}>
           <Settings />
-          Settings
+          {tc("settings")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => {
@@ -918,7 +923,7 @@ function AccountMenu({
           }}
         >
           <Keyboard />
-          Keyboard shortcuts
+          {t("keyboardShortcuts")}
           <kbd aria-hidden className="ml-auto">
             ?
           </kbd>
@@ -926,7 +931,7 @@ function AccountMenu({
         {user.isAdmin && (
           <DropdownMenuItem onSelect={() => goTo("/admin")}>
             <ShieldCheck />
-            Admin
+            {t("admin")}
           </DropdownMenuItem>
         )}
         <ThemeChoices
@@ -938,7 +943,7 @@ function AccountMenu({
             <DropdownMenuSeparator />
             <DropdownMenuItem tone="danger" onSelect={onSignOut}>
               <LogOut />
-              Sign out
+              {t("signOut")}
             </DropdownMenuItem>
           </>
         )}
@@ -948,9 +953,9 @@ function AccountMenu({
 }
 
 const THEMES = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "Match system", icon: Monitor },
+  { value: "light", labelKey: "themeLight", icon: Sun },
+  { value: "dark", labelKey: "themeDark", icon: Moon },
+  { value: "system", labelKey: "themeSystem", icon: Monitor },
 ] as const;
 
 const themeItemClass =
@@ -963,6 +968,7 @@ function ThemeChoices({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const t = useTranslations("layout.sidebar");
   const root = React.useRef<HTMLDivElement>(null);
   const fill = useGlidingFill(root, value);
   const labelId = React.useId();
@@ -981,7 +987,7 @@ function ThemeChoices({
 
   return (
     <div className="flex items-center justify-between gap-3 py-1 pr-1 pl-2.5 text-ui">
-      <span id={labelId}>Theme</span>
+      <span id={labelId}>{t("theme")}</span>
       <MenuPrimitive.RadioGroup
         ref={root}
         data-slot="segmented-control"
@@ -991,12 +997,12 @@ function ThemeChoices({
         onKeyDown={onKeyDown}
         className="relative inline-flex gap-0.5 rounded-lg bg-muted p-0.75"
       >
-        {THEMES.map(({ value: option, label, icon: Icon }) => (
-          <Tip key={option} label={label}>
+        {THEMES.map(({ value: option, labelKey, icon: Icon }) => (
+          <Tip key={option} label={t(labelKey)}>
             <MenuPrimitive.RadioItem
               value={option}
               data-seg={option}
-              aria-label={label}
+              aria-label={t(labelKey)}
               onSelect={(e) => e.preventDefault()}
               className={cn(
                 themeItemClass,

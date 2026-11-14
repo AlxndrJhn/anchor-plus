@@ -1,1 +1,209 @@
-{}
+{
+  "reminder": {
+    "recurrence": {
+      "none": "Never",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "presets": {
+      "later": "Later today",
+      "tomorrow": "Tomorrow",
+      "weekend": "On the weekend",
+      "monday": "Next Monday",
+      "week": "Next week",
+      "month": "Next month"
+    },
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inMinutes": "In {count, plural, one {# minute} other {# minutes}}",
+    "inHours": "In {count, plural, one {# hour} other {# hours}}",
+    "inDays": "In {count, plural, one {# day} other {# days}}",
+    "repeatsDaily": "Repeats every day",
+    "repeatsWeekly": "Repeats every {weekday}",
+    "repeatsMonthly": "Repeats monthly on the {day, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+    "repeatsYearly": "Repeats every year on {date}",
+    "none": "No reminder",
+    "pickWhen": "Pick when to be reminded",
+    "passed": "That time has passed"
+  },
+  "history": {
+    "cause": {
+      "edit": "Earlier version",
+      "conflict": "Not saved",
+      "restore": "Before a restore"
+    },
+    "someone": "Someone",
+    "you": "You",
+    "dayAtTime": "{day} at {time}",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "drawing": {
+    "colors": {
+      "black": "Black",
+      "red": "Red",
+      "orange": "Orange",
+      "green": "Green",
+      "blue": "Blue",
+      "purple": "Purple"
+    },
+    "sizes": {
+      "thin": "Thin",
+      "medium": "Medium",
+      "thick": "Thick"
+    }
+  },
+  "textStyle": {
+    "colors": {
+      "red": "Red",
+      "orange": "Orange",
+      "amber": "Amber",
+      "green": "Green",
+      "teal": "Teal",
+      "blue": "Blue",
+      "purple": "Purple",
+      "pink": "Pink",
+      "gray": "Gray"
+    },
+    "fonts": {
+      "serif": "Serif",
+      "monospace": "Monospace",
+      "comic": "Comic Sans",
+      "handwriting": "Handwriting",
+      "typewriter": "Typewriter",
+      "rounded": "Rounded",
+      "slab": "Slab",
+      "marker": "Marker"
+    }
+  },
+  "emoji": {
+    "categories": {
+      "people": "Smileys & people",
+      "nature": "Animals & nature",
+      "food": "Food & drink",
+      "activity": "Activity",
+      "travel": "Travel & places",
+      "objects": "Objects",
+      "symbols": "Symbols",
+      "flags": "Flags"
+    }
+  },
+  "flowchart": {
+    "start": "Start",
+    "step": "Step",
+    "label": "Flowchart",
+    "labelWithText": "Flowchart: {text}"
+  },
+  "quillFormats": {
+    "picture": "Picture",
+    "liveScreen": "Live screen",
+    "liveCamera": "Live camera",
+    "live": "Live",
+    "downloadPdf": "Download PDF"
+  },
+  "scans": {
+    "scan": "Scan",
+    "pages": "{count, plural, one {# page} other {# pages}}",
+    "profiles": {
+      "bw": "Black and white",
+      "whiteboard": "Whiteboard",
+      "text": "Color text",
+      "color": "Full color"
+    }
+  },
+  "noteLock": {
+    "kinds": {
+      "biometric": {
+        "label": "Fingerprint or face",
+        "description": "On the web, your account password opens it."
+      },
+      "pin": {
+        "label": "PIN",
+        "description": "Your notes’ PIN opens it."
+      },
+      "pattern": {
+        "label": "Pattern",
+        "description": "Your notes’ pattern opens it."
+      },
+      "tap": {
+        "label": "Just a tap",
+        "description": "A tap opens it."
+      }
+    },
+    "pinHint": "4 to 12 digits."
+  },
+  "liveHub": {
+    "deviceOn": "{app} on {system}",
+    "aBrowser": "a browser"
+  },
+  "saveQueues": {
+    "offlineEditFailed": "An edit made offline couldn’t be saved.",
+    "conflictCopyKept": "“{title}” was changed elsewhere too. Your version is kept as a new note.",
+    "untitled": "Untitled"
+  },
+  "print": {
+    "locked": "This note is locked.",
+    "failed": "{count, plural, one {Couldn’t print the note} other {Couldn’t print the notes}}"
+  },
+  "checklistActions": {
+    "couldNotUndo": "Couldn’t undo that",
+    "uncheck": "{count, plural, one {Item unchecked} other {# items unchecked}}",
+    "delete": "{count, plural, one {Checked item deleted} other {# checked items deleted}}",
+    "sort": "{count, plural, one {Item sorted A to Z} other {# items sorted A to Z}}",
+    "sortAlready": "Already in A to Z order"
+  },
+  "noteActions": {
+    "archived": "Note archived",
+    "archiveFailed": "Couldn’t archive note",
+    "unarchived": "Note unarchived",
+    "unarchiveFailed": "Couldn’t unarchive note",
+    "movedToTrash": "Note moved to trash",
+    "removedFromYours": "Note removed from your notes",
+    "trashFailed": "Couldn’t move note to trash",
+    "removeFailed": "Couldn’t remove note",
+    "restored": "Note restored",
+    "followIt": "Follow it",
+    "restoreFailed": "Couldn’t restore note",
+    "permanentlyDeleted": "Note permanently deleted",
+    "deleteFailed": "Couldn’t delete note"
+  },
+  "liveImages": {
+    "whoDefault": "the device that added it",
+    "starting": "Turning the camera on…",
+    "connecting": "Connecting to {who}…",
+    "waiting": "Waiting for {who}. Open Anchor there to show it.",
+    "pausedScreen": "{who} isn’t sharing its screen right now.",
+    "pausedCamera": "{who} can’t show its camera right now.",
+    "screenNotShared": "Your screen isn’t being shared.",
+    "cameraOff": "Your camera is off.",
+    "denied": "This device wasn’t allowed to use the camera.",
+    "shareScreen": "Share screen",
+    "turnCameraOn": "Turn camera on",
+    "tryAgain": "Try again",
+    "unmuteMic": "Unmute microphone",
+    "muteMic": "Mute microphone",
+    "micMuted": "Microphone muted",
+    "soundOn": "Turn sound on",
+    "soundOff": "Turn sound off",
+    "unsupported": "This browser can’t show live images.",
+    "shareFailed": "Couldn’t share the screen",
+    "cameraFailed": "Couldn’t turn the camera on",
+    "stillAdded": "Still added to the attachments",
+    "stillFailed": "Couldn’t keep a still of the live image"
+  },
+  "noteEditor": {
+    "changedElsewhereKept": "This note was changed elsewhere. Your version is kept, and the other one is in History.",
+    "history": "History",
+    "changedElsewhereReloaded": "This note was changed elsewhere and has been reloaded.",
+    "reminderRemoved": "Reminder removed"
+  },
+  "attachmentBlob": {
+    "failedToLoad": "Failed to load"
+  },
+  "publicLink": {
+    "edit": "Public: anyone with the link can edit",
+    "view": "Public: anyone with the link can view"
+  }
+}

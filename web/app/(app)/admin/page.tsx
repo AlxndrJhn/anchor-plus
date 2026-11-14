@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Hash, NotebookPen, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { AppPage, PageTitle } from "@/components/layout/app-page";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,8 @@ import { useRetry } from "@/lib/hooks/use-retry";
 import { useServerVersion } from "@/lib/hooks/use-server-version";
 
 export default function AdminPage() {
-  useDocumentTitle("Admin");
+  const t = useTranslations("admin.page");
+  useDocumentTitle(t("title"));
   return (
     <AdminGuard>
       <AdminPageContent />
@@ -30,6 +32,7 @@ export default function AdminPage() {
 }
 
 function AdminPageContent() {
+  const t = useTranslations("admin.page");
   const [tab, setTab] = React.useState<"people" | "signin">("people");
   const stats = useQuery({
     queryKey: adminKeys.stats,
@@ -44,46 +47,45 @@ function AdminPageContent() {
   const serverVersion = useServerVersion();
 
   return (
-    <AppPage title={<PageTitle>Admin</PageTitle>} scrollKey="admin">
+    <AppPage title={<PageTitle>{t("title")}</PageTitle>} scrollKey="admin">
       <div className="grid gap-4 pb-10">
         <div className="grid grid-cols-3 gap-3 max-md:gap-2">
           <StatCard
             icon={<Users />}
-            label="People"
+            label={t("people")}
             value={stats.data?.totalUsers}
             failed={stats.isError}
-            caption={
-              waitingCount ? `${waitingCount} waiting` : "No one waiting"
-            }
+            caption={t("waitingCaption", { count: waitingCount })}
           />
           <StatCard
             icon={<NotebookPen />}
-            label="Notes"
+            label={t("notes")}
             value={stats.data?.totalNotes}
             failed={stats.isError}
-            caption="Including trash"
+            caption={t("includingTrash")}
           />
           <StatCard
             icon={<Hash />}
-            label="Tags"
+            label={t("tags")}
             value={stats.data?.totalTags}
             failed={stats.isError}
-            caption="Across all people"
+            caption={t("acrossPeople")}
           />
         </div>
         {((stats.isError && !stats.data) || statsRetry.isRetrying) && (
           <LoadFailedRow
-            message="Couldn’t load the counts."
+            message={t("countsFailed")}
             onRetry={statsRetry.retry}
             isRetrying={statsRetry.isRetrying}
           />
         )}
         <p className="text-meta text-muted-foreground">
-          Anchor+ {process.env.NEXT_PUBLIC_APP_VERSION}
-          {serverVersion && ` · Server ${serverVersion}`}
+          {t("version", { version: process.env.NEXT_PUBLIC_APP_VERSION ?? "" })}
+          {serverVersion &&
+            ` · ${t("serverVersion", { version: serverVersion })}`}
         </p>
         <Tabs
-          aria-label="Admin"
+          aria-label={t("title")}
           panelId="admin-panel"
           value={tab}
           onValueChange={setTab}
@@ -92,17 +94,17 @@ function AdminPageContent() {
               value: "people",
               label: (
                 <>
-                  People
+                  {t("people")}
                   {waitingCount > 0 && (
                     <Badge tone="warn">
                       {waitingCount}
-                      <span className="sr-only"> waiting</span>
+                      <span className="sr-only"> {t("waiting")}</span>
                     </Badge>
                   )}
                 </>
               ),
             },
-            { value: "signin", label: "Sign-in" },
+            { value: "signin", label: t("signIn") },
           ]}
         />
         <TabPanel id="admin-panel" labelledBy={`admin-panel-tab-${tab}`}>

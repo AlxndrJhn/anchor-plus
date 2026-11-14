@@ -1,6 +1,7 @@
 "use client";
 
 import { ClipboardCopy, TextCursorInput, TextSelect } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { toast } from "@/components/ui/toast";
 import {
@@ -48,6 +49,8 @@ export function ImageTextView({
   /** Puts the chosen text in the note; absent when it can't be edited. */
   onInsert?: (text: string) => void;
 }) {
+  const t = useTranslations("noteEditor.attachments.imageText");
+  const tc = useTranslations("common");
   const { words } = text;
   // The selected words, by index.
   const [selection, setSelectionState] = React.useState<ReadonlySet<number>>(
@@ -143,7 +146,7 @@ export function ImageTextView({
       window.clearTimeout(copiedTimer.current);
       copiedTimer.current = window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Couldn’t copy the text");
+      toast.error(t("copyFailed"));
     }
   };
 
@@ -268,22 +271,17 @@ export function ImageTextView({
           aria-hidden={chosen > 0 || !!box}
           data-hidden={chosen > 0 || box ? "" : undefined}
         >
-          <span className="dk">
-            Drag over the text to select it, or from beside it to draw a box
-          </span>
-          <span className="ph">
-            Hold a word and drag to select text, or hold beside it and drag a
-            box
-          </span>
+          <span className="dk">{t("hintDesktop")}</span>
+          <span className="ph">{t("hintTouch")}</span>
         </div>
       </div>
       <div className="itv-bar">
         <div className="itv-status" aria-live="polite">
           {copied
-            ? "Copied"
+            ? tc("copied")
             : chosen > 0
-              ? `${chosen} ${chosen === 1 ? "word" : "words"} selected`
-              : "Nothing selected"}
+              ? t("selected", { count: chosen })
+              : t("nothingSelected")}
         </div>
         <div className="itv-actions">
           <button
@@ -292,11 +290,11 @@ export function ImageTextView({
             disabled={chosen === words.length}
           >
             <TextSelect aria-hidden />
-            Select all
+            {t("selectAll")}
           </button>
           <button type="button" onClick={copy} disabled={chosen <= 0}>
             <ClipboardCopy aria-hidden />
-            Copy
+            {tc("copy")}
           </button>
           {onInsert && (
             <button
@@ -306,7 +304,7 @@ export function ImageTextView({
               disabled={chosen <= 0}
             >
               <TextCursorInput aria-hidden />
-              Insert in note
+              {t("insert")}
             </button>
           )}
         </div>

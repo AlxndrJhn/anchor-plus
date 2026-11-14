@@ -6,6 +6,7 @@ import {
   MousePointerClick,
   RectangleEllipsis,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +51,8 @@ export function LockDialog({
   /** Throws when it couldn't be locked. */
   onLock: (kind: NoteLockKind) => Promise<void>;
 }) {
+  const t = useTranslations("noteEditor.lock.dialog");
+  const tc = useTranslations("common");
   const secrets = useNoteLockSecrets();
   const [kind, setKind] = React.useState<NoteLockKind>(current ?? "biometric");
   const [settingUp, setSettingUp] = React.useState<"pin" | "pattern" | null>(
@@ -71,11 +74,7 @@ export function LockDialog({
       await onLock(chosen);
       onOpenChange(false);
     } catch {
-      setError(
-        navigator.onLine
-          ? "Couldn’t lock it. Try again in a moment."
-          : "Locking needs a connection. Try again once you’re online.",
-      );
+      setError(navigator.onLine ? t("lockFailed") : t("lockOffline"));
     } finally {
       setBusy(false);
     }
@@ -84,9 +83,7 @@ export function LockDialog({
   const confirm = () => {
     if (kind === "pin" || kind === "pattern") {
       if (!secrets.data) {
-        setError(
-          `Setting up a ${kind === "pin" ? "PIN" : "pattern"} needs a connection.`,
-        );
+        setError(t("setupOffline", { kind }));
         return;
       }
       if (!secrets.data[kind]) {
@@ -98,7 +95,6 @@ export function LockDialog({
   };
 
   const changing = !!current;
-  const what = count === 1 ? "this note" : `these ${count} notes`;
   return (
     <>
       <Dialog
@@ -107,17 +103,14 @@ export function LockDialog({
       >
         <DialogContent size="md">
           <DialogHeader>
-            <DialogTitle>{changing ? "Change lock" : "Lock"}</DialogTitle>
-            <DialogDescription>
-              Choose what opens {what}.{" "}
-              {count === 1
-                ? "Until then it shows only its title. Once opened, it stays open until you reload or close Anchor+."
-                : "Until then they show only their titles. Once opened, each stays open until you reload or close Anchor+."}
-            </DialogDescription>
+            <DialogTitle>
+              {changing ? t("changeTitle") : t("title")}
+            </DialogTitle>
+            <DialogDescription>{t("description", { count })}</DialogDescription>
           </DialogHeader>
           <DialogBody>
             <RadioCards
-              aria-label="Lock with"
+              aria-label={t("lockWith")}
               value={kind}
               onValueChange={setKind}
               className="grid-cols-2 max-md:grid-cols-1"
@@ -136,10 +129,10 @@ export function LockDialog({
               onClick={() => onOpenChange(false)}
               disabled={busy}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
-            <Button onClick={confirm} busy={busy && "Locking…"}>
-              {changing ? "Change lock" : "Lock"}
+            <Button onClick={confirm} busy={busy && t("locking")}>
+              {changing ? t("changeTitle") : t("title")}
             </Button>
           </DialogFooter>
         </DialogContent>

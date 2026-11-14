@@ -1,3 +1,4 @@
+import { translate } from "@/lib/i18n";
 import {
   type CanonicalAttachment,
   type CanonicalNote,
@@ -87,7 +88,10 @@ export const googleKeepAdapter: ImportAdapter = {
     for (const entryPath of noteEntries) {
       const keepNote = readKeepNote(zip, entryPath);
       if (!keepNote) {
-        skipped.push({ item: entryPath, reason: "Unreadable note file" });
+        skipped.push({
+          item: entryPath,
+          reason: translate("settings.importExport.adapters")("unreadableNote"),
+        });
         continue;
       }
 
@@ -95,7 +99,10 @@ export const googleKeepAdapter: ImportAdapter = {
         keepNote.title?.trim() || basenameForDisplay(entryPath);
 
       if (keepNote.isTrashed) {
-        skipped.push({ item: displayName, reason: "Trashed in Google Keep" });
+        skipped.push({
+          item: displayName,
+          reason: translate("settings.importExport.adapters")("trashedInKeep"),
+        });
         continue;
       }
 
@@ -105,7 +112,9 @@ export const googleKeepAdapter: ImportAdapter = {
         if (!resolved) {
           skipped.push({
             item: ref.filePath,
-            reason: "Attachment file not found in export",
+            reason: translate("settings.importExport.adapters")(
+              "attachmentNotFoundInExport",
+            ),
           });
           continue;
         }
@@ -113,7 +122,10 @@ export const googleKeepAdapter: ImportAdapter = {
         if (!supported) {
           skipped.push({
             item: ref.filePath,
-            reason: `Unsupported file type (${ref.mimetype})`,
+            reason: translate("settings.importExport.adapters")(
+              "unsupportedType",
+              { type: ref.mimetype },
+            ),
           });
         }
         attachments.push({
