@@ -53,6 +53,7 @@ import {
   NotesBoardSkeleton,
 } from "@/features/notes/components/notes-board";
 import { ShareDialog } from "@/features/notes/components/share-dialog";
+import { storageSizeLabel } from "@/features/notes/file-size";
 import { useArchivedNotes } from "@/features/notes/hooks/use-archived-notes";
 import {
   isOwnFrozen,
@@ -500,6 +501,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
         {(visible.length > 0 || (hasArchivedSection && !isLoading)) && (
           <NotesBoard
             searchTerm={list.term || undefined}
+            dateLabel={list.sortBy === "size" ? storageSizeLabel : undefined}
             onReorder={
               list.sortBy === "updatedAt" &&
               list.sortOrder === "desc" &&

@@ -4,6 +4,7 @@ import {
   ALargeSmall,
   CalendarPlus,
   Check,
+  HardDrive,
   LayoutDashboard,
   LayoutGrid,
   PencilLine,
@@ -44,6 +45,10 @@ const ORDER_OPTIONS: Record<SortBy, [SortOrder, string][]> = {
   title: [
     ["asc", "A to Z"],
     ["desc", "Z to A"],
+  ],
+  size: [
+    ["desc", "Largest first"],
+    ["asc", "Smallest first"],
   ],
 };
 
@@ -127,6 +132,7 @@ const SORT_CHOICES = [
   ["updatedAt", "Last edited", PencilLine],
   ["createdAt", "Date created", CalendarPlus],
   ["title", "Title", ALargeSmall],
+  ["size", "Size", HardDrive],
 ] as const;
 
 function SortChoices({

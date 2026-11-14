@@ -57,6 +57,25 @@ describe("LocalServer", () => {
     expect(trash[0].stateChangedAt).toBeDefined();
   });
 
+  it("counts a note's text and attachments as its size", async () => {
+    const note = await createNote("Café", "hi");
+    const form = new FormData();
+    form.append(
+      "file",
+      new File([new Uint8Array(300)], "a.png", { type: "image/png" }),
+    );
+    await server.handle(
+      new Request(`http://localhost/api/notes/${note.id}/attachments`, {
+        method: "POST",
+        body: form,
+      }),
+    );
+
+    const [listed] = (await call<Note[]>("GET", "notes")).body;
+    // "Café" is 5 bytes, "hi" 2.
+    expect(listed.storageSize).toBe(5 + 2 + 300);
+  });
+
   it("refuses an edit made on an older version, keeping it in the history", async () => {
     const note = await createNote("Plan", "a");
     const saved = await call<Note>("PATCH", `notes/${note.id}`, {

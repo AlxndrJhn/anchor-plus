@@ -26,6 +26,7 @@ import {
   NotesBoardSkeleton,
 } from "@/features/notes/components/notes-board";
 import { ShareDialog } from "@/features/notes/components/share-dialog";
+import { storageSizeLabel } from "@/features/notes/file-size";
 import { isOwnFrozen } from "@/features/notes/hooks/use-note-freeze";
 import { useNoteList } from "@/features/notes/hooks/use-note-list";
 import { useRefreshNotes } from "@/features/notes/hooks/use-refresh-notes";
@@ -196,6 +197,7 @@ export default function ArchivePage() {
         {list.visible.length > 0 && (
           <NotesBoard
             searchTerm={list.term || undefined}
+            dateLabel={list.sortBy === "size" ? storageSizeLabel : undefined}
             ref={list.boardRef}
             layout={list.layout}
             picking={list.picking}

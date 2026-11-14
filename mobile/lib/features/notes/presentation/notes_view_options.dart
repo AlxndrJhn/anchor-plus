@@ -11,7 +11,7 @@ import '../domain/note.dart';
 /// Saved as 'grid' (masonry) and 'uniform' (grid); stored options use these.
 enum ViewType { masonry, grid, list }
 
-enum SortOption { dateModified, dateCreated, title }
+enum SortOption { dateModified, dateCreated, title, size }
 
 class NotesViewOptions {
   final ViewType viewType;
@@ -95,6 +95,7 @@ int Function(Note, Note) noteComparator(NotesViewOptions options) {
       SortOption.title => a.title.trim().toLowerCase().compareTo(
         b.title.trim().toLowerCase(),
       ),
+      SortOption.size => a.storageSize.compareTo(b.storageSize),
     };
 
     final ordered = options.isAscending ? compare : -compare;

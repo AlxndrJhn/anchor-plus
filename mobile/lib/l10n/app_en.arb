@@ -4673,6 +4673,18 @@
   "@viewTitle": {
     "description": "Sort option: orders notes alphabetically by their title."
   },
+  "viewSize": "Size",
+  "@viewSize": {
+    "description": "Sort option: orders notes by how much space they take on the server, their text and attachments together."
+  },
+  "viewLargestFirst": "Largest first",
+  "@viewLargestFirst": {
+    "description": "Sort direction for sizes, the notes taking the most space first. Short: one of two tabs in a row."
+  },
+  "viewSmallestFirst": "Smallest first",
+  "@viewSmallestFirst": {
+    "description": "Sort direction for sizes, the notes taking the least space first. Short: one of two tabs in a row."
+  },
   "viewAtoZ": "A to Z",
   "@viewAtoZ": {
     "description": "Sort direction for titles, alphabetical. Short: one of two tabs in a row."

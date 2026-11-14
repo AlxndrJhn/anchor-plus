@@ -9,7 +9,7 @@ import type { CustomTheme } from "@/lib/design/custom-theme";
 import type { DateDisplay, TimeDisplay, WeekStart } from "./date-time";
 
 export type ViewMode = "masonry" | "grid" | "list";
-export type SortBy = "updatedAt" | "createdAt" | "title";
+export type SortBy = "updatedAt" | "createdAt" | "title" | "size";
 export type SortOrder = "asc" | "desc";
 
 export type AppStyle = "default" | "skeuomorphism" | "neo-brutalism" | "lofi";
