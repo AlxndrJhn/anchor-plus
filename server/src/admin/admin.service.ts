@@ -390,6 +390,8 @@ export class AdminService {
     clearClientSecret?: boolean;
     mobileClientId?: string;
     disableInternalAuth?: boolean;
+    providerLogout?: boolean;
+    logoutUrl?: string;
   }) {
     const { clearClientSecret, ...rest } = settings;
     const toSet = { ...rest };

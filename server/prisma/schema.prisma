@@ -305,10 +305,17 @@ model RefreshToken {
   sessionId  String   @default(dbgenerated("(gen_random_uuid())::text"))
   signedInAt DateTime @default(now())
   userAgent  String?
+  // Signed in through the OIDC provider: its session id (the ID token's
+  // sid) and the ID token itself, for signing out at the provider too and
+  // for its back-channel logout. Refreshing carries them over.
+  viaOidc     Boolean @default(false)
+  oidcSid     String?
+  oidcIdToken String?
 
   @@index([userId])
   @@index([token])
   @@index([sessionId])
+  @@index([oidcSid])
 }
 
 model SyncState {

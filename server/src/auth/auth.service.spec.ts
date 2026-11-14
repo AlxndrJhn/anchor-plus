@@ -45,6 +45,9 @@ describe('AuthService', () => {
     signedInAt: Date;
     userAgent: string | null;
     createdAt: Date;
+    viaOidc?: boolean;
+    oidcSid?: string | null;
+    oidcIdToken?: string | null;
   }
 
   type TokenWhere = Partial<
@@ -590,6 +593,29 @@ describe('AuthService', () => {
       expect(
         refreshTokens.get(oldToken)!.expiresAt.getTime(),
       ).toBeLessThanOrEqual(Date.now() + REFRESH_TOKEN_REUSE_WINDOW_MS);
+    });
+
+    it('carries the provider’s session over to the new token', async () => {
+      addUser({ id: 'u1' });
+      const { refresh_token } = await service.createTokenPair(
+        'u1',
+        'u1@example.com',
+        undefined,
+        { viaOidc: true, oidcSid: 'sid-1', oidcIdToken: 'id.token' },
+      );
+      const result = await service.refreshTokens(refresh_token);
+      expect(refreshTokens.get(result.refresh_token)).toMatchObject({
+        sessionId: refreshTokens.get(refresh_token)!.sessionId,
+        viaOidc: true,
+        oidcSid: 'sid-1',
+        oidcIdToken: 'id.token',
+      });
+    });
+
+    it('keeps a password session apart from the provider', async () => {
+      const oldToken = await loginAndGetRefreshToken();
+      const result = await service.refreshTokens(oldToken);
+      expect(refreshTokens.get(result.refresh_token)?.viaOidc).toBeUndefined();
     });
 
     it('lets a client that missed the reply refresh again with the old token', async () => {

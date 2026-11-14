@@ -7,7 +7,9 @@ import {
   Req,
   Res,
   BadRequestException,
+  HttpCode,
   HttpException,
+  HttpStatus,
   InternalServerErrorException,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +19,7 @@ import { JwtAuthGuard } from '../jwt-auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { OidcService } from './oidc.service';
 import { OidcConfigService } from './oidc-config.service';
+import { OidcLogoutService } from './oidc-logout.service';
 import { getErrorMessage } from './oidc.utils';
 
 @Controller('api/auth/oidc')
@@ -24,6 +27,7 @@ export class OidcController {
   constructor(
     private readonly oidcService: OidcService,
     private readonly oidcConfigService: OidcConfigService,
+    private readonly oidcLogoutService: OidcLogoutService,
   ) {}
 
   /**
@@ -136,6 +140,34 @@ export class OidcController {
       throw new BadRequestException('Missing or invalid code');
     }
     return this.oidcService.exchangeCode(code);
+  }
+
+  /**
+   * OpenID Connect Back-Channel Logout 1.0: the provider posts a signed
+   * logout token (form-encoded) when its session ends, and the matching
+   * Anchor+ sessions sign out.
+   */
+  @Post('backchannel-logout')
+  @HttpCode(HttpStatus.OK)
+  async backchannelLogout(
+    @Body('logout_token') logoutToken: string | undefined,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      await this.oidcLogoutService.backchannelLogout(logoutToken);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        // The spec's error response, instead of Nest's own shape.
+        res.status(HttpStatus.BAD_REQUEST);
+        res.json({
+          error: 'invalid_request',
+          error_description: getErrorMessage(error, 'Invalid logout token'),
+        });
+        return;
+      }
+      throw error;
+    }
   }
 
   /**

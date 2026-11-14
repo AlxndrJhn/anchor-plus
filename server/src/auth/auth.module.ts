@@ -23,6 +23,7 @@ import { OidcConfigService } from './oidc/oidc-config.service';
 import { OidcClientService } from './oidc/oidc-client.service';
 import { OidcStateService } from './oidc/oidc-state.service';
 import { OidcUserService } from './oidc/oidc-user.service';
+import { OidcLogoutService } from './oidc/oidc-logout.service';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { OidcUserService } from './oidc/oidc-user.service';
     OidcClientService,
     OidcStateService,
     OidcUserService,
+    OidcLogoutService,
   ],
   exports: [
     AuthService,

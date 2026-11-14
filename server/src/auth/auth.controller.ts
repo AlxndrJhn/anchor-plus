@@ -19,6 +19,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 import { MagicLoginService } from './magic-login.service';
+import { OidcLogoutService } from './oidc/oidc-logout.service';
 import { MagicLoginDto } from './dto/magic-login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -38,6 +39,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly magicLoginService: MagicLoginService,
+    private readonly oidcLogoutService: OidcLogoutService,
   ) {}
 
   @Get('registration-mode')
@@ -64,8 +66,15 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('logout')
-  async logout(@Body() logoutDto: LogoutDto): Promise<void> {
-    return this.authService.revokeRefreshToken(logoutDto.refreshToken);
+  async logout(
+    @Body() logoutDto: LogoutDto,
+  ): Promise<{ providerLogoutUrl?: string }> {
+    // Read before the session goes: it holds the provider's ID token.
+    const providerLogoutUrl = await this.oidcLogoutService.providerLogoutUrl(
+      logoutDto.refreshToken,
+    );
+    await this.authService.revokeRefreshToken(logoutDto.refreshToken);
+    return providerLogoutUrl ? { providerLogoutUrl } : {};
   }
 
   /** Signs out every device but the one asking. */
