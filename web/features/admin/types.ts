@@ -1,4 +1,5 @@
 import type { RegistrationMode } from "@/features/auth/types";
+import type { Plan } from "@/features/settings/api";
 
 export interface AdminStats {
   totalUsers: number;
@@ -14,6 +15,11 @@ export interface AdminUser {
   isAdmin: boolean;
   status: "active" | "pending";
   authMethod?: "oidc" | "local";
+  plan?: Plan;
+  /** The admin's own storage limit in MB; null follows the plan. */
+  storageQuotaMb?: number | null;
+  /** limitBytes null: no limit. */
+  storage?: { usedBytes: number; limitBytes: number | null };
   createdAt: string;
   updatedAt: string;
   _count?: {
@@ -39,6 +45,8 @@ export interface UpdateUserDto {
   email?: string;
   name?: string;
   isAdmin?: boolean;
+  plan?: Plan;
+  storageQuotaMb?: number | null;
 }
 
 export interface ResetPasswordResponse {

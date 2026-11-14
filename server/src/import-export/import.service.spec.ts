@@ -6,6 +6,7 @@ import {
   type MockInstance,
   vi,
 } from 'vitest';
+import { StorageQuotaService } from '../storage-quota/storage-quota.service';
 import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ImportService } from './import.service';
@@ -75,6 +76,10 @@ describe('ImportService.importNotes', () => {
         {
           provide: SyncEmitterService,
           useValue: asSyncEmitter(createMockSyncEmitter()),
+        },
+        {
+          provide: StorageQuotaService,
+          useValue: { assertRoom: vi.fn() },
         },
         {
           provide: StorageConfig.KEY,

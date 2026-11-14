@@ -38,6 +38,7 @@ import {
 } from '../utils/attachment-rows.util';
 import { PictureTextService } from './picture-text.service';
 import { PictureSearchService } from '../../picture-search/picture-search.service';
+import { StorageQuotaService } from '../../storage-quota/storage-quota.service';
 import { replaceAttachmentIds } from '../utils/inline-images.util';
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
@@ -54,6 +55,7 @@ export class NoteAttachmentsService {
     private syncEmitter: SyncEmitterService,
     private pictureText: PictureTextService,
     private pictureSearch: PictureSearchService,
+    private storageQuota: StorageQuotaService,
     @Inject(StorageConfig.KEY)
     private storageConfig: ConfigType<typeof StorageConfig>,
   ) {}
@@ -108,6 +110,8 @@ export class NoteAttachmentsService {
       return toAttachmentResponse(taken);
     }
 
+    await this.storageQuota.assertRoom(userId, file.size);
+
     const attachmentType = attachmentTypeForMime(file.mimetype);
 
     let stored: { storedFilename: string; filePath: string } | null = null;
@@ -161,6 +165,10 @@ export class NoteAttachmentsService {
   async copyAll(userId: string, fromNoteId: string, toNoteId: string) {
     const attachments = await findAttachmentRows(this.prisma, fromNoteId);
     if (attachments.length === 0) return;
+    await this.storageQuota.assertRoom(
+      userId,
+      attachments.reduce((sum, attachment) => sum + attachment.fileSize, 0),
+    );
     const newIds = new Map<string, string>();
 
     const written: string[] = [];

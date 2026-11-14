@@ -51,7 +51,7 @@ import { useAuth } from "@/features/auth";
 import { formatFullDate, formatShortDate } from "@/features/preferences";
 import { useLastShown } from "@/lib/hooks/use-last-shown";
 import { useRetry } from "@/lib/hooks/use-retry";
-import { cn, plural } from "@/lib/utils";
+import { cn, plural, storageSize } from "@/lib/utils";
 import {
   approveUser,
   deleteUser,
@@ -283,8 +283,9 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
         ) : users.isLoading ? (
           <SkeletonRows count={5} className="px-3.5 py-3" />
         ) : (
-          // Narrower, it leaves out sign-in and tags, then all but name and role.
-          <Table className="@max-3xl:min-w-0 @max-3xl:[&_:is(th,td):is(:nth-child(3),:nth-child(5))]:hidden max-md:[&_:is(th,td):nth-child(n+3):not(:last-child)]:hidden">
+          // Narrower, it leaves out sign-in, tags and storage, then all but name
+          // and role.
+          <Table className="@max-3xl:min-w-0 @max-3xl:[&_:is(th,td):is(:nth-child(3),:nth-child(5),:nth-child(6))]:hidden max-md:[&_:is(th,td):nth-child(n+3):not(:last-child)]:hidden">
             <TableHeader>
               <tr>
                 <TableHead>Person</TableHead>
@@ -292,6 +293,7 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
                 <TableHead>Signs in with</TableHead>
                 <TableHead className="text-right">Notes</TableHead>
                 <TableHead className="text-right">Tags</TableHead>
+                <TableHead className="text-right">Storage</TableHead>
                 <TableHead>Joined</TableHead>
                 <TableHead>
                   <span className="sr-only">Options</span>
@@ -321,6 +323,9 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
                     </TableCell>
                     <TableCell numeric>{user._count?.notes ?? 0}</TableCell>
                     <TableCell numeric>{user._count?.tags ?? 0}</TableCell>
+                    <TableCell numeric>
+                      <StorageUse storage={user.storage} />
+                    </TableCell>
                     <TableCell dim>
                       {formatFullDate(new Date(user.createdAt))}
                     </TableCell>
@@ -468,5 +473,21 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
         onConfirm={() => deleting && remove.mutate(deleting)}
       />
     </div>
+  );
+}
+
+function StorageUse({ storage }: { storage: AdminUser["storage"] }) {
+  if (!storage) return <span className="text-muted-foreground">–</span>;
+  const used = storageSize(storage.usedBytes);
+  if (storage.limitBytes === null) return <>{used}</>;
+  const full = storage.usedBytes >= storage.limitBytes;
+  return (
+    <span className={cn(full && "font-semibold text-destructive")}>
+      {used}
+      <span className="text-muted-foreground">
+        {" "}
+        / {storageSize(storage.limitBytes)}
+      </span>
+    </span>
   );
 }

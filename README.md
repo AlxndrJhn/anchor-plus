@@ -353,6 +353,8 @@ The [desktop app](#desktop-app) installs with winget too.
    | `APP_URL` | No | `http://localhost:3001` | Base URL where Anchor is served |
    | `JWT_SECRET` | No | (auto-generated) | Auth token secret. Min 16 characters when set |
    | `DATA_DIR` | No | `/data` | Root directory for persisted uploads |
+   | `STORAGE_QUOTA_FREE_MB` | No | (no limit) | How much each account on the Free plan may upload (pictures, recordings and files), in MB. For a server many people sign up to; admins change an account's plan or limit under Admin › People |
+   | `STORAGE_QUOTA_PLUS_MB` | No | (no limit) | The same for accounts on the Plus plan |
    | `PICTURE_TEXT` | No | `on` | `off` stops reading the text in pictures for search |
    | `PICTURE_SEARCH` | No | `on` | `off` stops offering search by what pictures show (Settings › Search) |
    | `PICTURE_SEARCH_MODEL_URL` | No | (Hugging Face) | Where to download its model (~380 MB) from, e.g. a mirror |

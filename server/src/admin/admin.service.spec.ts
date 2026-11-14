@@ -5,6 +5,12 @@ import { SettingsService } from '../settings/settings.service';
 import { SecondFactorService } from '../auth/second-factor.service';
 import { OidcClientService } from '../auth/oidc/oidc-client.service';
 import { OidcConfigService } from '../auth/oidc/oidc-config.service';
+import { StorageQuotaService } from '../storage-quota/storage-quota.service';
+
+const noQuota = {
+  usedBytesByUser: () => Promise.resolve(new Map([['u1', 2048]])),
+  limitMb: () => null,
+} as unknown as StorageQuotaService;
 
 describe('AdminService.findUsers', () => {
   let findMany: ReturnType<typeof vi.fn>;
@@ -27,6 +33,7 @@ describe('AdminService.findUsers', () => {
       {} as OidcConfigService,
       {} as SecondFactorService,
       {} as OidcClientService,
+      noQuota,
     );
   });
 
@@ -112,6 +119,7 @@ describe('AdminService.getPendingUsers', () => {
       {} as OidcConfigService,
       {} as SecondFactorService,
       {} as OidcClientService,
+      noQuota,
     );
 
     const waiting = await service.getPendingUsers();

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Input, InputButton } from "@/components/ui/input";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 import {
@@ -25,10 +26,16 @@ import {
   refusedField,
 } from "@/features/auth/account-fields";
 import { useAuthStore } from "@/features/auth/store";
+import type { Plan } from "@/features/settings/api";
 import { copyText } from "@/lib/clipboard";
 import { useLastShown } from "@/lib/hooks/use-last-shown";
 import { createUser, updateUser } from "../api";
 import type { AdminUser } from "../types";
+
+const PLAN_OPTIONS = [
+  { value: "free", label: "Free" },
+  { value: "plus", label: "Plus" },
+] as const;
 
 const isEmailTaken = (error: Error) =>
   error instanceof HTTPError && error.response.status === 409;
@@ -195,6 +202,8 @@ export function EditPersonDialog({
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [isAdmin, setIsAdmin] = React.useState(false);
+  const [plan, setPlan] = React.useState<Plan>("free");
+  const [quotaMb, setQuotaMb] = React.useState("");
   const [errors, setErrors] = React.useState<PersonErrors>({});
   const nameRef = React.useRef<HTMLInputElement>(null);
   const emailRef = React.useRef<HTMLInputElement>(null);
@@ -207,6 +216,8 @@ export function EditPersonDialog({
     setName(user.name);
     setEmail(user.email);
     setIsAdmin(user.isAdmin);
+    setPlan(user.plan ?? "free");
+    setQuotaMb(user.storageQuotaMb == null ? "" : String(user.storageQuotaMb));
     setErrors({});
   }, [user]);
   const save = useMutation({
@@ -215,6 +226,8 @@ export function EditPersonDialog({
         name: name.trim(),
         email: email.trim(),
         ...(isSelf ? {} : { isAdmin }),
+        plan,
+        storageQuotaMb: quotaMb.trim() === "" ? null : Number(quotaMb),
       }),
     onSuccess: (updated) => {
       const { user: signedIn, mergeUser } = useAuthStore.getState();
@@ -292,6 +305,41 @@ export function EditPersonDialog({
                 onCheckedChange={setIsAdmin}
               />
             </div>
+            <div className="flex flex-wrap items-center gap-4 pt-1">
+              <div className="grid flex-1 gap-0.5">
+                <span className="font-semibold text-ui">Plan</span>
+                <span className="text-meta text-muted-foreground">
+                  Sets how much they can upload, on a server with storage
+                  quotas.
+                </span>
+              </div>
+              <SegmentedControl
+                aria-label="Plan"
+                size="sm"
+                value={plan}
+                onValueChange={setPlan}
+                options={PLAN_OPTIONS}
+              />
+            </div>
+            <Field
+              label="Storage limit"
+              help="In MB. Leave it empty to use the plan’s limit."
+            >
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                step={1}
+                value={quotaMb}
+                onChange={(e) => setQuotaMb(e.target.value)}
+                placeholder={
+                  shownUser?.storage?.limitBytes == null ||
+                  shownUser.storageQuotaMb != null
+                    ? "Plan’s limit"
+                    : `Plan’s limit (${Math.round(shownUser.storage.limitBytes / 1024 / 1024)} MB)`
+                }
+              />
+            </Field>
           </DialogBody>
           <DialogFooter>
             <Button type="button" variant="quiet" onClick={onClose}>

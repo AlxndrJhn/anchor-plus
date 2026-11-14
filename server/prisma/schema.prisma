@@ -19,6 +19,14 @@ enum UserStatus {
   pending
 }
 
+/// What an account pays for. On a server with storage quotas
+/// (STORAGE_QUOTA_FREE_MB, STORAGE_QUOTA_PLUS_MB) it sets how much an
+/// account may upload; without them it changes nothing.
+enum Plan {
+  free
+  plus
+}
+
 enum NoteSharePermission {
   viewer
   editor
@@ -67,6 +75,10 @@ model User {
   apiToken             String?          @unique
   isAdmin              Boolean          @default(false)
   status               UserStatus       @default(active)
+  plan                 Plan             @default(free)
+  /// An admin's own storage limit for this account, in MB, in place of the
+  /// plan's; null follows the plan.
+  storageQuotaMb       Int?
   oidcSubject          String?          @unique
   /// Opted in to finding notes by what their pictures show.
   pictureSearch        Boolean          @default(false)

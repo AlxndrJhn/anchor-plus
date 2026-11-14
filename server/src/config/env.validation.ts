@@ -96,6 +96,18 @@ export class EnvironmentVariables {
   @Min(10)
   @Max(86400)
   HEARTBEAT_INTERVAL?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  STORAGE_QUOTA_FREE_MB?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  STORAGE_QUOTA_PLUS_MB?: number;
 }
 
 export function validate(

@@ -21,6 +21,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { BCRYPT_SALT_ROUNDS } from '../auth/constants/auth.constants';
 import { normalizeEmail, sameEmail } from '../common/utils/email.util';
+import { StorageQuotaService } from '../storage-quota/storage-quota.service';
 
 @Injectable()
 export class AdminService {
@@ -30,6 +31,7 @@ export class AdminService {
     private oidcConfigService: OidcConfigService,
     private secondFactorService: SecondFactorService,
     private oidcClientService: OidcClientService,
+    private storageQuota: StorageQuotaService,
   ) {}
 
   async getStats() {
@@ -92,6 +94,8 @@ export class AdminService {
           profileImage: true,
           isAdmin: true,
           status: true,
+          plan: true,
+          storageQuotaMb: true,
           oidcSubject: true,
           createdAt: true,
           updatedAt: true,
@@ -110,10 +114,20 @@ export class AdminService {
       this.prisma.user.count({ where }),
     ]);
 
-    const usersWithAuthMethod = users.map(({ oidcSubject, ...rest }) => ({
-      ...rest,
-      authMethod: oidcSubject ? ('oidc' as const) : ('local' as const),
-    }));
+    const usedBytes = await this.storageQuota.usedBytesByUser(
+      users.map((user) => user.id),
+    );
+    const usersWithAuthMethod = users.map(({ oidcSubject, ...rest }) => {
+      const limitMb = this.storageQuota.limitMb(rest.plan, rest.storageQuotaMb);
+      return {
+        ...rest,
+        authMethod: oidcSubject ? ('oidc' as const) : ('local' as const),
+        storage: {
+          usedBytes: usedBytes.get(rest.id) ?? 0,
+          limitBytes: limitMb === null ? null : limitMb * 1024 * 1024,
+        },
+      };
+    });
 
     return {
       users: usersWithAuthMethod,
@@ -206,8 +220,9 @@ export class AdminService {
       }
     }
 
-    // Demotion safety: cannot remove admin status from current user or the last admin
-    if (updateUserDto.isAdmin === false) {
+    // Demotion safety: cannot remove admin status from current user or the
+    // last admin. Saving a member as a member demotes nobody.
+    if (updateUserDto.isAdmin === false && user.isAdmin) {
       if (id === currentUserId) {
         throw new BadRequestException('Cannot change your own admin status');
       }
@@ -221,12 +236,15 @@ export class AdminService {
       }
     }
 
-    const data: Partial<UpdateUserDto> = {};
+    const data: Prisma.UserUpdateInput = {};
     if (updateUserDto.email !== undefined)
       data.email = normalizeEmail(updateUserDto.email);
     if (updateUserDto.name !== undefined) data.name = updateUserDto.name;
     if (updateUserDto.isAdmin !== undefined)
       data.isAdmin = updateUserDto.isAdmin;
+    if (updateUserDto.plan !== undefined) data.plan = updateUserDto.plan;
+    if (updateUserDto.storageQuotaMb !== undefined)
+      data.storageQuotaMb = updateUserDto.storageQuotaMb;
 
     const updatedUser = await this.prisma.user.update({
       where: { id },
@@ -236,6 +254,8 @@ export class AdminService {
         email: true,
         name: true,
         isAdmin: true,
+        plan: true,
+        storageQuotaMb: true,
         createdAt: true,
         updatedAt: true,
       },

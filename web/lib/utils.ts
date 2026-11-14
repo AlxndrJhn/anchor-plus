@@ -34,3 +34,15 @@ export function shortNames(names: string[]) {
       : name,
   );
 }
+
+/** “820 KB”, “3.4 MB”, “250 MB”, “20 GB”: how much is stored. */
+export function storageSize(bytes: number) {
+  const MB = 1024 * 1024;
+  const tenths = (value: number) => {
+    const rounded = Math.round(value * 10) / 10;
+    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  };
+  if (bytes < MB) return `${Math.round(bytes / 1024)} KB`;
+  if (bytes < 1024 * MB) return `${tenths(bytes / MB)} MB`;
+  return `${tenths(bytes / (1024 * MB))} GB`;
+}

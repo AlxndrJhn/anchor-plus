@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
+import { isStorageFull, toastStorageFull } from "@/lib/api/upload";
 import {
   encodeInlineImage,
   INLINE_IMAGE_EMBED,
@@ -291,8 +292,9 @@ export const InlineImageTools = React.forwardRef<
       if (!id || !at) return;
       replaceAt(at.quill, at.index, { ...at.image, id });
       dropIfUnused(at.quill, from.image.id);
-    } catch {
-      toast.error("Couldn’t change the picture");
+    } catch (error) {
+      if (isStorageFull(error)) toastStorageFull(error);
+      else toast.error("Couldn’t change the picture");
     } finally {
       from.node.removeAttribute("data-busy");
     }
@@ -441,8 +443,9 @@ export const InlineImageTools = React.forwardRef<
       const quill = getQuill();
       if (quill && ids.length)
         insertPictures(quill, caretForInsert.current, ids);
-    } catch {
-      toast.error("Couldn’t add the picture");
+    } catch (error) {
+      if (isStorageFull(error)) toastStorageFull(error);
+      else toast.error("Couldn’t add the picture");
     }
   };
 

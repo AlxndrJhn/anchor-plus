@@ -6,6 +6,7 @@ import { validate } from './config/env.validation';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ProtocolGuard } from './common/protocol/protocol.guard';
 import { PrismaModule } from './prisma/prisma.module';
+import { StorageQuotaModule } from './storage-quota/storage-quota.module';
 import { AuthModule } from './auth/auth.module';
 import { SecondFactorInterceptor } from './auth/second-factor.interceptor';
 import { NotesModule } from './notes/notes.module';
@@ -30,6 +31,7 @@ import { LiveModule } from './live/live.module';
       load: configurations,
     }),
     PrismaModule,
+    StorageQuotaModule,
     AuthModule,
     NotesModule,
     TagsModule,

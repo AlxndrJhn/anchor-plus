@@ -20,6 +20,7 @@ import {
   Section,
   SecuritySection,
   SettingsNav,
+  StorageSection,
 } from "@/features/settings";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { useServerVersion } from "@/lib/hooks/use-server-version";
@@ -41,6 +42,7 @@ export default function SettingsPage() {
           <QuickActionsSection />
           {!isServerless && <SearchSection />}
           {!isServerless && <ApiTokenSection />}
+          {!isServerless && <StorageSection />}
           <ImportExportSection />
           <NoteLocksSection />
           {!isServerless && <SecuritySection />}

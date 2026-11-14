@@ -6,6 +6,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { create } from "zustand";
 import { toast } from "@/components/ui/toast";
+import { isStorageFull, toastStorageFull } from "@/lib/api/upload";
 import { eachLimited } from "@/lib/each";
 import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
 import { useFlip } from "@/lib/use-flip";
@@ -262,8 +263,9 @@ export function AttachmentStrip({
       setUploads((list) => list.filter((x) => x.key !== upload.key));
       letGo(upload);
       return "added";
-    } catch {
+    } catch (error) {
       if (signal.aborted) return "canceled";
+      if (isStorageFull(error)) toastStorageFull(error);
       patch(upload.key, { failed: true, progress: null });
       return "failed";
     }

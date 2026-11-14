@@ -13,3 +13,4 @@ export { SearchSection } from "./components/search-section";
 export { SecuritySection } from "./components/security-section";
 export { Row, Section } from "./components/settings-blocks";
 export { SettingsNav } from "./components/settings-nav";
+export { StorageSection } from "./components/storage-section";

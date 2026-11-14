@@ -29,6 +29,7 @@ import {
   tagEmission,
   attachmentsEmissions,
 } from '../sync/sync-emitter.service';
+import { StorageQuotaService } from '../storage-quota/storage-quota.service';
 import { IMPORT_ALLOWED_BACKGROUNDS } from './constants/import.constants';
 import { SyncReminderRecurrence } from '../sync/dto/sync-request.dto';
 import {
@@ -54,6 +55,7 @@ export class ImportService {
     private prisma: PrismaService,
     private noteAccessService: NoteAccessService,
     private syncEmitter: SyncEmitterService,
+    private storageQuota: StorageQuotaService,
     @Inject(StorageConfig.KEY)
     private storageConfig: ConfigType<typeof StorageConfig>,
   ) {}
@@ -362,6 +364,7 @@ export class ImportService {
     }
 
     assertValidAttachmentFile(file);
+    await this.storageQuota.assertRoom(userId, file.size);
 
     const noteDir = noteAttachmentDir(
       this.storageConfig.attachmentsDir,

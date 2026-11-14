@@ -2,6 +2,7 @@
 
 import {
   CalendarClock,
+  HardDrive,
   HardDriveDownload,
   Info,
   KeyRound,
@@ -29,6 +30,7 @@ const ALL_SECTIONS = [
   { id: "quick-actions", label: "Quick actions", icon: LayoutPanelTop },
   { id: "search", label: "Search", icon: Search },
   { id: "token", label: "API token", icon: KeyRound },
+  { id: "storage", label: "Storage", icon: HardDrive },
   { id: "data", label: "Import and export", icon: HardDriveDownload },
   { id: "locks", label: "Note locks", icon: LockKeyhole },
   { id: "security", label: "Sign-in security", icon: ShieldCheck },
@@ -39,14 +41,20 @@ const ALL_SECTIONS = [
 ] as const;
 
 // Without a server there is no phone sign-in, API token, sign-in security,
-// password, device sign-out or picture search.
+// password, device sign-out, storage use or picture search.
 const SECTIONS = ALL_SECTIONS.filter(
   (section) =>
     !(
       isServerless &&
-      ["phone", "token", "security", "password", "devices", "search"].includes(
-        section.id,
-      )
+      [
+        "phone",
+        "token",
+        "storage",
+        "security",
+        "password",
+        "devices",
+        "search",
+      ].includes(section.id)
     ),
 );
 

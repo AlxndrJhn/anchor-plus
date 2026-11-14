@@ -43,6 +43,23 @@ export const PictureSearchConfig = registerAs('pictureSearch', () => ({
   modelUrl: process.env.PICTURE_SEARCH_MODEL_URL?.trim() || undefined,
 }));
 
+function megabytes(value: string | undefined): number | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : null;
+}
+
+/**
+ * How much each plan may upload (pictures, recordings and files), in MB:
+ * STORAGE_QUOTA_FREE_MB and STORAGE_QUOTA_PLUS_MB. Unset means no limit, as
+ * on a self-hosted server.
+ */
+export const QuotaConfig = registerAs('quota', () => ({
+  freeMb: megabytes(process.env.STORAGE_QUOTA_FREE_MB),
+  plusMb: megabytes(process.env.STORAGE_QUOTA_PLUS_MB),
+}));
+
 /** Reading the text in note pictures, for search; PICTURE_TEXT=off stops it. */
 export const PictureTextConfig = registerAs('pictureText', () => ({
   enabled: process.env.PICTURE_TEXT?.trim().toLowerCase() !== 'off',
@@ -101,6 +118,7 @@ export const configurations = [
   DatabaseConfig,
   AuthConfig,
   StorageConfig,
+  QuotaConfig,
   PictureTextConfig,
   PictureSearchConfig,
   MonitoringConfig,
