@@ -31,6 +31,7 @@ import '../features/notes/presentation/notes_view_options.dart';
 import '../features/reminders/domain/reminder_preferences.dart';
 import '../features/reminders/presentation/notification_launch.dart';
 import '../features/settings/domain/editor_preferences.dart';
+import '../l10n/l10n.dart';
 import 'app_bootstrap.dart';
 import 'router/app_routes.dart';
 
@@ -111,6 +112,16 @@ Future<AppBootstrap> initializeApp({
   // Before the first frame, so the first route already runs at this speed.
   motionSpeed = speed;
 
+  final savedLanguage = await preferences.getAppLanguage();
+  final language =
+      AppLocalizations.supportedLocales.any(
+        (locale) => locale.languageCode == savedLanguage,
+      )
+      ? savedLanguage
+      : null;
+  // Before the first frame, for dates and notifications too.
+  appLanguage = language;
+
   final savedScheme = await preferences.getColorScheme();
   final colorScheme = schemeById(savedScheme) == null
       ? anchorSchemeId
@@ -186,6 +197,7 @@ Future<AppBootstrap> initializeApp({
     themeMode: themeMode,
     displayDensity: displayDensity,
     motionSpeed: speed,
+    appLanguage: language,
     colorScheme: colorScheme,
     appStyle: appStyle,
     customTheme: customTheme,
