@@ -763,15 +763,18 @@ Claude gets these tools, and sees only what your account sees:
 
 | Tool | What it does |
 |---|---|
-| `list_notes` | Lists notes, archived ones or the trash, by search or tag |
+| `list_notes` | Lists notes, archived ones or the trash, by search or tag, with each note's text (long ones cut off); a search that finds nothing brings up recent notes |
 | `get_note` | Reads a note's title, tags and text as Markdown, and lists its attachments |
 | `get_attachment` | Fetches an attachment: a picture to look at (scaled down if large), a recording, or a file |
-| `list_tags` | Lists your tags |
-| `create_tag` | Makes a tag with no notes yet, in one of the apps' colours |
-| `create_note` | Makes a note from Markdown, with tags (new ones are created) and attachments: pictures, recordings or any other file, sent as base64 |
-| `update_note` | Changes a note's title, text, tags, pin or archive |
+| `create_note` | Makes a note from Markdown, with tags (new ones are created), a background, a reminder and attachments: pictures, recordings or any other file, sent as base64 |
+| `update_note` | Changes a note's title, text, tags, pin, archive, background or reminder |
 | `append_to_note` | Adds lines to the end of a note, such as checklist items |
-| `trash_note` | Moves a note to the trash, from where it can be restored |
+| `trash_note`, `restore_note` | Moves a note to the trash, and back |
+| `bulk_update_notes` | Trashes, archives, pins, unpins or tags many notes at once |
+| `list_note_versions`, `get_note_version`, `restore_note_version` | Browses a note's history and puts an earlier version back |
+| `add_attachments`, `delete_attachment` | Attaches files to a note, or deletes one for good |
+| `find_users`, `list_shares`, `share_note`, `unshare_note` | Shares a note with people on your server, as viewer or editor, and stops sharing it |
+| `list_tags`, `create_tag`, `update_tag`, `delete_tag` | Lists, makes, renames or recolours, and deletes your tags |
 
 Notes are written as Markdown: headings, lists, checklists (`- [ ] item`),
 bold, italic, `~~strike~~`, `<u>underline</u>`, `==highlight==`, links,
@@ -781,7 +784,11 @@ text of a note with pictures in it, colours, fonts or aligned paragraphs is
 never replaced, only
 added to, so nothing Markdown can't carry is lost. A change made from a stale
 copy is refused, as in the apps, and every change shows in the note's history.
-Revoking the API token cuts Claude off.
+Notes are never deleted for good from Claude, only moved to the trash; the
+tools that do delete something (an attachment, a tag, a share) are marked
+destructive, so your client can ask before running them. Notes others share with you
+can hold text aimed at Claude, so treat them as untrusted. Revoking the API
+token cuts Claude off.
 
 ## OIDC Authentication
 

@@ -99,16 +99,32 @@ describe('mcp', () => {
     const { tools } = await client.listTools();
 
     expect(tools.map((tool) => tool.name).sort()).toEqual([
+      'add_attachments',
       'append_to_note',
+      'bulk_update_notes',
       'create_note',
       'create_tag',
+      'delete_attachment',
+      'delete_tag',
+      'find_users',
       'get_attachment',
       'get_note',
+      'get_note_version',
+      'list_note_versions',
       'list_notes',
+      'list_shares',
       'list_tags',
+      'restore_note',
+      'restore_note_version',
+      'share_note',
       'trash_note',
+      'unshare_note',
       'update_note',
+      'update_tag',
     ]);
+    for (const tool of tools) {
+      expect(tool.annotations?.openWorldHint, tool.name).toBe(false);
+    }
   });
 
   it('creates a note from markdown, with new tags', async () => {
@@ -249,6 +265,40 @@ describe('mcp', () => {
     expect(found.notes.map((n) => n.title)).toEqual(['Other']);
   });
 
+  it('hands back the text of each note, cutting long ones', async () => {
+    await user.notes.create({
+      title: 'Long',
+      content: JSON.stringify({ ops: [{ insert: `${'a'.repeat(2000)}\n` }] }),
+    });
+    await user.notes.create({
+      title: 'Short',
+      content: JSON.stringify({ ops: [{ insert: 'hi\n' }] }),
+    });
+
+    const { notes } = await json<{
+      notes: { title: string; content: string; truncated?: boolean }[];
+    }>('list_notes');
+    const long = notes.find((n) => n.title === 'Long')!;
+    const short = notes.find((n) => n.title === 'Short')!;
+
+    expect(long.truncated).toBe(true);
+    expect(long.content).toHaveLength(1501);
+    expect(short).toMatchObject({ content: 'hi' });
+    expect(short.truncated).toBeUndefined();
+  });
+
+  it('brings up recent notes when a search finds nothing', async () => {
+    await user.notes.create({ title: 'Recent', content: null });
+
+    const missed = await json<{ notes: unknown[]; recent: NoteResult[] }>(
+      'list_notes',
+      { query: 'zebra' },
+    );
+
+    expect(missed.notes).toEqual([]);
+    expect(missed.recent.map((n) => n.title)).toEqual(['Recent']);
+  });
+
   it('changes a note, refusing a stale version', async () => {
     const note = await user.notes.create({ title: 'Old', content: null });
 
@@ -266,6 +316,8 @@ describe('mcp', () => {
       title: 'Lost',
     });
     expect(stale.isError).toBe(true);
+    expect(stale.text).toContain('Nothing was overwritten');
+    expect(stale.text).toContain(`current version is ${updated.version}`);
     expect((await user.notes.read(note.id)).title).toBe('New');
   });
 
@@ -313,10 +365,16 @@ describe('mcp', () => {
     const read = await json<NoteResult>('get_note', { id: note.id });
     expect(read).toMatchObject({ locked: true, content: null });
 
-    const listed = await call('list_notes', { query: 'secret' });
-    expect(listed.text).not.toContain('secret');
-    // Found by its title alone: a word of its text doesn't bring it up.
-    expect(listed.text).not.toContain('Diary');
+    // Found by its title alone: a word of its text doesn't bring it up, and
+    // it shows among the recent notes without its text.
+    const listed = await json<{ notes: unknown[]; recent: NoteResult[] }>(
+      'list_notes',
+      { query: 'secret' },
+    );
+    expect(listed.notes).toEqual([]);
+    expect(listed.recent).toEqual([
+      expect.objectContaining({ title: 'Diary', content: '', locked: true }),
+    ]);
 
     const append = await call('append_to_note', { id: note.id, content: 'x' });
     expect(append.isError).toBe(true);
@@ -415,6 +473,157 @@ describe('mcp', () => {
       scope: 'trash',
     });
     expect(trash.notes.map((n) => n.id)).toEqual([note.id]);
+  });
+
+  it('gives a note a background and a reminder, and takes them off', async () => {
+    const created = await json<NoteResult & { background?: string }>(
+      'create_note',
+      {
+        title: 'Trip',
+        background: 'pattern_travel',
+        reminder: { remindAt: '2026-12-01T09:00', recurrence: 'weekly' },
+      },
+    );
+    expect(created).toMatchObject({
+      background: 'pattern_travel',
+      reminder: { remindAt: '2026-12-01T09:00', recurrence: 'weekly' },
+    });
+
+    const cleared = await json<Record<string, unknown>>('update_note', {
+      id: created.id,
+      background: null,
+      reminder: null,
+    });
+    expect(cleared.background).toBeUndefined();
+    expect(cleared.reminder).toBeUndefined();
+  });
+
+  it('brings a note back from the trash', async () => {
+    const note = await user.notes.create({ title: 'Back', content: null });
+    await call('trash_note', { id: note.id });
+
+    await json('restore_note', { id: note.id });
+
+    const listed = await json<{ notes: NoteResult[] }>('list_notes');
+    expect(listed.notes.map((n) => n.id)).toEqual([note.id]);
+  });
+
+  it('pins, tags and trashes many notes at once', async () => {
+    const a = await user.notes.create({ title: 'A', content: null });
+    const b = await user.notes.create({ title: 'B', content: null });
+    const ids = [a.id, b.id];
+
+    expect(await json('bulk_update_notes', { ids, action: 'pin' })).toEqual({
+      count: 2,
+    });
+    await json('bulk_update_notes', {
+      ids,
+      action: 'add_tags',
+      tags: ['Work'],
+    });
+    const tagged = await json<NoteResult>('get_note', { id: a.id });
+    expect(tagged).toMatchObject({ pinned: true, tags: ['Work'] });
+
+    await json('bulk_update_notes', { ids, action: 'trash' });
+    const trash = await json<{ notes: NoteResult[] }>('list_notes', {
+      scope: 'trash',
+    });
+    expect(trash.notes).toHaveLength(2);
+  });
+
+  it('does not trash notes shared with the user in bulk', async () => {
+    const owner = await ctx.registerUser();
+    const note = await owner.notes.create({ title: 'Theirs', content: null });
+    await owner.http
+      .post(`/api/notes/${note.id}/shares`)
+      .send({ sharedWithUserId: user.id, permission: 'editor' })
+      .expect(201);
+
+    expect(
+      await json('bulk_update_notes', { ids: [note.id], action: 'trash' }),
+    ).toEqual({ count: 0 });
+    expect((await owner.notes.read(note.id)).title).toBe('Theirs');
+  });
+
+  it('renames and deletes a tag', async () => {
+    await json('create_tag', { name: 'Old' });
+
+    expect(
+      await json('update_tag', { tag: 'old', name: 'New', color: 'teal' }),
+    ).toMatchObject({ name: 'New', color: 'teal' });
+    await call('delete_tag', { tag: 'New' });
+
+    expect(await json('list_tags')).toEqual([]);
+  });
+
+  it('lists, reads and restores versions of a note', async () => {
+    const note = await user.notes.create({
+      title: 'Draft',
+      content: JSON.stringify({ ops: [{ insert: 'first\n' }] }),
+    });
+    await json('update_note', { id: note.id, content: 'second' });
+
+    const { versions } = await json<{
+      versions: { id: string; title: string }[];
+    }>('list_note_versions', { id: note.id });
+    expect(versions.length).toBeGreaterThan(0);
+
+    const old = await json<{ content: string }>('get_note_version', {
+      noteId: note.id,
+      versionId: versions[0].id,
+    });
+    expect(old.content).toBe('first\n');
+
+    const restored = await json<NoteResult>('restore_note_version', {
+      noteId: note.id,
+      versionId: versions[0].id,
+    });
+    expect(restored.content).toBe('first\n');
+  });
+
+  it('attaches files to a note that exists, and deletes one', async () => {
+    const note = await user.notes.create({ title: 'Snap', content: null });
+
+    const attached = await json<{ id: string; filename: string }[]>(
+      'add_attachments',
+      {
+        noteId: note.id,
+        attachments: [
+          { filename: 'a.png', data: PNG_1PX.toString('base64') },
+          { filename: 'b.png', data: PNG_1PX.toString('base64') },
+        ],
+      },
+    );
+    expect(attached.map((a) => a.filename)).toEqual(['a.png', 'b.png']);
+
+    await call('delete_attachment', { noteId: note.id, id: attached[0].id });
+    const read = await json<{ attachments: { filename: string }[] }>(
+      'get_note',
+      { id: note.id },
+    );
+    expect(read.attachments.map((a) => a.filename)).toEqual(['b.png']);
+  });
+
+  it('shares a note and stops sharing it', async () => {
+    const friend = await ctx.registerUser('Friend Person');
+    const note = await user.notes.create({ title: 'Plans', content: null });
+
+    const [found] = await json<{ id: string }[]>('find_users', {
+      query: 'friend',
+    });
+    expect(found.id).toBe(friend.id);
+
+    const shares = await json<{ shareId: string; permission: string }[]>(
+      'share_note',
+      { noteId: note.id, userId: friend.id, permission: 'viewer' },
+    );
+    expect(shares).toEqual([
+      expect.objectContaining({ userId: friend.id, permission: 'viewer' }),
+    ]);
+    expect((await friend.notes.read(note.id)).title).toBe('Plans');
+
+    await call('unshare_note', { noteId: note.id, shareId: shares[0].shareId });
+    expect(await json('list_shares', { noteId: note.id })).toEqual([]);
   });
 
   it("does not reach other people's notes", async () => {
