@@ -5,6 +5,7 @@ import {
   IsUrl,
   Matches,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
 import { RejectUnknownFields } from '../../common/decorators/reject-unknown-fields.decorator';
 import { OIDC_PROVIDER_ID_PATTERN } from '../../auth/oidc/oidc-providers';
@@ -46,6 +47,17 @@ export class UpdateOidcProviderDto {
   @IsString()
   @MaxLength(500)
   mobileClientId?: string;
+
+  /** Its sign-out page, if it publishes no end_session_endpoint. Empty clears it. */
+  @IsOptional()
+  @ValidateIf((dto: UpdateOidcProviderDto) => dto.logoutUrl !== '')
+  @IsUrl({
+    protocols: ['http', 'https'],
+    require_protocol: true,
+    require_tld: false,
+  })
+  @MaxLength(2048)
+  logoutUrl?: string;
 }
 
 /** A sign-in provider the admin adds. */

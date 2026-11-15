@@ -130,11 +130,22 @@ export async function exchangeOidcCode(
     .json<OidcExchangeResponse>();
 }
 
+/**
+ * Signs this device out. Returns the provider's sign-out page to go on to,
+ * when the session came from the provider and the server says to.
+ */
 export async function revokeRefreshToken(
   refreshToken?: string | null,
-): Promise<void> {
-  if (!refreshToken) return;
-  return api.post("api/auth/logout", { json: { refreshToken } }).json<void>();
+): Promise<{ providerLogoutUrl?: string }> {
+  if (!refreshToken) return {};
+  // Older servers answer with an empty body.
+  const result = await api
+    .post("api/auth/logout", { json: { refreshToken } })
+    .json<{ providerLogoutUrl?: unknown } | "" | undefined>();
+  const url = result ? result.providerLogoutUrl : undefined;
+  return typeof url === "string" && /^https?:\/\//i.test(url)
+    ? { providerLogoutUrl: url }
+    : {};
 }
 
 /** Signs in with a passkey this browser or a phone nearby offers. */

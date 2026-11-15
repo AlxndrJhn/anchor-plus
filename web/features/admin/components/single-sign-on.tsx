@@ -31,11 +31,18 @@ import { OtherProviders } from "./other-providers";
 const PHONE_CALLBACK_URL = "anchor://oidc/callback";
 
 /** What to ask whoever runs the provider for, ready to paste in a message. */
-function providerRequest(providerName: string, callbackUrl: string) {
+function providerRequest(
+  providerName: string,
+  callbackUrl: string,
+  postLogoutRedirectUrl: string,
+  backchannelLogoutUrl: string,
+) {
   return translate("admin.singleSignOn")("request", {
     provider: providerName,
     callbackUrl,
     phoneUrl: PHONE_CALLBACK_URL,
+    postLogoutUrl: postLogoutRedirectUrl,
+    backchannelUrl: backchannelLogoutUrl,
   });
 }
 
@@ -48,6 +55,8 @@ type OidcForm = Required<
     | "clientId"
     | "mobileClientId"
     | "disableInternalAuth"
+    | "providerLogout"
+    | "logoutUrl"
   >
 > & {
   clientSecret: string;
@@ -74,6 +83,8 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
             clientId: settings.clientId ?? "",
             mobileClientId: settings.mobileClientId ?? "",
             disableInternalAuth: settings.disableInternalAuth,
+            providerLogout: settings.providerLogout ?? true,
+            logoutUrl: settings.logoutUrl ?? "",
             clientSecret: "",
             clearSecret: false,
           }
@@ -84,6 +95,7 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
   const [errors, setErrors] = React.useState<{
     issuer?: string;
     client?: string;
+    logout?: string;
   }>({});
   React.useEffect(() => setForm(saved), [saved]);
   const test = useMutation({
@@ -144,6 +156,8 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
   const updateForm = (patch: Partial<OidcForm>) =>
     setForm((prev) => (prev ? { ...prev, ...patch } : prev));
   const providerName = form.providerName.trim() || t("providerFallback");
+  // Sign-out settings apply to every provider once there are more.
+  const several = (settings.providers?.length ?? 0) > 0;
   const hasSecret = settings.hasClientSecret && !form.clearSecret;
 
   const submit = () => {
@@ -154,8 +168,13 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
       fieldErrors.issuer = t("issuerInvalid");
     if (form.enabled && !form.clientId.trim())
       fieldErrors.client = t("clientRequired");
+    if (
+      form.logoutUrl.trim() &&
+      !/^https?:\/\/\S+$/i.test(form.logoutUrl.trim())
+    )
+      fieldErrors.logout = t("logoutUrlInvalid");
     setErrors(fieldErrors);
-    if (fieldErrors.issuer || fieldErrors.client) return;
+    if (fieldErrors.issuer || fieldErrors.client || fieldErrors.logout) return;
     const dto: UpdateOidcSettingsDto = {
       enabled: form.enabled,
       providerName: form.providerName.trim(),
@@ -163,6 +182,8 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
       clientId: form.clientId.trim(),
       mobileClientId: form.mobileClientId.trim(),
       disableInternalAuth: form.disableInternalAuth,
+      providerLogout: form.providerLogout,
+      logoutUrl: form.logoutUrl.trim(),
     };
     if (form.clientSecret.trim()) dto.clientSecret = form.clientSecret.trim();
     else if (form.clearSecret) dto.clearClientSecret = true;
@@ -371,6 +392,54 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                 }
               />
             </Row>
+            <Row className="grid gap-3.5">
+              <div className="flex items-center gap-3.5">
+                <div className="grid min-w-50 flex-1 gap-0.5">
+                  <label
+                    htmlFor="oidc-logout"
+                    className="font-semibold text-ui"
+                  >
+                    {several
+                      ? t("providerLogoutAny")
+                      : t("providerLogout", { provider: providerName })}
+                  </label>
+                  <span className="text-meta text-muted-foreground">
+                    {several
+                      ? t("providerLogoutAnyHelp")
+                      : t("providerLogoutHelp", { provider: providerName })}
+                  </span>
+                </div>
+                <Switch
+                  id="oidc-logout"
+                  checked={form.providerLogout}
+                  disabled={locked}
+                  onCheckedChange={(providerLogout) =>
+                    updateForm({ providerLogout })
+                  }
+                />
+              </div>
+              {form.providerLogout && (
+                <div className="grid grid-cols-2 items-start gap-3.5 max-md:grid-cols-1">
+                  <Field
+                    label={t("logoutUrl")}
+                    aside={t("optional")}
+                    error={errors.logout}
+                    help={t("logoutUrlHelp", { provider: providerName })}
+                  >
+                    <Input
+                      value={form.logoutUrl}
+                      readOnly={locked}
+                      inputMode="url"
+                      placeholder={t("logoutUrlPlaceholder")}
+                      onChange={(e) => {
+                        updateForm({ logoutUrl: e.target.value });
+                        setErrors((prev) => ({ ...prev, logout: undefined }));
+                      }}
+                    />
+                  </Field>
+                </div>
+              )}
+            </Row>
             <Row className="block">
               <div className="grid gap-1.5 rounded-lg bg-muted px-3.5 py-3">
                 <b className="font-semibold text-meta">{t("callbackUrls")}</b>
@@ -394,13 +463,33 @@ export function SingleSignOn({ isHidden = false }: { isHidden?: boolean }) {
                     ),
                   })}
                 </FieldDescription>
+                <b className="mt-2 font-semibold text-meta">
+                  {t("logoutUrls")}
+                </b>
+                <CopyAddress
+                  label={t("postLogoutCallback")}
+                  value={settings.postLogoutRedirectUrl}
+                />
+                <CopyAddress
+                  label={t("backchannelLogout")}
+                  value={settings.backchannelLogoutUrl}
+                />
+                <FieldDescription>
+                  {t("logoutUrlsHelp", { provider: providerName })}
+                  {several && ` ${t("logoutUrlsShared")}`}
+                </FieldDescription>
                 <Button
                   variant="secondary"
                   size="sm"
                   className="justify-self-start"
                   onClick={() =>
                     copyText(
-                      providerRequest(providerName, settings.callbackUrl),
+                      providerRequest(
+                        providerName,
+                        settings.callbackUrl,
+                        settings.postLogoutRedirectUrl,
+                        settings.backchannelLogoutUrl,
+                      ),
                     ).then(
                       () =>
                         toast.success(

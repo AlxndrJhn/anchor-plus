@@ -375,6 +375,8 @@ The [desktop app](#desktop-app) installs with winget too.
    | `OIDC_CLIENT_SECRET` | No | — | OIDC client secret. Omit for public client (PKCE) |
    | `OIDC_MOBILE_CLIENT_ID` | No | `OIDC_CLIENT_ID` | A separate public client for the phone app |
    | `DISABLE_INTERNAL_AUTH` | No | `false` | Hide local login form when OIDC is enabled (OIDC-only mode) |
+   | `OIDC_PROVIDER_LOGOUT` | No | `true` | After signing out of Anchor+ on the web, sign out at the provider too (see [Signing out](#signing-out)) |
+   | `OIDC_LOGOUT_URL` | No | — | The provider's sign-out page, in place of its `end_session_endpoint` |
    | `OIDC_<N>_ISSUER_URL`, `OIDC_<N>_CLIENT_ID`, … | No | — | More OIDC providers, numbered from 2. See [Several providers](#several-providers) |
 
 3. **Start the container:**
@@ -895,6 +897,7 @@ Add them in **Admin → Sign-in → Single sign-on → More providers**, which s
 | `OIDC_<N>_PROVIDER_NAME` | No | `"OIDC Provider"` | Name on the sign-in button |
 | `OIDC_<N>_ID` | No | `oidc-<N>` | The ID in its callback URL |
 | `OIDC_<N>_ENABLED` | No | `true` | `false` hides it from the sign-in pages |
+| `OIDC_<N>_LOGOUT_URL` | No | — | Its sign-out page, in place of its `end_session_endpoint` (see [Signing out](#signing-out)) |
 
 ```yaml
     environment:
@@ -914,6 +917,49 @@ Add them in **Admin → Sign-in → Single sign-on → More providers**, which s
 Providers from the environment can't be changed in the admin panel, and win over one added there with the same ID. `DISABLE_INTERNAL_AUTH` (or **Only sign in with …**) applies whichever providers are on.
 
 Accounts are linked to a provider by its issuer URL and the person's subject there, so one person can connect several providers to one account (**Settings → Sign-in security → Connect**), and the same subject at two providers stays two people. Signing in with a new provider whose verified email matches an account links it to that account, as with the first provider. Links made before Anchor+ supported several providers belong to the first one. Removing a provider keeps its links: add it back with the same issuer URL and its people sign in to their accounts again.
+
+#### Signing out
+
+Sign-out can be shared with the provider in either direction, or both, or neither. With several providers, each session belongs to the provider it signed in with: signing out goes on to that provider, and a provider's back-channel logout signs out only its own sessions.
+
+**Anchor+ → provider (RP-initiated logout).** After someone who signed in through a provider signs out of Anchor+ on the web, the browser goes on to that provider's `end_session_endpoint` (from its discovery document) with `id_token_hint`, `client_id` and `post_logout_redirect_uri`, and the provider sends them back to the Anchor+ sign-in page. This is on by default, for all providers. Add this as a post-logout redirect URI in each provider:
+
+```
+{APP_URL}/login
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_PROVIDER_LOGOUT` | `true` | `false` keeps sign-out in Anchor+ only |
+| `OIDC_LOGOUT_URL` | — | The provider's sign-out page, in place of its `end_session_endpoint` (for a provider that doesn't publish one); the same parameters are added |
+
+Without the env vars, the same two are under **Admin → Sign-in → Single sign-on** (**Sign out of … too** and **Sign-out URL**). The other providers have their own sign-out URL: `OIDC_<N>_LOGOUT_URL`, or **Sign-out URL** when editing one under **More providers**. Sessions signed in before this update, and those signed in with a password or passkey, sign out of Anchor+ only.
+
+**Provider → Anchor+ (back-channel logout).** When a provider's session ends, it can post a logout token ([OpenID Connect Back-Channel Logout 1.0](https://openid.net/specs/openid-connect-backchannel-1_0.html)) to Anchor+, which finds the provider by the token's `iss`, checks it (signature against that provider's JWKS, `aud` against its client IDs, the logout event, `sid`/`sub`, age and replay) and signs out the matching sessions within the access token's 15 minutes. All providers share this back-channel logout URL; give it to each one that offers back-channel logout:
+
+```
+{APP_URL}/api/auth/oidc/backchannel-logout
+```
+
+- A token with a `sid` signs out the browser sessions signed in with that provider session; a token with only a `sub` signs out all of that person's sessions from that provider (found through the account linked to that provider and subject).
+- The phone app signs in without handing Anchor+ an ID token, so its sessions have no `sid`; they follow the person and sign out on any back-channel logout for them, including the one that follows signing out of Anchor+ on the web when both directions are on.
+- Sessions from other providers, and sessions signed in with a password or passkey, are left alone.
+
+Where to put the URLs:
+
+| Provider | Post-logout redirect URI | Back-channel logout URL |
+|----------|--------------------------|-------------------------|
+| Pocket ID | OIDC client → **Logout Callback URLs** | OIDC client → **Back-channel logout URL** (must be `https://` for a client without a secret) |
+| Authentik | Provider → **Redirect URIs** (type *Logout*) | Provider → **Logout URI** with **Logout Method** *Back-channel* |
+| Keycloak | Client → **Valid post logout redirect URIs** | Client → **Backchannel logout URL**, **Backchannel logout session required** on |
+
+Field names change between provider versions; look for the post-logout redirect and back-channel logout settings of the client. Both URLs are listed, ready to copy, under **Admin → Sign-in → Single sign-on**.
+
+What each provider does (tested with Keycloak 26.4, Authentik 2026.8 and Pocket ID 2.19):
+
+- **Pocket ID** puts no `sid` in its tokens, so its back-channel logout signs out all of that person's Pocket ID sessions in Anchor+. It sends one when the person revokes Anchor+ from their authorized apps or an admin disables them; signing out of Pocket ID itself doesn't send one yet.
+- **Authentik** ends sign-out with the provider's invalidation flow. The default `default-provider-invalidation-flow` only signs out of the app and leaves the Authentik session open, so the next **Continue with Authentik** signs straight back in. To end the Authentik session too, add a **User Logout** stage to that flow (or pick a flow that has one).
+- **Keycloak** ends its session on RP-initiated logout and sends a back-channel logout with `sid` when a session ends in Keycloak, including from the admin console.
 
 #### OIDC Providers with a Private CA
 

@@ -137,7 +137,7 @@
   "singleSignOn": {
     "copyAddressFailed": "Couldn’t copy the address",
     "copyLabel": "Copy {label}",
-    "request": "Could you add Anchor+ as an OIDC client in {provider}? In Pocket ID, that’s OIDC Clients → Add OIDC Client.\n\n- Name: Anchor+\n- Callback URLs: {callbackUrl}\n  and {phoneUrl} (for the phone app)\n- Public client: yes, with PKCE (the phone app can’t keep a secret)\n\nThen send me its client ID and the issuer URL (your Pocket ID’s address). Thanks!",
+    "request": "Could you add Anchor+ as an OIDC client in {provider}? In Pocket ID, that’s OIDC Clients → Add OIDC Client.\n\n- Name: Anchor+\n- Callback URLs: {callbackUrl}\n  and {phoneUrl} (for the phone app)\n- Logout callback URL (post-logout redirect URI): {postLogoutUrl}\n- Back-channel logout URL, if it has one: {backchannelUrl}\n- Public client: yes, with PKCE (the phone app can’t keep a secret)\n\nThen send me its client ID and the issuer URL (your Pocket ID’s address). Thanks!",
     "testFailed": "Couldn’t test the issuer URL",
     "saved": "Single sign-on settings saved",
     "saveFailed": "Couldn’t save single sign-on",
@@ -186,7 +186,20 @@
     "requestCopyFailed": "Couldn’t copy the request",
     "copyRequest": "Copy a request for your {provider} admin",
     "unsaved": "You have unsaved changes to single sign-on.",
-    "discard": "Discard"
+    "discard": "Discard",
+    "logoutUrlInvalid": "Enter a full URL, or leave it empty.",
+    "providerLogout": "Sign out of {provider} too",
+    "providerLogoutHelp": "Signing out of Anchor+ on the web goes on to {provider}’s sign-out, then back to the sign-in page.",
+    "logoutUrl": "Sign-out URL",
+    "logoutUrlHelp": "Leave empty to use the end_session_endpoint {provider} publishes.",
+    "logoutUrlPlaceholder": "From the provider’s discovery",
+    "logoutUrls": "Sign-out URLs",
+    "postLogoutCallback": "Post-logout redirect URL",
+    "backchannelLogout": "Back-channel logout URL",
+    "logoutUrlsHelp": "Add the first as a post-logout redirect URI (Logout Callback URL in Pocket ID), so {provider} sends people back after signing out there. Give the second as the back-channel logout URL, if {provider} has one, so signing out there signs out of Anchor+ too, on phones as well.",
+    "providerLogoutAny": "Sign out of the provider too",
+    "providerLogoutAnyHelp": "Signing out of Anchor+ on the web goes on to the sign-out of the provider the person signed in with, then back to the sign-in page.",
+    "logoutUrlsShared": "Every provider below uses the same two."
   },
   "otherProviders": {
     "title": "More providers",
@@ -212,6 +225,7 @@
     "fromServer": "Set on the server",
     "callbackUrl": "{provider} callback URL",
     "removeTitle": "Remove {provider}?",
-    "removeDescription": "Its button leaves the sign-in page. Accounts connected to it stay connected, and sign in with it again if you add it back with the same issuer URL."
+    "removeDescription": "Its button leaves the sign-in page. Accounts connected to it stay connected, and sign in with it again if you add it back with the same issuer URL.",
+    "logoutUrlHelp": "Leave empty to use the end_session_endpoint it publishes. It uses the same post-logout redirect and back-channel logout URLs as the first provider."
   }
 }
