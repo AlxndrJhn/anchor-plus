@@ -3004,6 +3004,18 @@ class AppLocalizationsPl extends AppLocalizations {
   String get toolHighlight => 'Wyróżnienie';
 
   @override
+  String get toolAlignLeft => 'Wyrównaj do lewej';
+
+  @override
+  String get toolAlignCenter => 'Wyśrodkuj';
+
+  @override
+  String get toolAlignRight => 'Wyrównaj do prawej';
+
+  @override
+  String get toolAlignJustify => 'Wyjustuj';
+
+  @override
   String get toolTextStyle => 'Kolor i czcionka';
 
   @override

@@ -3,6 +3,20 @@ import 'package:flutter_quill/flutter_quill.dart';
 
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../domain/note_blocks.dart';
+
+/// A line's alignment as it's laid out, in the editor and on cards.
+extension LineAlignLayout on LineAlign {
+  /// Left is the line's start, as with no alignment at all (a Hebrew line
+  /// starts at the right); right is the page's right whatever the line's
+  /// direction, as `text-align: right` on the web.
+  TextAlign get textAlign => switch (this) {
+    LineAlign.left => TextAlign.start,
+    LineAlign.center => TextAlign.center,
+    LineAlign.right => TextAlign.right,
+    LineAlign.justify => TextAlign.justify,
+  };
+}
 
 /// Inline formats shared with the web app, stored on text runs:
 ///

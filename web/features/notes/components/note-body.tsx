@@ -89,7 +89,12 @@ export function NoteBody({
                   key={key}
                   dir="auto"
                   data-lvl={block.level}
-                  style={{ "--lvl": block.level } as React.CSSProperties}
+                  style={
+                    {
+                      "--lvl": block.level,
+                      textAlign: block.align,
+                    } as React.CSSProperties
+                  }
                   className={block.done ? "done" : undefined}
                 >
                   {block.type === "check" &&
@@ -150,22 +155,28 @@ function Block({ row, card }: { row: Row; card: boolean }) {
   }
   const block = row as NoteBlock;
   const text = <TextRuns runs={block.runs} card={card} />;
+  const style = block.align ? { textAlign: block.align } : undefined;
   if (block.type === "h1" || block.type === "h2" || block.type === "h3") {
     const headingClass = `x-${block.type}`;
     if (card)
       return (
-        <p className={headingClass} dir="auto">
+        <p className={headingClass} dir="auto" style={style}>
           {text}
         </p>
       );
     const Tag = ({ h1: "h2", h2: "h3", h3: "h4" } as const)[block.type];
     return (
-      <Tag className={headingClass} dir="auto">
+      <Tag className={headingClass} dir="auto" style={style}>
         {text}
       </Tag>
     );
   }
-  if (block.type === "quote") return <blockquote dir="auto">{text}</blockquote>;
+  if (block.type === "quote")
+    return (
+      <blockquote dir="auto" style={style}>
+        {text}
+      </blockquote>
+    );
   if (block.type === "code") {
     const code = block.runs.map((r) => r.text).join("");
     const preview = card ? cardCodeLines(code, CARD_CODE_LINES) : null;
@@ -177,7 +188,11 @@ function Block({ row, card }: { row: Row; card: boolean }) {
       </div>
     );
   }
-  return <p dir="auto">{text}</p>;
+  return (
+    <p dir="auto" style={style}>
+      {text}
+    </p>
+  );
 }
 
 export function TextRuns({ runs, card }: { runs: InlineRun[]; card: boolean }) {

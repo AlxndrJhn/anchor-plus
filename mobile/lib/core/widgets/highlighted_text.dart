@@ -26,6 +26,7 @@ class HighlightedText extends StatelessWidget {
     this.maxLines,
     this.overflow = TextOverflow.ellipsis,
     this.softWrap = true,
+    this.textAlign = TextAlign.start,
   });
 
   final InlineSpan span;
@@ -34,6 +35,9 @@ class HighlightedText extends StatelessWidget {
   final TextOverflow overflow;
   final bool softWrap;
 
+  /// Anything but start lays the text out across the width it's given.
+  final TextAlign textAlign;
+
   @override
   Widget build(BuildContext context) {
     final text = Text.rich(
@@ -41,6 +45,7 @@ class HighlightedText extends StatelessWidget {
       maxLines: maxLines,
       overflow: overflow,
       softWrap: softWrap,
+      textAlign: textAlign,
     );
     if (highlights.isEmpty) return text;
     final style = DefaultTextStyle.of(context).style;
@@ -52,6 +57,7 @@ class HighlightedText extends StatelessWidget {
         textScaler: MediaQuery.textScalerOf(context),
         direction: Directionality.of(context),
         ellipsis: overflow == TextOverflow.ellipsis ? '…' : null,
+        textAlign: textAlign,
       ),
       child: text,
     );
@@ -66,6 +72,7 @@ class _HighlightPainter extends CustomPainter {
     required this.textScaler,
     required this.direction,
     required this.ellipsis,
+    required this.textAlign,
   });
 
   final InlineSpan span;
@@ -74,16 +81,22 @@ class _HighlightPainter extends CustomPainter {
   final TextScaler textScaler;
   final TextDirection direction;
   final String? ellipsis;
+  final TextAlign textAlign;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final painter = TextPainter(
-      text: span,
-      textDirection: direction,
-      maxLines: maxLines,
-      ellipsis: ellipsis,
-      textScaler: textScaler,
-    )..layout(maxWidth: size.width);
+    final painter =
+        TextPainter(
+          text: span,
+          textDirection: direction,
+          maxLines: maxLines,
+          ellipsis: ellipsis,
+          textScaler: textScaler,
+          textAlign: textAlign,
+        )..layout(
+          minWidth: textAlign == TextAlign.start ? 0 : size.width,
+          maxWidth: size.width,
+        );
     final fontSize = textScaler.scale(span.style?.fontSize ?? 14);
     for (final mark in highlights) {
       final boxes = painter.getBoxesForSelection(
@@ -125,5 +138,6 @@ class _HighlightPainter extends CustomPainter {
   bool shouldRepaint(_HighlightPainter old) =>
       old.span != span ||
       old.highlights.length != highlights.length ||
-      old.maxLines != maxLines;
+      old.maxLines != maxLines ||
+      old.textAlign != textAlign;
 }

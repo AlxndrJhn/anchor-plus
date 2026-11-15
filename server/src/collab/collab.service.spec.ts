@@ -58,6 +58,21 @@ describe('CollabDocument', () => {
     expect(document.doc.ops).toEqual([{ insert: 'AhelloB\n' }]);
   });
 
+  it("keeps a line's alignment set while someone types in it", () => {
+    const document = new CollabDocument(parseNoteContent(content('hello')));
+    document.applyClient([{ retain: 5 }, { insert: '!' }], 0, 'one', 1);
+    document.applyClient(
+      [{ retain: 5 }, { retain: 1, attributes: { align: 'center' } }],
+      0,
+      'two',
+      1,
+    );
+    expect(document.doc.ops).toEqual([
+      { insert: 'hello!' },
+      { insert: '\n', attributes: { align: 'center' } },
+    ]);
+  });
+
   it('applies a resent change once', () => {
     const document = new CollabDocument(parseNoteContent(content('x')));
     document.applyClient([{ insert: 'A' }], 0, 'one', 1);

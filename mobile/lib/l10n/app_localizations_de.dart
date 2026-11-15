@@ -2901,6 +2901,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get toolHighlight => 'Hervorheben';
 
   @override
+  String get toolAlignLeft => 'Linksbündig';
+
+  @override
+  String get toolAlignCenter => 'Zentriert';
+
+  @override
+  String get toolAlignRight => 'Rechtsbündig';
+
+  @override
+  String get toolAlignJustify => 'Blocksatz';
+
+  @override
   String get toolTextStyle => 'Farbe und Schrift';
 
   @override

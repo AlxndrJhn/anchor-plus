@@ -9,6 +9,7 @@ import '../../../../core/widgets/expanded_hit_area.dart';
 import '../../../../core/widgets/highlighted_text.dart';
 import '../../../../l10n/l10n.dart';
 import '../../domain/note_blocks.dart';
+import '../editor/text_formats.dart';
 import 'note_surface.dart';
 import 'note_text.dart';
 
@@ -74,20 +75,24 @@ class CardBody extends StatelessWidget {
       final block = line.block!;
       final onToggle = onToggleItem;
       // Each line in its own direction; code always reads left to right.
+      // An aligned line spans the card, to have room to lie in.
       rows.add(
-        inTextDirection(
-          context,
-          block.type == BlockType.code ? '' : block.text,
-          _CardLine(
-            block: block,
-            onToggle: onToggle == null || block.type != BlockType.check
-                ? null
-                : () => onToggle(lineOf[block]!, block.text),
-            marker: numbers[i],
-            base: base,
-            appearance: appearance,
-            isFirst: i == 0,
-            isSingleLine: layout == CardLayout.list,
+        _spanning(
+          block.align != LineAlign.left,
+          inTextDirection(
+            context,
+            block.type == BlockType.code ? '' : block.text,
+            _CardLine(
+              block: block,
+              onToggle: onToggle == null || block.type != BlockType.check
+                  ? null
+                  : () => onToggle(lineOf[block]!, block.text),
+              marker: numbers[i],
+              base: base,
+              appearance: appearance,
+              isFirst: i == 0,
+              isSingleLine: layout == CardLayout.list,
+            ),
           ),
         ),
       );
@@ -123,6 +128,9 @@ class CardBody extends StatelessWidget {
     );
   }
 }
+
+Widget _spanning(bool spans, Widget child) =>
+    spans ? SizedBox(width: double.infinity, child: child) : child;
 
 /// The lines a card shows of [content], each block with its line in the
 /// note.
@@ -210,6 +218,7 @@ class _CardLine extends StatelessWidget {
             span: span,
             highlights: marks,
             maxLines: isSingleLine ? 1 : 2,
+            textAlign: block.align.textAlign,
           ),
         );
       case BlockType.quote:
@@ -235,6 +244,7 @@ class _CardLine extends StatelessWidget {
             span: span,
             highlights: marks,
             maxLines: isSingleLine ? 1 : 3,
+            textAlign: block.align.textAlign,
           ),
         );
       case BlockType.code:
@@ -270,6 +280,7 @@ class _CardLine extends StatelessWidget {
           span: span,
           highlights: marks,
           maxLines: isSingleLine ? 1 : 3,
+          textAlign: block.align.textAlign,
         );
       case BlockType.bullet || BlockType.ordered || BlockType.check:
         final (span, marks) = spanOfRuns(
@@ -305,6 +316,7 @@ class _CardLine extends StatelessWidget {
                   highlights: marks,
                   maxLines: 1,
                   softWrap: false,
+                  textAlign: block.align.textAlign,
                 ),
               ),
             ],

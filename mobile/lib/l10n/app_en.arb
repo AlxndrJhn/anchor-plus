@@ -3819,6 +3819,22 @@
   "@toolHighlight": {
     "description": "Screen reader label of the toolbar button that marks text with a color."
   },
+  "toolAlignLeft": "Align left",
+  "@toolAlignLeft": {
+    "description": "Editor toolbar button (in Aa) for the alignment of the caret's lines, while they're aligned left (the default); a tap centers them."
+  },
+  "toolAlignCenter": "Align center",
+  "@toolAlignCenter": {
+    "description": "Editor toolbar button (in Aa) for the alignment of the caret's lines, while they're centered; a tap aligns them right."
+  },
+  "toolAlignRight": "Align right",
+  "@toolAlignRight": {
+    "description": "Editor toolbar button (in Aa) for the alignment of the caret's lines, while they're aligned right; a tap justifies them."
+  },
+  "toolAlignJustify": "Justify",
+  "@toolAlignJustify": {
+    "description": "Editor toolbar button (in Aa) for the alignment of the caret's lines, while they're justified (both edges straight); a tap aligns them left again."
+  },
   "toolTextStyle": "Color and font",
   "@toolTextStyle": {
     "description": "Editor toolbar button (in Aa, with words picked) and the sheet it opens: the words' highlight, text color and font."

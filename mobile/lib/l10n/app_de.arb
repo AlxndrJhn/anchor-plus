@@ -1,5 +1,9 @@
 {
   "@@locale": "de",
+  "toolAlignLeft": "Linksbündig",
+  "toolAlignCenter": "Zentriert",
+  "toolAlignRight": "Rechtsbündig",
+  "toolAlignJustify": "Blocksatz",
   "appName": "Anchor Notes",
   "commonBack": "Zurück",
   "commonCancel": "Abbrechen",

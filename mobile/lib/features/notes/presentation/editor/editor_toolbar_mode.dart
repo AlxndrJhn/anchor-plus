@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../domain/note_blocks.dart';
 import 'line_kind.dart';
 
 enum EditorSubmenu { none, styles, colors }
@@ -41,6 +42,9 @@ enum EditorTool {
   link(LucideIcons.link),
   clearFormatting(LucideIcons.removeFormatting),
   textStyle(LucideIcons.baseline),
+  // Its icon and label are the caret's lines' alignment (see alignIcon);
+  // a tap steps to the next.
+  align(LucideIcons.textAlignStart),
   yellow(null, highlightName: 'yellow'),
   green(null, highlightName: 'green'),
   blue(null, highlightName: 'blue'),
@@ -75,6 +79,7 @@ enum EditorTool {
     EditorTool.link => l10n.editorLink,
     EditorTool.clearFormatting => l10n.toolClearFormatting,
     EditorTool.textStyle => l10n.toolTextStyle,
+    EditorTool.align => l10n.toolAlignLeft,
     EditorTool.yellow => l10n.colorYellow,
     EditorTool.green => l10n.colorGreen,
     EditorTool.blue => l10n.colorBlue,
@@ -95,6 +100,20 @@ enum EditorTool {
 
   static const List<EditorTool> colors = [yellow, green, blue, pink, purple];
 }
+
+IconData alignIcon(LineAlign align) => switch (align) {
+  LineAlign.left => LucideIcons.textAlignStart,
+  LineAlign.center => LucideIcons.textAlignCenter,
+  LineAlign.right => LucideIcons.textAlignEnd,
+  LineAlign.justify => LucideIcons.textAlignJustify,
+};
+
+String alignLabelIn(AppLocalizations l10n, LineAlign align) => switch (align) {
+  LineAlign.left => l10n.toolAlignLeft,
+  LineAlign.center => l10n.toolAlignCenter,
+  LineAlign.right => l10n.toolAlignRight,
+  LineAlign.justify => l10n.toolAlignJustify,
+};
 
 const List<LineKind> lineStyles = [
   LineKind.h1,
@@ -160,7 +179,7 @@ EditorToolbarMode toolbarModeOf({
     // Aa trades Link (one tap back) for the text's color and font.
     EditorToolbarMode.styles => [
       EditorTool.styles,
-      if (!isInCode) ...EditorTool.inline,
+      if (!isInCode) ...[...EditorTool.inline, EditorTool.align],
       if (!isInCode && hasWords) ...[
         EditorTool.highlight,
         EditorTool.textStyle,
@@ -193,6 +212,7 @@ class EditorToolbarModel {
     this.disabledTools = const {},
     this.lineKind = LineKind.text,
     this.highlightName = 'yellow',
+    this.align = LineAlign.left,
   });
 
   factory EditorToolbarModel.of({
@@ -203,6 +223,7 @@ class EditorToolbarModel {
     Set<EditorTool> formats = const {},
     String? highlight,
     bool hasTextStyle = false,
+    LineAlign align = LineAlign.left,
     required String lastHighlight,
     required bool canUndo,
     required bool canRedo,
@@ -225,12 +246,14 @@ class EditorToolbarModel {
       end: tools.end,
       lineKind: kind,
       highlightName: highlight ?? lastHighlight,
+      align: align,
       activeTools: {
         if (submenu == EditorSubmenu.styles) EditorTool.styles,
         if (kind == LineKind.checklist) EditorTool.checklist,
         if (kind == LineKind.bullet) EditorTool.bullet,
         ...formats.where(EditorTool.inline.contains),
         if (hasTextStyle) EditorTool.textStyle,
+        if (align != LineAlign.left) EditorTool.align,
         if (highlight != null) ...[
           EditorTool.highlight,
           ?EditorTool.colors
@@ -262,6 +285,9 @@ class EditorToolbarModel {
 
   final String highlightName;
 
+  /// The caret's line's alignment, which the Align tool shows.
+  final LineAlign align;
+
   bool get hasLineStyles => mode == EditorToolbarMode.styles;
 
   int get rows => hasLineStyles ? 2 : 1;
@@ -275,7 +301,8 @@ class EditorToolbarModel {
       setEquals(other.activeTools, activeTools) &&
       setEquals(other.disabledTools, disabledTools) &&
       other.lineKind == lineKind &&
-      other.highlightName == highlightName;
+      other.highlightName == highlightName &&
+      other.align == align;
 
   @override
   int get hashCode => Object.hash(
@@ -286,5 +313,6 @@ class EditorToolbarModel {
     Object.hashAllUnordered(disabledTools),
     lineKind,
     highlightName,
+    align,
   );
 }

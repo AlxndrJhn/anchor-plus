@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:anchor/features/notes/domain/note_blocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -76,6 +78,53 @@ void main() {
 
       expect(lines.single.checkedCount, 2);
       expect(lines.single.isAllChecked, isTrue);
+    });
+  });
+
+  group('alignment', () {
+    test("reads the web's align on each line, but not on code", () {
+      final blocks = parseNoteBlocks(
+        jsonEncode({
+          'ops': [
+            {'insert': 'Title'},
+            {
+              'insert': '\n',
+              'attributes': {'header': 1, 'align': 'center'},
+            },
+            {'insert': 'item'},
+            {
+              'insert': '\n',
+              'attributes': {'list': 'bullet', 'align': 'right'},
+            },
+            {'insert': 'text'},
+            {
+              'insert': '\n',
+              'attributes': {'align': 'justify'},
+            },
+            {'insert': 'plain\ncode'},
+            {
+              'insert': '\n',
+              'attributes': {'code-block': true, 'align': 'center'},
+            },
+          ],
+        }),
+      );
+
+      expect(blocks.map((b) => b.align), [
+        LineAlign.center,
+        LineAlign.right,
+        LineAlign.justify,
+        LineAlign.left,
+        LineAlign.left,
+      ]);
+    });
+
+    test('stores left as nothing, and reads anything else as left', () {
+      expect(LineAlign.left.value, isNull);
+      expect(LineAlign.center.value, 'center');
+      expect(LineAlign.of('left'), LineAlign.left);
+      expect(LineAlign.of('middle'), LineAlign.left);
+      expect(LineAlign.of(null), LineAlign.left);
     });
   });
 }

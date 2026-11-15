@@ -13,6 +13,7 @@ import '../../../../core/widgets/bottom_bar_frame.dart';
 import '../../../../core/widgets/global_rect_of.dart';
 import '../../../../core/widgets/page_bar.dart';
 import '../../../../l10n/l10n.dart';
+import '../../domain/note_blocks.dart';
 import 'editor_format.dart';
 import 'editor_link.dart';
 import 'editor_overlay_controller.dart';
@@ -138,6 +139,7 @@ class EditorOverlay extends StatelessWidget {
       },
       highlight: hasWords ? style.highlight : null,
       hasTextStyle: hasWords && (style.textColor != null || style.font != null),
+      align: isTitleFocused ? LineAlign.left : controller.lineAlign,
       lastHighlight: this.controller.highlight,
       canUndo: isTitleFocused ? history.canUndo : controller.hasUndo,
       canRedo: isTitleFocused ? history.canRedo : controller.hasRedo,
@@ -189,6 +191,8 @@ class EditorOverlay extends StatelessWidget {
         editor.clearFormatting();
       case EditorTool.textStyle:
         _editTextStyle(context);
+      case EditorTool.align:
+        controller.setLineAlign(controller.lineAlign.next);
       case EditorTool.yellow ||
           EditorTool.green ||
           EditorTool.blue ||

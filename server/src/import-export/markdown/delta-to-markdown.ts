@@ -223,7 +223,12 @@ function blockPrefix(line: DeltaLine, counters: Map<number, number>): string {
   return '';
 }
 
-/** Renders a note's Delta ops as a markdown body (empty string when blank). */
+/**
+ * Renders a note's Delta ops as a markdown body (empty string when blank).
+ * A line's alignment (`align`: center, right, justify) has no markdown, so
+ * it's left out and the line comes out as it would unaligned; raw HTML
+ * would keep it but hide the line's own markdown from most readers.
+ */
 export function deltaToMarkdown(ops: QuillOp[]): string {
   const lines = deltaToLines(ops);
   const out: string[] = [];

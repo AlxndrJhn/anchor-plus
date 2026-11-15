@@ -15,6 +15,8 @@ import 'package:flutter_quill/src/editor/widgets/text/text_line.dart'
     show RenderEditableTextLine, TextLineSlot;
 
 import '../../../../core/text/text_direction.dart';
+import '../../domain/note_blocks.dart';
+import 'text_formats.dart';
 
 /// The direction [line] reads in: that of its first letter, else [base].
 TextDirection lineDirectionOf(Line line, TextDirection base) =>
@@ -149,11 +151,22 @@ class RenderLineDirections extends RenderProxyBox {
   void _setDirection(RenderEditableTextLine line) {
     final direction = lineDirectionOf(line.line, _base);
     line.setTextDirection(direction);
+    // Quill takes right for the line's end, which is the left of a right
+    // to left line; it's the page's right, as on the web.
+    final align = LineAlign.of(
+      line.line.style.attributes[Attribute.align.key]?.value,
+    ).textAlign;
     final body = line.children[TextLineSlot.body];
     if (body is RenderParagraphProxy) {
-      body.textDirection = direction;
+      body
+        ..textDirection = direction
+        ..textAlign = align;
       final paragraph = body.child;
-      if (paragraph is RenderParagraph) paragraph.textDirection = direction;
+      if (paragraph is RenderParagraph) {
+        paragraph
+          ..textDirection = direction
+          ..textAlign = align;
+      }
     }
   }
 

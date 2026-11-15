@@ -2849,6 +2849,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolHighlight => 'Highlight';
 
   @override
+  String get toolAlignLeft => 'Align left';
+
+  @override
+  String get toolAlignCenter => 'Align center';
+
+  @override
+  String get toolAlignRight => 'Align right';
+
+  @override
+  String get toolAlignJustify => 'Justify';
+
+  @override
   String get toolTextStyle => 'Color and font';
 
   @override

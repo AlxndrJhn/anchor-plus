@@ -141,6 +141,7 @@ void main() {
         'italic',
         'underline',
         'strikethrough',
+        'align',
         'space',
         'hideKeyboard',
       ]);
@@ -151,6 +152,7 @@ void main() {
         'italic',
         'underline',
         'strikethrough',
+        'align',
         'highlight',
         'textStyle',
         'space',

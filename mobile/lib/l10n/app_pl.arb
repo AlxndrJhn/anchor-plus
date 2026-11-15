@@ -1,5 +1,9 @@
 {
   "@@locale": "pl",
+  "toolAlignLeft": "Wyrównaj do lewej",
+  "toolAlignCenter": "Wyśrodkuj",
+  "toolAlignRight": "Wyrównaj do prawej",
+  "toolAlignJustify": "Wyjustuj",
   "appName": "Anchor Notes",
   "commonBack": "Wstecz",
   "commonCancel": "Anuluj",

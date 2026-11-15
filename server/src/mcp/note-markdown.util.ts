@@ -48,7 +48,8 @@ export function appendMarkdownToContent(
 
 /**
  * Whether rewriting the note from its markdown keeps everything in it:
- * pictures in the text, colours, fonts and custom highlights would be lost.
+ * pictures in the text, colours, fonts, custom highlights and aligned
+ * paragraphs would be lost.
  */
 export function markdownCanCarry(content: string | null): boolean {
   const ops = parseDeltaOps(content);
@@ -58,9 +59,12 @@ export function markdownCanCarry(content: string | null): boolean {
       typeof op.insert === 'string' &&
       Object.entries(op.attributes ?? {}).every(
         ([name, value]) =>
-          MARKDOWN_FORMATS.has(name) &&
-          (name !== 'highlight' ||
-            (typeof value === 'string' && MARKDOWN_HIGHLIGHTS.includes(value))),
+          // Left is how a line lies anyway.
+          (name === 'align' && (value === 'left' || !value)) ||
+          (MARKDOWN_FORMATS.has(name) &&
+            (name !== 'highlight' ||
+              (typeof value === 'string' &&
+                MARKDOWN_HIGHLIGHTS.includes(value)))),
       ),
   );
 }

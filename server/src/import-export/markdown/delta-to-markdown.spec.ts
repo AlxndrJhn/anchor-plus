@@ -234,6 +234,19 @@ describe('deltaToMarkdown', () => {
     ).toBe('text\n');
   });
 
+  it('leaves alignment out, keeping the line as it is', () => {
+    expect(
+      deltaToMarkdown([
+        { insert: 'Title' },
+        { insert: '\n', attributes: { header: 1, align: 'center' } },
+        { insert: 'Signed', attributes: { italic: true } },
+        { insert: '\n', attributes: { align: 'right' } },
+        { insert: 'item' },
+        { insert: '\n', attributes: { list: 'bullet', align: 'justify' } },
+      ]),
+    ).toBe('# Title\n*Signed*\n- item\n');
+  });
+
   it.each(roundTripCases)('renders the $name fixture', ({ ops, markdown }) => {
     expect(deltaToMarkdown(ops)).toBe(markdown);
   });
