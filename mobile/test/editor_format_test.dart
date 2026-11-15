@@ -214,4 +214,67 @@ void main() {
       expect(lineAttributes(controller, 1), isNull);
     });
   });
+
+  group('alignment', () {
+    /// "one", "two", then a code line "x = 1".
+    const alignOps = [
+      {'insert': 'one\ntwo\nx = 1'},
+      {
+        'insert': '\n',
+        'attributes': {'code-block': true},
+      },
+    ];
+
+    test("aligns the caret's line, and Left takes it off again", () {
+      final controller = controllerAt(1, alignOps)
+        ..setLineAlign(LineAlign.center);
+
+      expect(controller.lineAlign, LineAlign.center);
+      expect(controller.document.toDelta().toJson(), [
+        {'insert': 'one'},
+        {
+          'insert': '\n',
+          'attributes': {'align': 'center'},
+        },
+        {'insert': 'two\nx = 1'},
+        {
+          'insert': '\n',
+          'attributes': {'code-block': true},
+        },
+      ]);
+
+      controller.setLineAlign(LineAlign.left);
+
+      expect(controller.lineAlign, LineAlign.left);
+      expect(controller.document.toDelta().toJson(), alignOps);
+    });
+
+    test('aligns every selected line, but never code', () {
+      final controller = controllerAt(0, alignOps)
+        ..updateSelection(
+          const TextSelection(baseOffset: 1, extentOffset: 10),
+          ChangeSource.local,
+        )
+        ..setLineAlign(LineAlign.justify);
+
+      expect(lineAttributes(controller, 0), {'align': 'justify'});
+      expect(lineAttributes(controller, 1), {'align': 'justify'});
+      expect(lineAttributes(controller, 2), {'code-block': true});
+    });
+
+    test('a line turned into code loses its alignment', () {
+      final controller = controllerAt(1, alignOps)
+        ..setLineAlign(LineAlign.right)
+        ..setLineKind(LineKind.code);
+
+      expect(lineAttributes(controller, 0), {'code-block': true});
+    });
+
+    test('the tool steps left, center, right, justify and around', () {
+      expect(LineAlign.left.next, LineAlign.center);
+      expect(LineAlign.center.next, LineAlign.right);
+      expect(LineAlign.right.next, LineAlign.justify);
+      expect(LineAlign.justify.next, LineAlign.left);
+    });
+  });
 }

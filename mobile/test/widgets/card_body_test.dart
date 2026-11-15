@@ -84,4 +84,42 @@ void main() {
     expect(item.right, lessThan(card.right - 15));
     expect(item.right, greaterThan(card.center.dx));
   });
+
+  testWidgets('aligned lines lie centred, right and justified on the card', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 200,
+              child: Builder(
+                builder: (context) => CardBody(
+                  content:
+                      r'{"ops":[{"insert":"Party"},'
+                      r'{"insert":"\n","attributes":{"header":1,"align":"center"}},'
+                      r'{"insert":"Mara"},'
+                      r'{"insert":"\n","attributes":{"align":"right"}},'
+                      r'{"insert":"plain\n"}]}',
+                  appearance: NoteAppearance.of(context, null),
+                  layout: CardLayout.masonry,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final card = tester.getRect(find.byType(CardBody));
+    final heading = tester.getRect(find.text('Party', findRichText: true));
+    expect(heading.center.dx, moreOrLessEquals(card.center.dx, epsilon: 1));
+    final signed = tester.getRect(find.text('Mara', findRichText: true));
+    expect(signed.right, moreOrLessEquals(card.right, epsilon: 1));
+    final plain = tester.getRect(find.text('plain', findRichText: true));
+    expect(plain.left, card.left);
+  });
 }

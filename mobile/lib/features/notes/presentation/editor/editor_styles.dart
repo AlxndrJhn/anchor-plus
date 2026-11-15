@@ -77,8 +77,11 @@ DefaultStyles noteEditorStyles(
       null,
       indentWidthBuilder: (block, context, count, numberPointWidthBuilder) {
         final attrs = block.style.attributes;
+        // Quill asks for every block's indent, and lines of the same
+        // alignment are a block of their own.
         if (attrs.containsKey(Attribute.blockQuote.key) ||
-            attrs.containsKey(Attribute.codeBlock.key)) {
+            attrs.containsKey(Attribute.codeBlock.key) ||
+            !attrs.containsKey(Attribute.list.key)) {
           return none;
         }
         return HorizontalSpacing(
@@ -89,6 +92,9 @@ DefaultStyles noteEditorStyles(
       },
     ),
     indent: DefaultTextBlockStyle(base, none, zero, listLine, null),
+    // Lines of one alignment, set apart as paragraphs are (see
+    // CollapsedBlockSpacing, which spaces them one by one).
+    align: DefaultTextBlockStyle(base, none, zero, spacing.paragraph, null),
     quote: DefaultTextBlockStyle(
       base,
       none,

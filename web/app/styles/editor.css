@@ -165,6 +165,9 @@
 }
 .anchor-quill .ql-editor .ql-code-block {
   white-space: pre;
+  /* A line aligned before it became code; code keeps to the left. */
+  /* biome-ignore lint/complexity/noImportantStyles: over the align format's inline text-align */
+  text-align: left !important;
 }
 @media (hover: none) {
   .anchor-quill .ql-editor .ql-code-block-container {

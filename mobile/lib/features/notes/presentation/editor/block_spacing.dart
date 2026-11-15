@@ -171,6 +171,18 @@ class RenderCollapsedBlockSpacing extends RenderProxyBox {
         } else if (attributes.containsKey(Attribute.codeBlock.key)) {
           margins = _spacing.code;
           child.contentPadding = NoteBlockSpacing.codeInset;
+        } else if (!attributes.containsKey(Attribute.list.key)) {
+          // Lines of one alignment, which Quill puts in a block of their
+          // own: spaced one by one, as they would be unaligned.
+          child.setPadding(EdgeInsets.zero);
+          for (
+            var line = child.firstChild;
+            line != null;
+            line = child.childAfter(line)
+          ) {
+            if (line is RenderEditableTextLine) below = _space(line, below);
+          }
+          continue;
         } else {
           final last = child.lastChild;
           margins = VerticalSpacing(
@@ -187,22 +199,33 @@ class RenderCollapsedBlockSpacing extends RenderProxyBox {
           );
         }
       } else if (child is RenderEditableTextLine) {
-        final level = child.line.style.attributes[Attribute.header.key]?.value;
-        margins = level is num
-            ? _spacing.heading(level.toInt())
-            : _spacing.paragraph;
-        final top = _collapsed(margins.top, below);
-        final padding = child.padding;
-        child.setPadding(switch (padding) {
-          EdgeInsetsDirectional() => padding.copyWith(top: top),
-          EdgeInsets() => padding.copyWith(top: top),
-          _ => padding,
-        });
+        below = _space(child, below);
+        continue;
       } else {
         continue;
       }
       below = margins.bottom;
     }
+  }
+
+  /// Spaces a paragraph or heading [line] from the one above it, which
+  /// left [below] under it; gives back the space it leaves under itself.
+  double _space(RenderEditableTextLine line, double? below) {
+    final level = line.line.style.attributes[Attribute.header.key]?.value;
+    final margins = level is num
+        ? _spacing.heading(level.toInt())
+        : _spacing.paragraph;
+    final top = _collapsed(margins.top, below);
+    final padding = line.padding;
+    line.setPadding(switch (padding) {
+      EdgeInsetsDirectional() => padding.copyWith(
+        top: top,
+        bottom: margins.bottom,
+      ),
+      EdgeInsets() => padding.copyWith(top: top, bottom: margins.bottom),
+      _ => padding,
+    });
+    return margins.bottom;
   }
 
   static double _collapsed(double above, double? below) =>

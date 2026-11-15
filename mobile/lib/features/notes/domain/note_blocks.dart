@@ -7,6 +7,29 @@ bool isChecklistValue(Object? list) => list == 'checked' || list == 'unchecked';
 
 enum BlockType { paragraph, h1, h2, h3, quote, code, bullet, ordered, check }
 
+/// How a line lies between the note's edges: its `align` attribute, as the
+/// web stores it. Left is the default and never stored; right and left are
+/// the page's sides whatever the line's direction.
+enum LineAlign {
+  left,
+  center,
+  right,
+  justify;
+
+  /// The stored value; null for [left].
+  String? get value => this == left ? null : name;
+
+  /// The next one, for a tool that steps through them.
+  LineAlign get next => values[(index + 1) % values.length];
+
+  static LineAlign of(Object? value) => switch (value) {
+    'center' => center,
+    'right' => right,
+    'justify' => justify,
+    _ => left,
+  };
+}
+
 class InlineRun {
   const InlineRun(
     this.text, {
@@ -45,9 +68,13 @@ class NoteBlock {
     this.level = 0,
     this.done = false,
     this.runs = const [],
+    this.align = LineAlign.left,
   });
 
   final BlockType type;
+
+  /// Never anything but [LineAlign.left] for code.
+  final LineAlign align;
 
   /// List depth, 0 to [maxListIndent].
   final int level;
@@ -144,6 +171,9 @@ NoteBlock _block(List<InlineRun> runs, Map<String, dynamic> attributes) {
     level: type == BlockType.paragraph ? 0 : level,
     done: list == 'checked',
     runs: runs,
+    align: type == BlockType.code
+        ? LineAlign.left
+        : LineAlign.of(attributes['align']),
   );
 }
 

@@ -19,6 +19,7 @@ a { color: inherit; }
 .li { display: flex; gap: 0.5em; align-items: baseline; margin: 0 0 0.25em;
   padding-inline-start: calc(var(--lvl) * 1.5em); break-inside: avoid; }
 .li .mk { min-width: 1.2em; text-align: end; }
+.li > span:last-child { flex: 1; min-width: 0; }
 .box { flex: none; display: inline-block; width: 0.85em; height: 0.85em; border: 1.5px solid #333;
   border-radius: 3px; font-size: 0.75em; line-height: 0.85em; text-align: center; position: relative; top: 0.1em; }
 .box.done { background: #333; color: #fff; }

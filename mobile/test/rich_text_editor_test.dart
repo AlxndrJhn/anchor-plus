@@ -1993,6 +1993,51 @@ void main() {
       );
     });
 
+    testWidgets('aligned lines span the editor, unindented, right being the '
+        "page's right even on a Hebrew line", (tester) async {
+      await pumpEditor(
+        tester,
+        content:
+            '{"ops":[{"insert":"Middle"},'
+            '{"insert":"\\n","attributes":{"align":"center"}},'
+            '{"insert":"שלום"},'
+            '{"insert":"\\n","attributes":{"align":"right"}},'
+            '{"insert":"עולם"},'
+            '{"insert":"\\n","attributes":{"align":"left"}},'
+            '{"insert":"Plain\\n"}]}',
+      );
+      final editor = tester.getRect(find.byType(QuillEditor));
+      Rect glyphs(String words) {
+        final text = tester.renderObject<RenderParagraph>(
+          find.text(words, findRichText: true),
+        );
+        final box = text
+            .getBoxesForSelection(
+              TextSelection(baseOffset: 0, extentOffset: words.length),
+            )
+            .first
+            .toRect();
+        return box.shift(text.localToGlobal(Offset.zero));
+      }
+
+      expect(
+        tester.getRect(find.text('Middle', findRichText: true)).left,
+        moreOrLessEquals(editor.left, epsilon: 1),
+      );
+      expect(
+        glyphs('Middle').center.dx,
+        moreOrLessEquals(editor.center.dx, epsilon: 1),
+      );
+      expect(glyphs('שלום').right, moreOrLessEquals(editor.right, epsilon: 1));
+      // Left is the line's start, as unaligned.
+      expect(glyphs('עולם').right, moreOrLessEquals(editor.right, epsilon: 1));
+      // Spaced as plain lines are.
+      expect(
+        glyphs('שלום').top - glyphs('Middle').top,
+        moreOrLessEquals(glyphs('Plain').top - glyphs('עולם').top, epsilon: 1),
+      );
+    });
+
     testWidgets('a Hebrew quote has its bar on the right', (tester) async {
       await pumpEditor(tester, content: mixed);
       RenderObject? box = tester.renderObject(

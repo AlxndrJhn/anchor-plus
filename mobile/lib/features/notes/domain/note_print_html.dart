@@ -67,15 +67,20 @@ void _writeBlocks(
   for (var i = 0; i < blocks.length; i++) {
     final block = blocks[i];
     final text = _runs(block.runs, highlights);
+    final textAlign = switch (block.align.value) {
+      final String value => 'text-align:$value',
+      null => null,
+    };
+    final align = textAlign == null ? '' : ' style="$textAlign"';
     switch (block.type) {
       case BlockType.h1:
-        out.write('<h2 dir="auto">$text</h2>');
+        out.write('<h2 dir="auto"$align>$text</h2>');
       case BlockType.h2:
-        out.write('<h3 dir="auto">$text</h3>');
+        out.write('<h3 dir="auto"$align>$text</h3>');
       case BlockType.h3:
-        out.write('<h4 dir="auto">$text</h4>');
+        out.write('<h4 dir="auto"$align>$text</h4>');
       case BlockType.quote:
-        out.write('<blockquote dir="auto">$text</blockquote>');
+        out.write('<blockquote dir="auto"$align>$text</blockquote>');
       case BlockType.code:
         // Code lines come one block each; they join into one box.
         final lines = [block.text];
@@ -94,10 +99,13 @@ void _writeBlocks(
         final done = block.type == BlockType.check && block.done;
         out.write(
           '<div class="li${done ? ' done' : ''}" dir="auto" '
-          'style="--lvl:${block.level}">$mark<span>$text</span></div>',
+          'style="--lvl:${block.level}${textAlign == null ? '' : ';$textAlign'}">'
+          '$mark<span>$text</span></div>',
         );
       case BlockType.paragraph:
-        out.write(block.isEmpty ? '<p>&nbsp;</p>' : '<p dir="auto">$text</p>');
+        out.write(
+          block.isEmpty ? '<p>&nbsp;</p>' : '<p dir="auto"$align>$text</p>',
+        );
     }
   }
 }

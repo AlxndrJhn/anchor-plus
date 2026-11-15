@@ -4336,6 +4336,30 @@ abstract class AppLocalizations {
   /// **'Highlight'**
   String get toolHighlight;
 
+  /// Editor toolbar button (in Aa) for the alignment of the caret's lines, while they're aligned left (the default); a tap centers them.
+  ///
+  /// In en, this message translates to:
+  /// **'Align left'**
+  String get toolAlignLeft;
+
+  /// Editor toolbar button (in Aa) for the alignment of the caret's lines, while they're centered; a tap aligns them right.
+  ///
+  /// In en, this message translates to:
+  /// **'Align center'**
+  String get toolAlignCenter;
+
+  /// Editor toolbar button (in Aa) for the alignment of the caret's lines, while they're aligned right; a tap justifies them.
+  ///
+  /// In en, this message translates to:
+  /// **'Align right'**
+  String get toolAlignRight;
+
+  /// Editor toolbar button (in Aa) for the alignment of the caret's lines, while they're justified (both edges straight); a tap aligns them left again.
+  ///
+  /// In en, this message translates to:
+  /// **'Justify'**
+  String get toolAlignJustify;
+
   /// Editor toolbar button (in Aa, with words picked) and the sheet it opens: the words' highlight, text color and font.
   ///
   /// In en, this message translates to:
