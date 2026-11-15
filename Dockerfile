@@ -59,22 +59,36 @@ RUN pnpm build
 #
 # Runtime image (single container: postgres + api + web)
 #
-FROM postgres:18-alpine@sha256:10a5c69a83035ab5239f5620d708520e8b28f5aa1f2b20143e6024532edadfb5 AS runner
+# Plain Alpine with Postgres from apk, not the postgres image: that one
+# declares a VOLUME for its own data directory, which Docker would create
+# (empty, anonymous) for every container, since Anchor+ keeps the database in
+# /data/postgres. A Dockerfile can't drop an inherited VOLUME.
+FROM alpine:3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PGDATA=/data/postgres
+# The entrypoint refuses a database from another major version.
+ENV PG_MAJOR=18
+# As in the postgres image, so a new database gets the same encoding (UTF8)
+# and locale as the ones it made.
+ENV LANG=en_US.utf8
 
-# Bring Node runtime into the postgres image (same Alpine/musl family).
-# Copy only the Node binary so we don't overwrite Postgres' own entrypoint scripts.
+# Node from the build stages (same Alpine/musl family)
 COPY --from=base /usr/local/bin/node /usr/local/bin/node
 
-# curl for HEALTHCHECK, supervisor for process management. Upgrading first
-# takes Alpine's fixes ahead of the base image's next rebuild; CI passes a
-# new day each day so the build cache doesn't keep an old upgrade.
+# Postgres 18 (its package adds the postgres user with uid and gid 70, as in
+# the postgres image, so existing data keeps its owner), su-exec to run it as
+# that user, curl for HEALTHCHECK, supervisor for process management.
+# Upgrading first takes Alpine's fixes ahead of the base image's next
+# rebuild; CI passes a new day each day so the build cache doesn't keep an
+# old upgrade.
 ARG APK_UPGRADE_DAY
-RUN apk upgrade --no-cache   && apk add --no-cache curl supervisor libstdc++ libatomic libc6-compat
+RUN apk upgrade --no-cache \
+  && apk add --no-cache postgresql18 postgresql18-client su-exec tzdata \
+    curl supervisor libstdc++ libatomic libc6-compat \
+  && [ "$(id -u postgres):$(id -g postgres)" = "70:70" ]
 
 # Server runtime files
 COPY --from=server_builder /app/server/dist ./server/dist

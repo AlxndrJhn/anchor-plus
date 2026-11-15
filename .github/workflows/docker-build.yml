@@ -84,10 +84,7 @@ jobs:
       - name: Test image
         run: sh docker/test-image.sh anchor:test
 
-      # Fails on a high or critical vulnerability that has a fix. Postgres'
-      # gosu is skipped: its entrypoint runs it only to switch to the postgres
-      # user, never the Go network and parsing code its old toolchain is
-      # flagged for, and upstream doesn't rebuild it for those.
+      # Fails on a high or critical vulnerability that has a fix.
       - name: Scan image for vulnerabilities
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -96,7 +93,6 @@ jobs:
           scanners: vuln
           severity: HIGH,CRITICAL
           ignore-unfixed: true
-          skip-files: usr/local/bin/gosu
           exit-code: "1"
 
       - name: Set image name
