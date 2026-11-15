@@ -949,11 +949,17 @@ Where to put the URLs:
 
 | Provider | Post-logout redirect URI | Back-channel logout URL |
 |----------|--------------------------|-------------------------|
-| Pocket ID | OIDC client → **Logout Callback URLs** | Not offered at the time of writing |
-| Authentik | Provider → **Redirect URIs** (type *Post Logout*) | Provider → **Logout URI** with **Logout Method** *Back-channel* |
+| Pocket ID | OIDC client → **Logout Callback URLs** | OIDC client → **Back-channel logout URL** (must be `https://` for a client without a secret) |
+| Authentik | Provider → **Redirect URIs** (type *Logout*) | Provider → **Logout URI** with **Logout Method** *Back-channel* |
 | Keycloak | Client → **Valid post logout redirect URIs** | Client → **Backchannel logout URL**, **Backchannel logout session required** on |
 
 Field names change between provider versions; look for the post-logout redirect and back-channel logout settings of the client. Both URLs are listed, ready to copy, under **Admin → Sign-in → Single sign-on**.
+
+What each provider does (tested with Keycloak 26.4, Authentik 2026.8 and Pocket ID 2.19):
+
+- **Pocket ID** puts no `sid` in its tokens, so its back-channel logout signs out all of that person's Pocket ID sessions in Anchor+. It sends one when the person revokes Anchor+ from their authorized apps or an admin disables them; signing out of Pocket ID itself doesn't send one yet.
+- **Authentik** ends sign-out with the provider's invalidation flow. The default `default-provider-invalidation-flow` only signs out of the app and leaves the Authentik session open, so the next **Continue with Authentik** signs straight back in. To end the Authentik session too, add a **User Logout** stage to that flow (or pick a flow that has one).
+- **Keycloak** ends its session on RP-initiated logout and sends a back-channel logout with `sid` when a session ends in Keycloak, including from the admin console.
 
 #### OIDC Providers with a Private CA
 
