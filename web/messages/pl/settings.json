@@ -463,7 +463,10 @@
       "unsupportedType": "Nieobsługiwany typ pliku ({type})",
       "attachmentNotFound": "Nie znaleziono pliku załącznika",
       "emptyFile": "Pusty plik",
-      "noteTooLarge": "Notatka jest za duża (ponad 1 MB sformatowanej treści)"
+      "noteTooLarge": "Notatka jest za duża (ponad 1 MB sformatowanej treści)",
+      "notZip": "To nie jest plik ZIP.",
+      "zipDamaged": "Ten plik ZIP jest uszkodzony.",
+      "zipPassword": "Nie można zaimportować plików ZIP chronionych hasłem."
     },
     "run": {
       "nothingToImport": "Nie ma tu nic do zaimportowania. Upuść kopię zapasową Anchor, plik zip z Google Takeout lub folder z plikami Markdown (.md).",
@@ -516,7 +519,8 @@
       "reportTitleIssues": "{imported, plural, one {Zaimportowano # notatkę} few {Zaimportowano # notatki} many {Zaimportowano # notatek} other {Zaimportowano # notatki}}, {issues, plural, one {# wymaga uwagi} few {# wymagają uwagi} many {# wymaga uwagi} other {# wymaga uwagi}}",
       "nothingImported": "Nic nie zaimportowano",
       "needAttention": "{count, plural, one {# pozycja wymaga uwagi} few {# pozycje wymagają uwagi} many {# pozycji wymaga uwagi} other {# pozycji wymaga uwagi}}",
-      "restoredTrashed": "Notatki przywrócone do kosza dostają tam nowe 30 dni."
+      "restoredTrashed": "Notatki przywrócone do kosza dostają tam nowe 30 dni.",
+      "keepHint": "Przenosisz się z Google Keep? <link>Wyeksportuj dane przez Google Takeout</link> (zaznaczony jest tylko Keep), pobierz plik ZIP z e-maila od Google i upuść go tutaj. Duże eksporty z wieloma zdjęciami też działają."
     },
     "localMove": {
       "movedTitle": "Twoje notatki zostały przeniesione",

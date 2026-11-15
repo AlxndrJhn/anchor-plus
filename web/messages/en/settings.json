@@ -463,7 +463,10 @@
       "unsupportedType": "Unsupported file type ({type})",
       "attachmentNotFound": "Attachment file not found",
       "emptyFile": "Empty file",
-      "noteTooLarge": "Note is too large (over 1 MB of formatted content)"
+      "noteTooLarge": "Note is too large (over 1 MB of formatted content)",
+      "notZip": "This is not a ZIP file.",
+      "zipDamaged": "This ZIP file is damaged.",
+      "zipPassword": "Password-protected ZIP files can’t be imported."
     },
     "run": {
       "nothingToImport": "Nothing to import here. Drop an Anchor backup, a Google Takeout zip, or a folder of Markdown (.md) files.",
@@ -516,7 +519,8 @@
       "reportTitleIssues": "{imported, plural, one {# note imported} other {# notes imported}}, {issues, plural, one {# needs attention} other {# need attention}}",
       "nothingImported": "Nothing was imported",
       "needAttention": "{count, plural, one {# item needs attention} other {# items need attention}}",
-      "restoredTrashed": "Notes restored to the trash get a fresh 30 days there."
+      "restoredTrashed": "Notes restored to the trash get a fresh 30 days there.",
+      "keepHint": "Moving from Google Keep? <link>Export it with Google Takeout</link> (only Keep is selected), download the ZIP from Google’s email and drop it here. Large exports with many pictures work too."
     },
     "localMove": {
       "movedTitle": "Your notes moved",
