@@ -7,9 +7,20 @@ import { Button } from "@/components/ui/button";
 import { ExportMenu, ImportDialog } from "@/features/import-export";
 import { Row, RowText, Section } from "./settings-blocks";
 
+/** anchor-plus.app links here to start a move from Google Keep. */
+const IMPORT_DEEP_LINK = "google-keep";
+
 export function ImportExportSection() {
   const t = useTranslations("settings.importExportSection");
   const [importing, setImporting] = React.useState(false);
+
+  React.useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("import") !== IMPORT_DEEP_LINK) return;
+    setImporting(true);
+    url.searchParams.delete("import");
+    window.history.replaceState(null, "", url);
+  }, []);
   return (
     <Section id="data" title={t("title")}>
       <Row>

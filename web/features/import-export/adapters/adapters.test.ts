@@ -24,7 +24,10 @@ import {
 import { googleKeepAdapter } from "./google-keep";
 import { detectFormat } from "./index";
 import { markdownAdapter } from "./markdown";
-import { readFiles, readZip, type ZipArchive } from "./zip";
+import { openZip, readFiles, type ZipArchive } from "./zip";
+
+const readZip = (bytes: Uint8Array) =>
+  openZip(new Blob([bytes as Uint8Array<ArrayBuffer>]));
 
 function anchorZipBytes(): Uint8Array {
   return zipSync({
@@ -34,11 +37,11 @@ function anchorZipBytes(): Uint8Array {
   });
 }
 
-function buildAnchorZip(): ZipArchive {
+function buildAnchorZip(): Promise<ZipArchive> {
   return readZip(anchorZipBytes());
 }
 
-function buildKeepZip(prefix = "Takeout/Keep/"): ZipArchive {
+function buildKeepZip(prefix = "Takeout/Keep/"): Promise<ZipArchive> {
   return readZip(
     zipSync({
       [`${prefix}shopping.json`]: strToU8(JSON.stringify(keepTextNote)),
@@ -58,7 +61,9 @@ function buildKeepZip(prefix = "Takeout/Keep/"): ZipArchive {
 const picked = (files: File[]) =>
   files.map((file) => ({ path: file.name, file }));
 
-function markdownZip(entries: Record<string, string | Uint8Array>): ZipArchive {
+function markdownZip(
+  entries: Record<string, string | Uint8Array>,
+): Promise<ZipArchive> {
   return readZip(
     zipSync(
       Object.fromEntries(
@@ -103,22 +108,22 @@ const anchorMarkdownZip = () =>
 
 describe("format detection", () => {
   it("detects anchor backups by manifest", async () => {
-    expect(await anchorAdapter.detect(buildAnchorZip())).toBe(true);
-    expect(await googleKeepAdapter.detect(buildAnchorZip())).toBe(false);
+    expect(await anchorAdapter.detect(await buildAnchorZip())).toBe(true);
+    expect(await googleKeepAdapter.detect(await buildAnchorZip())).toBe(false);
   });
 
   it("detects keep takeouts by folder path", async () => {
-    expect(await googleKeepAdapter.detect(buildKeepZip())).toBe(true);
-    expect(await anchorAdapter.detect(buildKeepZip())).toBe(false);
+    expect(await googleKeepAdapter.detect(await buildKeepZip())).toBe(true);
+    expect(await anchorAdapter.detect(await buildKeepZip())).toBe(false);
   });
 
   it("detects keep takeouts with localized folder names via content sniffing", async () => {
-    const zip = buildKeepZip("Takeout/Notizen/");
+    const zip = await buildKeepZip("Takeout/Notizen/");
     expect(await googleKeepAdapter.detect(zip)).toBe(true);
   });
 
   it("reads each keep note once across detect and parse", async () => {
-    const zip = buildKeepZip("Takeout/Notizen/");
+    const zip = await buildKeepZip("Takeout/Notizen/");
     const reads = new Map<string, number>();
     const counting: ZipArchive = {
       ...zip,
@@ -136,16 +141,18 @@ describe("format detection", () => {
   });
 
   it("detects markdown files, and only after the specific formats", async () => {
-    expect(await markdownAdapter.detect(nextcloudZip())).toBe(true);
+    expect(await markdownAdapter.detect(await nextcloudZip())).toBe(true);
     expect(
-      await markdownAdapter.detect(markdownZip({ "notes/A.MARKDOWN": "hi" })),
+      await markdownAdapter.detect(
+        await markdownZip({ "notes/A.MARKDOWN": "hi" }),
+      ),
     ).toBe(true);
-    expect(await markdownAdapter.detect(buildAnchorZip())).toBe(false);
-    expect(await markdownAdapter.detect(buildKeepZip())).toBe(false);
+    expect(await markdownAdapter.detect(await buildAnchorZip())).toBe(false);
+    expect(await markdownAdapter.detect(await buildKeepZip())).toBe(false);
   });
 
   it("ignores hidden folders and macOS resource forks", async () => {
-    const zip = markdownZip({
+    const zip = await markdownZip({
       "__MACOSX/._note.md": "junk",
       ".trash/gone.md": "junk",
     });
@@ -153,9 +160,56 @@ describe("format detection", () => {
   });
 });
 
-describe("readZip", () => {
+/** A one-entry ZIP64 archive, as Takeout writes for exports over 4 GB. */
+function zip64Bytes(name: string, data: Uint8Array): Uint8Array {
+  const nameBytes = strToU8(name);
+  const local = new Uint8Array(30 + nameBytes.length + data.length);
+  const lv = new DataView(local.buffer);
+  lv.setUint32(0, 0x04034b50, true);
+  lv.setUint16(26, nameBytes.length, true);
+  local.set(nameBytes, 30);
+  local.set(data, 30 + nameBytes.length);
+
+  const central = new Uint8Array(46 + nameBytes.length + 28);
+  const cv = new DataView(central.buffer);
+  cv.setUint32(0, 0x02014b50, true);
+  cv.setUint32(20, 0xffffffff, true);
+  cv.setUint32(24, 0xffffffff, true);
+  cv.setUint16(28, nameBytes.length, true);
+  cv.setUint16(30, 28, true);
+  cv.setUint32(42, 0xffffffff, true);
+  central.set(nameBytes, 46);
+  const extra = 46 + nameBytes.length;
+  cv.setUint16(extra, 0x0001, true);
+  cv.setUint16(extra + 2, 24, true);
+  cv.setBigUint64(extra + 4, BigInt(data.length), true);
+  cv.setBigUint64(extra + 12, BigInt(data.length), true);
+  cv.setBigUint64(extra + 20, BigInt(0), true);
+
+  const end = new Uint8Array(56 + 20 + 22);
+  const ev = new DataView(end.buffer);
+  const dirOffset = local.length;
+  ev.setUint32(0, 0x06064b50, true);
+  ev.setBigUint64(32, BigInt(1), true);
+  ev.setBigUint64(40, BigInt(central.length), true);
+  ev.setBigUint64(48, BigInt(dirOffset), true);
+  ev.setUint32(56, 0x07064b50, true);
+  ev.setBigUint64(64, BigInt(dirOffset + central.length), true);
+  ev.setUint32(76, 0x06054b50, true);
+  ev.setUint16(86, 0xffff, true);
+  ev.setUint32(88, 0xffffffff, true);
+  ev.setUint32(92, 0xffffffff, true);
+
+  const out = new Uint8Array(local.length + central.length + end.length);
+  out.set(local, 0);
+  out.set(central, local.length);
+  out.set(end, local.length + central.length);
+  return out;
+}
+
+describe("openZip", () => {
   it("reads text entries and attachments from the same archive", async () => {
-    const zip = markdownZip({
+    const zip = await markdownZip({
       "Notes/A.md": "first",
       "Notes/B.MARKDOWN": "second",
       "Notes/data.json": "{}",
@@ -166,11 +220,54 @@ describe("readZip", () => {
     expect(zip.text("Notes/A.md")).toBe("first");
     expect(zip.text("Notes/B.MARKDOWN")).toBe("second");
     expect(zip.text("Notes/data.json")).toBe("{}");
-    expect(zip.text("Notes/readme.txt")).toBe("plain");
     expect(
-      new Uint8Array(await zip.blob("Notes/shot.png").arrayBuffer()),
+      new Uint8Array(await (await zip.blob("Notes/readme.txt")).arrayBuffer()),
+    ).toEqual(strToU8("plain"));
+    expect(
+      new Uint8Array(await (await zip.blob("Notes/shot.png")).arrayBuffer()),
     ).toEqual(new Uint8Array([1, 2, 3]));
     expect(() => zip.text("Notes/missing.md")).toThrow();
+  });
+
+  it("opens a large export without reading it whole", async () => {
+    const photo = new Uint8Array(4 * 1024 * 1024).map((_, i) => i * 7);
+    const bytes = zipSync(
+      {
+        "Takeout/Keep/a.json": strToU8(JSON.stringify(keepTextNote)),
+        "Takeout/Keep/photo.jpg": [photo, { level: 0 }],
+      },
+      { level: 6 },
+    );
+    const file = new Blob([bytes as Uint8Array<ArrayBuffer>]);
+    let largestRead = 0;
+    const slice = file.slice.bind(file);
+    file.slice = (start?: number, end?: number) => {
+      largestRead = Math.max(largestRead, (end ?? file.size) - (start ?? 0));
+      return slice(start, end);
+    };
+
+    const zip = await openZip(file);
+    expect(largestRead).toBeLessThan(100 * 1024);
+    expect(JSON.parse(zip.text("Takeout/Keep/a.json")).title).toBe(
+      keepTextNote.title,
+    );
+    const blob = await zip.blob("Takeout/Keep/photo.jpg");
+    // toEqual walks 4 MB element by element; compare the bytes at once.
+    expect(
+      Buffer.from(await blob.arrayBuffer()).equals(Buffer.from(photo)),
+    ).toBe(true);
+  });
+
+  it("reads ZIP64 archives", async () => {
+    const zip = await readZip(zip64Bytes("Takeout/Keep/n.json", strToU8("{}")));
+    expect(zip.names).toEqual(["Takeout/Keep/n.json"]);
+    expect(zip.text("Takeout/Keep/n.json")).toBe("{}");
+  });
+
+  it("refuses a file that is not a ZIP", async () => {
+    await expect(readZip(strToU8("not a zip at all"))).rejects.toThrow(
+      "This is not a ZIP file",
+    );
   });
 });
 
@@ -186,13 +283,13 @@ describe("readFiles", () => {
 
     expect(zip.names).toEqual(["Vault/Note.md", "Vault/shot.png"]);
     expect(zip.text("Vault/Note.md")).toBe("body");
-    expect(zip.blob("Vault/shot.png")).toBe(image);
+    expect(await zip.blob("Vault/shot.png")).toBe(image);
   });
 });
 
 describe("anchorAdapter.parse", () => {
   it("maps manifest notes to canonical notes", async () => {
-    const parsed = await anchorAdapter.parse(buildAnchorZip());
+    const parsed = await anchorAdapter.parse(await buildAnchorZip());
 
     expect(parsed.formatId).toBe("anchor");
     expect(parsed.notes).toHaveLength(3);
@@ -225,7 +322,7 @@ describe("anchorAdapter.parse", () => {
   });
 
   it("rejects manifests from newer format versions", async () => {
-    const zip = readZip(
+    const zip = await readZip(
       zipSync({
         "manifest.json": strToU8(
           JSON.stringify({ ...anchorManifestFixture, version: 2 }),
@@ -237,7 +334,7 @@ describe("anchorAdapter.parse", () => {
 
   it("rejects manifests with a missing version field", async () => {
     const { version: _dropped, ...versionless } = anchorManifestFixture;
-    const zip = readZip(
+    const zip = await readZip(
       zipSync({ "manifest.json": strToU8(JSON.stringify(versionless)) }),
     );
     await expect(anchorAdapter.parse(zip)).rejects.toThrow(/newer version/);
@@ -246,7 +343,7 @@ describe("anchorAdapter.parse", () => {
 
 describe("googleKeepAdapter.parse", () => {
   it("imports active and archived notes, skipping trashed ones", async () => {
-    const parsed = await googleKeepAdapter.parse(buildKeepZip());
+    const parsed = await googleKeepAdapter.parse(await buildKeepZip());
 
     expect(parsed.formatId).toBe("google-keep");
     expect(parsed.notes.map((note) => note.title).sort()).toEqual([
@@ -262,7 +359,7 @@ describe("googleKeepAdapter.parse", () => {
   });
 
   it("maps keep fields to canonical notes", async () => {
-    const parsed = await googleKeepAdapter.parse(buildKeepZip());
+    const parsed = await googleKeepAdapter.parse(await buildKeepZip());
     const byTitle = new Map(parsed.notes.map((note) => [note.title, note]));
 
     const shopping = byTitle.get("Shopping thoughts");
@@ -292,7 +389,7 @@ describe("googleKeepAdapter.parse", () => {
   });
 
   it("resolves media by stem and flags unsupported types", async () => {
-    const parsed = await googleKeepAdapter.parse(buildKeepZip());
+    const parsed = await googleKeepAdapter.parse(await buildKeepZip());
     const receipt = parsed.notes.find((note) => note.title === "Receipt");
 
     expect(receipt?.attachments).toHaveLength(2);
@@ -311,7 +408,7 @@ describe("googleKeepAdapter.parse", () => {
 
 describe("markdownAdapter.parse", () => {
   it("takes the title from the filename and folders from the path", async () => {
-    const parsed = await markdownAdapter.parse(nextcloudZip());
+    const parsed = await markdownAdapter.parse(await nextcloudZip());
 
     expect(parsed.formatId).toBe("markdown");
     expect(parsed.hasFolders).toBe(true);
@@ -333,7 +430,7 @@ describe("markdownAdapter.parse", () => {
   });
 
   it("drops a title heading that repeats the filename", async () => {
-    const parsed = await markdownAdapter.parse(appleZip());
+    const parsed = await markdownAdapter.parse(await appleZip());
     const byTitle = new Map(parsed.notes.map((note) => [note.title, note]));
 
     expect(byTitle.get("Meeting- Q3 planning")?.contentDelta.ops[0]).toEqual({
@@ -351,7 +448,7 @@ describe("markdownAdapter.parse", () => {
   });
 
   it("resolves obsidian embeds and relative images, skipping other files", async () => {
-    const parsed = await markdownAdapter.parse(obsidianZip());
+    const parsed = await markdownAdapter.parse(await obsidianZip());
     const anchor = parsed.notes.find((note) => note.title === "Anchor");
 
     expect(parsed.notes.map((note) => note.title).sort()).toEqual([
@@ -375,7 +472,7 @@ describe("markdownAdapter.parse", () => {
 
   it("keeps readme-style structure without inventing formats", async () => {
     const parsed = await markdownAdapter.parse(
-      markdownZip({ "README.md": readmeFile }),
+      await markdownZip({ "README.md": readmeFile }),
     );
     const ops = parsed.notes[0].contentDelta.ops;
 
@@ -398,7 +495,7 @@ describe("markdownAdapter.parse", () => {
   });
 
   it("round-trips its own markdown export", async () => {
-    const parsed = await markdownAdapter.parse(anchorMarkdownZip());
+    const parsed = await markdownAdapter.parse(await anchorMarkdownZip());
     const groceries = parsed.notes.find((note) => note.title === "Groceries");
     const archived = parsed.notes.find((note) => note.title === "Old plan");
 
@@ -417,7 +514,7 @@ describe("markdownAdapter.parse", () => {
   it("finds a shared attachments folder kept above the notes", async () => {
     // How Apple Notes exporters lay out a multi-folder export
     const parsed = await markdownAdapter.parse(
-      markdownZip({
+      await markdownZip({
         "Export/Personal/Trip.md": "![](Attachments/A1B2.jpeg)\n\nbody\n",
         "Export/Work/Plan.md": "See ![](Attachments/C3D4.jpeg)\n",
         "Export/Attachments/A1B2.jpeg": new Uint8Array([1]),
@@ -434,7 +531,7 @@ describe("markdownAdapter.parse", () => {
 
   it("skips blank files and reports unresolved references", async () => {
     const parsed = await markdownAdapter.parse(
-      markdownZip({
+      await markdownZip({
         "Blank.md": blankFile,
         "Real.md": "![missing](gone.png)\n\ntext\n",
         "Notes.txt": "ignored",
@@ -454,7 +551,7 @@ describe("markdownAdapter.parse", () => {
 
   it("treats an Untitled filename as no title", async () => {
     const parsed = await markdownAdapter.parse(
-      markdownZip({ "Untitled.md": "body\n" }),
+      await markdownZip({ "Untitled.md": "body\n" }),
     );
     expect(parsed.notes[0].title).toBe("");
   });

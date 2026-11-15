@@ -2,7 +2,7 @@ import { anchorAdapter } from "./anchor";
 import { googleKeepAdapter } from "./google-keep";
 import { markdownAdapter } from "./markdown";
 import type { ImportAdapter } from "./types";
-import { type PickedFile, readFiles, readZip, type ZipArchive } from "./zip";
+import { openZip, type PickedFile, readFiles, type ZipArchive } from "./zip";
 
 // Detection runs in order; anchor's manifest check is the cheapest and most
 // specific, markdown the loosest. New formats register here.
@@ -24,7 +24,7 @@ export async function detectFormat(
 
   const zip =
     files.length === 1 && isZip(files[0].file)
-      ? readZip(new Uint8Array(await files[0].file.arrayBuffer()))
+      ? await openZip(files[0].file)
       : await readFiles(files);
 
   for (const adapter of ADAPTERS) {

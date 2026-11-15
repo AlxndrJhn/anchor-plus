@@ -4,6 +4,7 @@ import {
   ChevronDown,
   CircleAlert,
   CircleCheck,
+  ExternalLink,
   FileArchive,
   Folder,
   LoaderCircle,
@@ -92,12 +93,15 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
         </DialogHeader>
         <DialogBody className="gap-3">
           {step === "pick" && (
-            <DropArea
-              reading={importer.isDetecting}
-              name={name}
-              error={importer.pickError}
-              onFiles={pick}
-            />
+            <>
+              <DropArea
+                reading={importer.isDetecting}
+                name={name}
+                error={importer.pickError}
+                onFiles={pick}
+              />
+              {!importer.isDetecting && <KeepHint />}
+            </>
           )}
 
           {step === "preview" && parsed && (
@@ -352,6 +356,31 @@ function DropArea({
       </div>
       {error && <FieldError id={errorId}>{error}</FieldError>}
     </>
+  );
+}
+
+/** Opens Takeout with only Keep selected. */
+const KEEP_TAKEOUT_URL =
+  "https://takeout.google.com/settings/takeout/custom/keep";
+
+function KeepHint() {
+  const t = useTranslations("settings.importExport.dialog");
+  return (
+    <FieldDescription>
+      {t.rich("keepHint", {
+        link: (chunks) => (
+          <a
+            href={KEEP_TAKEOUT_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 font-medium text-foreground underline underline-offset-2 [&>svg]:size-3.5"
+          >
+            {chunks}
+            <ExternalLink aria-hidden />
+          </a>
+        ),
+      })}
+    </FieldDescription>
   );
 }
 

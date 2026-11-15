@@ -463,7 +463,10 @@
       "unsupportedType": "Nicht unterstützter Dateityp ({type})",
       "attachmentNotFound": "Anhangsdatei nicht gefunden",
       "emptyFile": "Leere Datei",
-      "noteTooLarge": "Notiz ist zu groß (über 1 MB formatierter Inhalt)"
+      "noteTooLarge": "Notiz ist zu groß (über 1 MB formatierter Inhalt)",
+      "notZip": "Das ist keine ZIP-Datei.",
+      "zipDamaged": "Diese ZIP-Datei ist beschädigt.",
+      "zipPassword": "Passwortgeschützte ZIP-Dateien können nicht importiert werden."
     },
     "run": {
       "nothingToImport": "Hier gibt es nichts zu importieren. Ziehe ein Anchor-Backup, eine Google-Takeout-Zip-Datei oder einen Ordner mit Markdown-Dateien (.md) hierher.",
@@ -516,7 +519,8 @@
       "reportTitleIssues": "{imported, plural, one {# Notiz importiert} other {# Notizen importiert}}, {issues, plural, one {# braucht Aufmerksamkeit} other {# brauchen Aufmerksamkeit}}",
       "nothingImported": "Es wurde nichts importiert",
       "needAttention": "{count, plural, one {# Eintrag braucht Aufmerksamkeit} other {# Einträge brauchen Aufmerksamkeit}}",
-      "restoredTrashed": "Notizen, die in den Papierkorb wiederhergestellt werden, bekommen dort neue 30 Tage."
+      "restoredTrashed": "Notizen, die in den Papierkorb wiederhergestellt werden, bekommen dort neue 30 Tage.",
+      "keepHint": "Du kommst von Google Keep? <link>Exportiere es mit Google Takeout</link> (nur Keep ist ausgewählt), lade die ZIP-Datei aus der E-Mail von Google herunter und zieh sie hierher. Auch große Exporte mit vielen Bildern funktionieren."
     },
     "localMove": {
       "movedTitle": "Deine Notizen sind umgezogen",
