@@ -15,7 +15,7 @@
     "test": "node --test test/",
     "build": "pnpm run check && electron-builder --dir --publish never",
     "dist:win": "electron-builder --win nsis --x64 --publish never",
-    "dist:mac": "electron-builder --mac dmg --universal --publish never"
+    "dist:mac": "electron-builder --mac dmg --universal --publish never -c.mac.identity=- -c.mac.hardenedRuntime=false -c.mac.notarize=false"
   },
   "devDependencies": {
     "electron": "44.9.1",
