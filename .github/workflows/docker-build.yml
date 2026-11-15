@@ -136,6 +136,11 @@ jobs:
     permissions:
       contents: read
       packages: write
+      # For signing the image: a Sigstore certificate for this workflow
+      # (id-token), and storing the build attestation with the repository.
+      id-token: write
+      attestations: write
+      artifact-metadata: write
 
     steps:
       - name: Download digests
@@ -168,3 +173,33 @@ jobs:
           docker buildx imagetools create \
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf "$IMAGE@sha256:%s " *)
+
+      - name: Look up the image digest
+        id: digest
+        run: |
+          IMAGE="$REGISTRY/${IMAGE_NAME,,}"
+          TAG=$(jq -r '.tags[0]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          DIGEST=$(docker buildx imagetools inspect "$TAG" --format '{{json .Manifest}}' | jq -r .digest)
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+      # Keyless: signed with a short-lived Sigstore certificate naming this
+      # workflow, and logged in Rekor. Check with
+      #   cosign verify ghcr.io/alxndrjhn/anchor-plus:<tag>       #     --certificate-identity-regexp '^https://github.com/AlxndrJhn/anchor-plus/'       #     --certificate-oidc-issuer https://token.actions.githubusercontent.com
+      - name: Set up cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+
+      - name: Sign the image
+        env:
+          REF: ${{ steps.digest.outputs.image }}@${{ steps.digest.outputs.digest }}
+        run: cosign sign --yes "$REF"
+
+      # A signed record that this image was built by this workflow from this
+      # commit, stored next to it in the registry:
+      #   gh attestation verify oci://ghcr.io/alxndrjhn/anchor-plus:<tag> --repo AlxndrJhn/anchor-plus
+      - name: Attest the image
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.digest.outputs.image }}
+          subject-digest: ${{ steps.digest.outputs.digest }}
+          push-to-registry: true

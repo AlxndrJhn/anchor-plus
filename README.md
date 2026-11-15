@@ -679,8 +679,8 @@ which keeps the notes on this computer, as
    an Anchor+ server; with another one, move them with Settings › Import and
    export.)
 
-The builds are not signed yet (see [Code signing policy](#code-signing-policy)),
-so the system warns the first time:
+Until a release says its installer is signed (see
+[Code signing policy](#code-signing-policy)), the system warns the first time:
 
 - **macOS:** right-click Anchor in Applications and choose **Open**, then
   **Open** again; or try to open it once, then allow it under **System
@@ -706,15 +706,28 @@ Links to other websites open in your browser. To build it yourself:
 
 ### Code signing policy
 
-The Windows installer is to be signed through SignPath Foundation's program
-for open-source projects; until it is, it ships unsigned as described above.
-Free code signing provided by [SignPath.io](https://about.signpath.io),
-certificate by [SignPath Foundation](https://signpath.org).
-
-Only installers built by this repository's
+Everything a release ships is signed, and only by this repository's
 [release workflow](.github/workflows/release.yml) on GitHub Actions, from the
-source in this repository, are signed, and each release is approved by hand
-before it is signed.
+source in this repository:
+
+- **Android:** the APKs with this project's own key, so each one installs as
+  an update over the last.
+- **Windows:** the installer through SignPath Foundation's program for
+  open-source projects, approved by hand for each release. Until SignPath
+  has taken the project on, it ships unsigned as described above. Free code
+  signing provided by [SignPath.io](https://about.signpath.io), certificate
+  by [SignPath Foundation](https://signpath.org).
+- **macOS:** the app with this project's Apple Developer ID, and notarized by
+  Apple. Until the Developer ID is set up, it ships ad-hoc signed as
+  described above.
+- **Docker:** each image with [Sigstore](https://www.sigstore.dev) (keyless,
+  tied to the release workflow), checked with
+  `cosign verify ghcr.io/alxndrjhn/anchor-plus:<tag> --certificate-identity-regexp '^https://github.com/AlxndrJhn/anchor-plus/' --certificate-oidc-issuer https://token.actions.githubusercontent.com`.
+
+Each file attached to a release, and each image, also carries a signed record
+of the commit and workflow run it was built from:
+`gh attestation verify <file> --repo AlxndrJhn/anchor-plus`, or
+`gh attestation verify oci://ghcr.io/alxndrjhn/anchor-plus:<tag> --repo AlxndrJhn/anchor-plus`.
 
 - Committers and reviewers: [AlxndrJhn](https://github.com/AlxndrJhn)
 - Approvers: [AlxndrJhn](https://github.com/AlxndrJhn)

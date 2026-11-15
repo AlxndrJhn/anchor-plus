@@ -53,12 +53,17 @@ mac:
     - target: dmg
       arch: [universal]
   category: public.app-category.productivity
-  # Not signed with a certificate: ad-hoc signed, so it runs on Apple silicon
-  # once allowed (right-click > Open, or Privacy & Security).
-  identity: "-"
-  hardenedRuntime: false
+  # Signed with the Developer ID certificate in CSC_LINK and notarized with
+  # the App Store Connect key in APPLE_API_KEY*, which the release workflow
+  # sets from its secrets. Hardened runtime, with electron-builder's default
+  # entitlements for Electron. Without a certificate (a local build, or a
+  # release before the secrets are set) build it ad-hoc signed instead, as
+  # `pnpm run dist:mac` does: -c.mac.identity=- -c.mac.hardenedRuntime=false
+  # -c.mac.notarize=false. It then runs once allowed (right-click > Open, or
+  # Privacy & Security).
+  hardenedRuntime: true
   gatekeeperAssess: false
-  notarize: false
+  notarize: true
 dmg:
   artifactName: Anchor-${version}-${arch}.${ext}
 
