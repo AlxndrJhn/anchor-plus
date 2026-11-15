@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:anchor/core/database/app_database.dart';
 import 'package:anchor/core/network/connectivity_provider.dart';
+import 'package:anchor/core/network/server_addresses.dart';
 import 'package:anchor/core/network/server_config_provider.dart';
 import 'package:anchor/core/network/server_headers.dart';
 import 'package:anchor/core/session/active_user_id_provider.dart';
@@ -48,6 +49,35 @@ class FixedServerConfig extends ServerConfig {
   Future<String?> build() async => 'https://anchor.example.com';
 }
 
+class OneServerAddress extends ServerAddresses {
+  @override
+  Future<ServerAddressList?> build() async =>
+      const ServerAddressList(primary: 'https://anchor.example.com');
+}
+
+/// The home address answers at first; once a sync fails there, only the
+/// VPN does.
+class HomeAndAwayAddresses extends ServerAddresses {
+  static const away = 'https://anchor.example.ts.net';
+
+  /// Whether each check was forced.
+  final checks = <bool>[];
+
+  @override
+  Future<ServerAddressList?> build() async => const ServerAddressList(
+    primary: 'https://anchor.example.com',
+    others: [away],
+  );
+
+  @override
+  Future<String?> check({bool force = false}) async {
+    checks.add(force);
+    final list = (await future)!;
+    if (checks.length > 1) state = AsyncData(list.copyWith(lastWorking: away));
+    return state.value!.active;
+  }
+}
+
 class NoSelfSignedCert extends AllowSelfSignedCert {
   @override
   Future<bool> build() async => false;
@@ -91,12 +121,14 @@ void main() {
   ProviderContainer start([
     SyncCompatibility compatibility = SyncCompatibility.ok,
     ActiveUserId Function() user = SignedIn.new,
+    ServerAddresses Function() addresses = OneServerAddress.new,
   ]) {
     final started = ProviderContainer(
       overrides: [
         syncServiceProvider.overrideWithValue(service),
         syncEventsProvider.overrideWithValue(QuietSyncEvents()),
         serverConfigProvider.overrideWith(FixedServerConfig.new),
+        serverAddressesProvider.overrideWith(addresses),
         allowSelfSignedCertProvider.overrideWith(NoSelfSignedCert.new),
         savedServerHeadersProvider.overrideWith(NoServerHeaders.new),
         syncCompatibilityProvider.overrideWith((ref) async => compatibility),
@@ -135,6 +167,30 @@ void main() {
 
     await manager().requestSync();
     expect(service.runs, hasLength(1));
+  });
+
+  test('a sync that can\'t reach the server tries again on another of its '
+      'addresses', () async {
+    final addresses = HomeAndAwayAddresses();
+    container = start(SyncCompatibility.ok, SignedIn.new, () => addresses);
+
+    final syncing = manager().requestSync();
+    await pumpEventQueue();
+    expect(addresses.checks, [true], reason: 'the first sync asks them all');
+    service.runs.single.completeError(
+      DioException(
+        requestOptions: RequestOptions(),
+        type: DioExceptionType.connectionTimeout,
+      ),
+    );
+    await pumpEventQueue();
+    // Asked again at once, so the next sync trusts the answer.
+    expect(addresses.checks, [true, true, false]);
+    expect(service.runs, hasLength(2), reason: 'synced again on the VPN');
+
+    service.runs.last.complete();
+    expect(await syncing, isTrue);
+    expect(container.read(serverUrlProvider), HomeAndAwayAddresses.away);
   });
 
   test('a failed sync is reported until one works', () async {

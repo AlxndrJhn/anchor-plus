@@ -14,7 +14,9 @@ import '../../../core/database/app_database.dart';
 import '../../../core/logging/app_logger.dart';
 import '../../../core/logging/log_tags.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/network/server_addresses.dart';
 import '../../../core/network/server_headers.dart';
+import '../../../core/network/server_probe.dart';
 import '../../../core/session/active_user_id_provider.dart';
 import '../../../core/session/session_expired_provider.dart';
 import '../../../core/storage/storage_keys.dart';
@@ -102,14 +104,27 @@ Future<void> runReminderCheck() async {
 
   const storage = FlutterSecureStorage();
   final saved = await readAllStorage(storage);
-  final serverUrl = saved[StorageKeys.serverUrl];
+  final addresses = ServerAddressList.fromStorage(saved);
   final userId = _userIdOf(saved[StorageKeys.userData]);
-  if (serverUrl == null ||
-      serverUrl.isEmpty ||
+  if (addresses == null ||
       userId == null ||
       saved[StorageKeys.accessToken] == null) {
     return;
   }
+  final allowSelfSigned = saved[StorageKeys.allowSelfSignedCert] == 'true';
+  final savedHeaders = ServerHeaders.fromJson(saved[StorageKeys.serverHeaders]);
+  // The app's own sync remembers the address it switches to.
+  final serverUrl = addresses.hasOthers
+      ? await pickReachableAddress(
+              addresses.all,
+              (url) => probeServerAddress(
+                url,
+                allowSelfSigned: allowSelfSigned,
+                headers: headersForAddress(savedHeaders, addresses, url),
+              ),
+            ) ??
+            addresses.active
+      : addresses.active;
 
   final container = ProviderContainer();
   final db = AppDatabase(userId);
@@ -129,12 +144,8 @@ Future<void> runReminderCheck() async {
     final api = SyncApi(
       createApiDio(
         serverUrl,
-        allowSelfSigned: saved[StorageKeys.allowSelfSignedCert] == 'true',
-        headers:
-            ServerHeaders.fromJson(
-              saved[StorageKeys.serverHeaders],
-            )?.forServer(serverUrl) ??
-            const {},
+        allowSelfSigned: allowSelfSigned,
+        headers: headersForAddress(savedHeaders, addresses, serverUrl),
         storage: storage,
         session: container.read(sessionExpiredProvider.notifier),
       ),

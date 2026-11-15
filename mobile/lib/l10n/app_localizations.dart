@@ -7245,6 +7245,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'From gallery'**
   String get scanFromGallery;
+
+  /// Settings section header for the server this phone syncs with.
+  ///
+  /// In en, this message translates to:
+  /// **'Server'**
+  String get settingsServer;
+
+  /// Settings row under Server that opens the list of the server's addresses.
+  ///
+  /// In en, this message translates to:
+  /// **'Addresses'**
+  String get settingsServerAddresses;
+
+  /// Under the Addresses row in Settings when the server has several addresses: the one requests go to now.
+  ///
+  /// In en, this message translates to:
+  /// **'In use: {address}'**
+  String settingsServerAddressInUse(String address);
+
+  /// Title of the screen listing the addresses of the one server this phone syncs with.
+  ///
+  /// In en, this message translates to:
+  /// **'Server addresses'**
+  String get serverAddressesTitle;
+
+  /// Section header above the list of the server's addresses, in the order the app tries them.
+  ///
+  /// In en, this message translates to:
+  /// **'Tried in this order'**
+  String get serverAddressesOrder;
+
+  /// Explanation under the list of server addresses.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more addresses for this same server, like its address at home and one through a VPN for when you’re away. The app tries them in order and uses the first that answers. Your notes and account are the same on every address.'**
+  String get serverAddressesHelp;
+
+  /// Under the first address in the list of server addresses: the one the server was connected with.
+  ///
+  /// In en, this message translates to:
+  /// **'Main address'**
+  String get serverAddressesMain;
+
+  /// Under the address in the list of server addresses that requests go to now.
+  ///
+  /// In en, this message translates to:
+  /// **'In use'**
+  String get serverAddressesInUse;
+
+  /// Under the first address in the list of server addresses when it is also the one in use.
+  ///
+  /// In en, this message translates to:
+  /// **'Main address · In use'**
+  String get serverAddressesMainInUse;
+
+  /// Screen reader label of the button that tries this address earlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {address} up'**
+  String serverAddressesMoveUp(String address);
+
+  /// Screen reader label of the button that tries this address later.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {address} down'**
+  String serverAddressesMoveDown(String address);
+
+  /// Screen reader label of the button that takes this address off the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {address}'**
+  String serverAddressesRemove(String address);
+
+  /// Section header and button on the server addresses screen that add another address of the same server.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get serverAddressesAdd;
+
+  /// Example shown in the empty field for another server address.
+  ///
+  /// In en, this message translates to:
+  /// **'http://192.168.1.20:3000'**
+  String get serverAddressesAddHint;
+
+  /// Error under the new address field when the address is already one of the server's.
+  ///
+  /// In en, this message translates to:
+  /// **'This address is already in the list'**
+  String get serverAddressesAlreadyAdded;
+
+  /// Button that asks every server address at once and uses the first that answers.
+  ///
+  /// In en, this message translates to:
+  /// **'Check addresses now'**
+  String get serverAddressesCheck;
+
+  /// The Check addresses now button while the addresses are being asked.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get serverAddressesChecking;
+
+  /// Message after checking the server addresses: the one now in use.
+  ///
+  /// In en, this message translates to:
+  /// **'Using {address}'**
+  String serverAddressesUsing(String address);
+
+  /// Message after checking the server addresses when none of them answered.
+  ///
+  /// In en, this message translates to:
+  /// **'No address answered. Still using {address}'**
+  String serverAddressesNoneAnswered(String address);
+
+  /// Shown on the server addresses screen when no server is connected.
+  ///
+  /// In en, this message translates to:
+  /// **'No server connected.'**
+  String get serverAddressesNone;
 }
 
 class _AppLocalizationsDelegate

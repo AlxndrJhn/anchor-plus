@@ -4786,4 +4786,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanFromGallery => 'From gallery';
+
+  @override
+  String get settingsServer => 'Server';
+
+  @override
+  String get settingsServerAddresses => 'Addresses';
+
+  @override
+  String settingsServerAddressInUse(String address) {
+    return 'In use: $address';
+  }
+
+  @override
+  String get serverAddressesTitle => 'Server addresses';
+
+  @override
+  String get serverAddressesOrder => 'Tried in this order';
+
+  @override
+  String get serverAddressesHelp =>
+      'Add more addresses for this same server, like its address at home and one through a VPN for when you’re away. The app tries them in order and uses the first that answers. Your notes and account are the same on every address.';
+
+  @override
+  String get serverAddressesMain => 'Main address';
+
+  @override
+  String get serverAddressesInUse => 'In use';
+
+  @override
+  String get serverAddressesMainInUse => 'Main address · In use';
+
+  @override
+  String serverAddressesMoveUp(String address) {
+    return 'Move $address up';
+  }
+
+  @override
+  String serverAddressesMoveDown(String address) {
+    return 'Move $address down';
+  }
+
+  @override
+  String serverAddressesRemove(String address) {
+    return 'Remove $address';
+  }
+
+  @override
+  String get serverAddressesAdd => 'Add address';
+
+  @override
+  String get serverAddressesAddHint => 'http://192.168.1.20:3000';
+
+  @override
+  String get serverAddressesAlreadyAdded =>
+      'This address is already in the list';
+
+  @override
+  String get serverAddressesCheck => 'Check addresses now';
+
+  @override
+  String get serverAddressesChecking => 'Checking…';
+
+  @override
+  String serverAddressesUsing(String address) {
+    return 'Using $address';
+  }
+
+  @override
+  String serverAddressesNoneAnswered(String address) {
+    return 'No address answered. Still using $address';
+  }
+
+  @override
+  String get serverAddressesNone => 'No server connected.';
 }
