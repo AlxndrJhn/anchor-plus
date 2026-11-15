@@ -60,6 +60,28 @@ export const QuotaConfig = registerAs('quota', () => ({
   plusMb: megabytes(process.env.STORAGE_QUOTA_PLUS_MB),
 }));
 
+/**
+ * Moving notes straight from Google Keep: the person exports Keep with Google
+ * Takeout into their Drive, picks the export in the Google Picker, and the
+ * server fetches and imports it. Needs a Google Cloud project with the Drive
+ * and Picker APIs: GOOGLE_DRIVE_IMPORT_CLIENT_ID (an OAuth web client),
+ * GOOGLE_DRIVE_IMPORT_API_KEY and GOOGLE_DRIVE_IMPORT_APP_ID (the project
+ * number). Off while any of them is unset. GOOGLE_DRIVE_IMPORT_MAX_MB caps
+ * the size of one export (default 20 GB).
+ */
+export const GoogleDriveImportConfig = registerAs('googleDriveImport', () => {
+  const clientId = process.env.GOOGLE_DRIVE_IMPORT_CLIENT_ID?.trim() || '';
+  const apiKey = process.env.GOOGLE_DRIVE_IMPORT_API_KEY?.trim() || '';
+  const appId = process.env.GOOGLE_DRIVE_IMPORT_APP_ID?.trim() || '';
+  return {
+    enabled: Boolean(clientId && apiKey && appId),
+    clientId,
+    apiKey,
+    appId,
+    maxMb: megabytes(process.env.GOOGLE_DRIVE_IMPORT_MAX_MB) ?? 20 * 1024,
+  };
+});
+
 /** Reading the text in note pictures, for search; PICTURE_TEXT=off stops it. */
 export const PictureTextConfig = registerAs('pictureText', () => ({
   enabled: process.env.PICTURE_TEXT?.trim().toLowerCase() !== 'off',
@@ -123,4 +145,5 @@ export const configurations = [
   PictureSearchConfig,
   MonitoringConfig,
   LiveConfig,
+  GoogleDriveImportConfig,
 ];

@@ -95,3 +95,44 @@ export async function importAttachment(
     })
     .json<NoteAttachment>();
 }
+
+export type KeepDriveConfig =
+  | { enabled: false }
+  | { enabled: true; clientId: string; apiKey: string; appId: string };
+
+export type KeepImportJob = {
+  id: string;
+  phase:
+    | "downloading"
+    | "reading"
+    | "notes"
+    | "attachments"
+    | "done"
+    | "failed";
+  done: number;
+  total: number;
+  notesCreated: number;
+  attachmentsImported: number;
+  skipped: { item: string; reason: string }[];
+  error?: string;
+};
+
+/** Whether this server can fetch a Keep export from Google Drive. */
+export function getKeepDriveConfig(): Promise<KeepDriveConfig> {
+  return api.get("api/import/google-keep/config").json<KeepDriveConfig>();
+}
+
+export function startKeepDriveImport(
+  fileIds: string[],
+  accessToken: string,
+): Promise<{ jobId: string }> {
+  return api
+    .post("api/import/google-keep/drive", { json: { fileIds, accessToken } })
+    .json<{ jobId: string }>();
+}
+
+export function getKeepImportJob(jobId: string): Promise<KeepImportJob> {
+  return api
+    .get(`api/import/google-keep/jobs/${encodeURIComponent(jobId)}`)
+    .json<KeepImportJob>();
+}

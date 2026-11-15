@@ -6,10 +6,12 @@ import { ExportController } from './export.controller';
 import { ExportService } from './export.service';
 import { ImportController } from './import.controller';
 import { ImportService } from './import.service';
+import { KeepDriveImportController } from './google-keep/keep-drive-import.controller';
+import { KeepDriveImportService } from './google-keep/keep-drive-import.service';
 
 @Module({
   imports: [AuthModule, NotesModule, SyncModule],
-  controllers: [ExportController, ImportController],
-  providers: [ExportService, ImportService],
+  controllers: [ExportController, ImportController, KeepDriveImportController],
+  providers: [ExportService, ImportService, KeepDriveImportService],
 })
 export class ImportExportModule {}

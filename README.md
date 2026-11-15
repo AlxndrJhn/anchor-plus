@@ -354,6 +354,10 @@ The [desktop app](#desktop-app) installs with winget too.
    | `DATA_DIR` | No | `/data` | Root directory for persisted uploads |
    | `STORAGE_QUOTA_FREE_MB` | No | (no limit) | How much each account on the Free plan may upload (pictures, recordings and files), in MB. For a server many people sign up to; admins change an account's plan or limit under Admin › People |
    | `STORAGE_QUOTA_PLUS_MB` | No | (no limit) | The same for accounts on the Plus plan |
+   | `GOOGLE_DRIVE_IMPORT_CLIENT_ID` | No | — | OAuth web client of a Google Cloud project, for **Move from Google Keep** (see [Moving from Google Keep](#moving-from-google-keep)). The feature is off until this, the API key and the app ID are all set |
+   | `GOOGLE_DRIVE_IMPORT_API_KEY` | No | — | API key of the same project, limited to the Google Picker API |
+   | `GOOGLE_DRIVE_IMPORT_APP_ID` | No | — | That project's number |
+   | `GOOGLE_DRIVE_IMPORT_MAX_MB` | No | `20480` | Largest Keep export the server fetches, in MB |
    | `PICTURE_TEXT` | No | `on` | `off` stops reading the text in pictures for search |
    | `PICTURE_SEARCH` | No | `on` | `off` stops offering search by what pictures show (Settings › Search) |
    | `PICTURE_SEARCH_MODEL_URL` | No | (Hugging Face) | Where to download its model (~380 MB) from, e.g. a mirror |
@@ -917,6 +921,35 @@ The resulting `anchor-export-YYYY-MM-DD.zip` contains:
 - the referenced attachments, stored within the `attachments` folder structure
 
 Restore the notes by uploading that file through the web UI. Go to **Settings**, then scroll down to the **Export & Import** section.
+
+### Moving from Google Keep
+
+**Settings › Import and export › Move from Keep** moves everything from Google Keep
+without downloading it to a phone or computer: Google Takeout puts the Keep export in
+your Google Drive, you pick it in the Google Picker, and the server fetches and imports
+it (notes, checklists, labels, colors, pictures and recordings; trashed notes stay
+behind). Anchor+ asks only for the `drive.file` permission, so it sees the files you
+pick and nothing else in your Drive. The Google token is used for the download and
+never stored. A link to `/settings?import=google-keep` opens it straight away.
+
+Google offers no API that reads Keep for personal accounts, which is why this goes
+through Takeout. Without the setup below, a Takeout ZIP can still be imported with
+**Import**.
+
+To turn it on for your server, in the [Google Cloud console](https://console.cloud.google.com/):
+
+1. Create a project and enable the **Google Drive API** and the **Google Picker API**.
+2. Under **Google Auth Platform**, set up the consent screen (External) and add the
+   scope `.../auth/drive.file`. It is a non-sensitive scope, so publishing the app
+   needs no security assessment.
+3. Create an **OAuth client ID** of type *Web application* with your `APP_URL` as an
+   authorized JavaScript origin → `GOOGLE_DRIVE_IMPORT_CLIENT_ID`.
+4. Create an **API key** restricted to the Google Picker API and your site →
+   `GOOGLE_DRIVE_IMPORT_API_KEY`.
+5. The project number (on the project's dashboard) → `GOOGLE_DRIVE_IMPORT_APP_ID`.
+
+The export is stored in the system's temporary folder while it is imported, so leave
+room there for the largest export you expect.
 
 ## Troubleshooting & Collecting Logs
 
