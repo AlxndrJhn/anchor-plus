@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { HTTPError } from "ky";
 import { useCallback } from "react";
 import { toast } from "@/components/ui/toast";
+import { translate } from "@/lib/i18n";
 import { firstName } from "@/lib/utils";
 import {
   getMe,
@@ -124,7 +125,11 @@ export function useLogin() {
     onSuccess: (data) => {
       if (data.access_token && data.refresh_token) {
         setAuth(data.user, data.access_token, data.refresh_token);
-        toast.success(`Welcome back, ${firstName(data.user.name)}`);
+        toast.success(
+          translate("auth.toasts")("welcomeBack", {
+            name: firstName(data.user.name),
+          }),
+        );
       }
     },
   });
@@ -137,7 +142,11 @@ export function usePasskeyLogin() {
     onSuccess: (data) => {
       if (data.access_token && data.refresh_token) {
         setAuth(data.user, data.access_token, data.refresh_token);
-        toast.success(`Welcome back, ${firstName(data.user.name)}`);
+        toast.success(
+          translate("auth.toasts")("welcomeBack", {
+            name: firstName(data.user.name),
+          }),
+        );
       }
     },
   });
@@ -151,7 +160,11 @@ export function useRegister() {
       // A pending account gets no tokens.
       if (data.access_token && data.refresh_token) {
         setAuth(data.user, data.access_token, data.refresh_token);
-        toast.success(`Welcome to Anchor+, ${firstName(data.user.name)}`);
+        toast.success(
+          translate("auth.toasts")("welcomeNew", {
+            name: firstName(data.user.name),
+          }),
+        );
       }
     },
   });

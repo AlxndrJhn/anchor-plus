@@ -1,3 +1,5 @@
+import { translate } from "@/lib/i18n";
+
 /** A word found in a picture, and where it is, in the picture's pixels. */
 export interface ImageWord {
   text: string;
@@ -148,7 +150,8 @@ function pictureSize(url: string) {
     const img = new Image();
     img.onload = () =>
       resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    img.onerror = () => reject(new Error("The picture didn't load"));
+    img.onerror = () =>
+      reject(new Error(translate("layout.api")("pictureNotLoaded")));
     img.src = url;
   });
 }

@@ -1,4 +1,7 @@
-import { format } from "date-fns";
+import { format as formatDate } from "date-fns";
+import { dateLocale } from "@/lib/i18n/date-locale";
+import { browserLanguages } from "@/lib/i18n/locales";
+import { currentLocale } from "@/lib/i18n/messages";
 import { usePreferencesStore } from "./store";
 
 /** How dates read across the app. "auto" follows the browser's language. */
@@ -68,8 +71,19 @@ const PATTERNS: Record<Exclude<DateDisplay, "auto">, DatePatterns> = {
   },
 };
 
-const browserLocale = () =>
-  typeof navigator === "undefined" ? "en-US" : navigator.language;
+/**
+ * The language "auto" formats follow: the browser’s, or the language chosen
+ * in Settings when it differs (German on an English browser reads 28.10.).
+ */
+const browserLocale = () => {
+  const browser = browserLanguages()[0] ?? "en-US";
+  const app = currentLocale();
+  return browser.toLowerCase().startsWith(app) ? browser : app;
+};
+
+/** date-fns’s format, with month and day names in the app’s language. */
+const format = (date: Date, pattern: string) =>
+  formatDate(date, pattern, { locale: dateLocale() });
 
 const dateOrders = new Map<string, Exclude<DateDisplay, "auto">>();
 

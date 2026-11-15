@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTagMap } from "@/features/tags/hooks";
@@ -83,6 +84,7 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
     },
     ref,
   ) => {
+    const t = useTranslations("notes.notesBoard");
     const isList = layout === "list";
     const tagMap = useTagMap();
     const boardRef = React.useRef<HTMLDivElement>(null);
@@ -100,19 +102,22 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
     const live = React.useRef({ groups, onReorder });
     live.current = { groups, onReorder };
     const canMove = drag.enabled;
-    const moveCard = React.useCallback((noteId: string, step: -1 | 1) => {
-      const { groups, onReorder } = live.current;
-      const group = groups.find(
-        (g) => !g.isFixed && g.notes.some((n) => n.id === noteId),
-      );
-      if (!group || !onReorder) return;
-      const ids = group.notes.map((n) => n.id);
-      const to = ids.indexOf(noteId) + step;
-      if (to < 0 || to >= ids.length) return;
-      refocus.current = noteId;
-      onReorder(noteId, moveItem(ids, ids.indexOf(noteId), to));
-      setAnnouncement(`Moved to ${to + 1} of ${ids.length}`);
-    }, []);
+    const moveCard = React.useCallback(
+      (noteId: string, step: -1 | 1) => {
+        const { groups, onReorder } = live.current;
+        const group = groups.find(
+          (g) => !g.isFixed && g.notes.some((n) => n.id === noteId),
+        );
+        if (!group || !onReorder) return;
+        const ids = group.notes.map((n) => n.id);
+        const to = ids.indexOf(noteId) + step;
+        if (to < 0 || to >= ids.length) return;
+        refocus.current = noteId;
+        onReorder(noteId, moveItem(ids, ids.indexOf(noteId), to));
+        setAnnouncement(t("movedTo", { position: to + 1, total: ids.length }));
+      },
+      [t],
+    );
     // The moved card is put back in the list; focus goes with it.
     // biome-ignore lint/correctness/useExhaustiveDependencies: runs when the order changes
     React.useEffect(() => {
@@ -343,6 +348,7 @@ function inPreviewOrder(
 }
 
 export function NotesBoardSkeleton({ loading }: { loading: boolean }) {
+  const t = useTranslations("notes.notesBoard");
   const shown = useDelayedFlag(loading);
   const boardRef = React.useRef<HTMLDivElement>(null);
   const rulerRef = React.useRef<HTMLDivElement>(null);
@@ -352,7 +358,7 @@ export function NotesBoardSkeleton({ loading }: { loading: boolean }) {
     <div
       ref={boardRef}
       role="status"
-      aria-label="Loading notes"
+      aria-label={t("loading")}
       className="relative"
     >
       <div

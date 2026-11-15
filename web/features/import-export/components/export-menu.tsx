@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, Download, FileText, FolderArchive } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,23 +10,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
+import { translate } from "@/lib/i18n";
 import { isServerless } from "@/lib/local-backend/mode";
 import { downloadExport } from "../api";
 import type { ExportFormat } from "../types";
 
 const ALL_CHOICES = [
-  {
-    format: "anchor",
-    label: "Anchor backup (.zip)",
-    hint: "Everything, to restore later: notes, tags and attachments",
-    icon: FolderArchive,
-  },
-  {
-    format: "markdown",
-    label: "Markdown files (.zip)",
-    hint: "Plain .md files for Obsidian, Nextcloud Notes and others",
-    icon: FileText,
-  },
+  { format: "anchor", icon: FolderArchive },
+  { format: "markdown", icon: FileText },
 ] as const;
 
 // The server writes the Markdown; without one there is only the backup.
@@ -34,23 +26,25 @@ const CHOICES = isServerless
   : ALL_CHOICES;
 
 function startExport(format: ExportFormat) {
+  const t = translate("settings.exportMenu");
   void toast
     .promise(downloadExport(format), {
-      loading: "Preparing your export…",
-      success: "Export downloaded",
-      error: "Couldn’t export your notes",
+      loading: t("preparing"),
+      success: t("downloaded"),
+      error: t("failed"),
       retry: () => startExport(format),
     })
     .catch(() => {});
 }
 
 export function ExportMenu() {
+  const t = useTranslations("settings.exportMenu");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="secondary">
           <Download aria-hidden />
-          Export
+          {t("export")}
           <ChevronDown aria-hidden className="-mr-1 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
@@ -63,9 +57,9 @@ export function ExportMenu() {
           >
             <choice.icon />
             <span className="grid gap-0.5 whitespace-normal leading-[1.35]">
-              {choice.label}
+              {t(`${choice.format}.label`)}
               <small className="text-muted-foreground text-small">
-                {choice.hint}
+                {t(`${choice.format}.hint`)}
               </small>
             </span>
           </DropdownMenuItem>

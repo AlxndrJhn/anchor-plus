@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { extendTailwindMerge } from "tailwind-merge";
 import { TAILWIND_THEME } from "@/lib/design/tokens";
+import { currentLocale } from "@/lib/i18n/messages";
 
 // tailwind-merge must know the theme's names, or text-meta is taken for a color.
 const twMerge = extendTailwindMerge({
@@ -20,9 +21,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const plural = (count: number, one: string, many = `${one}s`) =>
-  `${count} ${count === 1 ? one : many}`;
-
 export const firstName = (name: string) => name.split(" ")[0];
 
 /** First names, or the whole name where two people share a first name. */
@@ -38,10 +36,11 @@ export function shortNames(names: string[]) {
 /** “820 KB”, “3.4 MB”, “250 MB”, “20 GB”: how much is stored. */
 export function storageSize(bytes: number) {
   const MB = 1024 * 1024;
-  const tenths = (value: number) => {
-    const rounded = Math.round(value * 10) / 10;
-    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
-  };
+  // 3.4 MB, or 3,4 MB in German and Polish.
+  const tenths = (value: number) =>
+    new Intl.NumberFormat(currentLocale(), {
+      maximumFractionDigits: 1,
+    }).format(value);
   if (bytes < MB) return `${Math.round(bytes / 1024)} KB`;
   if (bytes < 1024 * MB) return `${tenths(bytes / MB)} MB`;
   return `${tenths(bytes / (1024 * MB))} GB`;

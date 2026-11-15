@@ -1,0 +1,188 @@
+{
+  "codeCopy": {
+    "code": "Code",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "selected": "Ausgewählt"
+  },
+  "drawing": {
+    "cleared": "Zeichnung gelöscht",
+    "saveFailed": "Zeichnung konnte nicht gespeichert werden",
+    "titleOnPicture": "Auf Bild zeichnen",
+    "title": "Bild zeichnen",
+    "tools": "Zeichenwerkzeuge",
+    "tool": {
+      "pen": "Stift",
+      "marker": "Marker",
+      "eraser": "Radierer",
+      "text": "Text",
+      "emoji": "Emoji"
+    },
+    "undoWithKey": "Rückgängig ({key})",
+    "redoWithKey": "Wiederholen ({key})",
+    "clear": "Leeren",
+    "padText": "Zeichenfläche: Klicke dorthin, wo der Text hin soll",
+    "padEmoji": "Zeichenfläche: Klicke dorthin, wo das Emoji hin soll",
+    "padDraw": "Zeichenfläche: Zeichne mit Maus, Finger oder Stift",
+    "textInput": "Text für die Zeichnung",
+    "insert": "Einfügen"
+  },
+  "emoji": {
+    "search": "Emoji suchen",
+    "categories": "Emoji-Kategorien",
+    "category": {
+      "recent": "Zuletzt",
+      "people": "Smileys & Personen",
+      "nature": "Tiere & Natur",
+      "food": "Essen & Trinken",
+      "activity": "Aktivitäten",
+      "travel": "Reisen & Orte",
+      "objects": "Objekte",
+      "symbols": "Symbole",
+      "flags": "Flaggen"
+    },
+    "loadFailed": "Emojis konnten nicht geladen werden",
+    "loading": "Emojis werden geladen…",
+    "none": "Kein Emoji gefunden",
+    "skinTone": "{emoji}: Hautton"
+  },
+  "flowchart": {
+    "edit": "Flussdiagramm bearbeiten",
+    "new": "Neues Flussdiagramm",
+    "help": "Ziehe Kästchen, um sie zu verschieben. Wähle ein Kästchen und ziehe einen seiner Punkte auf ein anderes Kästchen, um sie zu verbinden, oder klicke auf einen Punkt für den nächsten Schritt. Doppelklicke zum Schreiben.",
+    "removeFromNote": "Aus Notiz entfernen",
+    "addToNote": "Zur Notiz hinzufügen",
+    "newText": {
+      "box": "Schritt",
+      "round": "Ende",
+      "diamond": "Entscheidung"
+    },
+    "tools": "Flussdiagramm-Werkzeuge",
+    "add": {
+      "box": "Schritt hinzufügen",
+      "round": "Start oder Ende hinzufügen",
+      "diamond": "Entscheidung hinzufügen"
+    },
+    "addAfter": {
+      "box": "Schritt nach dem gewählten hinzufügen",
+      "round": "Start oder Ende nach dem gewählten hinzufügen",
+      "diamond": "Entscheidung nach dem gewählten hinzufügen"
+    },
+    "shapeLabel": "Form",
+    "makeIt": {
+      "box": "Zum Schritt machen",
+      "round": "Zu Start oder Ende machen",
+      "diamond": "Zur Entscheidung machen"
+    },
+    "shape": {
+      "box": "Schritt",
+      "round": "Start/Ende",
+      "diamond": "Entscheidung"
+    },
+    "deleteBox": "Kästchen löschen",
+    "deleteArrow": "Pfeil löschen",
+    "deleteWithKey": "{what} (Entf)",
+    "undoWithKey": "Rückgängig ({key})",
+    "redoWithKey": "Wiederholen ({key})",
+    "zoomOut": "Verkleinern",
+    "zoomIn": "Vergrößern",
+    "fit": "Ganzes Diagramm anzeigen",
+    "textInBox": "Text im Kästchen",
+    "textOnArrow": "Text am Pfeil",
+    "edgeLabel": "Beschriftung",
+    "canvasHelp": "{boxes, plural, one {# Kasten} other {# Kästen}}, {arrows, plural, one {# Pfeil} other {# Pfeile}}. Pfeiltasten verschieben den gewählten Kasten, Enter schreibt hinein, Tab fügt danach einen Schritt hinzu, Entf löscht ihn."
+  },
+  "highlight": {
+    "color": {
+      "yellow": "Gelb",
+      "green": "Grün",
+      "blue": "Blau",
+      "pink": "Pink",
+      "purple": "Violett"
+    },
+    "withKey": "Hervorheben ({key})",
+    "colors": "Markierungsfarben",
+    "withColorKey": "Mit {color} hervorheben ({key})",
+    "backToFormatting": "Zurück zur Formatierung",
+    "remove": "Markierung entfernen",
+    "format": {
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "underline": "Unterstrichen",
+      "strike": "Durchgestrichen"
+    },
+    "formatSelection": "Auswahl formatieren",
+    "clearFormatting": "Formatierung entfernen"
+  },
+  "inlineImage": {
+    "editCaption": "Bildunterschrift bearbeiten",
+    "addCaption": "Bildunterschrift hinzufügen",
+    "caption": "Bildunterschrift",
+    "cropTitle": "Bild zuschneiden",
+    "beingCropped": "Wird zugeschnitten",
+    "corner": {
+      "nw": "Ecke oben links",
+      "ne": "Ecke oben rechts",
+      "sw": "Ecke unten links",
+      "se": "Ecke unten rechts"
+    },
+    "reset": "Zurücksetzen",
+    "crop": "Zuschneiden",
+    "changeFailed": "Bild konnte nicht geändert werden",
+    "deleted": "Bild gelöscht",
+    "addFailed": "Bild konnte nicht hinzugefügt werden",
+    "openFailed": "Bild konnte nicht geöffnet werden",
+    "resizeLabel": "Ziehen, um die Bildgröße zu ändern",
+    "resize": "Ziehen zum Skalieren",
+    "menu": "Bild",
+    "viewFull": "In voller Größe ansehen",
+    "replace": "Ersetzen…",
+    "cropMenu": "Zuschneiden…",
+    "draw": "Darauf zeichnen…",
+    "mirrorHorizontally": "Horizontal spiegeln",
+    "mirrorVertically": "Vertikal spiegeln",
+    "editCaptionMenu": "Bildunterschrift bearbeiten…",
+    "addCaptionMenu": "Bildunterschrift hinzufügen…",
+    "fullWidth": "Volle Breite"
+  },
+  "liveImage": {
+    "errorScreenRefused": "Es wurde kein Bildschirm ausgewählt oder die Freigabe wurde nicht erlaubt.",
+    "errorScreenUnavailable": "Dieses Gerät kann hier seinen Bildschirm nicht teilen.",
+    "errorCameraRefused": "Die Kamera wurde nicht freigegeben. Erlaube sie in den Website-Einstellungen des Browsers und versuche es erneut.",
+    "errorCameraUnavailable": "Es konnte keine Kamera eingeschaltet werden.",
+    "errorMicRefused": "Das Mikrofon wurde nicht freigegeben. Erlaube es in den Website-Einstellungen des Browsers oder füge das Bild ohne Ton hinzu.",
+    "errorMicUnavailable": "Es konnte kein Mikrofon eingeschaltet werden.",
+    "addTitle": "Live-Bild hinzufügen",
+    "addHelp": "Zeigt eine Kamera oder den Bildschirm dieses Geräts live in der Notiz, auf jedem Gerät, das sie öffnet. Das Video läuft direkt zwischen den Geräten, solange Anchor hier geöffnet ist.",
+    "whatToShow": "Was gezeigt werden soll",
+    "camera": "Kamera",
+    "cameraHelp": "Eine Kamera dieses Geräts, die eingeschaltet wird, solange jemand zuschaut.",
+    "screen": "Bildschirm oder Fenster",
+    "screenHelp": "Geteilt, bis du es beendest oder Anchor hier schließt.",
+    "cameraN": "Kamera {n}",
+    "microphone": "Mikrofon",
+    "microphoneHelp": "Sendet auch den Ton dieses Geräts; du kannst ihn stummschalten, solange es live ist.",
+    "whichMicrophone": "Welches Mikrofon",
+    "usualMicrophone": "Das übliche",
+    "microphoneN": "Mikrofon {n}",
+    "opening": "Wird geöffnet…",
+    "previewHint": "Wähle die Kamera oder einen Bildschirm, um ihn hier zu sehen.",
+    "chooseScreen": "Bildschirm wählen…",
+    "turnCameraOn": "Kamera einschalten",
+    "addToNote": "Zur Notiz hinzufügen",
+    "deleted": "Live-Bild gelöscht",
+    "cropWhenVideo": "Zuschneiden geht erst, wenn das Video zu sehen ist",
+    "resizeLabel": "Ziehen, um die Größe des Live-Bilds zu ändern",
+    "resize": "Ziehen zum Skalieren",
+    "menu": "Live-Bild",
+    "cropMenu": "Zuschneiden…",
+    "fullWidth": "Volle Breite",
+    "muteMic": "Mikrofon stummschalten",
+    "unmuteMic": "Stummschaltung aufheben",
+    "stopScreen": "Bildschirmfreigabe beenden",
+    "turnCameraOff": "Kamera ausschalten",
+    "startFailed": "Video konnte nicht gestartet werden",
+    "shareAgain": "Bildschirm erneut teilen…",
+    "cropTitle": "Live-Bild zuschneiden"
+  }
+}

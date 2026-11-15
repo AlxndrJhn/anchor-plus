@@ -10,6 +10,7 @@ import {
   retryAllSaves,
 } from "@/features/notes/save-queues";
 import { useSyncStatus } from "@/features/sync/status";
+import { translate } from "@/lib/i18n";
 import { isServerless } from "@/lib/local-backend/mode";
 import { persistQueries } from "./query-cache";
 
@@ -58,11 +59,13 @@ export function OfflineSupport() {
       const check = async () => {
         if (!useSyncStatus.getState().online) return;
         if (await allSaved()) {
-          toast.success("Back online. All changes synced.", { id: "online" });
+          toast.success(translate("layout.offline")("synced"), {
+            id: "online",
+          });
           return;
         }
         if (Date.now() - since > SYNC_WAIT_MS) {
-          toast.info("Back online. Some changes are still waiting to sync.", {
+          toast.info(translate("layout.offline")("stillWaiting"), {
             id: "online",
           });
           return;

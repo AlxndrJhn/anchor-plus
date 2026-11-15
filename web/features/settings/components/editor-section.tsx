@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -23,18 +24,16 @@ import {
 } from "./settings-blocks";
 
 export function EditorSection() {
+  const t = useTranslations("settings.editor");
   const { editor, setEditorPreference } = usePreferencesStore();
   const [saveStatus, setSaveStatus] = useSaveStatus();
   const today = new Date();
   return (
-    <Section id="editor" title="Editor">
+    <Section id="editor" title={t("title")}>
       <Row>
-        <RowText
-          title="Note layout"
-          text="Clean puts tags under the text and folds the formatting bar away until you open it."
-        />
+        <RowText title={t("noteLayout")} text={t("noteLayoutText")} />
         <SegmentedControl<NoteLayout>
-          aria-label="Note layout"
+          aria-label={t("noteLayout")}
           size="sm"
           value={editor.noteLayout ?? "default"}
           onValueChange={(layout) => {
@@ -42,19 +41,15 @@ export function EditorSection() {
             setSaveStatus("saved");
           }}
           options={[
-            { value: "default", label: "Default" },
-            { value: "clean", label: "Clean" },
+            { value: "default", label: t("layoutDefault") },
+            { value: "clean", label: t("layoutClean") },
           ]}
         />
       </Row>
       <Row>
         <RowText
-          title={
-            <label htmlFor="sort-checked">
-              Move checked items to the bottom
-            </label>
-          }
-          text="Checked items move below the unchecked ones."
+          title={<label htmlFor="sort-checked">{t("sortChecked")}</label>}
+          text={t("sortCheckedText")}
           saved={<SaveStatus state={saveStatus} />}
         />
         <Switch
@@ -68,8 +63,8 @@ export function EditorSection() {
       </Row>
       <Row>
         <RowText
-          title={<label htmlFor="burn-deleted">Burn deleted notes</label>}
-          text="A deleted note burns away where it stood. Off, it just goes. On this device only."
+          title={<label htmlFor="burn-deleted">{t("burnDeleted")}</label>}
+          text={t("burnDeletedText")}
         />
         <Switch
           id="burn-deleted"
@@ -82,8 +77,10 @@ export function EditorSection() {
       </Row>
       <Row>
         <RowText
-          title="Insert today’s date"
-          text={`In a note, types the date, e.g. ${formatDate(today, editor.dateFormat)}. Typing /date does the same.`}
+          title={t("insertDate")}
+          text={t("insertDateText", {
+            example: formatDate(today, editor.dateFormat),
+          })}
         />
         <ShortcutRecorder
           id="date-shortcut"
@@ -96,12 +93,9 @@ export function EditorSection() {
         />
       </Row>
       <Row>
-        <RowText
-          title="Inserted date format"
-          text="How a date typed into a note reads."
-        />
+        <RowText title={t("dateFormat")} text={t("dateFormatText")} />
         <SegmentedControl<DateFormat>
-          aria-label="Inserted date format"
+          aria-label={t("dateFormat")}
           size="sm"
           value={editor.dateFormat ?? DEFAULT_DATE_FORMAT}
           onValueChange={(format) => {
@@ -115,10 +109,7 @@ export function EditorSection() {
         />
       </Row>
       <Row>
-        <RowText
-          title="Insert the date and time"
-          text="In a note, types the time with its offset from UTC, e.g. 2026-10-27T11:23:49+01:00."
-        />
+        <RowText title={t("insertDateTime")} text={t("insertDateTimeText")} />
         <ShortcutRecorder
           id="date-time-shortcut"
           value={editor.dateTimeShortcut ?? DEFAULT_DATE_TIME_SHORTCUT}
@@ -131,10 +122,8 @@ export function EditorSection() {
       </Row>
       <Row>
         <RowText
-          title={
-            <label htmlFor="single-key-shortcuts">Single-key shortcuts</label>
-          }
-          text="Keys like C for a new note, / to search, or F to pin, as in Google Keep. Off, only shortcuts with Ctrl or another modifier work. On this device only."
+          title={<label htmlFor="single-key-shortcuts">{t("singleKey")}</label>}
+          text={t("singleKeyText")}
         />
         <Switch
           id="single-key-shortcuts"
@@ -164,6 +153,7 @@ function ShortcutRecorder({
   isDefault: boolean;
   onChange: (shortcut: Shortcut | undefined) => void;
 }) {
+  const t = useTranslations("settings.editor");
   const [recording, setRecording] = React.useState(false);
   return (
     <div className="flex shrink-0 items-center gap-1.5">
@@ -173,8 +163,8 @@ function ShortcutRecorder({
         size="sm"
         aria-label={
           recording
-            ? "Press the new shortcut"
-            : `Shortcut ${value.label}, change`
+            ? t("pressNewShortcut")
+            : t("changeShortcut", { shortcut: value.label })
         }
         onClick={() => setRecording(true)}
         onBlur={() => setRecording(false)}
@@ -193,12 +183,12 @@ function ShortcutRecorder({
         }}
       >
         <kbd className="font-sans">
-          {recording ? "Press keys…" : value.label}
+          {recording ? t("pressKeys") : value.label}
         </kbd>
       </Button>
       {!isDefault && !recording && (
         <Button variant="quiet" size="sm" onClick={() => onChange(undefined)}>
-          Reset
+          {t("reset")}
         </Button>
       )}
     </div>

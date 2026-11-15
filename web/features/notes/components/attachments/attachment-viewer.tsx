@@ -17,6 +17,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { toast, toastHostRef } from "@/components/ui/toast";
 import {
@@ -58,6 +59,8 @@ export function Viewer({
   /** Where the note opens, when the viewer was opened from outside it. */
   noteHref?: string;
 }) {
+  const t = useTranslations("noteEditor.attachments.viewer");
+  const tc = useTranslations("common");
   // The last picture stays while the viewer fades out.
   const [last, setLast] = React.useState(id);
   if (id && id !== last) setLast(id);
@@ -92,16 +95,12 @@ export function Viewer({
       const { recognizeImageText } = await import("@/lib/image-text");
       const text = await recognizeImageText(blobUrl);
       if (!text.words.length) {
-        toast.error("No text found in this picture");
+        toast.error(t("noText"));
         return;
       }
       setFound({ pictureId: picture.id, text });
     } catch {
-      toast.error(
-        navigator.onLine
-          ? "Couldn’t read this picture"
-          : "Reading pictures needs a connection the first time",
-      );
+      toast.error(navigator.onLine ? t("readFailed") : t("readOffline"));
     } finally {
       setReading(false);
     }
@@ -127,12 +126,12 @@ export function Viewer({
     try {
       const labels = await getPictureLabels(picture.id, navigator.language);
       if (!labels.length) {
-        toast.error("This picture hasn’t been looked at yet. Try again soon.");
+        toast.error(t("notAnalyzed"));
         return;
       }
       setTags({ pictureId: picture.id, labels });
     } catch {
-      toast.error("Couldn’t get this picture’s tags");
+      toast.error(t("tagsFailed"));
     } finally {
       setFindingTags(false);
     }
@@ -182,7 +181,7 @@ export function Viewer({
                   {picture.originalFilename}
                 </DialogPrimitive.Title>
                 <div className="vw-count">
-                  {index + 1} of {pictures.length}
+                  {t("count", { index: index + 1, total: pictures.length })}
                 </div>
               </div>
               <div className="vw-actions">
@@ -190,7 +189,7 @@ export function Viewer({
                   <div className="vw-zoom">
                     <button
                       type="button"
-                      aria-label="Zoom out"
+                      aria-label={t("zoomOut")}
                       onClick={zoom.zoomOut}
                       disabled={!zoom.ready || !zoom.canZoomOut}
                     >
@@ -199,8 +198,8 @@ export function Viewer({
                     <button
                       type="button"
                       className="vw-pct"
-                      aria-label="Fit to screen"
-                      title="Fit to screen"
+                      aria-label={t("fit")}
+                      title={t("fit")}
                       onClick={zoom.reset}
                       disabled={!zoom.ready || !zoom.zoomed}
                     >
@@ -208,7 +207,7 @@ export function Viewer({
                     </button>
                     <button
                       type="button"
-                      aria-label="Zoom in"
+                      aria-label={t("zoomIn")}
                       onClick={zoom.zoomIn}
                       disabled={!zoom.ready || !zoom.canZoomIn}
                     >
@@ -218,7 +217,7 @@ export function Viewer({
                 )}
                 <button
                   type="button"
-                  aria-label="Grab image text"
+                  aria-label={t("grabImageText")}
                   aria-pressed={!!found}
                   onClick={grabText}
                   disabled={!blobUrl || reading}
@@ -230,15 +229,13 @@ export function Viewer({
                     <ScanText aria-hidden />
                   )}
                   <span className="vw-lbl">
-                    {reading ? "Reading…" : "Grab text"}
+                    {reading ? t("reading") : t("grabText")}
                   </span>
                 </button>
                 {pictureSearch?.enabled && (
                   <button
                     type="button"
-                    aria-label={
-                      tags ? "Hide detected tags" : "Show detected tags"
-                    }
+                    aria-label={tags ? t("hideTags") : t("showTags")}
                     aria-pressed={!!tags}
                     onClick={showTags}
                     disabled={findingTags}
@@ -249,41 +246,44 @@ export function Viewer({
                     ) : (
                       <Tags aria-hidden />
                     )}
-                    <span className="vw-lbl">Tags</span>
+                    <span className="vw-lbl">{t("tags")}</span>
                   </button>
                 )}
                 <button
                   type="button"
-                  aria-label="Download"
+                  aria-label={t("download")}
                   onClick={download}
                   disabled={!blobUrl}
                 >
                   <Download aria-hidden />
-                  <span className="vw-lbl">Download</span>
+                  <span className="vw-lbl">{t("download")}</span>
                 </button>
                 {canDelete(picture) && (
                   <button
                     type="button"
-                    aria-label="Delete"
+                    aria-label={tc("delete")}
                     onClick={() => onDelete(picture)}
                   >
                     <Trash2 aria-hidden />
-                    <span className="vw-lbl">Delete</span>
+                    <span className="vw-lbl">{tc("delete")}</span>
                   </button>
                 )}
                 {noteHref && (
                   <Link
                     href={noteHref}
                     className="vw-open"
-                    aria-label="Open note"
-                    title="Open note"
+                    aria-label={t("openNote")}
+                    title={t("openNote")}
                     onClick={() => onShow(null)}
                   >
                     <SquareArrowOutUpRight aria-hidden />
-                    <span className="vw-lbl">Open note</span>
+                    <span className="vw-lbl">{t("openNote")}</span>
                   </Link>
                 )}
-                <DialogPrimitive.Close className="vw-x" aria-label="Close">
+                <DialogPrimitive.Close
+                  className="vw-x"
+                  aria-label={tc("close")}
+                >
                   <X aria-hidden />
                 </DialogPrimitive.Close>
               </div>
@@ -298,7 +298,7 @@ export function Viewer({
                   ((text) => {
                     onGrabText(text);
                     onShow(null);
-                    toast.success("Text added to the note");
+                    toast.success(t("textAdded"));
                   })
                 }
               />
@@ -325,7 +325,7 @@ export function Viewer({
                   <button
                     type="button"
                     className="vw-nav"
-                    aria-label="Previous picture"
+                    aria-label={t("previous")}
                     disabled={pictures.length < 2}
                     onClick={() => go(-1)}
                   >
@@ -339,9 +339,9 @@ export function Viewer({
                     {error ? (
                       <div className="vw-fail">
                         <CircleAlert aria-hidden />
-                        Couldn’t load the picture
+                        {t("loadFailed")}
                         <button type="button" onClick={retry}>
-                          Try again
+                          {t("retry")}
                         </button>
                       </div>
                     ) : blobUrl ? (
@@ -358,7 +358,7 @@ export function Viewer({
                   <button
                     type="button"
                     className="vw-nav"
-                    aria-label="Next picture"
+                    aria-label={t("next")}
                     disabled={pictures.length < 2}
                     onClick={() => go(1)}
                   >
@@ -366,14 +366,14 @@ export function Viewer({
                   </button>
                 </div>
                 {tags ? (
-                  <ul className="vw-tags" aria-label="Detected tags">
+                  <ul className="vw-tags" aria-label={t("detectedTags")}>
                     {tags.labels.map((label) => {
                       const word = label.text ?? label.en;
                       return (
                         <li key={label.en}>
                           <Link
                             href={`/notes?q=${encodeURIComponent(word)}`}
-                            title={`Search for “${word}”`}
+                            title={t("searchFor", { word })}
                             onClick={() => onShow(null)}
                           >
                             {word}
@@ -384,11 +384,8 @@ export function Viewer({
                   </ul>
                 ) : (
                   <div className="vw-hint">
-                    <span className="dk">
-                      ← → to move · + − or wheel to zoom · 0 to fit · Esc to
-                      close
-                    </span>
-                    <span className="ph">Swipe to move</span>
+                    <span className="dk">{t("hintDesktop")}</span>
+                    <span className="ph">{t("hintTouch")}</span>
                   </div>
                 )}
               </>

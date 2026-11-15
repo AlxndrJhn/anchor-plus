@@ -1,4 +1,5 @@
 import { HIGHLIGHTS } from "@/lib/design/tokens";
+import { translate } from "@/lib/i18n";
 import {
   FLOWCHART_EMBED,
   flowchartLabel,
@@ -86,7 +87,8 @@ export function registerNoteFormats(Quill: QuillStatic) {
         node.style.setProperty("--note-image-width", `${image.width * 100}%`);
       const img = document.createElement("img");
       // Never empty: the picture is part of the note, not decoration.
-      img.alt = image.caption?.trim() || "Picture";
+      img.alt =
+        image.caption?.trim() || translate("noteHooks.quillFormats")("picture");
       img.draggable = false;
       node.appendChild(img);
       if (image.caption) {
@@ -127,7 +129,9 @@ export function registerNoteFormats(Quill: QuillStatic) {
       video.playsInline = true;
       video.setAttribute(
         "aria-label",
-        image.source === "screen" ? "Live screen" : "Live camera",
+        translate("noteHooks.quillFormats")(
+          image.source === "screen" ? "liveScreen" : "liveCamera",
+        ),
       );
       frame.appendChild(video);
       const status = document.createElement("span");
@@ -141,7 +145,7 @@ export function registerNoteFormats(Quill: QuillStatic) {
         '<span class="live-mark" aria-hidden="true"><span class="live-dot"></span>' +
         '<svg class="live-anchor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
         '<path d="M12 22V8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><circle cx="12" cy="5" r="3"/></svg></span>' +
-        '<span class="live-word">Live</span><span class="live-viewers" hidden></span>';
+        `<span class="live-word">${translate("noteHooks.quillFormats")("live")}</span><span class="live-viewers" hidden></span>`;
       frame.appendChild(badge);
       node.appendChild(frame);
       return node;
@@ -202,8 +206,11 @@ export function registerNoteFormats(Quill: QuillStatic) {
       pdf.type = "button";
       pdf.className = "scan-pdf";
       pdf.textContent = "PDF";
-      pdf.title = "Download PDF";
-      pdf.setAttribute("aria-label", "Download PDF");
+      pdf.title = translate("noteHooks.quillFormats")("downloadPdf");
+      pdf.setAttribute(
+        "aria-label",
+        translate("noteHooks.quillFormats")("downloadPdf"),
+      );
       pdf.contentEditable = "false";
       head.append(title, count, pdf);
       const pages = document.createElement("span");

@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { toast } from "@/components/ui/toast";
 import { useAuthStore } from "@/features/auth/store";
 import { useSyncStatus } from "@/features/sync/status";
+import { translate } from "@/lib/i18n";
 import { newId } from "@/lib/id";
 import { createNote, isRetryableError, saveNote } from "./api";
 import { type OutboxEntry, readOutbox, writeOutboxEntry } from "./outbox";
@@ -109,7 +110,7 @@ function unlinkedEditor(noteId: string): EditorLink {
     onFailed: (failure) => {
       if (failure.retryable) return;
       writeOutboxEntry(noteId, null);
-      toast.error("An edit made offline couldn’t be saved.");
+      toast.error(translate("noteHooks.saveQueues")("offlineEditFailed"));
     },
     onBusyChange: () => {},
     base: () => null,
@@ -163,9 +164,8 @@ export function keepConflictCopy(
   };
   keepNewNote(copyId, copy);
   sendNewNote(copyId, copy);
-  toast.info(
-    `“${draft.title || "Untitled"}” was changed elsewhere too. Your version is kept as a new note.`,
-  );
+  const t = translate("noteHooks.saveQueues");
+  toast.info(t("conflictCopyKept", { title: draft.title || t("untitled") }));
   return rebaseDraft(
     { ...draft, title: base.title, content: base.content },
     base,

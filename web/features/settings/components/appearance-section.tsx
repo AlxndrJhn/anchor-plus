@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import type * as React from "react";
 import { RadioCards } from "@/components/ui/radio-cards";
@@ -75,14 +76,10 @@ function SchemeThumb({ swatch }: { swatch: SchemeSwatch }) {
 
 const STYLES: {
   value: AppStyle;
-  label: string;
-  description: string;
   picture: React.ReactNode;
 }[] = [
   {
     value: "default",
-    label: "Default",
-    description: "Clean and soft",
     picture: (
       <StyleThumb
         card={{ borderRadius: 8, boxShadow: "0 2px 8px rgb(0 0 0 / .12)" }}
@@ -91,8 +88,6 @@ const STYLES: {
   },
   {
     value: "skeuomorphism",
-    label: "Skeuomorphism",
-    description: "Paper, linen and gloss",
     picture: (
       <StyleThumb
         page={{
@@ -110,8 +105,6 @@ const STYLES: {
   },
   {
     value: "neo-brutalism",
-    label: "Neo-Brutalism",
-    description: "Bold outlines, hard shadows",
     picture: (
       <StyleThumb
         card={{
@@ -124,8 +117,6 @@ const STYLES: {
   },
   {
     value: "lofi",
-    label: "Lo-fi",
-    description: "A pencil sketch, in greys",
     picture: (
       <StyleThumb
         page={{
@@ -163,6 +154,7 @@ function StyleThumb({
 }
 
 function SchemeAndStyle() {
+  const t = useTranslations("settings.appearance");
   const { resolvedTheme } = useTheme();
   const mode = resolvedTheme === "dark" ? "dark" : "light";
   const scheme = usePreferencesStore((s) => s.ui.colorScheme ?? "anchor");
@@ -172,15 +164,13 @@ function SchemeAndStyle() {
     <>
       <Row className="grid items-start gap-3.5">
         <RowText
-          title="Colour scheme"
+          title={t("colourScheme")}
           text={
-            style === "lofi"
-              ? "Lo-fi draws in its own greys; the scheme comes back with another style."
-              : "Popular palettes, each in a light and a dark version."
+            style === "lofi" ? t("colourSchemeLofi") : t("colourSchemeText")
           }
         />
         <RadioCards
-          aria-label="Colour scheme"
+          aria-label={t("colourScheme")}
           value={scheme}
           onValueChange={(value) => setUI("colorScheme", value)}
           className="grid-cols-[repeat(auto-fill,minmax(128px,1fr))]"
@@ -193,13 +183,18 @@ function SchemeAndStyle() {
       </Row>
       <CustomThemeEditor />
       <Row className="grid items-start gap-3.5">
-        <RowText title="Style" text="Shapes, shadows and type." />
+        <RowText title={t("style")} text={t("styleText")} />
         <RadioCards
-          aria-label="Style"
+          aria-label={t("style")}
           value={style}
           onValueChange={(value) => setUI("style", value)}
           className="grid-cols-4 max-md:grid-cols-2"
-          options={STYLES}
+          options={STYLES.map(({ value, picture }) => ({
+            value,
+            picture,
+            label: t(`styles.${value}.label`),
+            description: t(`styles.${value}.description`),
+          }))}
         />
       </Row>
     </>
@@ -207,23 +202,24 @@ function SchemeAndStyle() {
 }
 
 export function AppearanceSection() {
+  const t = useTranslations("settings.appearance");
   const { theme = "system", setTheme } = useTheme();
   const frameClass =
     "relative mb-2 h-16 overflow-hidden rounded-md shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--border)_80%,transparent)]";
   return (
-    <Section id="appearance" title="Appearance">
+    <Section id="appearance" title={t("title")}>
       <Row className="grid items-start gap-3.5">
-        <RowText title="Theme" text="Choose how Anchor+ looks." />
+        <RowText title={t("theme")} text={t("themeText")} />
         <RadioCards
-          aria-label="Theme"
+          aria-label={t("theme")}
           value={theme as "light" | "dark" | "system"}
           onValueChange={(v) => switchTheme(v, setTheme)}
           className="grid-cols-3 max-md:grid-cols-1"
           options={[
             {
               value: "light",
-              label: "Light",
-              description: "Always light",
+              label: t("light"),
+              description: t("lightText"),
               picture: (
                 <div className={frameClass}>
                   <ThemeThumb theme="light" />
@@ -232,8 +228,8 @@ export function AppearanceSection() {
             },
             {
               value: "dark",
-              label: "Dark",
-              description: "Always dark",
+              label: t("dark"),
+              description: t("darkText"),
               picture: (
                 <div className={frameClass}>
                   <ThemeThumb theme="dark" />
@@ -242,8 +238,8 @@ export function AppearanceSection() {
             },
             {
               value: "system",
-              label: "Match system",
-              description: "Follows your device",
+              label: t("system"),
+              description: t("systemText"),
               picture: (
                 <div className={frameClass}>
                   <div className="absolute inset-0">

@@ -12,6 +12,7 @@ import {
   Smile,
   Volleyball,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -63,6 +64,7 @@ export function EmojiPicker({
   recent: readonly string[];
   onPick: (unicode: string) => void;
 }) {
+  const t = useTranslations("editorMedia.emoji");
   const [all, setAll] = React.useState<Emoji[] | null>(null);
   const [failed, setFailed] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -253,23 +255,20 @@ export function EmojiPicker({
               setQuery("");
             }
           }}
-          placeholder="Search emoji"
-          aria-label="Search emoji"
+          placeholder={t("search")}
+          aria-label={t("search")}
           className="min-w-0 flex-1 border-0 bg-transparent p-0 text-small outline-none placeholder:text-note-muted"
         />
       </label>
       <div
         className="flex justify-between gap-0.5"
         role="toolbar"
-        aria-label="Emoji categories"
+        aria-label={t("categories")}
       >
         {(recent.length ? (["recent"] as EmojiCategoryId[]) : [])
           .concat(sections.filter((s) => s.id !== "recent").map((s) => s.id))
           .map((id) => {
-            const label =
-              id === "recent"
-                ? "Recent"
-                : (sections.find((s) => s.id === id)?.label ?? id);
+            const label = t(`category.${id}`);
             const isActive = !results && active === id;
             return (
               <button
@@ -296,11 +295,11 @@ export function EmojiPicker({
       >
         {failed ? (
           <p className="m-0 p-4 text-center text-note-muted text-small">
-            Couldn’t load the emojis
+            {t("loadFailed")}
           </p>
         ) : !all ? (
           <p className="m-0 p-4 text-center text-note-muted text-small">
-            Loading emojis…
+            {t("loading")}
           </p>
         ) : results ? (
           results.length ? (
@@ -309,7 +308,7 @@ export function EmojiPicker({
             </div>
           ) : (
             <p className="m-0 p-4 text-center text-note-muted text-small">
-              No emoji found
+              {t("none")}
             </p>
           )
         ) : (
@@ -317,10 +316,10 @@ export function EmojiPicker({
             <section
               key={section.id}
               data-section={section.id}
-              aria-label={section.label}
+              aria-label={t(`category.${section.id}`)}
             >
               <h3 className="sticky top-0 z-1 m-0 bg-note-surface px-1 py-1 font-medium text-note-muted text-xs">
-                {section.label}
+                {t(`category.${section.id}`)}
               </h3>
               <div className={grid}>
                 {section.emojis.map((emoji) =>
@@ -335,7 +334,7 @@ export function EmojiPicker({
         <div
           data-skin-menu
           role="menu"
-          aria-label={`${skinMenu.emoji.label}: skin tone`}
+          aria-label={t("skinTone", { emoji: skinMenu.emoji.label })}
           className="absolute z-10 flex -translate-x-1/2 -translate-y-full gap-0.5 rounded-full bg-popover p-1 shadow-[0_0_0_1px_var(--border),0_8px_24px_rgb(0_0_0/.18)]"
           style={{
             left: Math.min(

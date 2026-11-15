@@ -1,0 +1,209 @@
+{
+  "reminder": {
+    "recurrence": {
+      "none": "Nigdy",
+      "daily": "Codziennie",
+      "weekly": "Co tydzień",
+      "monthly": "Co miesiąc",
+      "yearly": "Co rok"
+    },
+    "presets": {
+      "later": "Później dzisiaj",
+      "tomorrow": "Jutro",
+      "weekend": "W weekend",
+      "monday": "W przyszły poniedziałek",
+      "week": "Za tydzień",
+      "month": "Za miesiąc"
+    },
+    "today": "Dzisiaj",
+    "tomorrow": "Jutro",
+    "inMinutes": "Za {count, plural, one {# minutę} few {# minuty} many {# minut} other {# minuty}}",
+    "inHours": "Za {count, plural, one {# godzinę} few {# godziny} many {# godzin} other {# godziny}}",
+    "inDays": "Za {count, plural, one {# dzień} few {# dni} many {# dni} other {# dni}}",
+    "repeatsDaily": "Powtarza się codziennie",
+    "repeatsWeekly": "Powtarza się co tydzień: {weekday}",
+    "repeatsMonthly": "Powtarza się co miesiąc, {day, selectordinal, other {#.}} dnia miesiąca",
+    "repeatsYearly": "Powtarza się co rok: {date}",
+    "none": "Brak przypomnienia",
+    "pickWhen": "Wybierz, kiedy przypomnieć",
+    "passed": "Ten czas już minął"
+  },
+  "history": {
+    "cause": {
+      "edit": "Wcześniejsza wersja",
+      "conflict": "Niezapisane",
+      "restore": "Przed przywróceniem"
+    },
+    "someone": "Ktoś",
+    "you": "Ty",
+    "dayAtTime": "{day}, {time}",
+    "today": "Dzisiaj",
+    "yesterday": "Wczoraj"
+  },
+  "drawing": {
+    "colors": {
+      "black": "Czarny",
+      "red": "Czerwony",
+      "orange": "Pomarańczowy",
+      "green": "Zielony",
+      "blue": "Niebieski",
+      "purple": "Fioletowy"
+    },
+    "sizes": {
+      "thin": "Cienki",
+      "medium": "Średni",
+      "thick": "Gruby"
+    }
+  },
+  "textStyle": {
+    "colors": {
+      "red": "Czerwony",
+      "orange": "Pomarańczowy",
+      "amber": "Bursztynowy",
+      "green": "Zielony",
+      "teal": "Morski",
+      "blue": "Niebieski",
+      "purple": "Fioletowy",
+      "pink": "Różowy",
+      "gray": "Szary"
+    },
+    "fonts": {
+      "serif": "Szeryfowa",
+      "monospace": "Monospace",
+      "comic": "Comic Sans",
+      "handwriting": "Pismo ręczne",
+      "typewriter": "Maszyna do pisania",
+      "rounded": "Zaokrąglona",
+      "slab": "Slab",
+      "marker": "Marker"
+    }
+  },
+  "emoji": {
+    "categories": {
+      "people": "Buźki i ludzie",
+      "nature": "Zwierzęta i natura",
+      "food": "Jedzenie i picie",
+      "activity": "Aktywność",
+      "travel": "Podróże i miejsca",
+      "objects": "Przedmioty",
+      "symbols": "Symbole",
+      "flags": "Flagi"
+    }
+  },
+  "flowchart": {
+    "start": "Start",
+    "step": "Krok",
+    "label": "Schemat blokowy",
+    "labelWithText": "Schemat blokowy: {text}"
+  },
+  "quillFormats": {
+    "picture": "Zdjęcie",
+    "liveScreen": "Ekran na żywo",
+    "liveCamera": "Kamera na żywo",
+    "live": "Na żywo",
+    "downloadPdf": "Pobierz PDF"
+  },
+  "scans": {
+    "scan": "Skan",
+    "pages": "{count, plural, one {# strona} few {# strony} many {# stron} other {# strony}}",
+    "profiles": {
+      "bw": "Czarno-biały",
+      "whiteboard": "Tablica",
+      "text": "Kolorowy tekst",
+      "color": "Pełny kolor"
+    }
+  },
+  "noteLock": {
+    "kinds": {
+      "biometric": {
+        "label": "Odcisk palca lub twarz",
+        "description": "W przeglądarce otwiera ją hasło do konta."
+      },
+      "pin": {
+        "label": "PIN",
+        "description": "Otwiera ją PIN Twoich notatek."
+      },
+      "pattern": {
+        "label": "Wzór",
+        "description": "Otwiera ją wzór Twoich notatek."
+      },
+      "tap": {
+        "label": "Samo dotknięcie",
+        "description": "Otwiera ją dotknięcie."
+      }
+    },
+    "pinHint": "Od 4 do 12 cyfr."
+  },
+  "liveHub": {
+    "deviceOn": "{app} na {system}",
+    "aBrowser": "przeglądarka"
+  },
+  "saveQueues": {
+    "offlineEditFailed": "Nie udało się zapisać zmiany wprowadzonej offline.",
+    "conflictCopyKept": "„{title}” została zmieniona także gdzie indziej. Twoja wersja zostaje jako nowa notatka.",
+    "untitled": "Bez tytułu"
+  },
+  "print": {
+    "locked": "Ta notatka jest zablokowana.",
+    "failed": "{count, plural, one {Nie udało się wydrukować notatki} few {Nie udało się wydrukować notatek} many {Nie udało się wydrukować notatek} other {Nie udało się wydrukować notatek}}"
+  },
+  "checklistActions": {
+    "couldNotUndo": "Nie udało się cofnąć",
+    "uncheck": "{count, plural, one {Pozycja odznaczona} few {# pozycje odznaczone} many {# pozycji odznaczonych} other {# pozycje odznaczone}}",
+    "delete": "{count, plural, one {Zaznaczona pozycja usunięta} few {# zaznaczone pozycje usunięte} many {# zaznaczonych pozycji usuniętych} other {# zaznaczone pozycje usunięte}}",
+    "sort": "{count, plural, one {Pozycja posortowana od A do Z} few {# pozycje posortowane od A do Z} many {# pozycji posortowanych od A do Z} other {# pozycje posortowane od A do Z}}",
+    "sortAlready": "Już posortowano od A do Z"
+  },
+  "noteActions": {
+    "archived": "Notatka zarchiwizowana",
+    "archiveFailed": "Nie udało się zarchiwizować notatki",
+    "unarchived": "Notatka przywrócona z archiwum",
+    "unarchiveFailed": "Nie udało się przywrócić notatki z archiwum",
+    "movedToTrash": "Notatka przeniesiona do kosza",
+    "removedFromYours": "Notatka usunięta z Twoich notatek",
+    "trashFailed": "Nie udało się przenieść notatki do kosza",
+    "removeFailed": "Nie udało się usunąć notatki",
+    "restored": "Notatka przywrócona",
+    "followIt": "Pokaż",
+    "restoreFailed": "Nie udało się przywrócić notatki",
+    "permanentlyDeleted": "Notatka usunięta na zawsze",
+    "deleteFailed": "Nie udało się usunąć notatki"
+  },
+  "liveImages": {
+    "whoDefault": "urządzenie, które ją dodało",
+    "starting": "Włączanie kamery…",
+    "connecting": "Łączenie z: {who}…",
+    "waiting": "Czekanie na: {who}. Otwórz tam Anchor, aby ją pokazać.",
+    "pausedScreen": "{who}: ekran nie jest teraz udostępniany.",
+    "pausedCamera": "{who}: kamera nie może teraz pokazać obrazu.",
+    "screenNotShared": "Twój ekran nie jest udostępniany.",
+    "cameraOff": "Twoja kamera jest wyłączona.",
+    "denied": "To urządzenie nie dostało zgody na użycie kamery.",
+    "shareScreen": "Udostępnij ekran",
+    "turnCameraOn": "Włącz kamerę",
+    "tryAgain": "Spróbuj ponownie",
+    "unmuteMic": "Włącz mikrofon",
+    "muteMic": "Wycisz mikrofon",
+    "micMuted": "Mikrofon wyciszony",
+    "soundOn": "Włącz dźwięk",
+    "soundOff": "Wyłącz dźwięk",
+    "unsupported": "Ta przeglądarka nie potrafi pokazać obrazów na żywo.",
+    "shareFailed": "Nie udało się udostępnić ekranu",
+    "cameraFailed": "Nie udało się włączyć kamery",
+    "stillAdded": "Klatka dodana do załączników",
+    "stillFailed": "Nie udało się zachować klatki z obrazu na żywo"
+  },
+  "noteEditor": {
+    "changedElsewhereKept": "Ta notatka została zmieniona gdzie indziej. Twoja wersja zostaje, a tamta jest w Historii.",
+    "history": "Historia",
+    "changedElsewhereReloaded": "Ta notatka została zmieniona gdzie indziej i wczytana ponownie.",
+    "reminderRemoved": "Przypomnienie usunięte"
+  },
+  "attachmentBlob": {
+    "failedToLoad": "Nie udało się wczytać"
+  },
+  "publicLink": {
+    "edit": "Publiczna: każdy z linkiem może edytować",
+    "view": "Publiczna: każdy z linkiem może wyświetlać"
+  }
+}

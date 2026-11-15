@@ -64,6 +64,7 @@ import '../../sync/data/sync_compatibility.dart';
 import '../../sync/presentation/compatibility_messages.dart';
 import 'custom_theme_sheet.dart';
 import 'editor_preferences_controller.dart';
+import 'language_controller.dart';
 import 'quick_actions_section.dart';
 import 'theme_preferences_controller.dart';
 
@@ -223,12 +224,24 @@ class _AppearanceSection extends ConsumerWidget {
     final scheme = ref.watch(colorSchemeControllerProvider);
     final style = ref.watch(appStyleControllerProvider);
     final customTheme = ref.watch(customThemeControllerProvider);
+    final language = ref.watch(appLanguageControllerProvider);
     final l10n = context.l10n;
     return Section(
       label: l10n.settingsAppearance,
       child: GroupedList(
         children: [
           const _ThemePicker(),
+          GroupedListTile(
+            icon: LucideIcons.languages,
+            label: l10n.settingsLanguage,
+            value: appLanguageNames[language] ?? l10n.settingsLanguageSystem,
+            showChevron: true,
+            onTap: () => showAnchorSheet<void>(
+              context,
+              semanticLabel: l10n.settingsLanguage,
+              builder: (_) => const _LanguagePickerSheet(),
+            ),
+          ),
           GroupedListTile(
             icon: LucideIcons.swatchBook,
             label: l10n.settingsColorScheme,
@@ -451,6 +464,50 @@ class _StylePickerSheet extends ConsumerWidget {
                       ref
                           .read(appStyleControllerProvider.notifier)
                           .setStyle(style);
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SheetBottomSpace(),
+      ],
+    );
+  }
+}
+
+class _LanguagePickerSheet extends ConsumerWidget {
+  const _LanguagePickerSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(appLanguageControllerProvider);
+    final l10n = context.l10n;
+    final options = <(String?, String)>[
+      (null, l10n.settingsLanguageSystem),
+      ...appLanguageNames.entries.map((entry) => (entry.key, entry.value)),
+    ];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SheetHeader(title: l10n.settingsLanguage, showDone: true),
+        Flexible(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GroupedList(
+              semanticLabel: l10n.settingsLanguage,
+              children: [
+                for (final (code, name) in options)
+                  GroupedListTile(
+                    label: name,
+                    checked: code == selected,
+                    onTap: () {
+                      if (code == selected) return;
+                      Haptics.selection();
+                      ref
+                          .read(appLanguageControllerProvider.notifier)
+                          .setLanguage(code);
                     },
                   ),
               ],

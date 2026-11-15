@@ -1,4 +1,7 @@
+"use client";
+
 import { Hash, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 import { tagColorStyle } from "../utils";
@@ -20,6 +23,7 @@ export function TagChip({
   removeLabel,
   className,
 }: TagChipProps) {
+  const t = useTranslations("settings.tags");
   const small = size === "sm";
   return (
     <span
@@ -46,7 +50,7 @@ export function TagChip({
       {onRemove && (
         <button
           type="button"
-          aria-label={removeLabel ?? "Remove tag"}
+          aria-label={removeLabel ?? t("removeTag")}
           onClick={onRemove}
           className="inline-grid cursor-pointer place-items-center rounded-pill bg-transparent p-0.5 text-note-muted hover:text-foreground [&_svg]:size-3"
         >

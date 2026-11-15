@@ -2,6 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "@/components/ui/toast";
 import { canGoBackInApp } from "@/lib/app-history";
@@ -37,6 +38,8 @@ export function useNoteActions({
   /** Where the caret is in the note, if it has been in it. */
   readCaret: () => NoteCaret | null;
 }) {
+  const t = useTranslations("noteHooks.noteActions");
+  const tc = useTranslations("common");
   const router = useRouter();
   const refreshLists = useRefreshNotes();
   const [confirmPermanentDelete, setConfirmPermanentDelete] = useState(false);
@@ -63,15 +66,15 @@ export function useNoteActions({
     onSuccess: () => {
       refreshLists();
       leave();
-      toast.success("Note archived", {
+      toast.success(t("archived"), {
         undo: () =>
           unarchiveNote(noteId).then(refreshLists, () =>
-            toast.error("Couldn’t undo that"),
+            toast.error(tc("couldNotUndo")),
           ),
       });
     },
     onError: () =>
-      toast.error("Couldn’t archive note", {
+      toast.error(t("archiveFailed"), {
         retry: () => archiveMutation.mutate(),
       }),
   });
@@ -82,10 +85,10 @@ export function useNoteActions({
       refreshLists();
       setIsArchived(false);
       await refetchNote();
-      toast.success("Note unarchived", {
+      toast.success(t("unarchived"), {
         undo: async () => {
           await archiveNote(noteId).catch(() =>
-            toast.error("Couldn’t undo that"),
+            toast.error(tc("couldNotUndo")),
           );
           setIsArchived(true);
           refreshLists();
@@ -94,7 +97,7 @@ export function useNoteActions({
       });
     },
     onError: () =>
-      toast.error("Couldn’t unarchive note", {
+      toast.error(t("unarchiveFailed"), {
         retry: () => unarchiveMutation.mutate(),
       }),
   });
@@ -129,7 +132,7 @@ export function useNoteActions({
     onSuccess: (_, __, context) => {
       refreshLists();
       if (isOwner)
-        toast.success("Note moved to trash", {
+        toast.success(t("movedToTrash"), {
           // Undo opens the note again, the caret where it was.
           undo: () =>
             restoreNote(noteId).then(
@@ -138,18 +141,15 @@ export function useNoteActions({
                 if (context?.caret) returnCaretTo(noteId, context.caret);
                 router.push(`/notes/${noteId}`);
               },
-              () => toast.error("Couldn’t undo that"),
+              () => toast.error(tc("couldNotUndo")),
             ),
         });
-      else toast.success("Note removed from your notes");
+      else toast.success(t("removedFromYours"));
     },
     onError: () => {
-      toast.error(
-        isOwner ? "Couldn’t move note to trash" : "Couldn’t remove note",
-        {
-          retry: () => trashMutation.mutate(),
-        },
-      );
+      toast.error(isOwner ? t("trashFailed") : t("removeFailed"), {
+        retry: () => trashMutation.mutate(),
+      });
     },
   });
 
@@ -159,17 +159,17 @@ export function useNoteActions({
       const trashedAt = note?.stateChangedAt;
       refreshLists();
       await refetchNote();
-      toast.success("Note restored", {
+      toast.success(t("restored"), {
         undo: async () => {
           await deleteNote(noteId, trashedAt).catch(() =>
-            toast.error("Couldn’t undo that"),
+            toast.error(tc("couldNotUndo")),
           );
           refreshLists();
           refetchNote();
         },
         // Goes to the list the note is kept in, which scrolls to its card.
         action: {
-          label: "Follow it",
+          label: t("followIt"),
           onClick: () => {
             save();
             followCard(noteId);
@@ -179,7 +179,7 @@ export function useNoteActions({
       });
     },
     onError: () =>
-      toast.error("Couldn’t restore note", {
+      toast.error(t("restoreFailed"), {
         retry: () => restoreMutation.mutate(),
       }),
   });
@@ -189,10 +189,10 @@ export function useNoteActions({
     onMutate: () => setConfirmPermanentDelete(false),
     onSuccess: () => {
       refreshLists();
-      toast.success("Note permanently deleted");
+      toast.success(t("permanentlyDeleted"));
     },
     onError: () => {
-      toast.error("Couldn’t delete note", {
+      toast.error(t("deleteFailed"), {
         retry: () => permanentDeleteMutation.mutate(),
       });
     },

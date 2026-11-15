@@ -1,4 +1,5 @@
 import { api, getJson } from "@/lib/api/client";
+import { translate } from "@/lib/i18n";
 import type { LiveImage, LiveSource } from "./live-images";
 
 /**
@@ -136,8 +137,10 @@ export function liveDeviceLabel(): string {
             ? "Chrome"
             : /Safari\//.test(agent)
               ? "Safari"
-              : "a browser";
-  return system ? `${app} on ${system}` : app;
+              : translate("noteHooks.liveHub")("aBrowser");
+  return system
+    ? translate("noteHooks.liveHub")("deviceOn", { app, system })
+    : app;
 }
 
 /** Whether this browser can show a live image's video at all. */

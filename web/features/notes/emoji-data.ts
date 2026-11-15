@@ -1,3 +1,5 @@
+import { translate } from "@/lib/i18n";
+
 // Every emoji, for the drawing pad's picker, grouped and searched as
 // WhatsApp does. The data (emojibase, English) ships with the app, so it
 // works offline, and is only loaded when the picker opens.
@@ -37,14 +39,62 @@ export const EMOJI_CATEGORIES: {
   label: string;
   groups: number[];
 }[] = [
-  { id: "people", label: "Smileys & people", groups: [0, 1] },
-  { id: "nature", label: "Animals & nature", groups: [3] },
-  { id: "food", label: "Food & drink", groups: [4] },
-  { id: "activity", label: "Activity", groups: [6] },
-  { id: "travel", label: "Travel & places", groups: [5] },
-  { id: "objects", label: "Objects", groups: [7] },
-  { id: "symbols", label: "Symbols", groups: [8] },
-  { id: "flags", label: "Flags", groups: [9] },
+  {
+    id: "people",
+    get label() {
+      return translate("noteHooks.emoji")("categories.people");
+    },
+    groups: [0, 1],
+  },
+  {
+    id: "nature",
+    get label() {
+      return translate("noteHooks.emoji")("categories.nature");
+    },
+    groups: [3],
+  },
+  {
+    id: "food",
+    get label() {
+      return translate("noteHooks.emoji")("categories.food");
+    },
+    groups: [4],
+  },
+  {
+    id: "activity",
+    get label() {
+      return translate("noteHooks.emoji")("categories.activity");
+    },
+    groups: [6],
+  },
+  {
+    id: "travel",
+    get label() {
+      return translate("noteHooks.emoji")("categories.travel");
+    },
+    groups: [5],
+  },
+  {
+    id: "objects",
+    get label() {
+      return translate("noteHooks.emoji")("categories.objects");
+    },
+    groups: [7],
+  },
+  {
+    id: "symbols",
+    get label() {
+      return translate("noteHooks.emoji")("categories.symbols");
+    },
+    groups: [8],
+  },
+  {
+    id: "flags",
+    get label() {
+      return translate("noteHooks.emoji")("categories.flags");
+    },
+    groups: [9],
+  },
 ];
 
 /** Splits emojis into the categories, in emojibase's order. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import type { RefObject } from "react";
 import { toast } from "@/components/ui/toast";
 import { getNote, saveNote } from "../api";
@@ -12,22 +13,19 @@ import { useRefreshNotes } from "./use-refresh-notes";
 const ACTIONS = {
   uncheck: {
     apply: (editor: RichTextEditorHandle) => editor.uncheckAll(),
-    message: (count: number) =>
-      count === 1 ? "Item unchecked" : `${count} items unchecked`,
+    message: "uncheck",
   },
   delete: {
     apply: (editor: RichTextEditorHandle) => editor.deleteChecked(),
-    message: (count: number) =>
-      count === 1 ? "Checked item deleted" : `${count} checked items deleted`,
+    message: "delete",
   },
   sort: {
     apply: (editor: RichTextEditorHandle) => editor.sortByName(),
-    message: (count: number) =>
-      count === 1 ? "Item sorted A to Z" : `${count} items sorted A to Z`,
+    message: "sort",
     /** Said when there was nothing to move. */
-    already: "Already in A to Z order",
+    already: "sortAlready",
   },
-};
+} as const;
 
 export interface ChecklistActions {
   getCounts: () => { items: number; checked: number } | null;
@@ -40,6 +38,7 @@ export function useChecklistActions(
   noteId: string,
   editorRef: RefObject<RichTextEditorHandle | null>,
 ): ChecklistActions {
+  const t = useTranslations("noteHooks.checklistActions");
   const queryClient = useQueryClient();
   const refreshLists = useRefreshNotes();
 
@@ -57,7 +56,7 @@ export function useChecklistActions(
       cacheSavedNote(queryClient, outcome.note);
       void refreshLists();
     } catch {
-      toast.error("Couldn’t undo that");
+      toast.error(t("couldNotUndo"));
     }
   };
 
@@ -65,10 +64,10 @@ export function useChecklistActions(
     const editor = editorRef.current;
     const edit = editor && action.apply(editor);
     if (!edit) {
-      if (editor && "already" in action) toast.success(action.already);
+      if (editor && "already" in action) toast.success(t(action.already));
       return;
     }
-    toast.success(action.message(edit.itemCount), {
+    toast.success(t(action.message, { count: edit.itemCount }), {
       undo: () => {
         if (!edit.undo() && edit.isClosed) void undoInSavedNote(edit);
       },

@@ -573,6 +573,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAppearance => 'Appearance';
 
   @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageSystem => 'Phone’s language';
+
+  @override
   String get settingsDensity => 'Density';
 
   @override

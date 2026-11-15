@@ -798,6 +798,14 @@
   "@settingsAppearance": {
     "description": "Section label in Settings for theme and density."
   },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Settings row and sheet title for the app’s language: the phone’s, English, German or Polish."
+  },
+  "settingsLanguageSystem": "Phone’s language",
+  "@settingsLanguageSystem": {
+    "description": "Language option that follows the phone’s language; the other options are each named in their own language."
+  },
   "settingsDensity": "Density",
   "@settingsDensity": {
     "description": "Setting for how tightly the app spaces notes and other items."
@@ -5721,7 +5729,11 @@
   "settingsAddToBar": "Put {action} in the top bar",
   "@settingsAddToBar": {
     "description": "Screen reader label of the + button by an action in Settings › In More.",
-    "placeholders": { "action": { "type": "String" } }
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
   },
   "settingsMoveAction": "Move {action}",
   "@settingsMoveAction": {
@@ -5736,7 +5748,11 @@
   "settingsRemoveFromBar": "Take {action} out of the top bar",
   "@settingsRemoveFromBar": {
     "description": "Screen reader label of the minus button by a quick action in Settings; it goes back to More.",
-    "placeholders": { "action": { "type": "String" } }
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
   },
   "settingsCopySetup": "Copy setup",
   "@settingsCopySetup": {

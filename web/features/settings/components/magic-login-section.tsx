@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link2, QrCode, RotateCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +44,7 @@ function useMinutesLeft(expiresAt: string | undefined) {
 
 /** The phone section's second tab: sign in to the app without a password. */
 export function MagicLoginPanel() {
+  const t = useTranslations("settings.magicLogin");
   const [isQrOpen, setIsQrOpen] = React.useState(false);
   const [shown, setShown] = React.useState<MagicLoginCode | null>(null);
   const minutesLeft = useMinutesLeft(shown?.expiresAt);
@@ -77,15 +79,13 @@ export function MagicLoginPanel() {
       setShown(magicLogin);
       setIsQrOpen(true);
     },
-    onError: () =>
-      toast.error("Couldn’t make a QR code", { retry: () => showQr.mutate() }),
+    onError: () => toast.error(t("qrFailed"), { retry: () => showQr.mutate() }),
   });
 
   const copy = (link: string) =>
     copyText(link).then(
-      () =>
-        toast.success("Magic link copied. Open it on your phone to sign in."),
-      () => toast.error("Couldn’t copy the magic link"),
+      () => toast.success(t("linkCopied")),
+      () => toast.error(t("linkCopyFailed")),
     );
 
   // Each new code ends the one before, so the open QR code shares its link.
@@ -97,7 +97,7 @@ export function MagicLoginPanel() {
       return copy(linkOf(magicLogin));
     },
     onError: () =>
-      toast.error("Couldn’t make a magic link", {
+      toast.error(t("linkFailed"), {
         retry: () => copyLink.mutate(),
       }),
   });
@@ -105,27 +105,24 @@ export function MagicLoginPanel() {
   return (
     <>
       <Row>
-        <RowText
-          title="Show QR code for magic login"
-          text="Once the app is installed, scan it from the app’s first screen, or open the magic link on your phone. No password needed. Each works once, within 10 minutes."
-        />
+        <RowText title={t("title")} text={t("text")} />
         <div className="flex flex-wrap items-center gap-2">
           <Button
             ref={showQrButton}
             variant="secondary"
             onClick={() => showQr.mutate()}
-            busy={showQr.isPending && "Making…"}
+            busy={showQr.isPending && t("making")}
           >
             <QrCode aria-hidden />
-            Show QR code
+            {t("showQr")}
           </Button>
           <Button
             variant="secondary"
             onClick={() => copyLink.mutate()}
-            busy={copyLink.isPending && "Copying…"}
+            busy={copyLink.isPending && t("copying")}
           >
             <Link2 aria-hidden />
-            Copy magic link
+            {t("copyLink")}
           </Button>
         </div>
       </Row>
@@ -141,25 +138,24 @@ export function MagicLoginPanel() {
           }}
         >
           <DialogHeader>
-            <DialogTitle>Magic login</DialogTitle>
+            <DialogTitle>{t("dialogTitle")}</DialogTitle>
             <DialogDescription>
-              On your phone, open Anchor+ and tap <b>Scan QR code</b> on its
-              first screen. It signs in to this server as you.
+              {t.rich("dialogText", { b: (chunks) => <b>{chunks}</b> })}
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
             {shown && (
               <div ref={qrRef} className="relative">
-                <QrImage text={linkOf(shown)} label="QR code for magic login" />
+                <QrImage text={linkOf(shown)} label={t("qrLabel")} />
                 {isExpired && (
                   <div className="absolute inset-0 grid place-items-center rounded-lg bg-card/90">
                     <Button
                       variant="secondary"
                       onClick={() => showQr.mutate()}
-                      busy={showQr.isPending && "Making…"}
+                      busy={showQr.isPending && t("making")}
                     >
                       <RotateCw aria-hidden />
-                      New QR code
+                      {t("newQr")}
                     </Button>
                   </div>
                 )}
@@ -170,20 +166,18 @@ export function MagicLoginPanel() {
               className="m-0 text-center text-meta text-muted-foreground"
             >
               {isExpired
-                ? "This code has expired."
-                : minutesLeft === 1
-                  ? "Works once, for less than a minute more."
-                  : `Works once, for ${minutesLeft} more minutes.`}
+                ? t("expired")
+                : t("worksOnce", { minutes: minutesLeft ?? 0 })}
             </p>
             <Button
               variant="secondary"
               className="w-full"
               disabled={isExpired}
               onClick={() => copyLink.mutate()}
-              busy={copyLink.isPending && "Copying…"}
+              busy={copyLink.isPending && t("copying")}
             >
               <Link2 aria-hidden />
-              Copy magic link
+              {t("copyLink")}
             </Button>
           </DialogBody>
         </DialogContent>

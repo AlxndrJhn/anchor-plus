@@ -12,6 +12,7 @@ import {
   Strikethrough,
   Underline,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { create } from "zustand";
 import { menuSurface } from "@/components/ui/dropdown-menu";
@@ -34,14 +35,6 @@ import { useColorsMenu } from "./colors-menu";
 import { TextStyleButton } from "./text-style-tools";
 
 export type HighlightColor = (typeof HIGHLIGHTS)[number];
-
-const COLOR_NAMES: Record<HighlightColor, string> = {
-  yellow: "Yellow",
-  green: "Green",
-  blue: "Blue",
-  pink: "Pink",
-  purple: "Purple",
-};
 
 const LAST_KEY = "anchor.highlight.last";
 
@@ -120,15 +113,16 @@ function HighlightSwatches({
   current: unknown;
   onPick: (color: HighlightColor) => void;
 }) {
+  const t = useTranslations("editorMedia.highlight");
   return (
     <>
       {HIGHLIGHTS.map((color) => (
-        <Tip key={color} label={COLOR_NAMES[color]}>
+        <Tip key={color} label={t(`color.${color}`)}>
           <button
             type="button"
             className="hl-dot"
             data-hl={color}
-            aria-label={COLOR_NAMES[color]}
+            aria-label={t(`color.${color}`)}
             aria-pressed={current === color}
             onMouseDown={keepSelection}
             onClick={() => onPick(color)}
@@ -148,6 +142,7 @@ export function HighlightSplitButton({
   disabled?: boolean;
   onPhoneColors: () => void;
 }) {
+  const t = useTranslations("editorMedia.highlight");
   const last = useLastHighlightColor((s) => s.color);
   const isPhone = useIsPhone();
   const [open, setOpen] = React.useState(false);
@@ -190,14 +185,19 @@ export function HighlightSplitButton({
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
       <PopoverPrimitive.Anchor asChild>
         <span ref={box} className="hl-split" data-hl={last}>
-          <Tip label={isPhone ? undefined : `Highlight (${highlightKeys()})`}>
+          <Tip
+            label={isPhone ? undefined : t("withKey", { key: highlightKeys() })}
+          >
             <button
               type="button"
               className="b hl-main"
               aria-label={
                 isPhone
-                  ? "Highlight colors"
-                  : `Highlight with ${COLOR_NAMES[last]} (${highlightKeys()})`
+                  ? t("colors")
+                  : t("withColorKey", {
+                      color: t(`color.${last}`),
+                      key: highlightKeys(),
+                    })
               }
               aria-disabled={disabled || undefined}
               onMouseDown={keepSelection}
@@ -220,7 +220,7 @@ export function HighlightSplitButton({
               ref={more}
               type="button"
               className="b hl-more"
-              aria-label="Highlight colors"
+              aria-label={t("colors")}
               aria-expanded={open}
               aria-disabled={disabled || undefined}
               onMouseDown={keepSelection}
@@ -242,7 +242,7 @@ export function HighlightSplitButton({
         <PopoverPrimitive.Content
           ref={colors}
           role="group"
-          aria-label="Highlight colors"
+          aria-label={t("colors")}
           align="start"
           sideOffset={6}
           onOpenAutoFocus={(e) => {
@@ -310,12 +310,13 @@ export function PhoneHighlightRow({
   canErase: boolean;
   onBack: () => void;
 }) {
+  const t = useTranslations("editorMedia.highlight");
   return (
     <>
       <button
         type="button"
         className="b"
-        aria-label="Back to formatting"
+        aria-label={t("backToFormatting")}
         onMouseDown={keepSelection}
         onClick={onBack}
       >
@@ -329,11 +330,11 @@ export function PhoneHighlightRow({
         }}
       />
       <span className="dv" aria-hidden />
-      <Tip label="Remove highlight">
+      <Tip label={t("remove")}>
         <button
           type="button"
           className="b"
-          aria-label="Remove highlight"
+          aria-label={t("remove")}
           aria-disabled={!canErase || undefined}
           onMouseDown={keepSelection}
           onClick={() => {
@@ -355,10 +356,10 @@ interface Place {
 }
 
 const FORMATS = [
-  { key: "bold", label: "Bold", icon: <Bold /> },
-  { key: "italic", label: "Italic", icon: <Italic /> },
-  { key: "underline", label: "Underline", icon: <Underline /> },
-  { key: "strike", label: "Strikethrough", icon: <Strikethrough /> },
+  { key: "bold", icon: <Bold /> },
+  { key: "italic", icon: <Italic /> },
+  { key: "underline", icon: <Underline /> },
+  { key: "strike", icon: <Strikethrough /> },
 ] as const;
 
 export function SelectionToolbar({
@@ -368,6 +369,7 @@ export function SelectionToolbar({
   getQuill: () => QuillInstance | null;
   container: HTMLDivElement | null;
 }) {
+  const t = useTranslations("editorMedia.highlight");
   const [place, setPlace] = React.useState<Place | null>(null);
   const [format, setFormat] = React.useState<Record<string, unknown>>({});
   const [canErase, setCanErase] = React.useState(false);
@@ -551,7 +553,7 @@ export function SelectionToolbar({
         place.below ? "animate-pop-in" : "animate-pop-up",
       )}
       role="toolbar"
-      aria-label="Format selection"
+      aria-label={t("formatSelection")}
       onFocus={roving.onFocus}
       onKeyDown={roving.onKeyDown}
       style={{
@@ -568,11 +570,11 @@ export function SelectionToolbar({
       />
       <span className="dv" aria-hidden />
       {FORMATS.map((option) => (
-        <Tip key={option.key} label={option.label}>
+        <Tip key={option.key} label={t(`format.${option.key}`)}>
           <button
             type="button"
             className="fb"
-            aria-label={option.label}
+            aria-label={t(`format.${option.key}`)}
             aria-pressed={!!format[option.key]}
             onClick={() =>
               run((quill, selection) =>
@@ -586,22 +588,22 @@ export function SelectionToolbar({
       ))}
       <TextStyleButton getQuill={getQuill} className="fb" inBubble />
       <span className="dv" aria-hidden />
-      <Tip label="Remove highlight">
+      <Tip label={t("remove")}>
         <button
           type="button"
           className="fb"
-          aria-label="Remove highlight"
+          aria-label={t("remove")}
           aria-disabled={!canErase || undefined}
           onClick={() => canErase && run((quill) => removeHighlight(quill))}
         >
           <Eraser aria-hidden />
         </button>
       </Tip>
-      <Tip label="Clear formatting">
+      <Tip label={t("clearFormatting")}>
         <button
           type="button"
           className="fb"
-          aria-label="Clear formatting"
+          aria-label={t("clearFormatting")}
           aria-disabled={!canClear || undefined}
           onClick={() => canClear && run(clearTextFormats)}
         >

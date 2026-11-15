@@ -6,7 +6,7 @@ import '../../l10n/l10n.dart';
 
 String get dateLocale {
   final phone = appLocaleFor(
-    PlatformDispatcher.instance.locales,
+    preferredLocales(),
     AppLocalizations.supportedLocales,
   ).toString();
   return DateFormat.localeExists(phone) ? phone : 'en';

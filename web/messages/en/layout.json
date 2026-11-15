@@ -1,0 +1,210 @@
+{
+  "ui": {
+    "calendar": {
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month"
+    },
+    "selectionBar": {
+      "label": "Selected notes",
+      "selectAll": "Select all",
+      "selected": "{count} selected",
+      "selectNotes": "Select notes",
+      "stopKey": "Stop selecting (Esc)",
+      "stop": "Stop selecting"
+    },
+    "toast": {
+      "dismiss": "Dismiss"
+    },
+    "emptyState": {
+      "tryingAgain": "Trying again…",
+      "checkConnection": "Check your connection, then try again."
+    },
+    "passwordInput": {
+      "hidePassword": "Hide password",
+      "showPassword": "Show password",
+      "hide": "Hide",
+      "show": "Show"
+    }
+  },
+  "errors": {
+    "code": "Error {id}",
+    "title": "Something went wrong",
+    "text": "An unexpected error occurred. Reloading the page usually fixes it. Your saved notes are safe.",
+    "reload": "Reload",
+    "copyDetails": "Copy error details",
+    "detailsCopied": "Error details copied",
+    "detailsCopyFailed": "Couldn’t copy the details"
+  },
+  "missingPage": {
+    "title": "Page not found",
+    "text": "Check the address, or go back to your notes.",
+    "goToNotes": "Go to your notes",
+    "searchNotes": "Search notes"
+  },
+  "api": {
+    "unreachable": "Couldn’t reach the server",
+    "uploadFailed": "Upload failed ({status})",
+    "pictureNotLoaded": "The picture didn’t load"
+  },
+  "offline": {
+    "synced": "Back online. All changes synced.",
+    "stillWaiting": "Back online. Some changes are still waiting to sync."
+  },
+  "localBackend": {
+    "frozen": "This note is frozen; unfreeze it first",
+    "noteNotFound": "Note not found",
+    "noServerToManage": "There is no server to manage",
+    "needsServer": "Not available without a server",
+    "sharingNeedsServer": "Sharing needs an Anchor server",
+    "shareLinksNeedServer": "Share links need an Anchor server",
+    "notInTrash": "Note is not in trash",
+    "onlyActiveFrozen": "Only active notes can be frozen",
+    "noteChanged": "Note was changed by someone else",
+    "revisionNotFound": "Revision not found",
+    "noFile": "No file",
+    "attachmentNotFound": "Attachment not found",
+    "wrongPin": "Wrong PIN",
+    "wrongPattern": "Wrong pattern",
+    "notFound": "Not found",
+    "tagNotFound": "Tag not found",
+    "tagChanged": "Tag was changed by someone else",
+    "markdownNeedsServer": "Markdown export needs an Anchor server"
+  },
+  "customTheme": {
+    "invalidJson": "Not valid JSON: {message}",
+    "mustBeObject": "The theme must be a JSON object, like {example}",
+    "nameString": "name: must be a string",
+    "modeObject": "{mode}: must be an object of colours",
+    "notColour": "{path}: {value} is not a colour; use #rgb, #rrggbb or #rrggbbaa",
+    "needOne": "Give at least one of \"light\" or \"dark\"",
+    "unknownKey": "{path}: unknown key; expected one of {options}",
+    "unknownKeyGuess": "{path}: unknown key (did you mean \"{guess}\"?); expected one of {options}"
+  },
+  "sidebar": {
+    "sidebar": "Sidebar",
+    "newNote": "New note",
+    "newNoteKey": "New note (N)",
+    "pages": "Pages",
+    "tags": "Tags",
+    "newTag": "New tag",
+    "tagsLoadFailed": "Couldn’t load tags",
+    "tagsLoadFailedRetry": "Couldn’t load tags. Try again",
+    "noTags": "No tags yet",
+    "moveTag": "Move {name}",
+    "moveTagHint": "Drag to move, or use the arrow keys",
+    "tagTip": "#{name} · {count, plural, one {# note} other {# notes}}",
+    "tagOptions": "Options for {name}",
+    "tagMenu": "Tag {name}",
+    "renameTag": "Rename",
+    "color": "Color",
+    "deleteTag": "Delete tag",
+    "offline": "Offline",
+    "offlineUnsaved": "Offline · {count, plural, one {# unsaved change} other {# unsaved changes}}",
+    "expandKey": "Expand sidebar ({keys})",
+    "collapseSidebar": "Collapse sidebar",
+    "keepSidebarOpen": "Keep sidebar open",
+    "expandSidebar": "Expand sidebar",
+    "collapse": "Collapse",
+    "keepOpen": "Keep open",
+    "featureDemos": "Feature demos",
+    "downloads": "Downloads",
+    "deleteTagTitle": "Delete tag “{name}”?",
+    "deleteTagDescription": "The tag will be removed from {count, plural, one {# note} other {# notes}}. Your notes won’t be deleted.",
+    "deleteTagUnused": "No notes use this tag.",
+    "deleting": "Deleting…",
+    "connectPhoneTip": "Connect phone via QR code",
+    "connectPhone": "Connect phone",
+    "viaQrCode": "via QR code",
+    "hide": "Hide",
+    "hidePhoneSetup": "Hide phone setup",
+    "account": "Account",
+    "keyboardShortcuts": "Keyboard shortcuts",
+    "admin": "Admin",
+    "signOut": "Sign out",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "Match system",
+    "colorFailed": "Couldn’t change the color of #{name}",
+    "deleteFailed": "Couldn’t delete #{name}",
+    "moveFailed": "Couldn’t move the tag"
+  },
+  "skipLink": {
+    "label": "Skip to content"
+  },
+  "splash": {
+    "loading": "Loading Anchor+",
+    "connecting": "Connecting…"
+  },
+  "desktopUpdate": {
+    "restartTip": "Restart Anchor+ to update to {version}",
+    "restarting": "Restarting…",
+    "update": "Update"
+  },
+  "legalNotice": {
+    "copyright": "© The Anchor and Anchor+ contributors. Free software under the GNU AGPL v3, with no warranty.",
+    "sourceCode": "Source code",
+    "license": "License"
+  },
+  "serverDown": {
+    "theServer": "The server",
+    "title": "Can’t connect to the server",
+    "text": "{host} isn’t responding. Your notes are safe on the server.",
+    "tryAgain": "Try again",
+    "connecting": "Connecting…",
+    "tryingAgainIn": "Trying again in {count, plural, one {# second} other {# seconds}}",
+    "whatYouCanDo": "What you can do",
+    "checkConnection": "Check your internet connection.",
+    "maybeRestarting": "The server may be restarting. Anchor+ will keep trying.",
+    "contactAdmin": "If it’s still down after a few minutes, contact the person who runs <b>{host}</b>.",
+    "noAnswer": "The server didn’t answer <code>GET /api/auth/me</code>."
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "or": "or",
+    "sections": {
+      "anywhere": "Anywhere",
+      "notes": "Notes",
+      "focused": "Focused or selected notes",
+      "inNote": "In a note"
+    },
+    "rows": {
+      "newNote": "New note",
+      "search": "Search, or go to a page or tag by name",
+      "goToPage": "Go to Notes, Archive, Trash or Settings",
+      "goToTag": "Go to a tag: type a few letters of it",
+      "toggleSidebar": "Show or hide the sidebar",
+      "thisDialog": "These shortcuts",
+      "moveBetween": "Move between notes",
+      "firstOrLast": "First or last note",
+      "open": "Open the note",
+      "select": "Select the note",
+      "selectUpTo": "Select up to it",
+      "newNoteOrList": "New note, or new list, with no note focused",
+      "leaveTag": "Leave a tag for all notes",
+      "pin": "Pin or unpin",
+      "archive": "Archive or unarchive",
+      "trash": "Move to trash; in Trash, delete permanently",
+      "leaveText": "Leave the text; again to close",
+      "backIntoText": "Back into the text",
+      "closeOrTick": "Close, or tick a checklist item",
+      "archiveOne": "Archive",
+      "trashOne": "Move to trash"
+    }
+  },
+  "tagJump": {
+    "title": "Go to tag",
+    "tagName": "Tag name",
+    "placeholder": "Type a tag’s name",
+    "tags": "Tags",
+    "noMatch": "No tag matches",
+    "noTags": "No tags yet"
+  },
+  "appPage": {
+    "openMenu": "Open menu",
+    "clearSearch": "Clear search",
+    "goTo": "Go to",
+    "tag": "Tag",
+    "page": "Page"
+  }
+}

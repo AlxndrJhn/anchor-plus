@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import {
@@ -36,6 +37,7 @@ import { sortTagsByName } from "@/features/tags/utils";
 import { useHighlightPaint } from "@/lib/highlight-paint";
 import { useNearScreen } from "@/lib/hooks/use-near-screen";
 import { singleKeyAllowed } from "@/lib/hooks/use-shortcuts";
+import { translate } from "@/lib/i18n";
 import { rememberCard } from "@/lib/morph";
 import { cn } from "@/lib/utils";
 import { getNoteAttachments } from "../api";
@@ -91,8 +93,8 @@ export function formatCardDate(iso: string, now = new Date()): string {
   const startOfDay = (d: Date) =>
     new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   const daysAgo = Math.round((startOfDay(now) - startOfDay(date)) / 86400000);
-  if (daysAgo === 0) return "Today";
-  if (daysAgo === 1) return "Yesterday";
+  if (daysAgo === 0) return translate("notes.noteCard")("today");
+  if (daysAgo === 1) return translate("notes.noteCard")("yesterday");
   return date.getFullYear() === now.getFullYear()
     ? formatShortDate(date)
     : formatFullDate(date);
@@ -142,6 +144,7 @@ export const NoteCard = React.memo(function NoteCard({
   searchTerm,
   onMove,
 }: NoteCardProps) {
+  const t = useTranslations("notes.noteCard");
   // A note locked and not opened this session shows only its title.
   const lockHidden = isLockHidden(note, useUnlockedIds());
   const blocks = lockHidden ? NO_BLOCKS : cardBlocks(note);
@@ -157,7 +160,7 @@ export const NoteCard = React.memo(function NoteCard({
     hasHighlights,
   );
   const title = hasTitle(note.title) ? note.title : "";
-  const label = title || "Untitled";
+  const label = title || t("untitled");
   const isList = layout === "list";
   const showPictures = usePreferencesStore(
     (s) => s.notes.showPictures !== false,
@@ -182,7 +185,7 @@ export const NoteCard = React.memo(function NoteCard({
 
   const shareCount =
     note.permission === "owner" ? (note.shareIds?.length ?? 0) : 0;
-  const sharedWithLabel = `Shared with ${shareCount} ${shareCount === 1 ? "person" : "people"}`;
+  const sharedWithLabel = t("sharedWith", { count: shareCount });
   const publicLabel = note.publicLink && publicLinkLabel(note.publicLink);
   const footer = (
     <div className="nc-foot">
@@ -190,7 +193,7 @@ export const NoteCard = React.memo(function NoteCard({
         <ReminderChip noteId={note.id} reminder={note.reminder} size="sm" />
       )}
       {note.sharedBy && (
-        <Tip label={`Shared by ${note.sharedBy.name.split(" ")[0]}`}>
+        <Tip label={t("sharedBy", { name: note.sharedBy.name.split(" ")[0] })}>
           <span className="relative z-5">
             <Avatar
               id={note.sharedBy.id}
@@ -208,7 +211,7 @@ export const NoteCard = React.memo(function NoteCard({
             <button
               type="button"
               className="nc-count relative z-5 -mx-1 min-h-6 min-w-6 cursor-pointer justify-center rounded-xs bg-transparent px-1 py-0 text-inherit hover:text-foreground"
-              aria-label={`${sharedWithLabel}. Open Share`}
+              aria-label={t("openShare", { label: sharedWithLabel })}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -231,7 +234,7 @@ export const NoteCard = React.memo(function NoteCard({
             <button
               type="button"
               className="nc-count relative z-5 -mx-1 min-h-6 min-w-6 cursor-pointer justify-center rounded-xs bg-transparent px-1 py-0 text-inherit hover:text-foreground"
-              aria-label={`${publicLabel}. Open Share`}
+              aria-label={t("openShare", { label: publicLabel })}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -248,22 +251,22 @@ export const NoteCard = React.memo(function NoteCard({
           </span>
         ))}
       {note.isFrozen && (
-        <span className="nc-count" title="Frozen">
+        <span className="nc-count" title={t("frozen")}>
           <Snowflake aria-hidden />
-          <span className="sr-only">Frozen</span>
+          <span className="sr-only">{t("frozen")}</span>
         </span>
       )}
       {note.lock && !lockHidden && (
         // Locked, but opened this session.
-        <span className="nc-count" title="Locked, unlocked for now">
+        <span className="nc-count" title={t("unlockedForNow")}>
           <LockOpen aria-hidden />
-          <span className="sr-only">Locked, unlocked for now</span>
+          <span className="sr-only">{t("unlockedForNow")}</span>
         </span>
       )}
       {attachmentCount > 0 && !pictureIds.length && (
         <span
           className="nc-count"
-          title={`${attachmentCount} ${attachmentCount === 1 ? "attachment" : "attachments"}`}
+          title={t("attachments", { count: attachmentCount })}
         >
           <Paperclip aria-hidden />
           {attachmentCount}
@@ -292,7 +295,7 @@ export const NoteCard = React.memo(function NoteCard({
       type="button"
       className="nc-zoom"
       tabIndex={-1}
-      aria-label="View picture"
+      aria-label={t("viewPicture")}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -369,11 +372,15 @@ export const NoteCard = React.memo(function NoteCard({
         onTogglePin &&
         note.state !== "trashed" &&
         !note.isArchived && (
-          <Tip label={note.isPinned ? "Unpin" : "Pin"}>
+          <Tip label={note.isPinned ? t("unpin") : t("pin")}>
             <button
               type="button"
               className="nc-pin"
-              aria-label={note.isPinned ? `Unpin ${label}` : `Pin ${label}`}
+              aria-label={
+                note.isPinned
+                  ? t("unpinNote", { label })
+                  : t("pinNote", { label })
+              }
               aria-pressed={!!note.isPinned}
               onClick={(e) => {
                 e.stopPropagation();
@@ -388,7 +395,7 @@ export const NoteCard = React.memo(function NoteCard({
         <button
           type="button"
           className="nc-pick"
-          aria-label={`Select ${label}`}
+          aria-label={t("selectNote", { label })}
           aria-pressed={!!picked}
           onClick={(e) => {
             e.stopPropagation();
@@ -424,7 +431,7 @@ export const NoteCard = React.memo(function NoteCard({
         {lockHidden ? (
           <div className="nc-locked">
             <Lock aria-hidden />
-            Locked
+            {t("locked")}
           </div>
         ) : (
           <NoteBody
@@ -515,16 +522,16 @@ function OfflineNote({
   locked: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("notes.noteCard");
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent size="lg" data-note={note.background ?? ""}>
         <DialogTitle>
-          {hasTitle(note.title) ? note.title : "Untitled"}
+          {hasTitle(note.title) ? note.title : t("untitled")}
         </DialogTitle>
         <DialogDescription className="flex items-center gap-1.5">
           <CloudOff aria-hidden className="size-3.5" />
-          You’re offline, so this is read-only. Open it again to edit once
-          you’re back online.
+          {t("offlineReadOnly")}
         </DialogDescription>
         <DialogBody className="grid gap-3">
           {locked && note.lock ? (
@@ -606,6 +613,7 @@ function CardPicture({
   attachmentId: string;
   isWanted: boolean;
 }) {
+  const t = useTranslations("notes.noteCard");
   const { blobUrl, isLoading, error } = useAttachmentBlob(
     noteId,
     attachmentId,
@@ -618,7 +626,7 @@ function CardPicture({
     return (
       <span
         className="grid size-full place-items-center text-note-muted"
-        title="Couldn’t load this picture"
+        title={t("couldNotLoadPicture")}
       >
         <ImageOff aria-hidden className="size-4.5" />
       </span>

@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { RotateCcw, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { AppPage, PageTitle, TopBarButton } from "@/components/layout/app-page";
 import { IconButton } from "@/components/ui/button";
@@ -34,15 +35,15 @@ import type { Note } from "@/features/notes/types";
 import { burnNoteCards } from "@/lib/destroy";
 import { eachLimited } from "@/lib/each";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
-import { plural } from "@/lib/utils";
 
 const NO_NOTES: Note[] = [];
 
-const timeLeft = (note: Note) =>
-  `${plural(daysUntilDeletion(note), "day")} left`;
-
 export default function TrashPage() {
-  useDocumentTitle("Trash");
+  const t = useTranslations("notes.trashPage");
+  const tc = useTranslations("common");
+  useDocumentTitle(tc("trash"));
+  const timeLeft = (note: Note) =>
+    t("daysLeft", { count: daysUntilDeletion(note) });
   const refresh = useRefreshNotes();
   const [pendingDelete, setPendingDelete] = React.useState<{
     ids: string[];
@@ -67,27 +68,20 @@ export default function TrashPage() {
     onSuccess: (_, ids, trashDates) => {
       refresh();
       list.stopPicking();
-      toast.success(
-        ids.length === 1
-          ? "Note restored"
-          : `${plural(ids.length, "note")} restored`,
-        {
-          undo: async () => {
-            list.prepareCardMotion();
-            try {
-              await eachLimited(ids, (id) =>
-                deleteNote(id, trashDates?.get(id)),
-              );
-            } catch {
-              toast.error("Couldn’t undo that");
-            }
-            refresh();
-          },
+      toast.success(t("restored", { count: ids.length }), {
+        undo: async () => {
+          list.prepareCardMotion();
+          try {
+            await eachLimited(ids, (id) => deleteNote(id, trashDates?.get(id)));
+          } catch {
+            toast.error(tc("couldNotUndo"));
+          }
+          refresh();
         },
-      );
+      });
     },
     onError: (_, ids) =>
-      toast.error(`Couldn’t restore ${ids.length === 1 ? "note" : "notes"}`, {
+      toast.error(t("couldNotRestore", { count: ids.length }), {
         retry: () => restore.mutate(ids),
       }),
   });
@@ -109,19 +103,15 @@ export default function TrashPage() {
       list.stopPicking();
       setPendingDelete(null);
       toast.success(
-        all
-          ? "Trash emptied"
-          : ids.length === 1
-            ? "Note permanently deleted"
-            : `${plural(ids.length, "note")} permanently deleted`,
+        all ? t("emptied") : t("deletedForever", { count: ids.length }),
       );
     },
     onError: (_, variables) => {
       refresh();
       toast.error(
         variables.all
-          ? "Couldn’t empty trash"
-          : `Couldn’t delete ${variables.ids.length === 1 ? "note" : "notes"}`,
+          ? t("couldNotEmpty")
+          : t("couldNotDelete", { count: variables.ids.length }),
         { retry: () => remove.mutate(variables) },
       );
     },
@@ -131,20 +121,20 @@ export default function TrashPage() {
   const renderActions = React.useCallback(
     (note: Note) => (
       <>
-        <Tip label="Restore">
+        <Tip label={t("restore")}>
           <IconButton
             size="sm"
-            label="Restore"
+            label={t("restore")}
             onClick={() => restoreNotes([note.id])}
           >
             <RotateCcw />
           </IconButton>
         </Tip>
-        <Tip label="Delete permanently">
+        <Tip label={t("deleteForever")}>
           <IconButton
             size="sm"
             tone="danger"
-            label="Delete permanently"
+            label={t("deleteForever")}
             onClick={() => setPendingDelete({ ids: [note.id] })}
           >
             <Trash2 />
@@ -152,7 +142,7 @@ export default function TrashPage() {
         </Tip>
       </>
     ),
-    [restoreNotes],
+    [restoreNotes, t],
   );
 
   const hasNotes = notes.length > 0;
@@ -166,38 +156,38 @@ export default function TrashPage() {
           <PageTitle
             count={isLoading || loadFailed ? undefined : list.visible.length}
           >
-            Trash
+            {tc("trash")}
           </PageTitle>
         }
         actions={
           hasNotes && (
-            <NoteListActions list={list} placeholder="Search trash">
+            <NoteListActions list={list} placeholder={t("search")}>
               <TopBarButton
                 icon={<Trash2 aria-hidden />}
                 onClick={() =>
                   setPendingDelete({ ids: notes.map((x) => x.id), all: true })
                 }
               >
-                Empty trash
+                {t("emptyTrash")}
               </TopBarButton>
             </NoteListActions>
           )
         }
       >
         <p className="m-0 -mt-2 mb-1 text-muted-foreground text-ui">
-          {`Notes in the trash are permanently deleted after ${TRASH_RETENTION_DAYS} days.`}
+          {t("retention", { days: TRASH_RETENTION_DAYS })}
         </p>
         <NotesBoardSkeleton loading={isLoading} />
         {loadFailed && (
           <LoadFailedState
-            title="Couldn’t load your trash"
+            title={t("couldNotLoad")}
             onRetry={() => refetch()}
             isRetrying={isFetching}
           />
         )}
         {!isLoading && !loadFailed && !hasNotes && (
-          <EmptyState illustration="trash" title="Trash is empty">
-            {`Notes you delete stay here for ${TRASH_RETENTION_DAYS} days.`}
+          <EmptyState illustration="trash" title={t("empty")}>
+            {t("emptyHelp", { days: TRASH_RETENTION_DAYS })}
           </EmptyState>
         )}
         {hasNotes && !list.visible.length && <NoSearchResults list={list} />}
@@ -230,13 +220,13 @@ export default function TrashPage() {
         actions={[
           {
             key: "restore",
-            label: "Restore",
+            label: t("restore"),
             icon: <RotateCcw aria-hidden />,
             onClick: () => restore.mutate(chosenIds),
           },
           {
             key: "forever",
-            label: "Delete permanently",
+            label: t("deleteForever"),
             icon: <Trash2 aria-hidden />,
             onClick: () => setPendingDelete({ ids: chosenIds }),
             keys: ["Delete"],
@@ -249,18 +239,16 @@ export default function TrashPage() {
         onOpenChange={(open) => !open && setPendingDelete(null)}
         title={
           pendingDelete?.all
-            ? "Empty trash?"
-            : deleteCount === 1
-              ? "Permanently delete this note?"
-              : `Permanently delete ${deleteCount} notes?`
+            ? t("emptyTitle")
+            : t("deleteForeverTitle", { count: deleteCount })
         }
         description={
           pendingDelete?.all
-            ? `${plural(deleteCount, "note")} will be permanently deleted. This can’t be undone.`
-            : `This can’t be undone. People you shared ${deleteCount === 1 ? "it" : "them"} with will lose access too.`
+            ? t("emptyDescription", { count: deleteCount })
+            : t("deleteForeverDescription", { count: deleteCount })
         }
-        confirmLabel={pendingDelete?.all ? "Empty trash" : "Delete permanently"}
-        busyLabel={pendingDelete?.all ? "Emptying trash…" : "Deleting…"}
+        confirmLabel={pendingDelete?.all ? t("emptyTrash") : t("deleteForever")}
+        busyLabel={pendingDelete?.all ? t("emptying") : t("deleting")}
         isPending={remove.isPending}
         onConfirm={() => pendingDelete && remove.mutate(pendingDelete)}
       />

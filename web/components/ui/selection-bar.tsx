@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useShellStore } from "@/components/layout/shell-store";
 import { Tip } from "@/components/ui/tooltip";
@@ -45,6 +46,7 @@ export function SelectionBar({
   onClose,
   ...props
 }: SelectionBarProps) {
+  const t = useTranslations("layout.ui.selectionBar");
   const { mounted, leaving, done } = usePresence(open);
   const setBarShown = useShellStore((s) => s.setBarShown);
   const roving = useRovingFocus<HTMLDivElement>();
@@ -83,7 +85,7 @@ export function SelectionBar({
       ref={roving.ref}
       data-slot="selection-bar"
       role="toolbar"
-      aria-label={props["aria-label"] ?? "Selected notes"}
+      aria-label={props["aria-label"] ?? t("label")}
       inert={leaving || undefined}
       onFocus={roving.onFocus}
       onKeyDown={roving.onKeyDown}
@@ -100,7 +102,7 @@ export function SelectionBar({
           type="button"
           role="checkbox"
           aria-checked={allSelected ? true : count ? "mixed" : false}
-          aria-label="Select all"
+          aria-label={t("selectAll")}
           onClick={onToggleAll}
           className={cn(
             "grid size-5 cursor-pointer place-items-center rounded-full border-[1.5px] border-current bg-transparent p-0 opacity-90 [&_svg]:size-3 [&_svg]:stroke-3",
@@ -114,7 +116,7 @@ export function SelectionBar({
           {allSelected && <Check aria-hidden />}
         </button>
         <span aria-live="polite">
-          {count ? `${count} selected` : "Select notes"}
+          {count ? t("selected", { count }) : t("selectNotes")}
         </span>
       </span>
       {divider}
@@ -148,11 +150,11 @@ export function SelectionBar({
         </Tip>
       ))}
       {divider}
-      <Tip label="Stop selecting (Esc)" side="top">
+      <Tip label={t("stopKey")} side="top">
         <button
           type="button"
           className={cn(barButtonClass, "w-9 justify-center px-0")}
-          aria-label="Stop selecting"
+          aria-label={t("stop")}
           aria-keyshortcuts="Escape"
           onClick={onClose}
         >

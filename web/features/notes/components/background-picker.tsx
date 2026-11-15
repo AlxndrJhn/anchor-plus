@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { PopoverTitle } from "@/components/ui/popover";
 import { BACKGROUNDS } from "@/lib/design/tokens";
@@ -12,6 +13,14 @@ interface BackgroundPickerProps {
   onChange: (background: string | null) => void;
   /** false when the pointer leaves. */
   onPreview?: (background: string | null | false) => void;
+}
+
+/** A colour's or pattern's name in the language on screen. */
+export function useBackgroundName() {
+  const t = useTranslations("notes.backgrounds");
+  // The names are keyed by background id (null is "default").
+  return (background: { id: string | null }) =>
+    t((background.id ?? "default") as "default");
 }
 
 const tileSize = (kind?: string) =>
@@ -30,17 +39,21 @@ export function BackgroundPicker({
   onChange,
   onPreview,
 }: BackgroundPickerProps) {
+  const t = useTranslations("notes.backgroundPicker");
+  const backgroundName = useBackgroundName();
   const isPattern = !!value?.startsWith("pattern_");
-  const chosenName = (list: readonly Background[]) =>
-    list.find((b) => b.id === value)?.name ?? "";
+  const chosenName = (list: readonly Background[]) => {
+    const chosen = list.find((b) => b.id === value);
+    return chosen ? backgroundName(chosen) : "";
+  };
   return (
     <div
       className="grid w-75 max-w-full gap-3.5 p-3.5 max-md:w-auto"
       onPointerLeave={() => onPreview?.(false)}
     >
-      <PopoverTitle className="sr-only">Background</PopoverTitle>
+      <PopoverTitle className="sr-only">{t("background")}</PopoverTitle>
       <Section
-        label="Color"
+        label={t("color")}
         chosen={isPattern ? "" : chosenName(BACKGROUNDS.colors)}
         items={BACKGROUNDS.colors}
         value={value}
@@ -49,7 +62,7 @@ export function BackgroundPicker({
         color
       />
       <Section
-        label="Pattern"
+        label={t("pattern")}
         chosen={isPattern ? chosenName(BACKGROUNDS.patterns) : ""}
         items={BACKGROUNDS.patterns}
         value={value}
@@ -77,6 +90,7 @@ function Section({
   onPreview?: (id: string | null | false) => void;
   color?: boolean;
 }) {
+  const backgroundName = useBackgroundName();
   const gridRef = React.useRef<HTMLDivElement>(null);
   const chooseByKeyboard = (id: string | null) => {
     onChange(id);
@@ -118,8 +132,8 @@ function Section({
               type="button"
               role="radio"
               aria-checked={isChosen}
-              aria-label={background.name}
-              title={background.name}
+              aria-label={backgroundName(background)}
+              title={backgroundName(background)}
               tabIndex={isChosen || (chosenIndex < 0 && index === 0) ? 0 : -1}
               data-note={background.id ?? ""}
               onClick={(e) =>

@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import * as React from "react";
 import { ErrorScreen } from "@/components/layout/error-screen";
 import { Button } from "@/components/ui/button";
+import { currentLocale, translate } from "@/lib/i18n";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -20,9 +21,15 @@ export default function GlobalError({
   error: Error & { digest?: string };
 }) {
   React.useEffect(() => console.error(error), [error]);
+  // Outside the providers, so in the language last on screen.
+  const t = translate("layout.errors");
 
   return (
-    <html lang="en" suppressHydrationWarning className={dmSans.variable}>
+    <html
+      lang={currentLocale()}
+      suppressHydrationWarning
+      className={dmSans.variable}
+    >
       <body>
         <title>Anchor+</title>
         <ThemeProvider
@@ -34,12 +41,12 @@ export default function GlobalError({
           <main className="grid min-h-dvh content-center bg-background px-4">
             <ErrorScreen
               illustration="broken"
-              title="Something went wrong"
-              text="An unexpected error occurred. Reloading the page usually fixes it. Your saved notes are safe."
+              title={t("title")}
+              text={t("text")}
               actions={
                 <Button onClick={() => window.location.reload()}>
                   <RotateCw aria-hidden />
-                  Reload
+                  {t("reload")}
                 </Button>
               }
             />

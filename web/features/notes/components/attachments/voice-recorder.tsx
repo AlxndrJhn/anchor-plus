@@ -1,6 +1,7 @@
 "use client";
 
 import { Mic, Square } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { translate } from "@/lib/i18n";
 
 /** Formats browsers record in, best first; all are accepted attachments. */
 const FORMATS = [
@@ -45,6 +47,8 @@ export function VoiceRecorder({
   onRecorded: (file: File) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("noteEditor.attachments.voice");
+  const tc = useTranslations("common");
   const [phase, setPhase] = React.useState<Phase>("asking");
   const [seconds, setSeconds] = React.useState(0);
   const recorder = React.useRef<MediaRecorder | null>(null);
@@ -77,9 +81,13 @@ export function VoiceRecorder({
             .slice(0, 19)
             .replace(/[T:]/g, "-");
           onRecorded(
-            new File(chunks, `Recording ${stamp}.${format.ext}`, {
-              type: format.type,
-            }),
+            new File(
+              chunks,
+              `${translate("noteEditor.attachments.voice")("fileName", { stamp })}.${format.ext}`,
+              {
+                type: format.type,
+              },
+            ),
           );
         };
         rec.start(250);
@@ -116,14 +124,8 @@ export function VoiceRecorder({
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent size="md">
-        <DialogTitle>Record audio</DialogTitle>
-        <DialogDescription>
-          {phase === "asking" && "Waiting for the microphone…"}
-          {phase === "recording" && "Recording. Stop to add it to the note."}
-          {phase === "denied" &&
-            "The browser didn’t allow the microphone. Allow it in the site settings and try again."}
-          {phase === "failed" && "Couldn’t start recording on this device."}
-        </DialogDescription>
+        <DialogTitle>{t("title")}</DialogTitle>
+        <DialogDescription>{t(phase)}</DialogDescription>
         <DialogBody className="grid place-items-center py-4">
           <span
             className="flex items-center gap-2 font-semibold text-heading tabular-nums"
@@ -142,11 +144,11 @@ export function VoiceRecorder({
         </DialogBody>
         <DialogFooter>
           <Button variant="secondary" onClick={onClose}>
-            Cancel
+            {tc("cancel")}
           </Button>
           <Button onClick={stop} disabled={phase !== "recording"}>
             <Square aria-hidden />
-            Stop and add
+            {t("stop")}
           </Button>
         </DialogFooter>
       </DialogContent>

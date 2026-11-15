@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 import {
@@ -12,21 +13,22 @@ import {
 import { Row, RowText, Section } from "./settings-blocks";
 
 /** Where indexing is, in a few words. */
-function progressText(status: PictureSearchStatus): string | null {
+function progressText(
+  status: PictureSearchStatus,
+  t: ReturnType<typeof useTranslations<"settings.searchSection">>,
+): string | null {
   if (!status.enabled) return null;
   const { model } = status;
   if (model.state === "downloading")
-    return `Downloading the picture model… ${Math.round(model.progress * 100)}%`;
-  if (model.state === "failed")
-    return "The picture model couldn’t be downloaded. Turn it off and on to try again.";
+    return t("downloading", { percent: Math.round(model.progress * 100) });
+  if (model.state === "failed") return t("modelFailed");
   if (status.indexed < status.total)
-    return `Looking at your pictures… ${status.indexed} of ${status.total}`;
-  return status.total === 1
-    ? "Your picture is ready to search."
-    : `All ${status.total} pictures are ready to search.`;
+    return t("indexing", { indexed: status.indexed, total: status.total });
+  return t("ready", { count: status.total });
 }
 
 export function SearchSection() {
+  const t = useTranslations("settings.searchSection");
   const queryClient = useQueryClient();
   const { data: status } = useQuery({
     queryKey: pictureSearchStatusKey,
@@ -43,26 +45,19 @@ export function SearchSection() {
   const toggle = useMutation({
     mutationFn: setPictureSearch,
     onSuccess: (next) => queryClient.setQueryData(pictureSearchStatusKey, next),
-    onError: () => toast.error("Couldn’t change picture search"),
+    onError: () => toast.error(t("couldNotChange")),
   });
 
   if (!status?.available) return null;
-  const progress = progressText(status);
+  const progress = progressText(status, t);
   return (
-    <Section id="search" title="Search">
+    <Section id="search" title={t("title")}>
       <Row>
         <RowText
-          title={
-            <label htmlFor="picture-search">
-              Find pictures by what they show
-            </label>
-          }
+          title={<label htmlFor="picture-search">{t("findPictures")}</label>}
           text={
             <>
-              Search for “Sonnenuntergang am Meer” or “receipt” and find notes
-              with such pictures, in most languages. Your server downloads a
-              model once (about 380 MB) and looks at each picture; nothing
-              leaves your server.
+              {t("findPicturesText")}
               {progress && (
                 <span className="mt-1 block text-foreground" aria-live="polite">
                   {progress}

@@ -212,6 +212,17 @@ class PreferencesRepository {
     await _storage.write(key: StorageKeys.motionSpeed, value: speed);
   }
 
+  /// The app’s language code, or null for the phone’s language.
+  Future<String?> getAppLanguage() => _read(StorageKeys.appLanguage);
+
+  Future<void> setAppLanguage(String? languageCode) async {
+    if (languageCode == null) {
+      await _storage.delete(key: StorageKeys.appLanguage);
+    } else {
+      await _storage.write(key: StorageKeys.appLanguage, value: languageCode);
+    }
+  }
+
   Future<String?> getColorScheme() => _read(StorageKeys.colorScheme);
 
   Future<void> setColorScheme(String scheme) async {

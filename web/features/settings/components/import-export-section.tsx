@@ -1,30 +1,26 @@
 "use client";
 
 import { Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { ExportMenu, ImportDialog } from "@/features/import-export";
 import { Row, RowText, Section } from "./settings-blocks";
 
 export function ImportExportSection() {
+  const t = useTranslations("settings.importExportSection");
   const [importing, setImporting] = React.useState(false);
   return (
-    <Section id="data" title="Import and export">
+    <Section id="data" title={t("title")}>
       <Row>
-        <RowText
-          title="Export"
-          text="Download all your notes as a backup, or to move them to another app."
-        />
+        <RowText title={t("export")} text={t("exportText")} />
         <ExportMenu />
       </Row>
       <Row>
-        <RowText
-          title="Import"
-          text="Import from an Anchor backup, Google Keep, or Markdown files from Obsidian and Nextcloud Notes."
-        />
+        <RowText title={t("import")} text={t("importText")} />
         <Button variant="secondary" onClick={() => setImporting(true)}>
           <Upload aria-hidden />
-          Import
+          {t("import")}
         </Button>
       </Row>
       <ImportDialog open={importing} onOpenChange={setImporting} />

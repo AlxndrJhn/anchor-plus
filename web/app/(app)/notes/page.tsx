@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { AppPage, Fab, PageTitle } from "@/components/layout/app-page";
 import { newNoteHref } from "@/components/layout/sidebar";
@@ -64,7 +65,6 @@ import { useRefreshNotes } from "@/features/notes/hooks/use-refresh-notes";
 import { matchesFilters } from "@/features/notes/note-filters";
 import { printNoteList } from "@/features/notes/print";
 import { positionBetween } from "@/features/notes/sort";
-import { deletedNotesText, deleteNotesWarning } from "@/features/notes/trash";
 import type { Note } from "@/features/notes/types";
 import { usePictureMatches } from "@/features/picture-search/use-picture-matches";
 import { tagColorStyle, useTagMap } from "@/features/tags";
@@ -73,7 +73,6 @@ import { eachLimited } from "@/lib/each";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { useShortcuts } from "@/lib/hooks/use-shortcuts";
 import { rememberNewNoteButton } from "@/lib/morph";
-import { plural } from "@/lib/utils";
 
 const NO_NOTES: Note[] = [];
 const NO_PICKS = new Set<string>();
@@ -82,23 +81,27 @@ const UNDOABLE_ACTIONS = {
   pin: {
     run: (ids: string[]) => bulkPinNotes(ids, true),
     undo: (ids: string[]) => bulkPinNotes(ids, false),
-    done: "pinned",
+    done: "notesPinned",
+    failed: "couldNotPin",
   },
   unpin: {
     run: (ids: string[]) => bulkPinNotes(ids, false),
     undo: (ids: string[]) => bulkPinNotes(ids, true),
-    done: "unpinned",
+    done: "notesUnpinned",
+    failed: "couldNotUnpin",
   },
   archive: {
     run: (ids: string[]) => bulkArchiveNotes(ids),
     undo: (ids: string[]) => eachLimited(ids, unarchiveNote),
-    done: "archived",
+    done: "notesArchived",
+    failed: "couldNotArchive",
     isArchived: true,
   },
   unarchive: {
     run: (ids: string[]) => eachLimited(ids, unarchiveNote),
     undo: (ids: string[]) => bulkArchiveNotes(ids),
-    done: "unarchived",
+    done: "notesUnarchived",
+    failed: "couldNotUnarchive",
     isArchived: false,
   },
 } satisfies Record<
@@ -106,7 +109,12 @@ const UNDOABLE_ACTIONS = {
   {
     run: (ids: string[]) => Promise<unknown>;
     undo: (ids: string[]) => Promise<unknown>;
-    done: string;
+    done: "notesPinned" | "notesUnpinned" | "notesArchived" | "notesUnarchived";
+    failed:
+      | "couldNotPin"
+      | "couldNotUnpin"
+      | "couldNotArchive"
+      | "couldNotUnarchive";
     isArchived?: boolean;
   }
 >;
@@ -120,6 +128,9 @@ export default function NotesPage() {
 }
 
 function NotesView({ tagId }: { tagId: string | null }) {
+  const t = useTranslations("notes.notesPage");
+  const tb = useTranslations("notes.bulkDelete");
+  const tc = useTranslations("common");
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -207,13 +218,11 @@ function NotesView({ tagId }: { tagId: string | null }) {
         .catch(() => {
           prepareCardMotion();
           place(!isPinned);
-          toast.error(
-            isPinned ? "Couldn’t pin the note" : "Couldn’t unpin the note",
-          );
+          toast.error(isPinned ? t("couldNotPinOne") : t("couldNotUnpinOne"));
         })
         .finally(() => refresh());
     },
-    [prepareCardMotion, queryClient, refresh],
+    [prepareCardMotion, queryClient, refresh, t],
   );
 
   const reorderNote = (noteId: string, ids: string[]) => {
@@ -241,7 +250,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
         position: before?.position ?? null,
         positionedAt: before?.positionedAt ?? null,
       });
-      toast.error("Couldn’t move the note", {
+      toast.error(t("couldNotMove"), {
         retry: () => reorderNote(noteId, ids),
       });
     });
@@ -286,14 +295,17 @@ function NotesView({ tagId }: { tagId: string | null }) {
         try {
           await run();
         } catch {
-          toast.error("Couldn’t undo that");
+          toast.error(tc("couldNotUndo"));
         }
         refresh();
       };
       if (kind === "trash") {
         const ownedIds = context?.ownedIds ?? [];
         toast.success(
-          deletedNotesText(ownedIds.length, ids.length - ownedIds.length),
+          tb("deleted", {
+            owned: ownedIds.length,
+            shared: ids.length - ownedIds.length,
+          }),
           ownedIds.length
             ? { undo: () => undo(() => eachLimited(ownedIds, restoreNote)) }
             : undefined,
@@ -303,7 +315,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
       const action = UNDOABLE_ACTIONS[kind];
       const isArchived = "isArchived" in action ? action.isArchived : null;
       if (isArchived !== null) archived.setArchivedInCache(ids, isArchived);
-      toast.success(`${plural(ids.length, "note")} ${action.done}`, {
+      toast.success(t(action.done, { count: ids.length }), {
         undo: () =>
           undo(async () => {
             await action.undo(ids);
@@ -313,10 +325,12 @@ function NotesView({ tagId }: { tagId: string | null }) {
       });
     },
     onError: (_, { kind, ids }) => {
-      const verb = kind === "trash" ? "delete" : kind;
-      toast.error(`Couldn’t ${verb} ${ids.length === 1 ? "note" : "notes"}`, {
-        retry: () => noteAction.mutate({ kind, ids }),
-      });
+      toast.error(
+        kind === "trash"
+          ? tb("couldNotDelete", { count: ids.length })
+          : t(UNDOABLE_ACTIONS[kind].failed, { count: ids.length }),
+        { retry: () => noteAction.mutate({ kind, ids }) },
+      );
     },
   });
 
@@ -324,7 +338,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
     // Frozen notes stay where they are.
     const deletable = notes.filter((n) => !isOwnFrozen(n));
     if (!deletable.length) {
-      toast.info("Frozen notes can’t be deleted; unfreeze them first");
+      toast.info(tb("frozenCantDelete"));
       return;
     }
     const ids = deletable.map((n) => n.id);
@@ -360,17 +374,19 @@ function NotesView({ tagId }: { tagId: string | null }) {
     applyFreeze(ids, isFrozen).then(
       () =>
         toast.success(
-          `${plural(ids.length, "note")} ${isFrozen ? "frozen" : "unfrozen"}`,
+          t(isFrozen ? "frozen" : "unfrozen", { count: ids.length }),
           {
             undo: () =>
               void applyFreeze(ids, !isFrozen).catch(() =>
-                toast.error("Couldn’t undo that"),
+                toast.error(tc("couldNotUndo")),
               ),
           },
         ),
       () =>
         toast.error(
-          `Couldn’t ${isFrozen ? "freeze" : "unfreeze"} ${ids.length === 1 ? "note" : "notes"}`,
+          t(isFrozen ? "couldNotFreeze" : "couldNotUnfreeze", {
+            count: ids.length,
+          }),
         ),
     );
   };
@@ -408,12 +424,12 @@ function NotesView({ tagId }: { tagId: string | null }) {
         onClick={(e) => rememberNewNoteButton(e.currentTarget)}
       >
         <Plus aria-hidden />
-        New note
+        {t("newNote")}
       </Link>
     </Button>
   );
 
-  useDocumentTitle(tag ? tag.name : "Notes");
+  useDocumentTitle(tag ? tag.name : t("title"));
   const title = tag ? (
     <div className="flex min-w-0 items-center gap-1">
       <PageTitle
@@ -430,10 +446,10 @@ function NotesView({ tagId }: { tagId: string | null }) {
       >
         {tag.name}
       </PageTitle>
-      <Tip label="Show all notes">
+      <Tip label={t("showAllNotes")}>
         <IconButton
           size="sm"
-          label="Show all notes"
+          label={t("showAllNotes")}
           onClick={() => router.push("/notes")}
         >
           <X />
@@ -441,7 +457,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
       </Tip>
     </div>
   ) : (
-    <PageTitle count={count}>Notes</PageTitle>
+    <PageTitle count={count}>{t("title")}</PageTitle>
   );
 
   const removeCount = confirmRemove?.ids.length ?? 0;
@@ -456,7 +472,9 @@ function NotesView({ tagId }: { tagId: string | null }) {
           !loadFailed && (
             <NoteListActions
               list={list}
-              placeholder={tag ? `Search #${tag.name}` : "Search notes"}
+              placeholder={
+                tag ? t("searchTag", { name: tag.name }) : t("searchNotes")
+              }
               autoFocus={searchParams.has("search")}
               showTagFilter={!tagId}
               onSearchFocus={archived.loadForSearch}
@@ -473,7 +491,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
         />
         {loadFailed && (
           <LoadFailedState
-            title="Couldn’t load your notes"
+            title={t("couldNotLoad")}
             onRetry={() => refetch()}
             isRetrying={isFetching}
           />
@@ -482,19 +500,18 @@ function NotesView({ tagId }: { tagId: string | null }) {
           (tag ? (
             <EmptyState
               illustration="notes"
-              title={`No notes tagged #${tag.name}`}
+              title={t("noNotesTagged", { name: tag.name })}
               action={newNoteButton}
             >
-              New notes you create here get this tag.
+              {t("noNotesTaggedHelp")}
             </EmptyState>
           ) : (
             <EmptyState
               illustration="notes"
-              title="No notes yet"
+              title={t("noNotesYet")}
               action={newNoteButton}
             >
-              Create a note, or import your notes from Google Keep or Markdown
-              in Settings.
+              {t("noNotesYetHelp")}
             </EmptyState>
           ))}
         {noResults && <NoSearchResults list={list} />}
@@ -523,7 +540,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
                 ? [
                     {
                       key: "pinned",
-                      label: "Pinned",
+                      label: t("pinned"),
                       icon: <Pin aria-hidden />,
                       notes: pinned,
                     },
@@ -533,7 +550,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
                 ? [
                     {
                       key: "others",
-                      label: pinned.length ? "Others" : undefined,
+                      label: pinned.length ? t("others") : undefined,
                       notes: others,
                     },
                   ]
@@ -542,7 +559,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
                 ? [
                     {
                       key: "archived",
-                      label: "Archived",
+                      label: t("archived"),
                       icon: <Archive aria-hidden />,
                       notes: list.archived,
                       isFixed: true,
@@ -557,7 +574,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
                         : undefined,
                       fallback: archiveFailed ? (
                         <LoadFailedRow
-                          message="Couldn’t load archived notes."
+                          message={t("couldNotLoadArchived")}
                           onRetry={() => archived.query.refetch()}
                           isRetrying={archived.query.isFetching}
                         />
@@ -579,7 +596,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
             groups={[
               {
                 key: "pictures",
-                label: "Pictures that may match",
+                label: t("picturesMayMatch"),
                 icon: <Images aria-hidden />,
                 notes: pictureMatches,
               },
@@ -589,7 +606,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
       </AppPage>
 
       {!list.picking && (
-        <Fab label="New note" asChild>
+        <Fab label={t("newNote")} asChild>
           <Link
             href={newNote}
             data-new-note="fab"
@@ -609,14 +626,14 @@ function NotesView({ tagId }: { tagId: string | null }) {
         actions={[
           {
             key: "tag",
-            label: "Tag",
+            label: t("tag"),
             icon: <TagIcon aria-hidden />,
             onClick: (button) =>
               setTagAnchor((current) => (current ? null : button)),
           },
           {
             key: "color",
-            label: "Colour",
+            label: t("colour"),
             icon: <Palette aria-hidden />,
             onClick: (button) =>
               setColorAnchor((current) => (current ? null : button)),
@@ -624,7 +641,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
           allPinned
             ? {
                 key: "unpin",
-                label: "Unpin",
+                label: t("unpin"),
                 icon: <PinOff aria-hidden />,
                 keys: ["f"],
                 onClick: () =>
@@ -635,7 +652,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
               }
             : {
                 key: "pin",
-                label: "Pin",
+                label: t("pin"),
                 icon: <Pin aria-hidden />,
                 keys: ["f"],
                 onClick: () =>
@@ -646,7 +663,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
               },
           {
             key: "lock",
-            label: "Lock…",
+            label: t("lock"),
             icon: <Lock aria-hidden />,
             onClick: () => setLocking(true),
           },
@@ -654,7 +671,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
             ? [
                 {
                   key: "freeze",
-                  label: allFrozen ? "Unfreeze" : "Freeze",
+                  label: allFrozen ? t("unfreeze") : t("freeze"),
                   icon: <Snowflake aria-hidden />,
                   onClick: freezeChosen,
                 },
@@ -662,14 +679,14 @@ function NotesView({ tagId }: { tagId: string | null }) {
             : []),
           {
             key: "print",
-            label: "Print",
+            label: t("print"),
             icon: <Printer aria-hidden />,
             onClick: () => printNoteList(chosen),
           },
           allArchived
             ? {
                 key: "unarchive",
-                label: "Unarchive",
+                label: t("unarchive"),
                 icon: <ArchiveRestore aria-hidden />,
                 keys: ["e"],
                 onClick: () =>
@@ -680,7 +697,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
               }
             : {
                 key: "archive",
-                label: "Archive",
+                label: t("archive"),
                 icon: <Archive aria-hidden />,
                 keys: ["e"],
                 onClick: () =>
@@ -691,7 +708,7 @@ function NotesView({ tagId }: { tagId: string | null }) {
               },
           {
             key: "delete",
-            label: "Delete",
+            label: tc("delete"),
             icon: <Trash2 aria-hidden />,
             onClick: () => deleteNotes(chosen),
             keys: ["Delete"],
@@ -702,13 +719,13 @@ function NotesView({ tagId }: { tagId: string | null }) {
       <ConfirmationDialog
         open={!!confirmRemove}
         onOpenChange={(open) => !open && setConfirmRemove(null)}
-        title={`Delete ${plural(removeCount, "note")}?`}
-        description={deleteNotesWarning(
-          removeCount - removeSharedCount,
-          removeSharedCount,
-        )}
-        confirmLabel="Delete"
-        busyLabel="Deleting…"
+        title={tb("deleteTitle", { count: removeCount })}
+        description={tb("deleteWarning", {
+          owned: removeCount - removeSharedCount,
+          shared: removeSharedCount,
+        })}
+        confirmLabel={tc("delete")}
+        busyLabel={tb("deleting")}
         isPending={noteAction.isPending}
         onConfirm={() =>
           confirmRemove &&

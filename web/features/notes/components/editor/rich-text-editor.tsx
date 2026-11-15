@@ -2,6 +2,7 @@
 
 import { ChevronDown, GripVertical } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import Delta from "quill-delta";
 import {
   forwardRef,
@@ -227,7 +228,7 @@ export const RichTextEditor = forwardRef<
     {
       value,
       onChange,
-      placeholder = "Start typing...",
+      placeholder,
       readOnly = false,
       onAddAttachment,
       onRecordAudio,
@@ -240,6 +241,8 @@ export const RichTextEditor = forwardRef<
     },
     ref,
   ) => {
+    const t = useTranslations("editor.text");
+    const shownPlaceholder = placeholder ?? t("placeholder");
     const quillRef = useRef<{ getEditor: () => QuillInstance }>(null);
     const pictureTools = useRef<InlineImageToolsHandle>(null);
     const canPlacePictures = !readOnly && !!pictures;
@@ -492,6 +495,12 @@ export const RichTextEditor = forwardRef<
       return () => el.removeEventListener("formatchange", bump);
     }, [editorContainerEl]);
 
+    // Quill reads the placeholder once, so a language change is applied here.
+    useEffect(() => {
+      const root = editorContainerEl?.querySelector<HTMLElement>(".ql-editor");
+      root?.setAttribute("data-placeholder", shownPlaceholder);
+    }, [editorContainerEl, shownPlaceholder]);
+
     // Says where Alt+Shift+Up/Down moved a checklist item.
     const [moveAnnouncement, setMoveAnnouncement] = useState("");
     useEffect(() => {
@@ -500,11 +509,11 @@ export const RichTextEditor = forwardRef<
       const announce = (e: Event) => {
         const { place, siblings } = (e as CustomEvent<ChecklistMoveDetail>)
           .detail;
-        setMoveAnnouncement(`Moved to ${place} of ${siblings}`);
+        setMoveAnnouncement(t("movedTo", { place, siblings }));
       };
       el.addEventListener("checklistmove", announce);
       return () => el.removeEventListener("checklistmove", announce);
-    }, [editorContainerEl]);
+    }, [editorContainerEl, t]);
 
     const { revealSelection } = checkedFolds;
     const handleSelectionChange = useCallback(
@@ -684,12 +693,15 @@ export const RichTextEditor = forwardRef<
       } catch {}
     }, []);
 
-    const copyLinkToClipboard = useCallback((url: string) => {
-      copyText(url).then(
-        () => toast.success("Link copied"),
-        () => toast.error("Couldn’t copy the link"),
-      );
-    }, []);
+    const copyLinkToClipboard = useCallback(
+      (url: string) => {
+        copyText(url).then(
+          () => toast.success(t("linkCopied")),
+          () => toast.error(t("linkCopyFailed")),
+        );
+      },
+      [t],
+    );
 
     const openLinkDialog = useCallback(() => {
       const quill = quillRef.current?.getEditor?.() as QuillInstance | null;
@@ -940,7 +952,7 @@ export const RichTextEditor = forwardRef<
         if (!root || root.getAttribute("role") === "textbox") return;
         root.setAttribute("role", "textbox");
         root.setAttribute("aria-multiline", "true");
-        root.setAttribute("aria-label", "Note text");
+        root.setAttribute("aria-label", t("noteText"));
         // Moves the checklist item at the caret (see QUILL_MODULES).
         root.setAttribute(
           "aria-keyshortcuts",
@@ -958,7 +970,7 @@ export const RichTextEditor = forwardRef<
         root?.removeAttribute("aria-label");
         root?.removeAttribute("aria-keyshortcuts");
       };
-    }, [editorContainerEl, readOnly]);
+    }, [editorContainerEl, readOnly, t]);
 
     useEffect(() => {
       const host = editorContainerEl;
@@ -968,7 +980,7 @@ export const RichTextEditor = forwardRef<
         if (!root || root.getAttribute("role") === "region") return;
         root.tabIndex = 0;
         root.setAttribute("role", "region");
-        root.setAttribute("aria-label", "Note text, read-only");
+        root.setAttribute("aria-label", t("noteTextReadOnly"));
       };
       markReadOnly();
       const observer = new MutationObserver(markReadOnly);
@@ -992,7 +1004,7 @@ export const RichTextEditor = forwardRef<
         root?.removeAttribute("role");
         root?.removeAttribute("aria-label");
       };
-    }, [editorContainerEl, readOnly]);
+    }, [editorContainerEl, readOnly, t]);
 
     // Runs before Quill's own paste handler.
     useEffect(() => {
@@ -1090,7 +1102,7 @@ export const RichTextEditor = forwardRef<
             onBlur={handleBlur}
             modules={QUILL_MODULES}
             formats={QUILL_FORMATS}
-            placeholder={placeholder}
+            placeholder={shownPlaceholder}
             readOnly={readOnly || !!longContent}
             useSemanticHTML={false}
           />
@@ -1110,7 +1122,9 @@ export const RichTextEditor = forwardRef<
                 checklistSort.cancel();
                 checklistDrag.startDrag(e);
               }}
-              title={`Drag to reorder (${isMac() ? "⌥⇧↑ ⌥⇧↓" : "Alt+Shift+↑ / ↓"})`}
+              title={t("dragToReorder", {
+                shortcut: isMac() ? "⌥⇧↑ ⌥⇧↓" : "Alt+Shift+↑ / ↓",
+              })}
             >
               <GripVertical size={15} />
             </button>

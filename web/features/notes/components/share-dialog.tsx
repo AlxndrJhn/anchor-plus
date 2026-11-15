@@ -16,6 +16,7 @@ import {
   UserMinus,
   UserPlus,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { create } from "zustand";
 import { Avatar } from "@/components/ui/avatar";
@@ -64,43 +65,48 @@ import type {
   UserSearchResult,
 } from "../types";
 
-const ACCESS: Record<
-  NoteSharePermission,
-  { label: string; icon: React.ReactNode; description: string }
-> = {
+type AccessText = {
+  label: "canView" | "canEdit" | "linkOff";
+  icon: React.ReactNode;
+  description:
+    | "canReadNote"
+    | "canChangeTextAndPictures"
+    | "linkOffHelp"
+    | "linkViewHelp"
+    | "linkEditHelp";
+};
+
+const ACCESS: Record<NoteSharePermission, AccessText> = {
   viewer: {
-    label: "Can view",
+    label: "canView",
     icon: <Eye />,
-    description: "Can read the note",
+    description: "canReadNote",
   },
   editor: {
-    label: "Can edit",
+    label: "canEdit",
     icon: <Pencil />,
-    description: "Can change the text and pictures",
+    description: "canChangeTextAndPictures",
   },
 };
 
 type LinkAccess = NoteSharePermission | "off";
 
 // What the note's link lets anyone who has it do.
-const LINK_ACCESS: Record<
-  LinkAccess,
-  { label: string; icon: React.ReactNode; description: string }
-> = {
+const LINK_ACCESS: Record<LinkAccess, AccessText> = {
   off: {
-    label: "Off",
+    label: "linkOff",
     icon: <Lock />,
-    description: "Only people you add can open it",
+    description: "linkOffHelp",
   },
   viewer: {
-    label: "Can view",
+    label: "canView",
     icon: <Eye />,
-    description: "Anyone with the link can read it, without an account",
+    description: "linkViewHelp",
   },
   editor: {
-    label: "Can edit",
+    label: "canEdit",
     icon: <Pencil />,
-    description: "Anyone with the link can change the title and text",
+    description: "linkEditHelp",
   },
 };
 
@@ -131,6 +137,8 @@ export function ShareDialog({
   noteId,
   title,
 }: ShareDialogProps) {
+  const t = useTranslations("notes.shareDialog");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const me = useAuthStore((s) => s.user);
   const pending = usePendingRevokes((s) => s.ids);
@@ -169,20 +177,18 @@ export function ShareDialog({
       queryClient.setQueryData<NoteShareLink | null>(linkKey, next);
       // The note's card and page say whether it's public.
       queryClient.invalidateQueries({ queryKey: ["notes"] });
-      if (!next) toast.success("Link turned off; it no longer opens the note");
+      if (!next) toast.success(t("linkTurnedOff"));
       else if (!link)
         copyText(shareLinkUrl(next.token)).then(
-          () => toast.success("Link made and copied"),
-          () => toast.success("Link made"),
+          () => toast.success(t("linkMadeAndCopied")),
+          () => toast.success(t("linkMade")),
         );
       else
         toast.success(
-          access === "editor"
-            ? "Anyone with the link can now edit"
-            : "Anyone with the link can now view",
+          access === "editor" ? t("linkNowEdit") : t("linkNowView"),
         );
     },
-    onError: () => toast.error("Couldn’t change the link"),
+    onError: () => toast.error(t("couldNotChangeLink")),
   });
   const visibleShares = shares.filter((s) => !pending.has(s.id));
 
@@ -201,9 +207,10 @@ export function ShareDialog({
       ]);
       setAddedShareId(share.id);
       refresh();
-      toast.success(`Shared with ${user.name}`);
+      toast.success(t("sharedWith", { name: user.name }));
     },
-    onError: (_e, user) => toast.error(`Couldn’t share with ${user.name}`),
+    onError: (_e, user) =>
+      toast.error(t("couldNotShareWith", { name: user.name })),
   });
 
   const changeAccess = useMutation({
@@ -222,19 +229,23 @@ export function ShareDialog({
     onSuccess: (_s, { share, permission }) => {
       refresh();
       toast.success(
-        `${share.sharedWithUser.name} ${permission === "editor" ? "can now edit" : "can now view"}`,
+        t(permission === "editor" ? "canNowEdit" : "canNowView", {
+          name: share.sharedWithUser.name,
+        }),
       );
     },
     onError: (_e, { share }) => {
       refresh();
-      toast.error(`Couldn’t change access for ${share.sharedWithUser.name}`);
+      toast.error(
+        t("couldNotChangeAccess", { name: share.sharedWithUser.name }),
+      );
     },
   });
 
   const removeAccess = (share: NoteShare) => {
     const name = share.sharedWithUser.name;
     setPending(share.id, true);
-    toast.success(`${name} no longer has access`, {
+    toast.success(t("noLongerHasAccess", { name }), {
       undo: () => setPending(share.id, false),
       onClose: () => {
         revokeShare(noteId, share.id).then(
@@ -247,7 +258,7 @@ export function ShareDialog({
           },
           () => {
             setPending(share.id, false);
-            toast.error(`Couldn’t remove access for ${name}`);
+            toast.error(t("couldNotRemoveAccess", { name }));
           },
         );
       },
@@ -265,7 +276,7 @@ export function ShareDialog({
       >
         <DialogHeader>
           <DialogTitle>
-            {title?.trim() ? `Share “${title}”` : "Share note"}
+            {title?.trim() ? t("shareTitled", { title }) : t("shareNote")}
           </DialogTitle>
         </DialogHeader>
         <DialogBody className="gap-3.5">
@@ -284,7 +295,7 @@ export function ShareDialog({
             onPick={(user) => addPerson.mutate(user)}
           />
           <div className="mt-1.5 -mb-0.5 text-label text-muted-foreground uppercase">
-            People with access
+            {t("peopleWithAccess")}
           </div>
           <div className="-mx-2 grid gap-0.5">
             {me && (
@@ -296,7 +307,7 @@ export function ShareDialog({
                 src={me.profileImage}
               >
                 <span className="pr-2 text-meta text-muted-foreground">
-                  Owner
+                  {t("owner")}
                 </span>
               </Person>
             )}
@@ -307,7 +318,7 @@ export function ShareDialog({
               />
             ) : isLoadingError ? (
               <LoadFailedRow
-                message="Couldn’t load the people with access."
+                message={t("couldNotLoadPeople")}
                 onRetry={() => void refetch()}
                 isRetrying={isFetching}
                 className="mx-2 mt-1"
@@ -336,7 +347,7 @@ export function ShareDialog({
           {!isServerless && (
             <>
               <div className="mt-1.5 -mb-0.5 text-label text-muted-foreground uppercase">
-                Link
+                {t("link")}
               </div>
               <LinkRow
                 link={link}
@@ -353,11 +364,9 @@ export function ShareDialog({
         <DialogFooter className="justify-between">
           <span className="flex items-center gap-2 text-meta text-muted-foreground [&_svg]:size-3.75">
             {link ? <Globe aria-hidden /> : <Lock aria-hidden />}
-            {link
-              ? "Anyone with the link can open it."
-              : "Only people you add can open it."}
+            {link ? t("anyoneCanOpen") : t("onlyPeopleYouAdd")}
           </span>
-          <Button onClick={() => onOpenChange(false)}>Done</Button>
+          <Button onClick={() => onOpenChange(false)}>{tc("done")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -381,6 +390,7 @@ function Person({
   you?: boolean;
   children: React.ReactNode;
 }) {
+  const t = useTranslations("notes.shareDialog");
   return (
     <div
       className={cn(
@@ -392,7 +402,7 @@ function Person({
       <span className="grid min-w-0 flex-1 leading-[1.3]">
         <b className="truncate font-semibold text-ui">
           {name}
-          {you && " (you)"}
+          {you && ` ${t("you")}`}
         </b>
         <small className="truncate text-muted-foreground text-small">
           {email}
@@ -412,6 +422,7 @@ function AccessMenu({
   onChange: (permission: NoteSharePermission) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations("notes.shareDialog");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -419,14 +430,14 @@ function AccessMenu({
           type="button"
           className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border-0 bg-transparent pr-2 pl-3 font-medium text-control text-foreground hover:bg-foreground/6 aria-expanded:bg-foreground/6 [&_svg]:size-3.75 [&_svg]:text-muted-foreground"
         >
-          {ACCESS[share.permission].label}
+          {t(ACCESS[share.permission].label)}
           <ChevronDown aria-hidden />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         className="w-61"
-        aria-label={`Access for ${share.sharedWithUser.name}`}
+        aria-label={t("accessFor", { name: share.sharedWithUser.name })}
       >
         <MenuPrimitive.RadioGroup
           value={share.permission}
@@ -442,9 +453,9 @@ function AccessMenu({
             >
               {ACCESS[permission].icon}
               <span className="grid flex-1 gap-0.5 leading-[1.3]">
-                {ACCESS[permission].label}
+                {t(ACCESS[permission].label)}
                 <small className="whitespace-normal text-muted-foreground text-small">
-                  {ACCESS[permission].description}
+                  {t(ACCESS[permission].description)}
                 </small>
               </span>
               <MenuPrimitive.ItemIndicator className="mt-0.5">
@@ -456,7 +467,7 @@ function AccessMenu({
         <DropdownMenuSeparator />
         <DropdownMenuItem tone="danger" onSelect={onRemove}>
           <UserMinus />
-          Remove access
+          {t("removeAccess")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -480,10 +491,11 @@ function LinkRow({
   busy: boolean;
   onChange: (access: LinkAccess) => void;
 }) {
+  const t = useTranslations("notes.shareDialog");
   if (failed)
     return (
       <LoadFailedRow
-        message="Couldn’t load the note’s link."
+        message={t("couldNotLoadLink")}
         onRetry={onRetry}
         isRetrying={retrying}
         className="mt-1"
@@ -500,9 +512,11 @@ function LinkRow({
           {link ? <Globe aria-hidden /> : <Link2 aria-hidden />}
         </span>
         <span className="grid min-w-0 flex-1 leading-[1.3]">
-          <b className="truncate font-semibold text-ui">Anyone with the link</b>
+          <b className="truncate font-semibold text-ui">
+            {t("anyoneWithLink")}
+          </b>
           <small className="truncate text-muted-foreground text-small">
-            {LINK_ACCESS[access].description}
+            {t(LINK_ACCESS[access].description)}
           </small>
         </span>
         <DropdownMenu>
@@ -512,14 +526,14 @@ function LinkRow({
               className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border-0 bg-transparent pr-2 pl-3 font-medium text-control text-foreground hover:bg-foreground/6 disabled:cursor-default disabled:opacity-60 aria-expanded:bg-foreground/6 [&_svg]:size-3.75 [&_svg]:text-muted-foreground"
             >
               {busy && <LoaderCircle aria-hidden className="animate-spin" />}
-              {LINK_ACCESS[access].label}
+              {t(LINK_ACCESS[access].label)}
               <ChevronDown aria-hidden />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
             className="w-61"
-            aria-label="Access with the link"
+            aria-label={t("accessWithLink")}
           >
             <MenuPrimitive.RadioGroup
               value={access}
@@ -535,9 +549,9 @@ function LinkRow({
                 >
                   {LINK_ACCESS[option].icon}
                   <span className="grid flex-1 gap-0.5 leading-[1.3]">
-                    {LINK_ACCESS[option].label}
+                    {t(LINK_ACCESS[option].label)}
                     <small className="whitespace-normal text-muted-foreground text-small">
-                      {LINK_ACCESS[option].description}
+                      {t(LINK_ACCESS[option].description)}
                     </small>
                   </span>
                   <MenuPrimitive.ItemIndicator className="mt-0.5">
@@ -554,7 +568,7 @@ function LinkRow({
           <Input
             readOnly
             value={url}
-            aria-label="The note’s link"
+            aria-label={t("noteLink")}
             boxClassName="h-9 min-w-0 flex-1"
             onFocus={(e) => e.currentTarget.select()}
           />
@@ -562,13 +576,13 @@ function LinkRow({
             variant="secondary"
             onClick={() =>
               copyText(url).then(
-                () => toast.success("Link copied"),
-                () => toast.error("Couldn’t copy the link"),
+                () => toast.success(t("linkCopied")),
+                () => toast.error(t("couldNotCopyLink")),
               )
             }
           >
             <Copy aria-hidden />
-            Copy link
+            {t("copyLink")}
           </Button>
         </div>
       )}
@@ -587,6 +601,7 @@ function PeopleSearch({
   busy: boolean;
   onPick: (user: UserSearchResult) => void;
 }) {
+  const t = useTranslations("notes.shareDialog");
   const [query, setQuery] = React.useState("");
   const [listWanted, setListWanted] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(0);
@@ -658,14 +673,14 @@ function PeopleSearch({
           )
         }
         role="combobox"
-        aria-label="Add people by name or email"
+        aria-label={t("addPeople")}
         aria-expanded={listShown}
         aria-controls={listId}
         aria-autocomplete="list"
         aria-activedescendant={
           listShown && options.length ? `${listId}-${highlighted}` : undefined
         }
-        placeholder="Add people by name or email"
+        placeholder={t("addPeople")}
         autoComplete="off"
         value={query}
         boxClassName="h-10.5"
@@ -700,20 +715,19 @@ function PeopleSearch({
         <div
           role="listbox"
           id={listId}
-          aria-label="People"
+          aria-label={t("people")}
           className="absolute inset-x-0 top-[calc(100%+6px)] z-(--z-popover) grid max-h-70 gap-px overflow-auto rounded-popover bg-card p-1.5 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--border)_70%,transparent),var(--sh-menu)] animate-pop-in"
           onMouseDown={(e) => e.preventDefault()}
         >
           {noMatches ? (
             <div className="px-2.5 py-3.5 text-center text-control text-muted-foreground">
-              No one found for “{term}”. You can only share with people who have
-              an account on this server.
+              {t("noOneFound", { term })}
             </div>
           ) : (
             <>
               {!hasTerm && (
                 <div className="px-2.5 pt-2 pb-1 text-label text-muted-foreground uppercase">
-                  Recently shared with
+                  {t("recentlySharedWith")}
                 </div>
               )}
               {options.map((user, i) => (

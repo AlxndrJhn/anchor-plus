@@ -8,6 +8,7 @@ import {
   Play,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { fetchAttachmentBlob } from "../../api";
@@ -77,6 +78,7 @@ export function PictureTile({
   onDelete,
   onOpen,
 }: TileProps & { onOpen: () => void }) {
+  const t = useTranslations("noteEditor.attachments.tiles");
   const { blobUrl, error, retry } = useAttachmentBlob(noteId, attachment.id);
   const [isArriving] = React.useState(!blobUrl);
   const state = error ? "failed" : blobUrl ? "ready" : "loading";
@@ -92,7 +94,7 @@ export function PictureTile({
       <button
         type="button"
         className="t-open"
-        aria-label={`${attachment.originalFilename}, open viewer`}
+        aria-label={t("openViewer", { name: attachment.originalFilename })}
         disabled={state !== "ready"}
         onClick={onOpen}
         onKeyDown={onKeyDown}
@@ -111,16 +113,16 @@ export function PictureTile({
         <button
           type="button"
           onClick={retry}
-          aria-label={`Try again, ${attachment.originalFilename}`}
+          aria-label={t("retryNamed", { name: attachment.originalFilename })}
         >
-          Try again
+          {t("retry")}
         </button>
       </div>
       {onDelete && (
         <button
           type="button"
           className="t-x"
-          aria-label={`Delete ${attachment.originalFilename}`}
+          aria-label={t("delete", { name: attachment.originalFilename })}
           onClick={onDelete}
         >
           <X aria-hidden />
@@ -138,6 +140,7 @@ export function VoiceCard({
   onKeyDown,
   onDelete,
 }: TileProps) {
+  const t = useTranslations("noteEditor.attachments.tiles");
   const { blobUrl, error, retry } = useAttachmentBlob(noteId, attachment.id);
   const audio = React.useRef<HTMLAudioElement>(null);
   const bar = React.useRef<HTMLDivElement>(null);
@@ -192,7 +195,7 @@ export function VoiceCard({
         <button
           type="button"
           className="play"
-          aria-label={`${playing ? "Pause" : "Play"} ${name}`}
+          aria-label={t(playing ? "pause" : "play", { name })}
           disabled={state !== "ready"}
           onClick={() =>
             playing ? audio.current?.pause() : void audio.current?.play()
@@ -210,13 +213,13 @@ export function VoiceCard({
             {duration ? ` / ${formatTime(duration)}` : ""}
           </span>
           <span className="a-fail">
-            Couldn’t load
+            {t("couldntLoad")}
             <button
               type="button"
               onClick={retry}
-              aria-label={`Try again, ${name}`}
+              aria-label={t("retryNamed", { name })}
             >
-              Try again
+              {t("retry")}
             </button>
           </span>
         </div>
@@ -227,11 +230,14 @@ export function VoiceCard({
         role="slider"
         tabIndex={state === "ready" ? 0 : -1}
         aria-disabled={state !== "ready" || undefined}
-        aria-label={`${name} position`}
+        aria-label={t("position", { name })}
         aria-valuemin={0}
         aria-valuemax={Math.round(duration)}
         aria-valuenow={Math.round(position)}
-        aria-valuetext={`${formatTime(position)} of ${formatTime(duration)}`}
+        aria-valuetext={t("positionText", {
+          position: formatTime(position),
+          duration: formatTime(duration),
+        })}
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
           seekTo(e.clientX);
@@ -257,8 +263,8 @@ export function VoiceCard({
           className="t-x t-dl"
           href={blobUrl}
           download={name}
-          aria-label={`Download ${name}`}
-          title="Download"
+          aria-label={t("download", { name })}
+          title={t("downloadTitle")}
           data-beside={onDelete ? "" : undefined}
         >
           <Download aria-hidden />
@@ -268,7 +274,7 @@ export function VoiceCard({
         <button
           type="button"
           className="t-x"
-          aria-label={`Delete ${name}`}
+          aria-label={t("delete", { name })}
           onClick={onDelete}
         >
           <X aria-hidden />
@@ -287,6 +293,7 @@ export function FileCard({
   onKeyDown,
   onDelete,
 }: TileProps) {
+  const t = useTranslations("noteEditor.attachments.tiles");
   const [state, setState] = React.useState<"ready" | "loading" | "failed">(
     "ready",
   );
@@ -321,7 +328,7 @@ export function FileCard({
         <button
           type="button"
           className="play"
-          aria-label={`Download ${name}`}
+          aria-label={t("download", { name })}
           disabled={state === "loading"}
           onClick={() => void download()}
           onKeyDown={onKeyDown}
@@ -338,13 +345,13 @@ export function FileCard({
           </span>
           <span className="a-time">{fileSize(attachment.fileSize)}</span>
           <span className="a-fail">
-            Couldn’t download
+            {t("couldntDownload")}
             <button
               type="button"
               onClick={() => void download()}
-              aria-label={`Try again, ${name}`}
+              aria-label={t("retryNamed", { name })}
             >
-              Try again
+              {t("retry")}
             </button>
           </span>
         </div>
@@ -353,7 +360,7 @@ export function FileCard({
         <button
           type="button"
           className="t-x"
-          aria-label={`Delete ${name}`}
+          aria-label={t("delete", { name })}
           onClick={onDelete}
         >
           <X aria-hidden />
@@ -372,12 +379,13 @@ export function UploadTile({
   onRetry: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("noteEditor.attachments.tiles");
   const name = upload.file.name;
   const cancelButton = (
     <button
       type="button"
       className="t-x"
-      aria-label={upload.failed ? `Remove ${name}` : `Cancel ${name}`}
+      aria-label={t(upload.failed ? "remove" : "cancel", { name })}
       onClick={onCancel}
     >
       <X aria-hidden />
@@ -404,7 +412,7 @@ export function UploadTile({
           </span>
           <div className="aa-meta">
             <span className="aa-name">{name}</span>
-            <span className="a-time">Uploading…</span>
+            <span className="a-time">{t("uploading")}</span>
           </div>
         </div>
         <div
@@ -414,13 +422,13 @@ export function UploadTile({
           <span className="a-fill" />
         </div>
         <span className="a-fail">
-          Couldn’t upload
+          {t("couldntUpload")}
           <button
             type="button"
             onClick={onRetry}
-            aria-label={`Try again, ${name}`}
+            aria-label={t("retryNamed", { name })}
           >
-            Try again
+            {t("retry")}
           </button>
         </span>
         {cancelButton}
@@ -436,15 +444,15 @@ export function UploadTile({
       {upload.preview && (
         <img className="th" src={upload.preview} alt="" draggable={false} />
       )}
-      <Ring progress={upload.progress} label={`Uploading ${name}`} />
+      <Ring progress={upload.progress} label={t("uploadingName", { name })} />
       <div className="t-fail">
         <CircleAlert aria-hidden />
         <button
           type="button"
           onClick={onRetry}
-          aria-label={`Try again, ${name}`}
+          aria-label={t("retryNamed", { name })}
         >
-          Try again
+          {t("retry")}
         </button>
       </div>
       {cancelButton}

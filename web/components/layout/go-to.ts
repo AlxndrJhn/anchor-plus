@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { orderTags, useTags } from "@/features/tags";
 
@@ -13,21 +14,31 @@ export interface GoToTarget {
   color?: string | null;
 }
 
-const PAGES: GoToTarget[] = [
-  { id: "page:notes", name: "Notes", href: "/notes", isTag: false },
-  { id: "page:archive", name: "Archive", href: "/archive", isTag: false },
-  { id: "page:trash", name: "Trash", href: "/trash", isTag: false },
-  { id: "page:settings", name: "Settings", href: "/settings", isTag: false },
-];
+const PAGES = [
+  { id: "page:notes", key: "notes", href: "/notes" },
+  { id: "page:archive", key: "archive", href: "/archive" },
+  { id: "page:trash", key: "trash", href: "/trash" },
+  { id: "page:settings", key: "settings", href: "/settings" },
+] as const;
 
 const NO_TAGS: never[] = [];
 
 /** The pages, if asked for, then the tags in the sidebar's order. */
 export function useGoToTargets({ pages }: { pages: boolean }) {
+  const t = useTranslations("common");
   const { data: tags = NO_TAGS } = useTags();
   return React.useMemo(
     () => [
-      ...(pages ? PAGES : []),
+      ...(pages
+        ? PAGES.map(
+            (page): GoToTarget => ({
+              id: page.id,
+              name: t(page.key),
+              href: page.href,
+              isTag: false,
+            }),
+          )
+        : []),
       ...orderTags(tags).map((tag) => ({
         id: `tag:${tag.id}`,
         name: tag.name,
@@ -36,7 +47,7 @@ export function useGoToTargets({ pages }: { pages: boolean }) {
         color: tag.color,
       })),
     ],
-    [pages, tags],
+    [pages, tags, t],
   );
 }
 

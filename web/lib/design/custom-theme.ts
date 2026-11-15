@@ -9,6 +9,7 @@
  * mode's colours are the scheme palette's fields; a missing one keeps the
  * chosen scheme's colour.
  */
+import { translate } from "@/lib/i18n";
 import {
   COLOR_SCHEMES,
   PALETTE_CSS_VARS,
@@ -72,8 +73,12 @@ function closest(key: string, options: readonly string[]): string | null {
 }
 
 const unknownKey = (path: string, key: string, options: readonly string[]) => {
+  const t = translate("layout.customTheme");
   const guess = closest(key, options);
-  return `${path}: unknown key${guess ? ` (did you mean "${guess}"?)` : ""}; expected one of ${options.join(", ")}`;
+  const expected = options.join(", ");
+  return guess
+    ? t("unknownKeyGuess", { path, guess, options: expected })
+    : t("unknownKey", { path, options: expected });
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -81,6 +86,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 
 /** Reads and checks a custom theme, listing every problem it finds. */
 export function parseCustomTheme(text: string): CustomThemeResult {
+  const t = translate("layout.customTheme");
   let json: unknown;
   try {
     json = JSON.parse(text);
@@ -88,14 +94,16 @@ export function parseCustomTheme(text: string): CustomThemeResult {
     return {
       ok: false,
       errors: [
-        `Not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+        t("invalidJson", {
+          message: error instanceof Error ? error.message : String(error),
+        }),
       ],
     };
   }
   if (!isObject(json))
     return {
       ok: false,
-      errors: ['The theme must be a JSON object, like {"dark": {…}}'],
+      errors: [t("mustBeObject", { example: '{"dark": {…}}' })],
     };
 
   const errors: string[] = [];
@@ -106,14 +114,14 @@ export function parseCustomTheme(text: string): CustomThemeResult {
 
   if (json.name !== undefined) {
     if (typeof json.name === "string") theme.name = json.name;
-    else errors.push("name: must be a string");
+    else errors.push(t("nameString"));
   }
 
   for (const mode of THEME_MODES) {
     const colors = json[mode];
     if (colors === undefined) continue;
     if (!isObject(colors)) {
-      errors.push(`${mode}: must be an object of colours`);
+      errors.push(t("modeObject", { mode }));
       continue;
     }
     const palette: Partial<Record<PaletteField, string>> = {};
@@ -126,14 +134,17 @@ export function parseCustomTheme(text: string): CustomThemeResult {
       if (color) palette[key as PaletteField] = color;
       else
         errors.push(
-          `${mode}.${key}: ${JSON.stringify(value)} is not a colour; use #rgb, #rrggbb or #rrggbbaa`,
+          t("notColour", {
+            path: `${mode}.${key}`,
+            value: JSON.stringify(value),
+          }),
         );
     }
     theme[mode] = palette;
   }
 
   if (json.light === undefined && json.dark === undefined)
-    errors.push('Give at least one of "light" or "dark"');
+    errors.push(t("needOne"));
 
   return errors.length ? { ok: false, errors } : { ok: true, theme };
 }

@@ -1,0 +1,209 @@
+{
+  "reminder": {
+    "recurrence": {
+      "none": "Nie",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich",
+      "yearly": "Jährlich"
+    },
+    "presets": {
+      "later": "Später heute",
+      "tomorrow": "Morgen",
+      "weekend": "Am Wochenende",
+      "monday": "Nächsten Montag",
+      "week": "Nächste Woche",
+      "month": "Nächsten Monat"
+    },
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "inMinutes": "In {count, plural, one {# Minute} other {# Minuten}}",
+    "inHours": "In {count, plural, one {# Stunde} other {# Stunden}}",
+    "inDays": "In {count, plural, one {# Tag} other {# Tagen}}",
+    "repeatsDaily": "Wiederholt sich täglich",
+    "repeatsWeekly": "Wiederholt sich jeden {weekday}",
+    "repeatsMonthly": "Wiederholt sich monatlich am {day, selectordinal, other {#.}}",
+    "repeatsYearly": "Wiederholt sich jährlich am {date}",
+    "none": "Keine Erinnerung",
+    "pickWhen": "Wähle, wann du erinnert wirst",
+    "passed": "Diese Zeit ist vorbei"
+  },
+  "history": {
+    "cause": {
+      "edit": "Frühere Version",
+      "conflict": "Nicht gespeichert",
+      "restore": "Vor einer Wiederherstellung"
+    },
+    "someone": "Jemand",
+    "you": "Du",
+    "dayAtTime": "{day}, {time}",
+    "today": "Heute",
+    "yesterday": "Gestern"
+  },
+  "drawing": {
+    "colors": {
+      "black": "Schwarz",
+      "red": "Rot",
+      "orange": "Orange",
+      "green": "Grün",
+      "blue": "Blau",
+      "purple": "Lila"
+    },
+    "sizes": {
+      "thin": "Dünn",
+      "medium": "Mittel",
+      "thick": "Dick"
+    }
+  },
+  "textStyle": {
+    "colors": {
+      "red": "Rot",
+      "orange": "Orange",
+      "amber": "Bernstein",
+      "green": "Grün",
+      "teal": "Petrol",
+      "blue": "Blau",
+      "purple": "Lila",
+      "pink": "Pink",
+      "gray": "Grau"
+    },
+    "fonts": {
+      "serif": "Serif",
+      "monospace": "Monospace",
+      "comic": "Comic Sans",
+      "handwriting": "Handschrift",
+      "typewriter": "Schreibmaschine",
+      "rounded": "Abgerundet",
+      "slab": "Slab",
+      "marker": "Marker"
+    }
+  },
+  "emoji": {
+    "categories": {
+      "people": "Smileys & Personen",
+      "nature": "Tiere & Natur",
+      "food": "Essen & Trinken",
+      "activity": "Aktivitäten",
+      "travel": "Reisen & Orte",
+      "objects": "Objekte",
+      "symbols": "Symbole",
+      "flags": "Flaggen"
+    }
+  },
+  "flowchart": {
+    "start": "Start",
+    "step": "Schritt",
+    "label": "Flussdiagramm",
+    "labelWithText": "Flussdiagramm: {text}"
+  },
+  "quillFormats": {
+    "picture": "Bild",
+    "liveScreen": "Live-Bildschirm",
+    "liveCamera": "Live-Kamera",
+    "live": "Live",
+    "downloadPdf": "PDF herunterladen"
+  },
+  "scans": {
+    "scan": "Scan",
+    "pages": "{count, plural, one {# Seite} other {# Seiten}}",
+    "profiles": {
+      "bw": "Schwarzweiß",
+      "whiteboard": "Whiteboard",
+      "text": "Farbiger Text",
+      "color": "Volle Farbe"
+    }
+  },
+  "noteLock": {
+    "kinds": {
+      "biometric": {
+        "label": "Fingerabdruck oder Gesicht",
+        "description": "Im Web öffnet dein Kontopasswort sie."
+      },
+      "pin": {
+        "label": "PIN",
+        "description": "Die PIN deiner Notizen öffnet sie."
+      },
+      "pattern": {
+        "label": "Muster",
+        "description": "Das Muster deiner Notizen öffnet sie."
+      },
+      "tap": {
+        "label": "Nur ein Tippen",
+        "description": "Ein Tippen öffnet sie."
+      }
+    },
+    "pinHint": "4 bis 12 Ziffern."
+  },
+  "liveHub": {
+    "deviceOn": "{app} auf {system}",
+    "aBrowser": "einem Browser"
+  },
+  "saveQueues": {
+    "offlineEditFailed": "Eine Änderung, die offline gemacht wurde, konnte nicht gespeichert werden.",
+    "conflictCopyKept": "„{title}“ wurde auch anderswo geändert. Deine Version bleibt als neue Notiz erhalten.",
+    "untitled": "Ohne Titel"
+  },
+  "print": {
+    "locked": "Diese Notiz ist gesperrt.",
+    "failed": "{count, plural, one {Notiz konnte nicht gedruckt werden} other {Notizen konnten nicht gedruckt werden}}"
+  },
+  "checklistActions": {
+    "couldNotUndo": "Rückgängig machen nicht möglich",
+    "uncheck": "{count, plural, one {Häkchen bei einem Eintrag entfernt} other {Häkchen bei # Einträgen entfernt}}",
+    "delete": "{count, plural, one {Abgehakter Eintrag gelöscht} other {# abgehakte Einträge gelöscht}}",
+    "sort": "{count, plural, one {Eintrag von A bis Z sortiert} other {# Einträge von A bis Z sortiert}}",
+    "sortAlready": "Schon von A bis Z sortiert"
+  },
+  "noteActions": {
+    "archived": "Notiz archiviert",
+    "archiveFailed": "Notiz konnte nicht archiviert werden",
+    "unarchived": "Notiz aus dem Archiv geholt",
+    "unarchiveFailed": "Notiz konnte nicht aus dem Archiv geholt werden",
+    "movedToTrash": "Notiz in den Papierkorb verschoben",
+    "removedFromYours": "Notiz aus deinen Notizen entfernt",
+    "trashFailed": "Notiz konnte nicht in den Papierkorb verschoben werden",
+    "removeFailed": "Notiz konnte nicht entfernt werden",
+    "restored": "Notiz wiederhergestellt",
+    "followIt": "Anzeigen",
+    "restoreFailed": "Notiz konnte nicht wiederhergestellt werden",
+    "permanentlyDeleted": "Notiz endgültig gelöscht",
+    "deleteFailed": "Notiz konnte nicht gelöscht werden"
+  },
+  "liveImages": {
+    "whoDefault": "dem Gerät, das es hinzugefügt hat",
+    "starting": "Kamera wird eingeschaltet…",
+    "connecting": "Verbindung zu {who} wird hergestellt…",
+    "waiting": "Warten auf {who}. Öffne dort Anchor, um es zu zeigen.",
+    "pausedScreen": "{who} teilt gerade den Bildschirm nicht.",
+    "pausedCamera": "{who} kann gerade die Kamera nicht zeigen.",
+    "screenNotShared": "Dein Bildschirm wird nicht geteilt.",
+    "cameraOff": "Deine Kamera ist aus.",
+    "denied": "Dieses Gerät durfte die Kamera nicht verwenden.",
+    "shareScreen": "Bildschirm teilen",
+    "turnCameraOn": "Kamera einschalten",
+    "tryAgain": "Erneut versuchen",
+    "unmuteMic": "Mikrofon einschalten",
+    "muteMic": "Mikrofon stummschalten",
+    "micMuted": "Mikrofon stummgeschaltet",
+    "soundOn": "Ton einschalten",
+    "soundOff": "Ton ausschalten",
+    "unsupported": "Dieser Browser kann keine Live-Bilder zeigen.",
+    "shareFailed": "Bildschirm konnte nicht geteilt werden",
+    "cameraFailed": "Kamera konnte nicht eingeschaltet werden",
+    "stillAdded": "Standbild zu den Anhängen hinzugefügt",
+    "stillFailed": "Standbild des Live-Bilds konnte nicht gespeichert werden"
+  },
+  "noteEditor": {
+    "changedElsewhereKept": "Diese Notiz wurde anderswo geändert. Deine Version bleibt erhalten, die andere findest du im Verlauf.",
+    "history": "Verlauf",
+    "changedElsewhereReloaded": "Diese Notiz wurde anderswo geändert und neu geladen.",
+    "reminderRemoved": "Erinnerung entfernt"
+  },
+  "attachmentBlob": {
+    "failedToLoad": "Laden fehlgeschlagen"
+  },
+  "publicLink": {
+    "edit": "Öffentlich: Alle mit dem Link können bearbeiten",
+    "view": "Öffentlich: Alle mit dem Link können ansehen"
+  }
+}

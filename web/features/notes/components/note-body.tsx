@@ -1,5 +1,6 @@
 import { CircleCheck } from "lucide-react";
 import * as React from "react";
+import { translate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   cardCodeLines,
@@ -52,6 +53,7 @@ export function NoteBody({
   ref,
   onToggle,
 }: NoteBodyProps) {
+  const t = translate("notes.noteBody");
   const card = variant === "card";
   const shown = blocks.filter(
     (b) => (b.type === "code" && !card) || b.runs.some((r) => r.text.trim()),
@@ -102,7 +104,9 @@ export function NoteBody({
                       type="button"
                       className="box tick"
                       aria-pressed={!!block.done}
-                      aria-label={`${block.done ? "Untick" : "Tick"} ${block.runs.map((r) => r.text).join("")}`}
+                      aria-label={t(block.done ? "untickItem" : "tickItem", {
+                        text: block.runs.map((r) => r.text).join(""),
+                      })}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -121,7 +125,7 @@ export function NoteBody({
                       // Its own dir keeps this English label out of the
                       // li's dir="auto", which reads the item's text.
                       <span className="sr-only" dir="ltr">
-                        {block.done ? "Checked: " : "Not checked: "}
+                        {block.done ? t("checked") : t("notChecked")}
                       </span>
                     )}
                     <TextRuns runs={block.runs} card={card} />
@@ -138,15 +142,17 @@ export function NoteBody({
 }
 
 function Block({ row, card }: { row: Row; card: boolean }) {
-  if (row.type === "done")
+  if (row.type === "done") {
+    const t = translate("notes.noteBody");
     return (
       <div className="sum">
         <CircleCheck aria-hidden />
         {row.isAll && row.count > 1
-          ? `All ${row.count} done`
-          : `${row.count} done`}
+          ? t("allDone", { count: row.count })
+          : t("someDone", { count: row.count })}
       </div>
     );
+  }
   const block = row as NoteBlock;
   const text = <TextRuns runs={block.runs} card={card} />;
   const style = block.align ? { textAlign: block.align } : undefined;

@@ -5,6 +5,10 @@ allowBuilds:
   sharp: true
   # Only a donation message after install.
   tesseract.js: false
+  # From next-intl's message extractor; both ship prebuilt binaries as
+  # optional packages, so their install scripts aren't needed.
+  "@parcel/watcher": false
+  "@swc/core": false
 
 # Patched versions of transitive dependencies whose parents pin a vulnerable
 # one (pnpm audit runs in CI). Drop an entry once its parent catches up.

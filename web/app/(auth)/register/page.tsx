@@ -3,6 +3,7 @@
 import { HTTPError } from "ky";
 import { ArrowLeft, KeyRound } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -14,7 +15,7 @@ import {
   useRegistrationMode,
 } from "@/features/auth";
 import {
-  ACCOUNT_FIELD_HELP,
+  accountFieldHelp,
   NAME_MAX_LENGTH,
   refusedField,
 } from "@/features/auth/account-fields";
@@ -26,6 +27,7 @@ import {
   OrDivider,
   PendingApprovalScreen,
 } from "@/features/auth/components/auth-parts";
+import { serverSignInError } from "@/features/auth/utils/sign-in-error";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { focusOnArrival } from "@/lib/platform";
 
@@ -37,7 +39,9 @@ type Errors = {
 };
 
 export default function RegisterPage() {
-  useDocumentTitle("Create account");
+  const t = useTranslations("auth.register");
+  const tAuth = useTranslations("auth");
+  useDocumentTitle(t("documentTitle"));
   const register = useRegister();
   const oidc = useOidcConfig();
   const { initiate } = useOidcLogin();
@@ -50,7 +54,7 @@ export default function RegisterPage() {
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
   const refs = { name: nameRef, email: emailRef, password: passwordRef };
-  const providerName = oidc.data?.providerName || "your provider";
+  const providerName = oidc.data?.providerName || tAuth("providerFallback");
   const isProviderOnly =
     !!oidc.data?.enabled && !!oidc.data?.disableInternalAuth;
 
@@ -61,32 +65,32 @@ export default function RegisterPage() {
       (error.response.status === 409 || /exist/i.test(message))
     ) {
       setErrors({
-        email: "An account with this email already exists. Sign in instead?",
+        email: t("emailTaken"),
       });
       refs.email.current?.focus();
     } else if (error instanceof HTTPError && error.response.status === 403) {
       void registrationMode.refetch();
       void oidc.refetch();
       if (/turned off/i.test(message))
-        setErrors({ form: `Sign up with ${providerName} instead.` });
+        setErrors({
+          form: t("signUpWithProvider", { provider: providerName }),
+        });
     } else if (!(error instanceof HTTPError))
       setErrors({
-        form: "Couldn’t reach the server. Check your connection and try again.",
+        form: serverSignInError(0),
       });
     else {
       const { status } = error.response;
       const field = refusedField(error);
       if (field) {
-        setErrors({ [field]: ACCOUNT_FIELD_HELP[field] });
+        setErrors({ [field]: accountFieldHelp(field) });
         refs[field].current?.focus();
       } else
         setErrors({
           form:
-            status >= 500
-              ? "Something went wrong on the server. Try again in a moment."
-              : status === 429
-                ? "Too many tries. Wait a minute, then try again."
-                : "Couldn’t create your account.",
+            status >= 500 || status === 429
+              ? serverSignInError(status)
+              : t("createFailed"),
         });
     }
   };
@@ -95,13 +99,13 @@ export default function RegisterPage() {
     return (
       <AuthStatusScreen
         illustration="closed"
-        title="Sign-ups are closed"
-        text="Ask an admin to create an account for you."
+        title={t("closedTitle")}
+        text={t("closedText")}
       >
         <Button size="lg" variant="secondary" className="w-full" asChild>
           <Link href="/login">
             <ArrowLeft aria-hidden />
-            Back to sign in
+            {t("backToSignIn")}
           </Link>
         </Button>
       </AuthStatusScreen>
@@ -114,11 +118,11 @@ export default function RegisterPage() {
     e.preventDefault();
     if (register.isPending) return;
     const fieldErrors: Errors = {};
-    if (!name.trim()) fieldErrors.name = "Enter your name.";
+    if (!name.trim()) fieldErrors.name = t("nameRequired");
     if (!/.+@.+\..+/.test(email.trim()))
-      fieldErrors.email = "Enter a valid email address.";
+      fieldErrors.email = accountFieldHelp("email");
     if (password.length < 8)
-      fieldErrors.password = "Use at least 8 characters.";
+      fieldErrors.password = accountFieldHelp("password");
     setErrors(fieldErrors);
     const firstInvalid = (["name", "email", "password"] as const).find(
       (field) => fieldErrors[field],
@@ -137,11 +141,9 @@ export default function RegisterPage() {
   return (
     <>
       <AuthHeading
-        title="Create your account"
+        title={t("title")}
         sub={
-          registrationMode.data?.mode === "review"
-            ? "An admin approves new accounts before you can sign in."
-            : "Start capturing your thoughts."
+          registrationMode.data?.mode === "review" ? t("reviewSub") : t("sub")
         }
       />
       {oidc.data?.enabled && (
@@ -153,7 +155,7 @@ export default function RegisterPage() {
             onClick={() => initiate()}
           >
             <KeyRound aria-hidden />
-            Continue with {providerName}
+            {t("continueWith", { provider: providerName })}
           </Button>
           {!isProviderOnly && <OrDivider />}
         </>
@@ -161,14 +163,14 @@ export default function RegisterPage() {
       {errors.form && <AuthMessage>{errors.form}</AuthMessage>}
       {!isProviderOnly && (
         <form className="grid gap-3.5" noValidate onSubmit={submit}>
-          <Field label="Name" error={errors.name}>
+          <Field label={t("name")} error={errors.name}>
             <Input
               ref={(el) => {
                 nameRef.current = el;
                 focusOnArrival(el);
               }}
               autoComplete="name"
-              placeholder="Your name"
+              placeholder={t("namePlaceholder")}
               maxLength={NAME_MAX_LENGTH}
               value={name}
               boxClassName="h-field-large"
@@ -178,12 +180,12 @@ export default function RegisterPage() {
               }}
             />
           </Field>
-          <Field label="Email" error={errors.email}>
+          <Field label={t("email")} error={errors.email}>
             <Input
               ref={refs.email}
               type="email"
               autoComplete="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               boxClassName="h-field-large"
               onChange={(e) => {
@@ -193,8 +195,8 @@ export default function RegisterPage() {
             />
           </Field>
           <Field
-            label="Password"
-            help="At least 8 characters."
+            label={t("password")}
+            help={t("passwordHelp")}
             error={errors.password}
           >
             <PasswordInput
@@ -212,17 +214,20 @@ export default function RegisterPage() {
             type="submit"
             size="lg"
             className="w-full"
-            busy={register.isPending && "Creating account…"}
+            busy={register.isPending && t("creating")}
           >
-            Create account
+            {t("createAccount")}
           </Button>
         </form>
       )}
       <p className="m-0 text-center text-muted-foreground text-ui">
-        Already have an account?{" "}
-        <Link href="/login" className={linkButtonClass}>
-          Sign in
-        </Link>
+        {t.rich("haveAccount", {
+          link: (chunks) => (
+            <Link href="/login" className={linkButtonClass}>
+              {chunks}
+            </Link>
+          ),
+        })}
       </p>
     </>
   );

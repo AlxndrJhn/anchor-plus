@@ -9,6 +9,7 @@ import {
   Square,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Delta from "quill-delta";
 import * as React from "react";
 import {
@@ -141,6 +142,8 @@ export const LiveImageTools = React.forwardRef<
     noteId: string;
   }
 >(({ getQuill, container, noteId }, ref) => {
+  const t = useTranslations("editorMedia.liveImage");
+  const tc = useTranslations("common");
   const [hovered, setHovered] = React.useState<{
     node: HTMLElement;
     left: number;
@@ -271,7 +274,7 @@ export const LiveImageTools = React.forwardRef<
     quill.deleteText(index, length, "user");
     quill.history.cutoff();
     quill.setSelection(index, 0, "silent");
-    toast.success("Live image deleted", {
+    toast.success(t("deleted"), {
       undo: () => quill.history.undo(),
     });
   };
@@ -371,7 +374,7 @@ export const LiveImageTools = React.forwardRef<
       if (!video?.videoWidth) throw new Error("No video yet");
       setCropping({ menu: from, still: await stillOf(video) });
     } catch {
-      toast.error("Crop it once its video shows");
+      toast.error(t("cropWhenVideo"));
     }
   };
 
@@ -385,8 +388,8 @@ export const LiveImageTools = React.forwardRef<
         <button
           type="button"
           className="nit-grip"
-          aria-label="Drag to resize the live image"
-          title="Drag to resize"
+          aria-label={t("resizeLabel")}
+          title={t("resize")}
           tabIndex={-1}
           style={{ left: hovered.left, top: hovered.top }}
           onPointerDown={startResize}
@@ -407,19 +410,19 @@ export const LiveImageTools = React.forwardRef<
         </DropdownMenuTrigger>
         {shown && (
           <DropdownMenuContent
-            aria-label="Live image"
+            aria-label={t("menu")}
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <DropdownMenuItem onSelect={() => void crop(shown)}>
               <Crop />
-              Crop…
+              {t("cropMenu")}
             </DropdownMenuItem>
             {shown.image.width !== undefined && (
               <DropdownMenuItem
                 onSelect={() => change(shown, { width: undefined })}
               >
                 <Maximize2 />
-                Full width
+                {t("fullWidth")}
               </DropdownMenuItem>
             )}
             {isShowing && shownView?.mic && (
@@ -429,9 +432,7 @@ export const LiveImageTools = React.forwardRef<
                 }
               >
                 {shownView.mic === "on" ? <MicOff /> : <Mic />}
-                {shownView.mic === "on"
-                  ? "Mute microphone"
-                  : "Unmute microphone"}
+                {shownView.mic === "on" ? t("muteMic") : t("unmuteMic")}
               </DropdownMenuItem>
             )}
             {isMine &&
@@ -443,27 +444,27 @@ export const LiveImageTools = React.forwardRef<
                 >
                   <Square />
                   {shown.image.source === "screen"
-                    ? "Stop sharing the screen"
-                    : "Turn the camera off"}
+                    ? t("stopScreen")
+                    : t("turnCameraOff")}
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
                   onSelect={() =>
                     void restartSource(shown.image, noteId).catch(() =>
-                      toast.error("Couldn’t start the video"),
+                      toast.error(t("startFailed")),
                     )
                   }
                 >
                   <Play />
                   {shown.image.source === "screen"
-                    ? "Share the screen again…"
-                    : "Turn the camera on"}
+                    ? t("shareAgain")
+                    : t("turnCameraOn")}
                 </DropdownMenuItem>
               ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem tone="danger" onSelect={() => remove(shown)}>
               <Trash2 />
-              Delete
+              {tc("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         )}
@@ -476,7 +477,7 @@ export const LiveImageTools = React.forwardRef<
       <CropDialog
         picture={cropping?.still ?? null}
         initial={cropping?.menu.image.crop}
-        title="Crop live image"
+        title={t("cropTitle")}
         canKeepWhole={!!cropping?.menu.image.crop}
         onClose={() => setCropping(null)}
         onCrop={(area) => {

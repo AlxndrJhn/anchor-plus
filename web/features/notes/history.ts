@@ -1,5 +1,6 @@
 import { format, isSameDay } from "date-fns";
 import { formatLongDate, formatTime } from "@/features/preferences";
+import { translate } from "@/lib/i18n";
 import type {
   Note,
   NoteRevisionAuthor,
@@ -24,22 +25,18 @@ export interface TimelineDay {
   entries: TimelineEntry[];
 }
 
-const labels: Record<NoteRevisionCause, string> = {
-  edit: "Earlier version",
-  conflict: "Not saved",
-  restore: "Before a restore",
-};
-
 export function revisionLabel(cause: NoteRevisionCause): string {
-  return labels[cause];
+  return translate("noteHooks.history")(`cause.${cause}`);
 }
 
 export function revisionAuthorName(
   entry: { author: NoteRevisionAuthor | null },
   currentUserId: string | null,
 ): string {
-  if (!entry.author) return "Someone";
-  return entry.author.id === currentUserId ? "You" : entry.author.name;
+  if (!entry.author) return translate("noteHooks.history")("someone");
+  return entry.author.id === currentUserId
+    ? translate("noteHooks.history")("you")
+    : entry.author.name;
 }
 
 export function revisionTime(entry: { createdAt: string }): string {
@@ -51,7 +48,10 @@ export function revisionDayTime(
   now: Date = new Date(),
 ): string {
   const date = new Date(entry.createdAt);
-  return `${dayLabel(date, now)} at ${formatTime(date)}`;
+  return translate("noteHooks.history")("dayAtTime", {
+    day: dayLabel(date, now),
+    time: formatTime(date),
+  });
 }
 
 export function historyHasMultipleAuthors(
@@ -124,11 +124,12 @@ export function groupTimelineByDay(
 }
 
 function dayLabel(date: Date, now: Date): string {
-  if (isSameDay(date, now)) return "Today";
+  if (isSameDay(date, now)) return translate("noteHooks.history")("today");
 
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
-  if (isSameDay(date, yesterday)) return "Yesterday";
+  if (isSameDay(date, yesterday))
+    return translate("noteHooks.history")("yesterday");
 
   return formatLongDate(date);
 }

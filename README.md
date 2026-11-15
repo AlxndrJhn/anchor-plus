@@ -997,6 +997,42 @@ node design/build/build.mjs
 
 CI runs it with `--check` and fails if the built files are out of date.
 
+### Translations
+
+Anchor+ speaks English, German (`de`) and Polish (`pl`). English is the source
+text; the other languages are translations of it. Native speakers are very
+welcome to fix wording: the German and Polish texts were machine-made and still
+need a careful read.
+
+- **Web app (and the desktop app, which shows it):** `web/messages/<language>/`,
+  one JSON file per part of the app (`notes.json`, `settings.json`, …). Messages
+  use ICU syntax: `{name}` placeholders, `{count, plural, one {# note} other {# notes}}`,
+  and tags like `<b>…</b>`.
+- **Phone app:** `mobile/lib/l10n/app_<language>.arb`. The `@key` entries in
+  `app_en.arb` say where each message shows.
+
+To fix a translation, edit the value and keep the key, the `{placeholders}`, the
+plural and select options' arguments and the tags as they are (a language may
+add plural forms, such as Polish `few` and `many`, but always keeps `other`).
+
+To add a language, for example French (`fr`):
+
+1. Web: copy `web/messages/en` to `web/messages/fr`, translate the values, add
+   `"fr"` to `LOCALES` in `web/lib/i18n/locales.ts`, its date-fns locale in
+   `web/lib/i18n/date-locale.ts`, its name in `common.language` in every
+   language, then run `node scripts/messages-index.mjs` in `web` and wire it into
+   `loadMessages` in `web/lib/i18n/messages.ts`.
+2. Phone: add `mobile/lib/l10n/app_fr.arb` with `"@@locale": "fr"` and every
+   message of `app_en.arb` (no `@key` entries needed), add it to `appLanguageNames`
+   in `mobile/lib/features/settings/presentation/language_controller.dart`,
+   `CFBundleLocalizations` in `mobile/ios/Runner/Info.plist` and
+   `mobile/android/app/src/main/res/xml/locales_config.xml`, then run
+   `dart run tool/share_extension_strings.dart` in `mobile`.
+
+Tests check that every language has the same keys, placeholders and plurals as
+English: `pnpm test messages` in `web` and `flutter test test/l10n_test.dart` in
+`mobile`.
+
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL v3) - see the [LICENSE](LICENSE) file for details.

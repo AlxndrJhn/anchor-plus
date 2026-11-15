@@ -9,6 +9,7 @@ import {
   Snowflake,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ type ReadOnlyBarProps =
 
 /** A new `nudge` number shakes it. */
 export function ReadOnlyBar(props: ReadOnlyBarProps & { nudge?: number }) {
+  const t = useTranslations("noteEditor.readOnly");
   const ref = React.useRef<HTMLDivElement>(null);
   const actions = useRovingFocus<HTMLSpanElement>();
   React.useEffect(() => {
@@ -61,26 +63,28 @@ export function ReadOnlyBar(props: ReadOnlyBarProps & { nudge?: number }) {
         <>
           {icon(<Trash2 />)}
           <span className="ro-msg">
-            <b>In trash.</b> It will be deleted on{" "}
-            {formatShortDate(props.deletesOn).replace(/\.$/, "")}.
+            {t.rich("trash", {
+              b: (chunks) => <b>{chunks}</b>,
+              date: formatShortDate(props.deletesOn).replace(/\.$/, ""),
+            })}
           </span>
           <span
             ref={actions.ref}
             className="ro-acts"
             role="toolbar"
-            aria-label="In trash"
+            aria-label={t("trashLabel")}
             onFocus={actions.onFocus}
             onKeyDown={actions.onKeyDown}
           >
             <Button
               onClick={props.onRestore}
-              busy={props.restoring && "Restoring…"}
+              busy={props.restoring && t("restoring")}
             >
               <RotateCcw aria-hidden />
-              Restore
+              {t("restore")}
             </Button>
             <Button variant="danger" onClick={props.onDelete}>
-              Delete permanently
+              {t("deletePermanently")}
             </Button>
           </span>
         </>
@@ -94,7 +98,10 @@ export function ReadOnlyBar(props: ReadOnlyBarProps & { nudge?: number }) {
             size="md"
           />
           <span className="ro-msg">
-            <b>View only.</b> Shared by {props.sharedBy.name.split(" ")[0]}.
+            {t.rich("view", {
+              b: (chunks) => <b>{chunks}</b>,
+              name: props.sharedBy.name.split(" ")[0],
+            })}
           </span>
         </>
       )}
@@ -102,12 +109,12 @@ export function ReadOnlyBar(props: ReadOnlyBarProps & { nudge?: number }) {
         <>
           {icon(<Archive />)}
           <span className="ro-msg">
-            <b>Archived.</b> It’s hidden from your notes list.
+            {t.rich("archived", { b: (chunks) => <b>{chunks}</b> })}
           </span>
           <span className="ro-acts">
             <Button variant="quiet" onClick={props.onUnarchive}>
               <ArchiveRestore aria-hidden />
-              Unarchive
+              {t("unarchive")}
             </Button>
           </span>
         </>
@@ -116,8 +123,7 @@ export function ReadOnlyBar(props: ReadOnlyBarProps & { nudge?: number }) {
         <>
           {icon(<CloudOff />)}
           <span className="ro-msg">
-            <b>You’re offline.</b> Your changes are kept on this device and sync
-            when you’re back online.
+            {t.rich("offline", { b: (chunks) => <b>{chunks}</b> })}
           </span>
         </>
       )}
@@ -125,14 +131,16 @@ export function ReadOnlyBar(props: ReadOnlyBarProps & { nudge?: number }) {
         <>
           {icon(<Snowflake />)}
           <span className="ro-msg">
-            <b>Frozen.</b> It can’t be changed or deleted
-            {props.onUnfreeze ? " until you unfreeze it" : ""}.
+            {t.rich("frozen", {
+              b: (chunks) => <b>{chunks}</b>,
+              canUnfreeze: props.onUnfreeze ? "yes" : "no",
+            })}
           </span>
           {props.onUnfreeze && (
             <span className="ro-acts">
               <Button variant="quiet" onClick={props.onUnfreeze}>
                 <Snowflake aria-hidden />
-                Unfreeze
+                {t("unfreeze")}
               </Button>
             </span>
           )}
@@ -142,7 +150,7 @@ export function ReadOnlyBar(props: ReadOnlyBarProps & { nudge?: number }) {
         <>
           {icon(<Lock />)}
           <span className="ro-msg">
-            <b>You can no longer edit this note.</b>
+            {t.rich("refused", { b: (chunks) => <b>{chunks}</b> })}
           </span>
         </>
       )}

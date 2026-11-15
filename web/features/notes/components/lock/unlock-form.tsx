@@ -1,6 +1,7 @@
 "use client";
 
 import { LockOpen } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -9,14 +10,6 @@ import { checkUnlock, useNoteLockSecrets } from "../../hooks/use-note-lock";
 import { unlockMethod, useUnlockedNotes } from "../../note-lock";
 import type { NoteLockKind } from "../../types";
 import { PatternPad } from "./pattern-pad";
-
-const WRONG = {
-  pin: "That isn’t your PIN.",
-  pattern: "That isn’t your pattern.",
-  password: "That isn’t your password.",
-} as const;
-
-const OFFLINE = "Couldn’t check it. Check your connection and try again.";
 
 /** What a locked note asks for before it opens: a tap, PIN, pattern or password. */
 export function UnlockForm({
@@ -28,6 +21,7 @@ export function UnlockForm({
   kind: NoteLockKind;
   onUnlocked?: () => void;
 }) {
+  const t = useTranslations("noteEditor.lock.unlock");
   const secrets = useNoteLockSecrets();
   const method = unlockMethod(kind, secrets.data);
   const [value, setValue] = React.useState("");
@@ -59,11 +53,11 @@ export function UnlockForm({
         unlock();
         return true;
       }
-      setError(WRONG[method]);
+      setError(t(`wrong.${method}`));
       setShake((n) => n + 1);
       return false;
     } catch {
-      setError(OFFLINE);
+      setError(t("offline"));
       return false;
     } finally {
       setBusy(false);
@@ -74,7 +68,7 @@ export function UnlockForm({
     return (
       <Button size="lg" autoFocus onClick={unlock}>
         <LockOpen aria-hidden />
-        Tap to unlock
+        {t("tap")}
       </Button>
     );
 
@@ -82,7 +76,7 @@ export function UnlockForm({
     return (
       <div ref={boxRef} className="unlock-box grid justify-items-center gap-2">
         <PatternPad
-          label="Your pattern"
+          label={t("yourPattern")}
           disabled={busy}
           onDone={(pattern) => check(pattern)}
         />
@@ -94,7 +88,7 @@ export function UnlockForm({
               : "m-0 text-muted-foreground text-small"
           }
         >
-          {error ?? "Draw your pattern to unlock."}
+          {error ?? t("drawPattern")}
         </p>
       </div>
     );
@@ -111,13 +105,13 @@ export function UnlockForm({
     >
       <div ref={boxRef} className="unlock-box">
         <Field
-          label={isPin ? "PIN" : "Account password"}
+          label={isPin ? t("pin") : t("password")}
           error={error}
           help={
             isPin
               ? undefined
               : kind === "biometric"
-                ? "On the web, your account password stands in for your fingerprint."
+                ? t("biometricHelp")
                 : undefined
           }
         >
@@ -148,9 +142,9 @@ export function UnlockForm({
           )}
         </Field>
       </div>
-      <Button type="submit" disabled={!value} busy={busy && "Checking…"}>
+      <Button type="submit" disabled={!value} busy={busy && t("checking")}>
         <LockOpen aria-hidden />
-        Unlock
+        {t("unlock")}
       </Button>
     </form>
   );

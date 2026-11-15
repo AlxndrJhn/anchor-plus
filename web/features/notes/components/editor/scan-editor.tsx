@@ -9,6 +9,7 @@ import {
   RotateCw,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button, IconButton } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +24,6 @@ import {
   type PageSize,
   PDF_MARGINS,
   type PdfQuality,
-  PROFILE_LABELS,
   SCAN_PROFILES,
   type ScanDocument,
   type ScanPage,
@@ -95,6 +95,7 @@ function CornerEditor({
   page: ScanPage;
   onCorners: (corners: Corners) => void;
 }) {
+  const t = useTranslations("editor.scan");
   const [url, setUrl] = React.useState<string | null>(null);
   const [ratio, setRatio] = React.useState<number | null>(null);
   const box = React.useRef<HTMLDivElement>(null);
@@ -157,7 +158,7 @@ function CornerEditor({
     if (isPageShape(next)) onCorners(next);
   };
 
-  const names = ["Top left", "Top right", "Bottom right", "Bottom left"];
+  const names = ["topLeft", "topRight", "bottomRight", "bottomLeft"] as const;
   return (
     <div className="scan-stage">
       {url && (
@@ -175,7 +176,7 @@ function CornerEditor({
         >
           <img
             src={url}
-            alt="The page as photographed"
+            alt={t("photographed")}
             draggable={false}
             onLoad={(e) =>
               setRatio(
@@ -212,7 +213,7 @@ function CornerEditor({
                 type="button"
                 className="scan-handle"
                 style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
-                aria-label={`${names[i]} corner`}
+                aria-label={t("corner", { corner: names[i] })}
                 onPointerDown={(e) => {
                   e.preventDefault();
                   dragging.current = i;
@@ -232,9 +233,11 @@ function Slider({
   value,
   min,
   max,
+  resetTo = 0,
   onChange,
 }: {
   label: string;
+  resetTo?: number;
   value: number;
   min: number;
   max: number;
@@ -255,7 +258,7 @@ function Slider({
         step={1}
         value={value}
         onChange={(e) => onChange(Number(e.currentTarget.value))}
-        onDoubleClick={() => onChange(label === "Clean up" ? 50 : 0)}
+        onDoubleClick={() => onChange(resetTo)}
       />
     </div>
   );
@@ -268,6 +271,7 @@ function Slider({
  */
 export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
   ({ initial, load, upload, onChange }, ref) => {
+    const t = useTranslations("editor.scan");
     const [scan, setScan] = React.useState(initial);
     const [selected, setSelected] = React.useState(0);
     const [showResult, setShowResult] = React.useState(true);
@@ -321,7 +325,7 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
           cleanup,
         })),
       });
-      toast.success("Look applied to every page");
+      toast.success(t("lookApplied"));
     };
 
     const addPictures = async (files: File[]) => {
@@ -342,7 +346,7 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
         change(next);
         setSelected(next.pages.length - 1);
       } catch {
-        toast.error("Couldn’t add the pictures");
+        toast.error(t("addFailed"));
       } finally {
         setAdding(false);
       }
@@ -351,10 +355,10 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
     if (!page)
       return (
         <div className="scan-empty">
-          <p>No pages left.</p>
+          <p>{t("noPages")}</p>
           {upload && (
             <Button type="button" onClick={() => input.current?.click()}>
-              <ImagePlus /> Add pictures
+              <ImagePlus /> {t("addPictures")}
             </Button>
           )}
           <input
@@ -374,7 +378,7 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
     const index = scan.pages.indexOf(page);
     return (
       <div className="scan-editor">
-        <ol className="scan-list" aria-label="Pages">
+        <ol className="scan-list" aria-label={t("pages")}>
           {scan.pages.map((p, i) => (
             <li
               // By photo, so a moved page keeps its element and its focus.
@@ -425,7 +429,7 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                   page={p}
                   size={200}
                   className="scan-list-thumb"
-                  alt={`Page ${i + 1}`}
+                  alt={t("pageN", { n: i + 1 })}
                 />
                 <span className="scan-list-number">{i + 1}</span>
               </button>
@@ -441,7 +445,7 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                 disabled={adding}
                 onClick={() => input.current?.click()}
               >
-                <ImagePlus /> {adding ? "Adding…" : "Add pictures"}
+                <ImagePlus /> {adding ? t("adding") : t("addPictures")}
               </Button>
               <input
                 ref={input}
@@ -461,25 +465,33 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
         <div className="scan-center">
           <div className="scan-center-bar">
             <SegmentedControl
-              aria-label="Show"
+              aria-label={t("show")}
               size="sm"
               value={showResult ? "result" : "photo"}
               onValueChange={(v) => setShowResult(v === "result")}
               options={[
-                { value: "result", label: "Result", icon: <Eye /> },
-                { value: "photo", label: "Corners", icon: <Crop /> },
+                { value: "result", label: t("result"), icon: <Eye /> },
+                { value: "photo", label: t("corners"), icon: <Crop /> },
               ]}
             />
             <span className="scan-center-tools">
-              <IconButton size="sm" label="Turn left" onClick={() => turn(-90)}>
+              <IconButton
+                size="sm"
+                label={t("turnLeft")}
+                onClick={() => turn(-90)}
+              >
                 <RotateCcw />
               </IconButton>
-              <IconButton size="sm" label="Turn right" onClick={() => turn(90)}>
+              <IconButton
+                size="sm"
+                label={t("turnRight")}
+                onClick={() => turn(90)}
+              >
                 <RotateCw />
               </IconButton>
               <IconButton
                 size="sm"
-                label="Delete page"
+                label={t("deletePage")}
                 onClick={() => removePage(index)}
               >
                 <Trash2 />
@@ -493,7 +505,7 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                 page={page}
                 size={1200}
                 className="scan-result"
-                alt={`Page ${index + 1}, as it comes out`}
+                alt={t("pageResult", { n: index + 1 })}
               />
             </div>
           ) : (
@@ -511,7 +523,7 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                 size="sm"
                 onClick={() => setPage({ corners: undefined })}
               >
-                Whole picture
+                {t("wholePicture")}
               </Button>
               <Button
                 type="button"
@@ -522,20 +534,20 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                     () => null,
                   );
                   if (found) setPage({ corners: found });
-                  else toast.error("No page found in this picture");
+                  else toast.error(t("noPageFound"));
                 }}
               >
-                Find the page
+                {t("findPage")}
               </Button>
             </div>
           )}
         </div>
 
         <div className="scan-side">
-          <section aria-label="Look">
-            <h3>Look</h3>
+          <section aria-label={t("look")}>
+            <h3>{t("look")}</h3>
             <SegmentedControl
-              aria-label="Color profile"
+              aria-label={t("colorProfile")}
               variant="tiles"
               full
               // Two by two, so each name fits on its tile.
@@ -544,18 +556,18 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
               onValueChange={(profile: ScanProfile) => setPage({ profile })}
               options={SCAN_PROFILES.map((value) => ({
                 value,
-                label: PROFILE_LABELS[value],
+                label: t(`profiles.${value}`),
               }))}
             />
             <Slider
-              label="Brightness"
+              label={t("brightness")}
               value={page.brightness}
               min={-100}
               max={100}
               onChange={(brightness) => setPage({ brightness })}
             />
             <Slider
-              label="Contrast"
+              label={t("contrast")}
               value={page.contrast}
               min={-100}
               max={100}
@@ -563,7 +575,8 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
             />
             {page.profile !== "color" && (
               <Slider
-                label="Clean up"
+                label={t("cleanUp")}
+                resetTo={50}
                 value={page.cleanup}
                 min={0}
                 max={100}
@@ -572,7 +585,7 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
             )}
             {page.profile === "bw" && (
               <Slider
-                label="Threshold"
+                label={t("threshold")}
                 value={page.threshold}
                 min={-100}
                 max={100}
@@ -586,27 +599,27 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                 size="sm"
                 onClick={applyToAll}
               >
-                Apply to all pages
+                {t("applyToAll")}
               </Button>
             )}
           </section>
-          <section aria-label="PDF">
-            <h3>PDF</h3>
+          <section aria-label={t("pdf")}>
+            <h3>{t("pdf")}</h3>
             <label className="scan-field" htmlFor={titleId}>
-              <span>Title</span>
+              <span>{t("title")}</span>
               <Input
                 id={titleId}
                 value={scan.title ?? ""}
-                placeholder="Scan"
+                placeholder={t("titlePlaceholder")}
                 onChange={(e) =>
                   change({ ...scan, title: e.currentTarget.value })
                 }
               />
             </label>
             <div className="scan-field">
-              <span>Page size</span>
+              <span>{t("pageSize")}</span>
               <SegmentedControl
-                aria-label="Page size"
+                aria-label={t("pageSize")}
                 size="sm"
                 full
                 value={scan.pdf.size}
@@ -616,14 +629,14 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                 options={[
                   { value: "a4", label: "A4" },
                   { value: "letter", label: "Letter" },
-                  { value: "fit", label: "Fit page" },
+                  { value: "fit", label: t("fitPage") },
                 ]}
               />
             </div>
             <div className="scan-field">
-              <span>Margin</span>
+              <span>{t("margin")}</span>
               <SegmentedControl
-                aria-label="Margin"
+                aria-label={t("margin")}
                 size="sm"
                 full
                 value={String(scan.pdf.margin)}
@@ -635,14 +648,14 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                 }
                 options={PDF_MARGINS.map((m) => ({
                   value: String(m),
-                  label: m ? `${m} mm` : "None",
+                  label: m ? `${m} mm` : t("none"),
                 }))}
               />
             </div>
             <div className="scan-field">
-              <span>Quality</span>
+              <span>{t("quality")}</span>
               <SegmentedControl
-                aria-label="Quality"
+                aria-label={t("quality")}
                 size="sm"
                 full
                 value={scan.pdf.quality}
@@ -650,9 +663,9 @@ export const ScanEditor = React.forwardRef<ScanEditorHandle, ScanEditorProps>(
                   change({ ...scan, pdf: { ...scan.pdf, quality } })
                 }
                 options={[
-                  { value: "small", label: "Small" },
-                  { value: "standard", label: "Standard" },
-                  { value: "high", label: "High" },
+                  { value: "small", label: t("qualities.small") },
+                  { value: "standard", label: t("qualities.standard") },
+                  { value: "high", label: t("qualities.high") },
                 ]}
               />
             </div>

@@ -3,6 +3,7 @@
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { toast } from "@/components/ui/toast";
+import { translate } from "@/lib/i18n";
 import { fetchAttachmentBlob, getNoteAttachments } from "./api";
 import { NoteBody } from "./components/note-body";
 import { deltaToBlocks } from "./note-blocks";
@@ -58,7 +59,7 @@ function PrintSheet({
         </h1>
       )}
       {note.locked ? (
-        <p className="print-locked">This note is locked.</p>
+        <p className="print-locked">{translate("noteHooks.print")("locked")}</p>
       ) : (
         <NoteBody blocks={deltaToBlocks(note.content)} variant="full" />
       )}
@@ -165,7 +166,7 @@ export function printNoteList(notes: Note[]) {
     })),
   ).catch(() =>
     toast.error(
-      notes.length > 1 ? "Couldn’t print the notes" : "Couldn’t print the note",
+      translate("noteHooks.print")("failed", { count: notes.length }),
     ),
   );
 }

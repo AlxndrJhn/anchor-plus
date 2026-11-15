@@ -1,5 +1,6 @@
 import { toast } from "@/components/ui/toast";
 import { getAccessToken } from "@/features/auth/store";
+import { translate } from "@/lib/i18n";
 import { isServerless } from "@/lib/local-backend/mode";
 import { refreshAccessToken } from "./client";
 
@@ -23,7 +24,8 @@ function send(path: string, body: FormData, options: UploadOptions) {
       if (e.lengthComputable) options.onProgress?.(e.loaded / e.total);
     };
     xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText });
-    xhr.onerror = () => reject(new Error("Couldn’t reach the server"));
+    xhr.onerror = () =>
+      reject(new Error(translate("layout.api")("unreachable")));
     xhr.onabort = () =>
       reject(new DOMException("Upload canceled", "AbortError"));
     options.signal?.addEventListener("abort", () => xhr.abort(), {
@@ -90,7 +92,10 @@ function parseUpload<T>(response: { status: number; text: string }): T {
     throw new UploadError(
       Array.isArray(message)
         ? message.join(", ")
-        : (message ?? `Upload failed (${response.status})`),
+        : (message ??
+            translate("layout.api")("uploadFailed", {
+              status: response.status,
+            })),
       response.status,
       refusal?.code,
     );

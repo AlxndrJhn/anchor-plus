@@ -11,6 +11,7 @@ import {
   Rows3,
   SlidersHorizontal,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { TopBarButton } from "@/components/layout/app-page";
 import {
   Popover,
@@ -33,22 +34,30 @@ interface ViewOptionsProps {
   onShowPictures: (show: boolean) => void;
 }
 
-const ORDER_OPTIONS: Record<SortBy, [SortOrder, string][]> = {
+type OrderLabel =
+  | "newestFirst"
+  | "oldestFirst"
+  | "aToZ"
+  | "zToA"
+  | "largestFirst"
+  | "smallestFirst";
+
+const ORDER_OPTIONS: Record<SortBy, [SortOrder, OrderLabel][]> = {
   updatedAt: [
-    ["desc", "Newest first"],
-    ["asc", "Oldest first"],
+    ["desc", "newestFirst"],
+    ["asc", "oldestFirst"],
   ],
   createdAt: [
-    ["desc", "Newest first"],
-    ["asc", "Oldest first"],
+    ["desc", "newestFirst"],
+    ["asc", "oldestFirst"],
   ],
   title: [
-    ["asc", "A to Z"],
-    ["desc", "Z to A"],
+    ["asc", "aToZ"],
+    ["desc", "zToA"],
   ],
   size: [
-    ["desc", "Largest first"],
-    ["asc", "Smallest first"],
+    ["desc", "largestFirst"],
+    ["asc", "smallestFirst"],
   ],
 };
 
@@ -63,59 +72,60 @@ export function ViewOptions({
   showPictures,
   onShowPictures,
 }: ViewOptionsProps) {
+  const t = useTranslations("notes.viewOptions");
   return (
     <Popover>
       <PopoverTrigger asChild>
         <TopBarButton icon={<SlidersHorizontal aria-hidden />}>
-          View
+          {t("view")}
         </TopBarButton>
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        aria-label="View options"
+        aria-label={t("viewOptions")}
         className="grid w-68 gap-3 p-3"
       >
         <div>
-          <h2 className={headingClass}>Layout</h2>
+          <h2 className={headingClass}>{t("layout")}</h2>
           <SegmentedControl
             variant="tiles"
-            aria-label="Layout"
+            aria-label={t("layout")}
             value={layout}
             onValueChange={onLayout}
             options={[
               {
                 value: "masonry",
-                label: "Masonry",
+                label: t("masonry"),
                 icon: <LayoutDashboard aria-hidden />,
               },
               {
                 value: "grid",
-                label: "Grid",
+                label: t("grid"),
                 icon: <LayoutGrid aria-hidden />,
               },
-              { value: "list", label: "List", icon: <Rows3 aria-hidden /> },
+              { value: "list", label: t("list"), icon: <Rows3 aria-hidden /> },
             ]}
           />
         </div>
         <div>
           <h2 className={headingClass} id="sort-by">
-            Sort by
+            {t("sortBy")}
           </h2>
           <SortChoices sortBy={sortBy} onSort={onSort} />
         </div>
         <SegmentedControl
           full
-          aria-label="Order"
+          aria-label={t("order")}
           value={sortOrder}
           onValueChange={(order) => onSort(sortBy, order)}
           options={ORDER_OPTIONS[sortBy].map(([value, label]) => ({
             value,
-            label,
+            label: t(label),
           }))}
         />
         <div className="flex items-center justify-between gap-3 border-0 border-border border-t border-solid pt-3 text-ui">
           <label htmlFor="cards-pictures" className="cursor-pointer">
-            Pictures on cards
+            {t("picturesOnCards")}
           </label>
           <Switch
             id="cards-pictures"
@@ -129,16 +139,17 @@ export function ViewOptions({
 }
 
 const SORT_CHOICES = [
-  ["updatedAt", "Last edited", PencilLine],
-  ["createdAt", "Date created", CalendarPlus],
-  ["title", "Title", ALargeSmall],
-  ["size", "Size", HardDrive],
+  ["updatedAt", "lastEdited", PencilLine],
+  ["createdAt", "dateCreated", CalendarPlus],
+  ["title", "title", ALargeSmall],
+  ["size", "size", HardDrive],
 ] as const;
 
 function SortChoices({
   sortBy,
   onSort,
 }: Pick<ViewOptionsProps, "sortBy" | "onSort">) {
+  const t = useTranslations("notes.viewOptions");
   const roving = useRovingFocus<HTMLDivElement>({
     orientation: "both",
     selectsOnMove: true,
@@ -152,7 +163,7 @@ function SortChoices({
       onKeyDown={roving.onKeyDown}
       className="grid gap-px"
     >
-      {SORT_CHOICES.map(([value, label, Icon]) => {
+      {SORT_CHOICES.map(([value, labelKey, Icon]) => {
         const selected = sortBy === value;
         return (
           // biome-ignore lint/a11y/useSemanticElements: menu-style rows in a radio group
@@ -170,7 +181,7 @@ function SortChoices({
             )}
           >
             <Icon aria-hidden />
-            {label}
+            {t(labelKey)}
             {selected && (
               <Check aria-hidden className="ml-auto text-accent-strong!" />
             )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Brand } from "@/components/layout/brand";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toast";
@@ -18,6 +19,7 @@ export function SecondFactorGate({
   done: boolean;
   onContinue: () => void;
 }) {
+  const t = useTranslations("auth.secondFactorGate");
   const { logout } = useAuth();
   return (
     <div className="min-h-dvh overflow-auto bg-background text-foreground">
@@ -25,19 +27,17 @@ export function SecondFactorGate({
         <Brand className="justify-self-start" />
         <div className="grid gap-2">
           <h1 className="m-0 text-heading">
-            {done ? "You’re all set" : "Add a passkey or an authenticator app"}
+            {done ? t("doneTitle") : t("title")}
           </h1>
           <p className="m-0 text-muted-foreground">
-            {done
-              ? "If you turned on an authenticator app, keep its recovery codes somewhere safe."
-              : "Your admin asks everyone to sign in with more than a password. Set one up here to get back to your notes."}
+            {done ? t("doneText") : t("text")}
           </p>
         </div>
         <SecuritySection />
         <div className="flex flex-wrap items-center gap-2">
-          {done && <Button onClick={onContinue}>Go to your notes</Button>}
+          {done && <Button onClick={onContinue}>{t("goToNotes")}</Button>}
           <Button variant="quiet" onClick={() => void logout()}>
-            Sign out
+            {t("signOut")}
           </Button>
         </div>
       </main>

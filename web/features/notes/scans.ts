@@ -5,6 +5,8 @@
 // from that data (mobile/lib/core/files/scan_document.dart), so a scan made
 // on the phone can be fine-tuned here and the other way round.
 
+import { translate } from "@/lib/i18n";
+
 export const SCAN_EMBED = "scan";
 
 export type ScanProfile = "bw" | "whiteboard" | "text" | "color";
@@ -217,18 +219,26 @@ export function scanAttachmentIds(content: string | null | undefined) {
 }
 
 export function scanTitle(scan: ScanDocument) {
-  return scan.title || "Scan";
+  return scan.title || translate("noteHooks.scans")("scan");
 }
 
 export function pagesLabel(count: number) {
-  return count === 1 ? "1 page" : `${count} pages`;
+  return translate("noteHooks.scans")("pages", { count });
 }
 
 export const PROFILE_LABELS: Record<ScanProfile, string> = {
-  bw: "Black and white",
-  whiteboard: "Whiteboard",
-  text: "Color text",
-  color: "Full color",
+  get bw() {
+    return translate("noteHooks.scans")("profiles.bw");
+  },
+  get whiteboard() {
+    return translate("noteHooks.scans")("profiles.whiteboard");
+  },
+  get text() {
+    return translate("noteHooks.scans")("profiles.text");
+  },
+  get color() {
+    return translate("noteHooks.scans")("profiles.color");
+  },
 };
 
 // ─── Pixels ────────────────────────────────────────────────────────────────
@@ -923,7 +933,9 @@ export function buildPdf(
     ),
   );
   object(3, () =>
-    push(`<< /Title ${pdfText(title ?? "Scan")} /Producer (Anchor+) >>`),
+    push(
+      `<< /Title ${pdfText(title ?? translate("noteHooks.scans")("scan"))} /Producer (Anchor+) >>`,
+    ),
   );
   images.forEach((image, i) => {
     const id = pageIds[i];
@@ -970,7 +982,7 @@ export function pdfFileName(scan: ScanDocument) {
     .replace(/[\\/:*?"<>|]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  return `${base || "Scan"}.pdf`;
+  return `${base || translate("noteHooks.scans")("scan")}.pdf`;
 }
 
 /**

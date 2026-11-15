@@ -15,6 +15,7 @@ import { getAccessToken } from "@/features/auth";
 import { CollabSession } from "@/features/notes/collab/session";
 import { useSyncStatus } from "@/features/sync";
 import { refreshAccessToken } from "@/lib/api/client";
+import { translate } from "@/lib/i18n";
 import { newId } from "@/lib/id";
 import { basePath, isServerless } from "@/lib/local-backend/mode";
 import {
@@ -394,16 +395,13 @@ export function useNoteEditor({
 
   const keepOtherEdit = useCallback(() => {
     replacesOtherEdit.current = true;
-    toast.info(
-      "This note was changed elsewhere. Your version is kept, and the other one is in History.",
-      {
-        id: conflictToastId,
-        action: {
-          label: "History",
-          onClick: () => live.current.openHistory(),
-        },
+    toast.info(translate("noteHooks.noteEditor")("changedElsewhereKept"), {
+      id: conflictToastId,
+      action: {
+        label: translate("noteHooks.noteEditor")("history"),
+        onClick: () => live.current.openHistory(),
       },
-    );
+    });
   }, [live]);
 
   // Text edited offline that was also changed elsewhere: the edit becomes a
@@ -666,9 +664,12 @@ export function useNoteEditor({
 
       if (serverWins) {
         applyServerNote(serverNote);
-        toast.info("This note was changed elsewhere and has been reloaded.", {
-          id: conflictToastId,
-        });
+        toast.info(
+          translate("noteHooks.noteEditor")("changedElsewhereReloaded"),
+          {
+            id: conflictToastId,
+          },
+        );
         return null;
       }
 
@@ -878,7 +879,7 @@ export function useNoteEditor({
     if (next || !reminder) return;
     const removed = reminder;
     const removedFromId = isNew ? null : noteId;
-    toast.success("Reminder removed", {
+    toast.success(translate("noteHooks.noteEditor")("reminderRemoved"), {
       undo: () => {
         if (mounted.current) setReminder(removed);
         else if (removedFromId)
@@ -886,7 +887,7 @@ export function useNoteEditor({
             reminder: toReminderInput(removed),
           }).then((outcome) => {
             if (outcome.status === "saved") refreshLists();
-            else toast.error("Couldn’t undo that");
+            else toast.error(translate("common")("couldNotUndo"));
           });
       },
     });

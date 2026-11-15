@@ -17,6 +17,7 @@ class AppBootstrap {
     this.themeMode = ThemeMode.system,
     this.displayDensity = DisplayDensity.standard,
     this.motionSpeed = MotionSpeed.normal,
+    this.appLanguage,
     this.colorScheme = anchorSchemeId,
     this.appStyle = AppStyle.standard,
     this.customTheme,
@@ -32,6 +33,9 @@ class AppBootstrap {
   final ThemeMode themeMode;
   final DisplayDensity displayDensity;
   final MotionSpeed motionSpeed;
+
+  /// The language chosen in Settings; null follows the phone.
+  final String? appLanguage;
 
   /// A colour scheme id: [anchorSchemeId] or one of `appSchemes`.
   final String colorScheme;

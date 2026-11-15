@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -40,7 +41,10 @@ import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { focusOnArrival } from "@/lib/platform";
 
 export default function LoginPage() {
-  useDocumentTitle("Sign in");
+  const t = useTranslations("auth.login");
+  const tc = useTranslations("common");
+  const tAuth = useTranslations("auth");
+  useDocumentTitle(t("documentTitle"));
   const searchParams = useSearchParams();
   const login = useLogin();
   const passkeyLogin = usePasskeyLogin();
@@ -58,9 +62,7 @@ export default function LoginPage() {
   const [canUsePasskey, setCanUsePasskey] = React.useState(false);
   React.useEffect(() => setCanUsePasskey(browserSupportsWebAuthn()), []);
 
-  const providerName = oidc.data?.providerName || "your provider";
-  const providerNameAtStart =
-    providerName[0].toUpperCase() + providerName.slice(1);
+  const providerName = oidc.data?.providerName || tAuth("providerFallback");
   const isProviderOnly =
     !!oidc.data?.enabled && !!oidc.data?.disableInternalAuth;
   const errorMessage =
@@ -79,7 +81,7 @@ export default function LoginPage() {
         className="m-0 mt-3.5 flex items-center gap-2.5 text-lead text-muted-foreground [&_svg]:size-4.5"
       >
         <LoaderCircle aria-hidden className="animate-spin" />
-        Signing you in…
+        {t("signingYouIn")}
       </p>
     );
 
@@ -91,16 +93,19 @@ export default function LoginPage() {
     return (
       <AuthStatusScreen
         illustration="callback"
-        title="Sign-in didn’t finish"
+        title={t("didntFinish")}
         text={
           failure.by === "provider"
-            ? `${providerNameAtStart} sent you back without signing you in. ${isProviderOnly ? "Try again." : "Try again, or sign in with your email."}`
+            ? t("providerSentBack", {
+                provider: providerName,
+                providerOnly: isProviderOnly ? "yes" : "no",
+              })
             : serverSignInError(failure.status, isProviderOnly)
         }
       >
         {failure.by === "provider" && (
           <p className="m-0 -mt-1.5 mb-1 text-muted-foreground text-small">
-            {providerNameAtStart} said:{" "}
+            {t("providerSaid", { provider: providerName })}{" "}
             <code className="rounded-[5px] bg-foreground/7 px-1.25 py-px font-mono text-foreground">
               {failure.message}
             </code>
@@ -108,7 +113,7 @@ export default function LoginPage() {
         )}
         <Button size="lg" className="w-full" onClick={signInWithProvider}>
           <KeyRound aria-hidden />
-          Try again with {providerName}
+          {t("tryAgainWith", { provider: providerName })}
         </Button>
         <Button
           size="lg"
@@ -117,7 +122,7 @@ export default function LoginPage() {
           onClick={oidcCallback.clearFailure}
         >
           <ArrowLeft aria-hidden />
-          Back to sign in
+          {t("backToSignIn")}
         </Button>
       </AuthStatusScreen>
     );
@@ -135,7 +140,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <AuthHeading title="Welcome back" sub="Sign in to continue to Anchor+." />
+      <AuthHeading title={t("welcomeTitle")} sub={t("welcomeSub")} />
       {oidc.data?.enabled && (
         <>
           <Button
@@ -145,7 +150,7 @@ export default function LoginPage() {
             onClick={signInWithProvider}
           >
             <KeyRound aria-hidden />
-            Continue with {providerName}
+            {t("continueWith", { provider: providerName })}
           </Button>
           {!isProviderOnly && <OrDivider />}
         </>
@@ -156,14 +161,14 @@ export default function LoginPage() {
             size="lg"
             variant="secondary"
             className="w-full"
-            busy={passkeyLogin.isPending && "Waiting for your passkey…"}
+            busy={passkeyLogin.isPending && t("waitingForPasskey")}
             onClick={() => {
               login.reset();
               passkeyLogin.mutate();
             }}
           >
             <FingerprintPattern aria-hidden />
-            Sign in with a passkey
+            {t("signInWithPasskey")}
           </Button>
           <OrDivider />
         </>
@@ -176,12 +181,11 @@ export default function LoginPage() {
               className={`${linkButtonClass} self-center whitespace-nowrap`}
               onClick={() => oidc.refetch()}
             >
-              Try again
+              {t("tryAgain")}
             </button>
           }
         >
-          Couldn’t load the sign-in options. You can still sign in with your
-          email.
+          {t("optionsError")}
         </AuthMessage>
       )}
       {errorMessage && <AuthMessage>{errorMessage}</AuthMessage>}
@@ -204,10 +208,7 @@ export default function LoginPage() {
             );
           }}
         >
-          <Field
-            label="Code from your authenticator app"
-            help="Lost your phone? Enter one of your recovery codes instead."
-          >
+          <Field label={t("codeLabel")} help={t("codeHelp")}>
             <Input
               ref={codeRef}
               autoFocus
@@ -227,9 +228,9 @@ export default function LoginPage() {
             type="submit"
             size="lg"
             className="w-full"
-            busy={login.isPending && "Signing in…"}
+            busy={login.isPending && t("signingIn")}
           >
-            Sign in
+            {t("signIn")}
           </Button>
           <Button
             type="button"
@@ -244,7 +245,7 @@ export default function LoginPage() {
             }}
           >
             <ArrowLeft aria-hidden />
-            Back
+            {tc("back")}
           </Button>
         </form>
       )}
@@ -273,7 +274,7 @@ export default function LoginPage() {
             );
           }}
         >
-          <Field label="Email">
+          <Field label={t("email")}>
             <Input
               ref={focusOnArrival}
               type="email"
@@ -287,7 +288,7 @@ export default function LoginPage() {
               }}
             />
           </Field>
-          <Field label="Password">
+          <Field label={t("password")}>
             <PasswordInput
               ref={passwordRef}
               autoComplete="current-password"
@@ -304,9 +305,9 @@ export default function LoginPage() {
             type="submit"
             size="lg"
             className="w-full"
-            busy={login.isPending && "Signing in…"}
+            busy={login.isPending && t("signingIn")}
           >
-            Sign in
+            {t("signIn")}
           </Button>
         </form>
       )}
@@ -314,10 +315,13 @@ export default function LoginPage() {
         !needsCode &&
         registrationMode.data?.mode !== "disabled" && (
           <p className="m-0 text-center text-muted-foreground text-ui">
-            New to Anchor+?{" "}
-            <Link href="/register" className={linkButtonClass}>
-              Create an account
-            </Link>
+            {t.rich("newToAnchor", {
+              link: (chunks) => (
+                <Link href="/register" className={linkButtonClass}>
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         )}
     </>

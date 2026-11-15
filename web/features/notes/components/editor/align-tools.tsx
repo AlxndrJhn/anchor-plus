@@ -7,6 +7,7 @@ import {
   TextAlignJustify,
   TextAlignStart,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { menuSurface } from "@/components/ui/dropdown-menu";
 import { Tip } from "@/components/ui/tooltip";
@@ -17,12 +18,16 @@ import { ALIGNMENTS, type Alignment } from "../../quill-lines";
 
 const ALIGN_TOOLS: Record<
   Alignment,
-  { label: string; key: string; Icon: typeof TextAlignStart }
+  {
+    label: "alignLeft" | "alignCenter" | "alignRight" | "justify";
+    key: string;
+    Icon: typeof TextAlignStart;
+  }
 > = {
-  left: { label: "Align left", key: "L", Icon: TextAlignStart },
-  center: { label: "Align center", key: "E", Icon: TextAlignCenter },
-  right: { label: "Align right", key: "R", Icon: TextAlignEnd },
-  justify: { label: "Justify", key: "J", Icon: TextAlignJustify },
+  left: { label: "alignLeft", key: "L", Icon: TextAlignStart },
+  center: { label: "alignCenter", key: "E", Icon: TextAlignCenter },
+  right: { label: "alignRight", key: "R", Icon: TextAlignEnd },
+  justify: { label: "justify", key: "J", Icon: TextAlignJustify },
 };
 
 const keepSelection = (e: React.MouseEvent) => e.preventDefault();
@@ -46,6 +51,7 @@ export function AlignButton({
   current: Alignment;
   disabled?: boolean;
 }) {
+  const t = useTranslations("editor.toolbar");
   const [open, setOpen] = React.useState(false);
   const [noteElement, setNoteElement] = React.useState<HTMLElement | null>(
     null,
@@ -65,13 +71,13 @@ export function AlignButton({
 
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
-      <Tip label="Align">
+      <Tip label={t("align")}>
         <PopoverPrimitive.Trigger asChild>
           <button
             ref={box}
             type="button"
             className="b"
-            aria-label="Align"
+            aria-label={t("align")}
             aria-disabled={disabled || undefined}
             onMouseDown={keepSelection}
             onClick={(e) => {
@@ -95,10 +101,10 @@ export function AlignButton({
             "al-pop rounded-menu animate-pop-in data-[side=top]:animate-pop-up data-[state=closed]:animate-pop-out",
           )}
         >
-          <fieldset className="al-row" aria-label="Alignment">
+          <fieldset className="al-row" aria-label={t("alignment")}>
             {ALIGNMENTS.map((align) => {
               const { label, Icon: AlignIcon } = ALIGN_TOOLS[align];
-              const name = `${label} (${alignShortcut(align)})`;
+              const name = t(label, { shortcut: alignShortcut(align) });
               return (
                 <Tip key={align} label={name}>
                   <button

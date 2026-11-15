@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { toast } from "@/components/ui/toast";
+import { translate } from "@/lib/i18n";
 import {
   canWatchLive,
   type LiveStatus,
@@ -17,31 +18,34 @@ import { cropPixels, WHOLE_PICTURE } from "../picture-edits";
 /** How long a tap waits to see if it is a double tap. */
 const DOUBLE_TAP_MS = 260;
 
+const t = () => translate("noteHooks.liveImages");
+
 function statusText(image: LiveImage, view: LiveView): string {
-  const who = image.label ?? "the device that added it";
+  const who = image.label ?? t()("whoDefault");
   const screen = image.source === "screen";
   const texts: Record<LiveStatus, string> = {
-    starting: "Turning the camera on…",
-    connecting: `Connecting to ${who}…`,
-    waiting: `Waiting for ${who}. Open Anchor there to show it.`,
+    starting: t()("starting"),
+    connecting: t()("connecting", { who }),
+    waiting: t()("waiting", { who }),
     paused: screen
-      ? `${who} isn’t sharing its screen right now.`
-      : `${who} can’t show its camera right now.`,
-    "needs-share": screen
-      ? "Your screen isn’t being shared."
-      : "Your camera is off.",
-    denied: "This device wasn’t allowed to use the camera.",
+      ? t()("pausedScreen", { who })
+      : t()("pausedCamera", { who }),
+    "needs-share": screen ? t()("screenNotShared") : t()("cameraOff"),
+    denied: t()("denied"),
     live: "",
   };
   return texts[view.status];
 }
 
-const actionText: Partial<
-  Record<LiveStatus, Record<LiveImage["source"], string>>
-> = {
-  "needs-share": { screen: "Share screen", camera: "Turn camera on" },
-  denied: { screen: "Try again", camera: "Try again" },
-};
+function actionText(
+  status: LiveStatus,
+  source: LiveImage["source"],
+): string | undefined {
+  if (status === "needs-share")
+    return source === "screen" ? t()("shareScreen") : t()("turnCameraOn");
+  if (status === "denied") return t()("tryAgain");
+  return undefined;
+}
 
 // Lucide's mic, mic-off, volume-2 and volume-x, drawn inside the text.
 const ICONS = {
@@ -90,7 +94,7 @@ function showSound(node: HTMLElement, view: LiveView, video: HTMLVideoElement) {
     const isMuted = view.mic === "muted";
     const mic = soundButton(
       "live-mic",
-      isMuted ? "Unmute microphone" : "Mute microphone",
+      isMuted ? t()("unmuteMic") : t()("muteMic"),
       isMuted ? ICONS.micOff : ICONS.mic,
     );
     if (isMuted) mic.dataset.off = "";
@@ -100,15 +104,15 @@ function showSound(node: HTMLElement, view: LiveView, video: HTMLVideoElement) {
   if (view.mic === "muted") {
     const muted = document.createElement("span");
     muted.className = "live-mic-muted";
-    muted.title = "Microphone muted";
-    muted.setAttribute("aria-label", "Microphone muted");
+    muted.title = t()("micMuted");
+    muted.setAttribute("aria-label", t()("micMuted"));
     muted.innerHTML = icon(ICONS.micOff);
     bar.appendChild(muted);
   }
   bar.appendChild(
     soundButton(
       "live-speaker",
-      video.muted ? "Turn sound on" : "Turn sound off",
+      video.muted ? t()("soundOn") : t()("soundOff"),
       video.muted ? ICONS.silent : ICONS.sound,
     ),
   );
@@ -135,9 +139,7 @@ function show(node: HTMLElement, image: LiveImage, view: LiveView) {
   node.dataset.status =
     view.stream && view.status === "live" ? "live" : view.status;
   const text = statusText(image, view);
-  const action = view.isOwn
-    ? undefined
-    : actionText[view.status]?.[image.source];
+  const action = view.isOwn ? undefined : actionText(view.status, image.source);
   status.replaceChildren();
   if (text) {
     const line = document.createElement("span");
@@ -258,7 +260,7 @@ export function useLiveImages(
           viewers: null,
         });
         const status = node.querySelector(".live-status");
-        if (status) status.textContent = "This browser can’t show live images.";
+        if (status) status.textContent = t()("unsupported");
         bound.set(node, { value, unbind: () => {} });
         return;
       }
@@ -345,9 +347,7 @@ export function useLiveImages(
       e.stopPropagation();
       restartSource(image, noteId).catch(() =>
         toast.error(
-          image.source === "screen"
-            ? "Couldn’t share the screen"
-            : "Couldn’t turn the camera on",
+          image.source === "screen" ? t()("shareFailed") : t()("cameraFailed"),
         ),
       );
     };
@@ -366,8 +366,8 @@ export function useLiveImages(
       stillOf(node, image)
         .then((file) => keep([file]))
         .then(
-          () => toast.success("Still added to the attachments"),
-          () => toast.error("Couldn’t keep a still of the live image"),
+          () => toast.success(t()("stillAdded")),
+          () => toast.error(t()("stillFailed")),
         );
     };
     let pendingSpin: ReturnType<typeof setTimeout> | undefined;

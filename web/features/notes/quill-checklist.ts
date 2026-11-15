@@ -1,4 +1,5 @@
 import Delta from "quill-delta";
+import { currentLocale } from "@/lib/i18n";
 import {
   LIST_FORMATS,
   parseStoredContent,
@@ -555,7 +556,10 @@ export function countChecklistItems(contents: QuillDelta) {
   return { items, checked };
 }
 
-const byName = new Intl.Collator("en", { numeric: false });
+const byName = {
+  compare: (a: string, b: string) =>
+    new Intl.Collator(currentLocale(), { numeric: false }).compare(a, b),
+};
 
 /** The lines of [start..end] in name order, children under their parent. */
 function orderByName(

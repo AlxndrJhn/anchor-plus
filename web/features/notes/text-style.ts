@@ -1,3 +1,4 @@
+import { translate } from "@/lib/i18n";
 /**
  * Text colours, fonts and custom highlight colours, as the notes store
  * them (shared with the Android app): `color` and a custom `highlight` are
@@ -6,26 +7,111 @@
  */
 
 export const TEXT_COLORS = [
-  { name: "Red", value: "#e03131" },
-  { name: "Orange", value: "#e8590c" },
-  { name: "Amber", value: "#f08c00" },
-  { name: "Green", value: "#2f9e44" },
-  { name: "Teal", value: "#0c8599" },
-  { name: "Blue", value: "#1971c2" },
-  { name: "Purple", value: "#7048e8" },
-  { name: "Pink", value: "#c2255c" },
-  { name: "Gray", value: "#868e96" },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.red");
+    },
+    value: "#e03131",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.orange");
+    },
+    value: "#e8590c",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.amber");
+    },
+    value: "#f08c00",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.green");
+    },
+    value: "#2f9e44",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.teal");
+    },
+    value: "#0c8599",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.blue");
+    },
+    value: "#1971c2",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.purple");
+    },
+    value: "#7048e8",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.pink");
+    },
+    value: "#c2255c",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("colors.gray");
+    },
+    value: "#868e96",
+  },
 ] as const;
 
 export const FONTS = [
-  { name: "Serif", value: "serif" },
-  { name: "Monospace", value: "monospace" },
-  { name: "Comic Sans", value: "comic" },
-  { name: "Handwriting", value: "handwriting" },
-  { name: "Typewriter", value: "typewriter" },
-  { name: "Rounded", value: "rounded" },
-  { name: "Slab", value: "slab" },
-  { name: "Marker", value: "marker" },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("fonts.serif");
+    },
+    value: "serif",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("fonts.monospace");
+    },
+    value: "monospace",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("fonts.comic");
+    },
+    value: "comic",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("fonts.handwriting");
+    },
+    value: "handwriting",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("fonts.typewriter");
+    },
+    value: "typewriter",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("fonts.rounded");
+    },
+    value: "rounded",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("fonts.slab");
+    },
+    value: "slab",
+  },
+  {
+    get name() {
+      return translate("noteHooks.textStyle")("fonts.marker");
+    },
+    value: "marker",
+  },
 ] as const;
 
 export type FontName = (typeof FONTS)[number]["value"];

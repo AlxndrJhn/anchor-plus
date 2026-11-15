@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { LoadFailedRow } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRetry } from "@/lib/hooks/use-retry";
@@ -15,6 +16,7 @@ const PLAN_NAMES: Record<Plan, string> = { free: "Free", plus: "Plus" };
  * on a server with storage quotas, how much its plan allows.
  */
 export function StorageSection() {
+  const t = useTranslations("settings.storage");
   const query = useQuery({
     queryKey: ["storage-usage"],
     queryFn: getStorageUsage,
@@ -24,16 +26,12 @@ export function StorageSection() {
   const usage = query.data;
 
   return (
-    <Section
-      id="storage"
-      title="Storage"
-      description="Pictures, recordings and files you’ve added to notes."
-    >
+    <Section id="storage" title={t("title")} description={t("description")}>
       {query.isError ? (
         <Row>
           <LoadFailedRow
             className="flex-1"
-            message="Couldn’t load your storage."
+            message={t("loadFailed")}
             onRetry={retry.retry}
             isRetrying={retry.isRetrying}
           />
@@ -46,8 +44,8 @@ export function StorageSection() {
       ) : usage.limitBytes === null ? (
         <Row>
           <RowText
-            title={`${storageSize(usage.usedBytes)} used`}
-            text="This server sets no limit."
+            title={t("used", { size: storageSize(usage.usedBytes) })}
+            text={t("noLimit")}
           />
         </Row>
       ) : (
@@ -70,19 +68,23 @@ function LimitedUsage({
   usedBytes: number;
   limitBytes: number;
 }) {
+  const t = useTranslations("settings.storage");
   const share = limitBytes > 0 ? Math.min(usedBytes / limitBytes, 1) : 1;
   const full = usedBytes >= limitBytes;
   const nearlyFull = !full && share >= 0.9;
   return (
     <Row className="grid gap-2.5">
       <RowText
-        title={`${storageSize(usedBytes)} of ${storageSize(limitBytes)} used`}
+        title={t("usedOf", {
+          used: storageSize(usedBytes),
+          limit: storageSize(limitBytes),
+        })}
         text={
           full
-            ? `Your storage is full. Delete pictures or files to add more.`
+            ? t("full")
             : nearlyFull
-              ? `Your storage is almost full. ${PLAN_NAMES[plan]} plan.`
-              : `${PLAN_NAMES[plan]} plan.`
+              ? t("almostFull", { plan: PLAN_NAMES[plan] })
+              : t("plan", { plan: PLAN_NAMES[plan] })
         }
       />
       <div

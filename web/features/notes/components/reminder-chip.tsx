@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, BellRing } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { isReminderPast, reminderLabel } from "../reminder";
@@ -35,13 +36,14 @@ export function ReminderChip({
   size = "default",
   className,
 }: ReminderChipProps) {
+  const t = useTranslations("notes.reminderChip");
   const late = isReminderPast(reminder);
   const ringBell = useRingOnce(noteId, late);
   const small = size === "sm";
   return (
     <span
       data-slot="reminder-chip"
-      title={late ? "Reminder time has passed" : "Reminder"}
+      title={late ? t("passed") : t("reminder")}
       className={cn(
         "inline-flex min-w-0 items-center whitespace-nowrap rounded-pill font-medium [&_svg]:flex-none",
         small
@@ -56,7 +58,7 @@ export function ReminderChip({
     >
       {late ? <BellRing aria-hidden /> : <Bell aria-hidden />}
       <span className="truncate">
-        {late && <span className="sr-only">Late: </span>}
+        {late && <span className="sr-only">{t("late")} </span>}
         {reminderLabel(reminder)}
       </span>
     </span>

@@ -1,4 +1,5 @@
 import { parseStoredContent } from "@/features/notes/quill";
+import { translate } from "@/lib/i18n";
 import {
   type CanonicalAttachment,
   type CanonicalNote,
@@ -72,7 +73,7 @@ export const anchorAdapter: ImportAdapter = {
       manifest.version > SUPPORTED_VERSION
     ) {
       throw new ImportFileError(
-        "This backup is from a newer version of Anchor+. Update your server, then try again.",
+        translate("settings.importExport.adapters")("newerBackup"),
       );
     }
 
@@ -86,7 +87,9 @@ export const anchorAdapter: ImportAdapter = {
         if (!zip.has(attachment.archivePath)) {
           skipped.push({
             item: attachment.originalFilename,
-            reason: "Attachment file missing from backup archive",
+            reason: translate("settings.importExport.adapters")(
+              "attachmentMissingFromBackup",
+            ),
           });
           continue;
         }

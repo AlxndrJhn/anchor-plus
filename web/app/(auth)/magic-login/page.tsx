@@ -5,6 +5,7 @@ import { HTTPError } from "ky";
 import { ArrowLeft, LogIn, Smartphone } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
@@ -22,6 +23,7 @@ const isAndroid = () =>
  * signs in with the code; anywhere, it can sign in this browser instead.
  */
 export default function MagicLoginPage() {
+  const t = useTranslations("auth.magicLogin");
   const code = useSearchParams().get("code") ?? "";
   const setAuth = useAuthStore((state) => state.setAuth);
   // Known only in the browser, after the first render.
@@ -48,7 +50,7 @@ export default function MagicLoginPage() {
       // GuestGuard navigates once signed in.
       if (data.access_token && data.refresh_token) {
         setAuth(data.user, data.access_token, data.refresh_token);
-        toast.success(`Welcome back, ${firstName(data.user.name)}`);
+        toast.success(t("welcomeBack", { name: firstName(data.user.name) }));
       }
     },
   });
@@ -60,13 +62,13 @@ export default function MagicLoginPage() {
     return (
       <AuthStatusScreen
         illustration="closed"
-        title="This magic link has run out"
-        text="A magic link works once, within 10 minutes. Make a new one in Settings, on a device that's signed in."
+        title={t("expiredTitle")}
+        text={t("expiredText")}
       >
         <Button size="lg" variant="secondary" className="w-full" asChild>
           <Link href="/login">
             <ArrowLeft aria-hidden />
-            Sign in with a password
+            {t("signInWithPassword")}
           </Link>
         </Button>
       </AuthStatusScreen>
@@ -75,18 +77,14 @@ export default function MagicLoginPage() {
   return (
     <AuthStatusScreen
       illustration="callback"
-      title="Magic login"
-      text={
-        isAndroidPhone
-          ? "Opening the Anchor+ app to sign you in. If it didn't open, tap below."
-          : "Open this link on your Android phone to sign in to the Anchor+ app, or sign in to this browser."
-      }
+      title={t("title")}
+      text={isAndroidPhone ? t("openingApp") : t("openOnPhone")}
     >
       {appUrl && isAndroidPhone && (
         <Button size="lg" className="w-full" asChild>
           <a href={appUrl}>
             <Smartphone aria-hidden />
-            Open in the Anchor+ app
+            {t("openInApp")}
           </a>
         </Button>
       )}
@@ -95,14 +93,14 @@ export default function MagicLoginPage() {
         variant={isAndroidPhone ? "secondary" : "primary"}
         className="w-full"
         onClick={() => signInHere.mutate()}
-        busy={signInHere.isPending && "Signing in…"}
+        busy={signInHere.isPending && t("signingIn")}
       >
         <LogIn aria-hidden />
-        Sign in to this browser
+        {t("signInHere")}
       </Button>
       {signInHere.isError && !isUsedUp && (
         <p role="alert" className="m-0 text-late text-small">
-          Couldn’t sign in. Check your connection and try again.
+          {t("signInFailed")}
         </p>
       )}
     </AuthStatusScreen>

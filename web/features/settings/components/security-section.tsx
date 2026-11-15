@@ -11,6 +11,7 @@ import {
   Plus,
   ShieldCheck,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -47,11 +48,12 @@ import type { Passkey } from "@/features/auth/types";
 import { isPasskeyCancelled } from "@/features/auth/utils/sign-in-error";
 import { copyText } from "@/lib/clipboard";
 import { useRetry } from "@/lib/hooks/use-retry";
+import { dateLocale, translate } from "@/lib/i18n";
 import { Row, RowText, Section } from "./settings-blocks";
 
 const securityKey = ["auth-security"];
 
-/** "Chrome on Windows", to tell passkeys apart. */
+/** "Chrome on Windows", to tell passkeys apart. Stored with the passkey. */
 function thisDeviceName() {
   const ua = navigator.userAgent;
   const browser = /Edg\//.test(ua)
@@ -80,16 +82,28 @@ function thisDeviceName() {
 const messageOf = (error: Error) =>
   error instanceof HTTPError
     ? error.message
-    : "Couldn’t reach the server. Check your connection and try again.";
+    : translate("settings.security")("offline");
 
-function passkeyUse(passkey: Passkey) {
-  const added = `Added ${formatDistanceToNowStrict(new Date(passkey.createdAt))} ago`;
+function passkeyUse(
+  passkey: Passkey,
+  t: ReturnType<typeof useTranslations<"settings.security">>,
+) {
+  const added = formatDistanceToNowStrict(new Date(passkey.createdAt), {
+    locale: dateLocale(),
+  });
   return passkey.lastUsedAt
-    ? `${added}, last used ${formatDistanceToNowStrict(new Date(passkey.lastUsedAt))} ago`
-    : added;
+    ? t("addedAndUsed", {
+        added,
+        used: formatDistanceToNowStrict(new Date(passkey.lastUsedAt), {
+          locale: dateLocale(),
+        }),
+      })
+    : t("added", { added });
 }
 
 export function SecuritySection() {
+  const t = useTranslations("settings.security");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const security = useQuery({ queryKey: securityKey, queryFn: getSecurity });
   const retry = useRetry(security.refetch);
@@ -107,7 +121,7 @@ export function SecuritySection() {
     mutationFn: () => addPasskey(thisDeviceName()),
     onSuccess: () => {
       void refresh();
-      toast.success("Passkey added. You can sign in with it now.");
+      toast.success(t("passkeyAdded"));
     },
     onError: (error: Error) => {
       if (isPasskeyCancelled(error)) return;
@@ -115,10 +129,10 @@ export function SecuritySection() {
         error.name === "InvalidStateError" ||
           (error.cause instanceof Error &&
             error.cause.name === "InvalidStateError")
-          ? "This device already has a passkey for your account"
+          ? t("passkeyExists")
           : error instanceof HTTPError
             ? messageOf(error)
-            : "Couldn’t add a passkey on this device",
+            : t("passkeyAddFailed"),
       );
     },
   });
@@ -127,7 +141,7 @@ export function SecuritySection() {
     onSuccess: () => {
       setRemoving(null);
       void refresh();
-      toast.success("Passkey removed");
+      toast.success(t("passkeyRemoved"));
     },
     onError: (error: Error) => toast.error(messageOf(error)),
   });
@@ -138,7 +152,8 @@ export function SecuritySection() {
   });
 
   const oidc = useOidcConfig();
-  const providerName = oidc.data?.providerName || "your provider";
+  const providerTitle = oidc.data?.providerName || t("providerTitle");
+  const provider = oidc.data?.providerName || t("providerFallback");
   const link = useMutation({
     mutationFn: startProviderLink,
     onSuccess: (url) => {
@@ -153,8 +168,8 @@ export function SecuritySection() {
     const failure = params.get("provider_error");
     if (!connected && failure === null) return;
     document.getElementById("set-security")?.scrollIntoView({ block: "start" });
-    if (connected) toast.success("Connected. You can sign in with it now.");
-    else toast.error(failure || "Couldn’t connect your account");
+    if (connected) toast.success(t("providerConnected"));
+    else toast.error(failure || t("providerConnectFailed"));
     params.delete("provider");
     params.delete("provider_error");
     const search = params.toString();
@@ -163,7 +178,7 @@ export function SecuritySection() {
       "",
       `${window.location.pathname}${search ? `?${search}` : ""}${window.location.hash}`,
     );
-  }, []);
+  }, [t]);
 
   const status = security.data;
   // Setting one up lifts the admin's reminder (or setup screen).
@@ -174,16 +189,12 @@ export function SecuritySection() {
   }, [status, mergeUser]);
 
   return (
-    <Section
-      id="security"
-      title="Sign-in security"
-      description="Passkeys and a second step after your password."
-    >
+    <Section id="security" title={t("title")} description={t("description")}>
       {security.isError || retry.isRetrying ? (
         <Row>
           <LoadFailedRow
             className="flex-1"
-            message="Couldn’t load how you sign in."
+            message={t("loadFailed")}
             onRetry={retry.retry}
             isRetrying={retry.isRetrying}
           />
@@ -198,42 +209,40 @@ export function SecuritySection() {
           {oidc.data?.enabled && (
             <Row>
               <RowText
-                title={providerName}
+                title={providerTitle}
                 text={
                   status.providerLinked
-                    ? `Connected. “Continue with ${providerName}” signs you in to this account.`
-                    : `Connect it to sign in to this account with “Continue with ${providerName}”, whatever email it has.`
+                    ? t("providerLinked", { provider })
+                    : t("providerLink", { provider })
                 }
               />
               {!status.providerLinked && (
                 <Button
                   variant="secondary"
                   onClick={() => link.mutate()}
-                  busy={(link.isPending || link.isSuccess) && "Opening…"}
+                  busy={(link.isPending || link.isSuccess) && t("opening")}
                 >
                   <KeyRound aria-hidden />
-                  Connect
+                  {t("connect")}
                 </Button>
               )}
             </Row>
           )}
           <Row>
             <RowText
-              title="Passkeys"
+              title={t("passkeys")}
               text={
-                canUsePasskey
-                  ? "Sign in with your fingerprint, face or screen lock instead of a password."
-                  : "This browser can’t make passkeys here. They need a secure (https) address."
+                canUsePasskey ? t("passkeysText") : t("passkeysUnsupported")
               }
             />
             <Button
               variant="secondary"
               disabled={!canUsePasskey}
               onClick={() => add.mutate()}
-              busy={add.isPending && "Waiting for your device…"}
+              busy={add.isPending && t("waitingForDevice")}
             >
               <Plus aria-hidden />
-              Add a passkey
+              {t("addPasskey")}
             </Button>
           </Row>
           {status.passkeys.map((passkey) => (
@@ -242,20 +251,22 @@ export function SecuritySection() {
                 aria-hidden
                 className="size-4.5 flex-none text-muted-foreground"
               />
-              <RowText title={passkey.name} text={passkeyUse(passkey)} />
+              <RowText title={passkey.name} text={passkeyUse(passkey, t)} />
               <Button variant="quiet" onClick={() => setRemoving(passkey)}>
-                Remove
+                {tc("remove")}
               </Button>
             </Row>
           ))}
           {status.hasPassword && (
             <Row>
               <RowText
-                title="Authenticator app"
+                title={t("authenticator")}
                 text={
                   status.twoStep
-                    ? `On. Signing in with your password also asks for a code from the app. ${status.recoveryCodesLeft} recovery code${status.recoveryCodesLeft === 1 ? "" : "s"} left.`
-                    : "Ask for a code from an app like Aegis, Google Authenticator or 1Password after your password."
+                    ? t("authenticatorOn", {
+                        count: status.recoveryCodesLeft,
+                      })
+                    : t("authenticatorText")
                 }
               />
               {status.twoStep ? (
@@ -264,13 +275,13 @@ export function SecuritySection() {
                     variant="secondary"
                     onClick={() => setTwoStepDialog("codes")}
                   >
-                    New recovery codes
+                    {t("newRecoveryCodes")}
                   </Button>
                   <Button
                     variant="danger"
                     onClick={() => setTwoStepDialog("disable")}
                   >
-                    Turn off
+                    {t("turnOff")}
                   </Button>
                 </div>
               ) : (
@@ -279,7 +290,7 @@ export function SecuritySection() {
                   onClick={() => setTwoStepDialog("setup")}
                 >
                   <ShieldCheck aria-hidden />
-                  Set up
+                  {t("setUp")}
                 </Button>
               )}
             </Row>
@@ -289,15 +300,15 @@ export function SecuritySection() {
               <RowText
                 title={
                   <label htmlFor="password-sign-in">
-                    Sign in with password
+                    {t("passwordSignIn")}
                   </label>
                 }
                 text={
                   status.passkeys.length === 0
-                    ? "Add a passkey before you turn this off."
+                    ? t("passwordSignInNeedsPasskey")
                     : status.passwordSignIn
-                      ? "Turn off to sign in only with your passkeys. Phone sign-in by QR code still works."
-                      : "Off. Only your passkeys sign you in."
+                      ? t("passwordSignInOn")
+                      : t("passwordSignInOff")
                 }
               />
               <Switch
@@ -316,10 +327,10 @@ export function SecuritySection() {
       <ConfirmationDialog
         open={!!removing}
         onOpenChange={(open) => !open && setRemoving(null)}
-        title="Remove this passkey?"
-        description={`“${removing?.name}” won’t sign you in anymore. Remove it from the device’s passkey list too.`}
-        confirmLabel="Remove"
-        busyLabel="Removing…"
+        title={t("removeTitle")}
+        description={t("removeText", { name: removing?.name ?? "" })}
+        confirmLabel={tc("remove")}
+        busyLabel={t("removing")}
         isPending={remove.isPending}
         onConfirm={() => removing && remove.mutate(removing)}
       />
@@ -339,15 +350,16 @@ export function SecuritySection() {
 }
 
 function RecoveryCodeList({ codes }: { codes: string[] }) {
+  const t = useTranslations("settings.security");
   const copy = () =>
     copyText(codes.join("\n")).then(
-      () => toast.success("Recovery codes copied"),
-      () => toast.error("Couldn’t copy the recovery codes"),
+      () => toast.success(t("codesCopied")),
+      () => toast.error(t("codesCopyFailed")),
     );
   return (
     <div className="grid gap-3">
       <ul
-        aria-label="Recovery codes"
+        aria-label={t("recoveryCodes")}
         className="m-0 grid list-none grid-cols-2 gap-x-6 gap-y-1.5 rounded-lg bg-foreground/4 p-4 font-mono text-ui"
       >
         {codes.map((code) => (
@@ -356,7 +368,7 @@ function RecoveryCodeList({ codes }: { codes: string[] }) {
       </ul>
       <Button variant="secondary" onClick={copy}>
         <Copy aria-hidden />
-        Copy codes
+        {t("copyCodes")}
       </Button>
     </div>
   );
@@ -371,6 +383,8 @@ function TwoStepSetupDialog({
   onOpenChange: (open: boolean) => void;
   onDone: () => void;
 }) {
+  const t = useTranslations("settings.security");
+  const tc = useTranslations("common");
   const [code, setCode] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const setup = useMutation({ mutationFn: startTwoStep });
@@ -381,7 +395,7 @@ function TwoStepSetupDialog({
       setCode("");
       setError(
         e instanceof HTTPError && e.response.status === 403
-          ? "That code isn’t right. Use the one the app shows now."
+          ? t("wrongSetupCode")
           : messageOf(e),
       );
     },
@@ -406,14 +420,10 @@ function TwoStepSetupDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {recoveryCodes
-              ? "Save your recovery codes"
-              : "Set up an authenticator app"}
+            {recoveryCodes ? t("saveCodesTitle") : t("setupTitle")}
           </DialogTitle>
           <DialogDescription>
-            {recoveryCodes
-              ? "Each one signs you in once if you lose your phone. Keep them somewhere safe, like a password manager. They won’t be shown again."
-              : "Scan the QR code with your authenticator app, then enter the six-digit code it shows."}
+            {recoveryCodes ? t("saveCodesText") : t("setupText")}
           </DialogDescription>
         </DialogHeader>
         <DialogBody>
@@ -433,17 +443,17 @@ function TwoStepSetupDialog({
                 enable.mutate(code.trim());
               }}
             >
-              <QrImage
-                text={setup.data.uri}
-                label="QR code for your authenticator app"
-              />
+              <QrImage text={setup.data.uri} label={t("qrLabel")} />
               <p className="m-0 text-center text-meta text-muted-foreground">
-                Can’t scan it? Enter this key:{" "}
-                <code className="break-all font-mono text-foreground">
-                  {setup.data.secret.replace(/(.{4})/g, "$1 ").trim()}
-                </code>
+                {t.rich("cantScan", {
+                  key: () => (
+                    <code className="break-all font-mono text-foreground">
+                      {setup.data.secret.replace(/(.{4})/g, "$1 ").trim()}
+                    </code>
+                  ),
+                })}
               </p>
-              <Field label="Code from the app" error={error}>
+              <Field label={t("codeFromApp")} error={error}>
                 <Input
                   autoFocus
                   autoComplete="one-time-code"
@@ -460,19 +470,19 @@ function TwoStepSetupDialog({
         </DialogBody>
         <DialogFooter>
           {recoveryCodes ? (
-            <Button onClick={() => onOpenChange(false)}>Done</Button>
+            <Button onClick={() => onOpenChange(false)}>{tc("done")}</Button>
           ) : (
             <>
               <Button variant="quiet" onClick={() => onOpenChange(false)}>
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button
                 type="submit"
                 form="two-step-setup"
                 disabled={!setup.data || code.replace(/\s/g, "").length < 6}
-                busy={enable.isPending && "Turning on…"}
+                busy={enable.isPending && t("turningOn")}
               >
-                Turn on
+                {t("turnOn")}
               </Button>
             </>
           )}
@@ -493,6 +503,8 @@ function TwoStepCodeDialog({
   onOpenChange: (open: boolean) => void;
   onDone: () => void;
 }) {
+  const t = useTranslations("settings.security");
+  const tc = useTranslations("common");
   const [code, setCode] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const submit = useMutation({
@@ -506,14 +518,14 @@ function TwoStepCodeDialog({
       onDone();
       if (!codes) {
         onOpenChange(false);
-        toast.success("Authenticator app turned off");
+        toast.success(t("turnedOff"));
       }
     },
     onError: (e: Error) => {
       setCode("");
       setError(
         e instanceof HTTPError && e.response.status === 403
-          ? "That code isn’t right."
+          ? t("wrongCode")
           : messageOf(e),
       );
     },
@@ -534,17 +546,17 @@ function TwoStepCodeDialog({
         <DialogHeader>
           <DialogTitle>
             {newCodes
-              ? "Save your new recovery codes"
+              ? t("saveNewCodesTitle")
               : mode === "disable"
-                ? "Turn off the authenticator app?"
-                : "Make new recovery codes?"}
+                ? t("disableTitle")
+                : t("newCodesTitle")}
           </DialogTitle>
           <DialogDescription>
             {newCodes
-              ? "Your old recovery codes don’t work anymore. Keep these somewhere safe; they won’t be shown again."
+              ? t("saveNewCodesText")
               : mode === "disable"
-                ? "Signing in with your password won’t ask for a code anymore. Enter a code from the app, or a recovery code, to confirm."
-                : "Your old recovery codes stop working. Enter a code from the app to confirm."}
+                ? t("disableText")
+                : t("newCodesText")}
           </DialogDescription>
         </DialogHeader>
         <DialogBody>
@@ -559,7 +571,7 @@ function TwoStepCodeDialog({
                 submit.mutate(code.trim());
               }}
             >
-              <Field label="Code" error={error}>
+              <Field label={t("code")} error={error}>
                 <Input
                   autoFocus
                   autoComplete="one-time-code"
@@ -575,11 +587,11 @@ function TwoStepCodeDialog({
         </DialogBody>
         <DialogFooter>
           {newCodes ? (
-            <Button onClick={() => onOpenChange(false)}>Done</Button>
+            <Button onClick={() => onOpenChange(false)}>{tc("done")}</Button>
           ) : (
             <>
               <Button variant="quiet" onClick={() => onOpenChange(false)}>
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button
                 type="submit"
@@ -588,10 +600,10 @@ function TwoStepCodeDialog({
                 disabled={!code.trim()}
                 busy={
                   submit.isPending &&
-                  (mode === "disable" ? "Turning off…" : "Making codes…")
+                  (mode === "disable" ? t("turningOff") : t("makingCodes"))
                 }
               >
-                {mode === "disable" ? "Turn off" : "Make new codes"}
+                {mode === "disable" ? t("turnOff") : t("makeNewCodes")}
               </Button>
             </>
           )}

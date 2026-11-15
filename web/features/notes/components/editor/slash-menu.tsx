@@ -19,6 +19,7 @@ import {
   Type,
   Workflow,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { menuItem, menuSurface } from "@/components/ui/dropdown-menu";
 import { ShortcutHints } from "@/components/ui/shortcut-hints";
@@ -48,125 +49,92 @@ type Kind =
   | "flowchart"
   | "scan";
 
+/** The commands; their names and search words are in the messages. */
 const ITEMS: {
   kind: Kind;
-  label: string;
   icon: React.ReactNode;
-  keywords: string;
   isPopular?: boolean;
   format?: Record<string, unknown>;
 }[] = [
   {
     kind: "checklist",
-    label: "Checklist",
     icon: <ListChecks />,
-    keywords: "todo to-do task checkbox list",
     isPopular: true,
     format: { list: "unchecked" },
   },
   {
     kind: "heading1",
-    label: "Heading 1",
     icon: <Heading1 />,
-    keywords: "h1 title",
     isPopular: true,
     format: { header: 1 },
   },
   {
     kind: "heading2",
-    label: "Heading 2",
     icon: <Heading2 />,
-    keywords: "h2 subtitle subheading",
     format: { header: 2 },
   },
   {
     kind: "heading3",
-    label: "Heading 3",
     icon: <Heading3 />,
-    keywords: "h3 subheading",
     format: { header: 3 },
   },
   {
     kind: "bullets",
-    label: "Bullet list",
     icon: <List />,
-    keywords: "unordered ul dashes",
     isPopular: true,
     format: { list: "bullet" },
   },
   {
     kind: "numbers",
-    label: "Numbered list",
     icon: <ListOrdered />,
-    keywords: "ordered ol",
     isPopular: true,
     format: { list: "ordered" },
   },
   {
     kind: "quote",
-    label: "Quote",
     icon: <Quote />,
-    keywords: "blockquote citation",
     isPopular: true,
     format: { blockquote: true },
   },
   {
     kind: "code",
-    label: "Code block",
     icon: <Code />,
-    keywords: "pre snippet",
     format: { "code-block": "plain" },
   },
   {
     kind: "text",
-    label: "Text",
     icon: <Type />,
-    keywords: "paragraph plain normal body",
     format: {},
   },
-  { kind: "link", label: "Link", icon: <Link />, keywords: "url web address" },
+  { kind: "link", icon: <Link /> },
   {
     kind: "date",
-    label: "Date",
     icon: <CalendarDays />,
-    keywords: "today day now stamp",
   },
   {
     kind: "attachment",
-    label: "Picture or audio",
     icon: <ImagePlus />,
-    keywords: "image img photo file voice recording attachment",
     isPopular: true,
   },
   {
     kind: "record",
-    label: "Record audio",
     icon: <Mic />,
-    keywords: "voice memo microphone mic recording sound",
   },
   {
     kind: "draw",
-    label: "Drawing",
     icon: <PencilLine />,
-    keywords: "draw sketch doodle pen hand drawn handwriting scribble paint",
   },
   {
     kind: "live",
-    label: "Live image",
     icon: <Radio />,
-    keywords: "camera webcam screen share window stream video live",
   },
   {
     kind: "flowchart",
-    label: "Flowchart",
     icon: <Workflow />,
-    keywords: "diagram chart flow process boxes arrows decision",
   },
   {
     kind: "scan",
-    label: "Scan",
     icon: <ScanLine />,
-    keywords: "document page paper pdf scanner photo receipt",
   },
 ];
 
@@ -207,6 +175,7 @@ export function SlashMenu({
   onAddFlowchart,
   onAddScan,
 }: SlashMenuProps) {
+  const t = useTranslations("editor.slashMenu");
   const [slash, setSlash] = React.useState<Slash | null>(null);
   const [place, setPlace] = React.useState<Place | null>(null);
   const [searchHint, setSearchHint] = React.useState<Place | null>(null);
@@ -220,7 +189,11 @@ export function SlashMenu({
   const items = React.useMemo(
     () =>
       findSlashItems(
-        ITEMS.filter(
+        ITEMS.map((item) => ({
+          ...item,
+          label: t(`items.${item.kind}`),
+          keywords: t(`keywords.${item.kind}`),
+        })).filter(
           (item) =>
             (item.kind !== "attachment" || onAddAttachment) &&
             (item.kind !== "record" || onRecordAudio) &&
@@ -232,6 +205,7 @@ export function SlashMenu({
         slash?.query ?? "",
       ),
     [
+      t,
       slash?.query,
       onAddAttachment,
       onRecordAudio,
@@ -479,7 +453,7 @@ export function SlashMenu({
             lineHeight: `${searchHint.height}px`,
           }}
         >
-          Type to search
+          {t("typeToSearch")}
         </span>
       )}
       {slash && place && (
@@ -504,7 +478,7 @@ export function SlashMenu({
             <div
               role="listbox"
               id={listId}
-              aria-label="Add a block"
+              aria-label={t("label")}
               className="grid gap-px"
             >
               {items.map((item, i) => (
@@ -534,17 +508,17 @@ export function SlashMenu({
             </div>
           ) : (
             <div role="status" className="px-2 py-1.5 text-muted-foreground">
-              No results
+              {t("noResults")}
             </div>
           )}
           {items.length > 0 && (
             <div className="mt-1 flex items-center border-border/55 border-t px-1.5 pt-2 pb-0.5 text-caption text-muted-foreground max-md:hidden">
               <ShortcutHints
                 groups={[
-                  [["↑", "↓"], "move"],
-                  [["↵"], "add"],
+                  [["↑", "↓"], t("move")],
+                  [["↵"], t("add")],
                 ]}
-                screenReaderText="Up and down arrows move, Enter adds"
+                screenReaderText={t("keysHelp")}
               />
             </div>
           )}

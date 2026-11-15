@@ -2,6 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { HTTPError } from "ky";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,25 +22,19 @@ import {
   NOTE_LOCKS_KEY,
   useNoteLockSecrets,
 } from "../../hooks/use-note-lock";
-import { isValidPattern, isValidPin, PIN_HINT } from "../../note-lock";
+import { isValidPattern, isValidPin } from "../../note-lock";
 import type { NoteLockSecrets } from "../../types";
 import { PatternPad } from "./pattern-pad";
 
 type SecretKind = "pin" | "pattern";
 
-const NAME = { pin: "PIN", pattern: "pattern" } as const;
+type SecretT = ReturnType<typeof useTranslations<"noteEditor.lock.secret">>;
 
-function failureText(error: unknown, kind: SecretKind) {
+function failureText(error: unknown, kind: SecretKind, t: SecretT) {
   const status = error instanceof HTTPError ? error.response.status : 0;
-  if (status === 403)
-    return kind === "pin"
-      ? "That isn’t your current PIN or password."
-      : "That isn’t your current pattern or password.";
-  if (status === 400)
-    return kind === "pin" ? `A PIN is ${PIN_HINT}` : "Join at least 4 dots.";
-  return status
-    ? "Couldn’t save it. Try again in a moment."
-    : `Setting your ${NAME[kind]} needs a connection. Try again once you’re online.`;
+  if (status === 403) return t("currentWrong", { kind });
+  if (status === 400) return kind === "pin" ? t("pinRule") : t("joinDots");
+  return status ? t("saveFailed") : t("setupOffline", { kind });
 }
 
 /**
@@ -116,6 +111,8 @@ function PinForm({
   onClose: () => void;
   onSaved?: (s: NoteLockSecrets) => void;
 }) {
+  const t = useTranslations("noteEditor.lock.secret");
+  const tc = useTranslations("common");
   const { secrets, forgot, setForgot, canUsePassword } = useProof();
   const replacing = !!secrets.data?.pin;
   const [current, setCurrent] = React.useState("");
@@ -139,28 +136,28 @@ function PinForm({
       onSubmit={async (e) => {
         e.preventDefault();
         setFormError(null);
-        if (!isValidPin(pin)) return setPinError(`Use ${PIN_HINT}`);
-        if (pin !== again) return setAgainError("The PINs don’t match.");
+        if (!isValidPin(pin)) return setPinError(t("useRule"));
+        if (pin !== again) return setAgainError(t("pinsDiffer"));
         const error = await save({
           secret: pin,
           ...(replacing ? (forgot ? { password: current } : { current }) : {}),
         });
         if (!error) return;
         if (error instanceof HTTPError && error.response.status === 403)
-          setCurrentError(failureText(error, "pin"));
-        else setFormError(failureText(error, "pin"));
+          setCurrentError(failureText(error, "pin", t));
+        else setFormError(failureText(error, "pin", t));
       }}
     >
       <DialogHeader>
-        <DialogTitle>{replacing ? "Change your PIN" : "Set a PIN"}</DialogTitle>
-        <DialogDescription>
-          One PIN opens every note you lock with a PIN, here and on your phone.
-        </DialogDescription>
+        <DialogTitle>
+          {replacing ? t("changePinTitle") : t("setPinTitle")}
+        </DialogTitle>
+        <DialogDescription>{t("pinDescription")}</DialogDescription>
       </DialogHeader>
       <DialogBody>
         {replacing && (
           <Field
-            label={forgot ? "Account password" : "Current PIN"}
+            label={forgot ? t("accountPassword") : t("currentPin")}
             error={currentError}
             aside={
               canUsePassword && (
@@ -173,7 +170,7 @@ function PinForm({
                     setCurrentError(null);
                   }}
                 >
-                  {forgot ? "Use your PIN" : "Forgot?"}
+                  {forgot ? t("usePin") : t("forgot")}
                 </button>
               )
             }
@@ -205,7 +202,7 @@ function PinForm({
             )}
           </Field>
         )}
-        <Field label="New PIN" help={PIN_HINT} error={pinError}>
+        <Field label={t("newPin")} help={t("pinHelp")} error={pinError}>
           <Input
             autoFocus={!replacing}
             type="password"
@@ -220,7 +217,7 @@ function PinForm({
             }}
           />
         </Field>
-        <Field label="New PIN again" error={againError}>
+        <Field label={t("newPinAgain")} error={againError}>
           <Input
             type="password"
             inputMode="numeric"
@@ -238,14 +235,14 @@ function PinForm({
       </DialogBody>
       <DialogFooter>
         <Button variant="quiet" onClick={onClose} disabled={busy}>
-          Cancel
+          {tc("cancel")}
         </Button>
         <Button
           type="submit"
           disabled={!pin || !again || (replacing && !current)}
-          busy={busy && "Saving…"}
+          busy={busy && tc("saving")}
         >
-          {replacing ? "Change PIN" : "Set PIN"}
+          {replacing ? t("changePin") : t("setPin")}
         </Button>
       </DialogFooter>
     </form>
@@ -261,6 +258,8 @@ function PatternSteps({
   onClose: () => void;
   onSaved?: (s: NoteLockSecrets) => void;
 }) {
+  const t = useTranslations("noteEditor.lock.secret");
+  const tc = useTranslations("common");
   const { secrets, forgot, setForgot, canUsePassword } = useProof();
   const replacing = !!secrets.data?.pattern;
   const [step, setStep] = React.useState<PatternStep>(
@@ -280,7 +279,7 @@ function PatternSteps({
       ...(replacing ? (forgot ? { password: current } : { current }) : {}),
     });
     if (!failure) return true;
-    setError(failureText(failure, "pattern"));
+    setError(failureText(failure, "pattern", t));
     if (failure instanceof HTTPError && failure.response.status === 403) {
       setCurrent("");
       setDrawn("");
@@ -292,22 +291,19 @@ function PatternSteps({
   const prompt =
     step === "current"
       ? forgot
-        ? "Enter your account password."
-        : "Draw your current pattern."
+        ? t("enterPassword")
+        : t("drawCurrent")
       : step === "new"
-        ? "Draw a new pattern, joining at least 4 dots."
-        : "Draw it again to confirm.";
+        ? t("drawNew")
+        : t("drawConfirm");
 
   return (
     <>
       <DialogHeader>
         <DialogTitle>
-          {replacing ? "Change your pattern" : "Set a pattern"}
+          {replacing ? t("changePatternTitle") : t("setPatternTitle")}
         </DialogTitle>
-        <DialogDescription>
-          One pattern opens every note you lock with a pattern, here and on your
-          phone.
-        </DialogDescription>
+        <DialogDescription>{t("patternDescription")}</DialogDescription>
       </DialogHeader>
       <DialogBody className="justify-items-center">
         <p className="m-0 font-medium text-ui">{prompt}</p>
@@ -321,7 +317,7 @@ function PatternSteps({
               setStep("new");
             }}
           >
-            <Field label="Account password">
+            <Field label={t("accountPassword")}>
               <PasswordInput
                 autoFocus
                 autoComplete="current-password"
@@ -330,7 +326,7 @@ function PatternSteps({
               />
             </Field>
             <Button type="submit" disabled={!current}>
-              Next
+              {tc("next")}
             </Button>
           </form>
         ) : (
@@ -348,7 +344,7 @@ function PatternSteps({
                   secrets.data,
                 ).catch(() => null);
                 if (ok === false) {
-                  setError("That isn’t your current pattern.");
+                  setError(t("currentPatternWrong"));
                   return false;
                 }
                 setCurrent(pattern);
@@ -356,7 +352,7 @@ function PatternSteps({
                 return true;
               }
               if (!isValidPattern(pattern)) {
-                setError("Join at least 4 dots.");
+                setError(t("joinDots"));
                 return false;
               }
               if (step === "new") {
@@ -365,7 +361,7 @@ function PatternSteps({
                 return true;
               }
               if (pattern !== drawn) {
-                setError("That wasn’t the same pattern. Draw a new one.");
+                setError(t("patternsDiffer"));
                 setDrawn("");
                 setStep("new");
                 return false;
@@ -387,11 +383,11 @@ function PatternSteps({
               setError(null);
             }}
           >
-            {forgot ? "Use your pattern" : "Forgot?"}
+            {forgot ? t("usePattern") : t("forgot")}
           </Button>
         )}
         <Button variant="quiet" onClick={onClose} disabled={busy}>
-          Cancel
+          {tc("cancel")}
         </Button>
       </DialogFooter>
     </>

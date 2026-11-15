@@ -19,6 +19,7 @@ import 'features/reminders/data/reminder_background_check.dart';
 import 'features/reminders/data/reminder_scheduler.dart';
 import 'features/reminders/presentation/reminder_tap_handler.dart';
 import 'features/settings/presentation/editor_preferences_controller.dart';
+import 'features/settings/presentation/language_controller.dart';
 import 'features/settings/presentation/theme_preferences_controller.dart';
 import 'features/share_target/data/share_target_service.dart';
 import 'features/share_target/presentation/share_sheet_app.dart';
@@ -72,6 +73,7 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
     final scheme = ref.watch(colorSchemeControllerProvider);
     final style = ref.watch(appStyleControllerProvider);
     final customTheme = ref.watch(customThemeControllerProvider);
+    final language = ref.watch(appLanguageControllerProvider);
     final (font, textSize) = ref.watch(
       editorPreferencesControllerProvider.select(
         (editor) => (editor.noteFont, editor.noteTextSize),
@@ -129,6 +131,10 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
         FlutterQuillLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      // The language chosen in Settings, else the phone's.
+      locale: language == null
+          ? null
+          : appLocaleFor(preferredLocales(), AppLocalizations.supportedLocales),
       localeListResolutionCallback: appLocaleFor,
     );
   }

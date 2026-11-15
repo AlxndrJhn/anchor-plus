@@ -1,7 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { toast } from "@/components/ui/toast";
-import { plural } from "@/lib/utils";
 import { useApplyLock, useUnlockedIds } from "../../hooks/use-note-lock";
 import { lockableNotes } from "../../note-lock";
 import type { Note } from "../../types";
@@ -22,6 +22,7 @@ export function BulkLockDialog({
   onOpenChange: (open: boolean) => void;
   onDone: () => void;
 }) {
+  const t = useTranslations("noteEditor.lock.bulk");
   const applyLock = useApplyLock();
   const unlocked = useUnlockedIds();
   const { lockable, skipped } = lockableNotes(notes, unlocked);
@@ -35,18 +36,18 @@ export function BulkLockDialog({
       current={current}
       onLock={async (kind) => {
         if (!lockable.length) {
-          toast.info(
-            `${notes.length === 1 ? "That note is" : "Those notes are"} locked. Open ${notes.length === 1 ? "it" : "them"} to change the lock.`,
-          );
+          toast.info(t("alreadyLocked", { count: notes.length }));
           return;
         }
         await applyLock(lockable, kind);
         onDone();
-        const locked = `${plural(lockable.length, "note")} locked`;
         toast.success(
           skipped.length
-            ? `${locked}. ${plural(skipped.length, "locked note")} left as ${skipped.length === 1 ? "it was" : "they were"}: open ${skipped.length === 1 ? "it" : "them"} to change ${skipped.length === 1 ? "its" : "their"} lock.`
-            : locked,
+            ? t("lockedSkipped", {
+                count: lockable.length,
+                skipped: skipped.length,
+              })
+            : t("locked", { count: lockable.length }),
         );
       }}
     />

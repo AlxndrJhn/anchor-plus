@@ -11,6 +11,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { IconButton } from "@/components/ui/button";
 import { isMac } from "@/lib/platform";
@@ -69,12 +70,6 @@ const STEP: Record<Side, { x: number; y: number }> = {
   left: { x: -1, y: 0 },
 };
 
-const SHAPE_NAMES: Record<FlowShape, string> = {
-  box: "Step",
-  round: "Start or end",
-  diamond: "Decision",
-};
-
 const SHAPE_ICONS: Record<FlowShape, React.ReactNode> = {
   box: <Square />,
   round: <RectangleHorizontal />,
@@ -102,6 +97,8 @@ export const FlowchartEditor = React.forwardRef<
   FlowchartEditorHandle,
   { initial: Flowchart; onChange?: () => void }
 >(({ initial, onChange }, ref) => {
+  const t = useTranslations("editorMedia.flowchart");
+  const tc = useTranslations("common");
   const [chart, setChart] = React.useState(initial);
   const [past, setPast] = React.useState<Flowchart[]>([]);
   const [future, setFuture] = React.useState<Flowchart[]>([]);
@@ -274,8 +271,7 @@ export const FlowchartEditor = React.forwardRef<
       id: newFlowId(),
       x: snap(spot.x),
       y: snap(spot.y),
-      text:
-        shape === "diamond" ? "Decision" : shape === "round" ? "End" : "Step",
+      text: t(`newText.${shape}`),
       shape,
     };
     const link =
@@ -625,15 +621,13 @@ export const FlowchartEditor = React.forwardRef<
 
   return (
     <div className="fce">
-      <div className="fce-toolbar" role="toolbar" aria-label="Flowchart tools">
+      <div className="fce-toolbar" role="toolbar" aria-label={t("tools")}>
         {(["box", "diamond", "round"] as const).map((shape) => (
           <IconButton
             key={shape}
             size="sm"
-            label={`Add ${SHAPE_NAMES[shape].toLowerCase()}`}
-            title={`Add ${SHAPE_NAMES[shape].toLowerCase()}${
-              selectedNode ? " after the picked one" : ""
-            }`}
+            label={t(`add.${shape}`)}
+            title={selectedNode ? t(`addAfter.${shape}`) : t(`add.${shape}`)}
             onClick={() => addNode(shape)}
           >
             {SHAPE_ICONS[shape]}
@@ -642,18 +636,18 @@ export const FlowchartEditor = React.forwardRef<
         <span className="fce-divider" aria-hidden />
         {selectedNode && (
           <>
-            <fieldset className="fce-shapes" aria-label="Shape">
+            <fieldset className="fce-shapes" aria-label={t("shapeLabel")}>
               {(["box", "diamond", "round"] as const).map((shape) => (
                 <button
                   key={shape}
                   type="button"
                   className="fce-shape"
                   aria-pressed={selectedNode.shape === shape}
-                  title={`Make it a ${SHAPE_NAMES[shape].toLowerCase()}`}
+                  title={t(`makeIt.${shape}`)}
                   onClick={() => setShape(shape)}
                 >
                   {SHAPE_ICONS[shape]}
-                  <span>{SHAPE_NAMES[shape]}</span>
+                  <span>{t(`shape.${shape}`)}</span>
                 </button>
               ))}
             </fieldset>
@@ -663,8 +657,13 @@ export const FlowchartEditor = React.forwardRef<
         {selection && (
           <IconButton
             size="sm"
-            label={selection.kind === "node" ? "Delete box" : "Delete arrow"}
-            title={`${selection.kind === "node" ? "Delete box" : "Delete arrow"} (Delete)`}
+            label={
+              selection.kind === "node" ? t("deleteBox") : t("deleteArrow")
+            }
+            title={t("deleteWithKey", {
+              what:
+                selection.kind === "node" ? t("deleteBox") : t("deleteArrow"),
+            })}
             onClick={removeSelection}
           >
             <Trash2 />
@@ -673,8 +672,8 @@ export const FlowchartEditor = React.forwardRef<
         <span className="flex-1" />
         <IconButton
           size="sm"
-          label="Undo"
-          title={`Undo (${isMac() ? "⌘" : "Ctrl+"}Z)`}
+          label={tc("undo")}
+          title={t("undoWithKey", { key: `${isMac() ? "⌘" : "Ctrl+"}Z` })}
           disabled={!past.length}
           onClick={undo}
         >
@@ -682,8 +681,8 @@ export const FlowchartEditor = React.forwardRef<
         </IconButton>
         <IconButton
           size="sm"
-          label="Redo"
-          title={`Redo (${isMac() ? "⇧⌘Z" : "Ctrl+Y"})`}
+          label={tc("redo")}
+          title={t("redoWithKey", { key: isMac() ? "⇧⌘Z" : "Ctrl+Y" })}
           disabled={!future.length}
           onClick={redo}
         >
@@ -691,26 +690,21 @@ export const FlowchartEditor = React.forwardRef<
         </IconButton>
         <IconButton
           size="sm"
-          label="Zoom out"
-          title="Zoom out"
+          label={t("zoomOut")}
+          title={t("zoomOut")}
           onClick={() => zoomBy(1 / 1.2)}
         >
           <ZoomOut />
         </IconButton>
         <IconButton
           size="sm"
-          label="Zoom in"
-          title="Zoom in"
+          label={t("zoomIn")}
+          title={t("zoomIn")}
           onClick={() => zoomBy(1.2)}
         >
           <ZoomIn />
         </IconButton>
-        <IconButton
-          size="sm"
-          label="Show the whole chart"
-          title="Show the whole chart"
-          onClick={fit}
-        >
+        <IconButton size="sm" label={t("fit")} title={t("fit")} onClick={fit}>
           <Maximize />
         </IconButton>
       </div>
@@ -731,9 +725,10 @@ export const FlowchartEditor = React.forwardRef<
         onKeyDown={onKeyDown}
       >
         <p id={descriptionId} className="sr-only">
-          {chart.nodes.length} boxes, {chart.edges.length} arrows. Arrow keys
-          move the picked box, Enter writes in it, Tab adds a step after it,
-          Delete removes it.
+          {t("canvasHelp", {
+            boxes: chart.nodes.length,
+            arrows: chart.edges.length,
+          })}
         </p>
         <svg
           className="fce-svg"
@@ -894,9 +889,9 @@ export const FlowchartEditor = React.forwardRef<
             autoFocus
             className="fce-text-input"
             aria-label={
-              editing.kind === "node" ? "Text in the box" : "Text on the arrow"
+              editing.kind === "node" ? t("textInBox") : t("textOnArrow")
             }
-            placeholder={editing.kind === "edge" ? "Label" : undefined}
+            placeholder={editing.kind === "edge" ? t("edgeLabel") : undefined}
             style={{
               left: editingBox.left,
               top: editingBox.top,
