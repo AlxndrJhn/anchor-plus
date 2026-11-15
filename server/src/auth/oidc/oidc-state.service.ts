@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import type { OidcExchangeResult } from './oidc.types';
+import { PRIMARY_OIDC_PROVIDER_ID } from './oidc-providers';
 
 export interface OidcState {
   state: string;
@@ -7,6 +8,8 @@ export interface OidcState {
   redirectUrl?: string;
   /** Set when a signed-in person connects their account to the provider. */
   linkUserId?: string;
+  /** The provider the sign-in went to; its callback must be the one used. */
+  providerId: string;
   expiresAt: number;
 }
 
@@ -40,12 +43,14 @@ export class OidcStateService implements OnModuleDestroy {
     codeVerifier?: string,
     redirectUrl?: string,
     linkUserId?: string,
+    providerId: string = PRIMARY_OIDC_PROVIDER_ID,
   ): void {
     this.stateStore.set(state, {
       state,
       codeVerifier,
       redirectUrl,
       linkUserId,
+      providerId,
       expiresAt: Date.now() + this.STATE_EXPIRY_MS,
     });
   }

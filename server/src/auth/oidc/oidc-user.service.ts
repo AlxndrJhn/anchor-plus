@@ -13,7 +13,7 @@ import { fetchPublicUrl } from '../../common/utils/public-fetch.util';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UserStatus } from '../../generated/prisma/enums';
-import type { OidcUserClaims } from './oidc.types';
+import type { OidcIdentityKey, OidcUserClaims } from './oidc.types';
 import { OIDC_USER_SELECT } from './oidc.constants';
 import { StorageConfig } from '../../config/configuration';
 import { PUBLIC_PROFILES_PREFIX } from '../../config/storage.constants';
@@ -38,19 +38,52 @@ export class OidcUserService {
   ) {}
 
   /**
-   * Find or create user based on OIDC claims.
-   * Links to an existing account with the same email (no OIDC link yet) only
-   * when the provider says it verified that email. New accounts follow the
-   * sign-up mode, like password sign-up.
+   * The link for this provider account (issuer and subject). The first
+   * provider also claims a link from before there were several, which has no
+   * issuer yet, and fills its issuer in.
    */
-  async findOrCreateUser(claims: OidcUserClaims) {
+  private async findIdentity(
+    tx: Prisma.TransactionClient,
+    subject: string,
+    key: OidcIdentityKey,
+  ) {
+    const exact = await tx.oidcIdentity.findUnique({
+      where: { issuer_subject: { issuer: key.issuer, subject } },
+    });
+    if (exact || !key.isPrimary || key.issuer === '') return exact;
+    const legacy = await tx.oidcIdentity.findUnique({
+      where: { issuer_subject: { issuer: '', subject } },
+    });
+    if (!legacy) return null;
+    this.logger.log(`Claimed an earlier OIDC link for issuer ${key.issuer}`);
+    return tx.oidcIdentity.update({
+      where: { id: legacy.id },
+      data: { issuer: key.issuer },
+    });
+  }
+
+  /** The link is to this provider (or, for the first one, from before). */
+  private isSameProvider(issuer: string, key: OidcIdentityKey): boolean {
+    return issuer === key.issuer || (key.isPrimary && issuer === '');
+  }
+
+  /**
+   * Find or create user based on OIDC claims from one provider.
+   * Links to an existing account with the same email (not linked to this
+   * provider yet) only when the provider says it verified that email. New
+   * accounts follow the sign-up mode, like password sign-up.
+   */
+  async findOrCreateUser(claims: OidcUserClaims, key: OidcIdentityKey) {
     try {
       return await this.prisma.$transaction(
         async (tx) => {
-          const existingBySubject = await tx.user.findUnique({
-            where: { oidcSubject: claims.subject },
-            select: OIDC_USER_SELECT,
-          });
+          const identity = await this.findIdentity(tx, claims.subject, key);
+          const existingBySubject = identity
+            ? await tx.user.findUnique({
+                where: { id: identity.userId },
+                select: OIDC_USER_SELECT,
+              })
+            : null;
           if (existingBySubject) {
             const updateData: { name?: string; profileImage?: string | null } =
               {
@@ -76,36 +109,41 @@ export class OidcUserService {
 
           const existingByEmail = await tx.user.findUnique({
             where: { email: claims.email },
+            include: { oidcIdentities: { select: { issuer: true } } },
           });
           if (existingByEmail) {
             if (
-              existingByEmail.oidcSubject != null &&
-              existingByEmail.oidcSubject !== claims.subject
+              existingByEmail.oidcIdentities.some((link) =>
+                this.isSameProvider(link.issuer, key),
+              )
             ) {
               throw new ConflictException(
                 'This email is already linked to a different sign-in account.',
               );
             }
+            // Otherwise anyone who can put this email on an account at the
+            // provider would sign in as its owner here.
+            if (!claims.emailVerified) {
+              throw new ConflictException(
+                'An account with this email already exists. Your sign-in provider has not verified this email, so it can’t be linked.',
+              );
+            }
+            await tx.oidcIdentity.create({
+              data: {
+                userId: existingByEmail.id,
+                issuer: key.issuer,
+                subject: claims.subject,
+              },
+            });
+            this.logger.log(
+              `Linked OIDC subject to existing user: ${claims.email}`,
+            );
             const updateData: {
-              oidcSubject?: string;
               name?: string;
               profileImage?: string | null;
             } = {
               name: claims.name,
             };
-            if (!existingByEmail.oidcSubject) {
-              // Otherwise anyone who can put this email on an account at the
-              // provider would sign in as its owner here.
-              if (!claims.emailVerified) {
-                throw new ConflictException(
-                  'An account with this email already exists. Your sign-in provider has not verified this email, so it can’t be linked.',
-                );
-              }
-              updateData.oidcSubject = claims.subject;
-              this.logger.log(
-                `Linked OIDC subject to existing user: ${claims.email}`,
-              );
-            }
             const profileImage = await this.resolveProfileImage(
               claims.picture,
               existingByEmail.id,
@@ -124,7 +162,7 @@ export class OidcUserService {
             });
           }
 
-          return this.createUserInTx(tx, claims);
+          return this.createUserInTx(tx, claims, key);
         },
         { timeout: 10000 },
       );
@@ -140,12 +178,14 @@ export class OidcUserService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        const user = await this.prisma.user.findUnique({
-          where: { oidcSubject: claims.subject },
-          select: OIDC_USER_SELECT,
+        const identity = await this.prisma.oidcIdentity.findUnique({
+          where: {
+            issuer_subject: { issuer: key.issuer, subject: claims.subject },
+          },
+          select: { user: { select: OIDC_USER_SELECT } },
         });
-        if (user) {
-          return user;
+        if (identity) {
+          return identity.user;
         }
       }
       throw error;
@@ -156,35 +196,36 @@ export class OidcUserService {
    * Connect a signed-in person to the provider account they just signed in
    * with. Their email can differ, and needn't be verified: they proved both.
    */
-  async linkUser(userId: string, claims: OidcUserClaims) {
-    const holder = await this.prisma.user.findUnique({
-      where: { oidcSubject: claims.subject },
-      select: { id: true },
-    });
-    if (holder && holder.id !== userId) {
-      throw new ConflictException(
-        'That sign-in account is already connected to someone else here.',
-      );
-    }
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { oidcSubject: true },
-    });
-    if (!user) {
-      throw new ForbiddenException('User not found');
-    }
-    if (user.oidcSubject && user.oidcSubject !== claims.subject) {
-      throw new ConflictException(
-        'Your account is already connected to a different sign-in account.',
-      );
-    }
-    if (!user.oidcSubject) {
-      await this.prisma.user.update({
+  async linkUser(userId: string, claims: OidcUserClaims, key: OidcIdentityKey) {
+    await this.prisma.$transaction(async (tx) => {
+      const holder = await this.findIdentity(tx, claims.subject, key);
+      if (holder && holder.userId !== userId) {
+        throw new ConflictException(
+          'That sign-in account is already connected to someone else here.',
+        );
+      }
+      if (holder) return;
+      const user = await tx.user.findUnique({
         where: { id: userId },
-        data: { oidcSubject: claims.subject },
+        select: { oidcIdentities: { select: { issuer: true } } },
+      });
+      if (!user) {
+        throw new ForbiddenException('User not found');
+      }
+      if (
+        user.oidcIdentities.some((link) =>
+          this.isSameProvider(link.issuer, key),
+        )
+      ) {
+        throw new ConflictException(
+          'Your account is already connected to a different sign-in account.',
+        );
+      }
+      await tx.oidcIdentity.create({
+        data: { userId, issuer: key.issuer, subject: claims.subject },
       });
       this.logger.log(`Linked OIDC subject to signed-in user ${userId}`);
-    }
+    });
     return this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
       select: OIDC_USER_SELECT,
@@ -199,6 +240,7 @@ export class OidcUserService {
   private async createUserInTx(
     tx: Prisma.TransactionClient,
     claims: OidcUserClaims,
+    key: OidcIdentityKey,
   ) {
     const isFirstUser = (await tx.user.count()) === 0;
     const mode = await this.settingsService.getRegistrationMode();
@@ -221,7 +263,9 @@ export class OidcUserService {
         email: claims.email,
         name: claims.name,
         password: null,
-        oidcSubject: claims.subject,
+        oidcIdentities: {
+          create: { issuer: key.issuer, subject: claims.subject },
+        },
         isAdmin: adminCount === 0,
         status,
       },

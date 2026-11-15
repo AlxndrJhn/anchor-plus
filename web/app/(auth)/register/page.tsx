@@ -28,6 +28,7 @@ import {
   PendingApprovalScreen,
 } from "@/features/auth/components/auth-parts";
 import { serverSignInError } from "@/features/auth/utils/sign-in-error";
+import { signInProviders } from "@/features/auth/utils/sign-in-providers";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { focusOnArrival } from "@/lib/platform";
 
@@ -54,7 +55,11 @@ export default function RegisterPage() {
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
   const refs = { name: nameRef, email: emailRef, password: passwordRef };
-  const providerName = oidc.data?.providerName || tAuth("providerFallback");
+  const providers = signInProviders(oidc.data);
+  const providerName =
+    providers.length > 1
+      ? tAuth("providerAny")
+      : oidc.data?.providerName || tAuth("providerFallback");
   const isProviderOnly =
     !!oidc.data?.enabled && !!oidc.data?.disableInternalAuth;
 
@@ -146,17 +151,20 @@ export default function RegisterPage() {
           registrationMode.data?.mode === "review" ? t("reviewSub") : t("sub")
         }
       />
-      {oidc.data?.enabled && (
+      {providers.length > 0 && (
         <>
-          <Button
-            size="lg"
-            variant="secondary"
-            className="w-full"
-            onClick={() => initiate()}
-          >
-            <KeyRound aria-hidden />
-            {t("continueWith", { provider: providerName })}
-          </Button>
+          {providers.map((provider) => (
+            <Button
+              key={provider.id}
+              size="lg"
+              variant="secondary"
+              className="w-full"
+              onClick={() => initiate(undefined, provider.id)}
+            >
+              <KeyRound aria-hidden />
+              {t("continueWith", { provider: provider.name })}
+            </Button>
+          ))}
           {!isProviderOnly && <OrDivider />}
         </>
       )}

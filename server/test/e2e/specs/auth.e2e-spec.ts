@@ -184,6 +184,72 @@ describe('provider-only sign-in', () => {
     await user.http.get('/api/auth/me').expect(200);
   });
 
+  it('shows a sign-in button for each provider an admin adds', async () => {
+    await setOidc({ ...providerOnly, oidc_disable_internal_auth: 'false' });
+    await ctx.prisma.user.update({
+      where: { id: user.id },
+      data: { isAdmin: true },
+    });
+
+    const added = await user.http
+      .post('/api/admin/settings/oidc/providers')
+      .send({
+        id: 'work',
+        name: 'Work Keycloak',
+        issuerUrl: 'https://sso.e2e.test/realms/staff',
+        clientId: 'anchor-plus',
+        clientSecret: 'shh',
+      })
+      .expect(201);
+    const [work] = bodyOf<{
+      providers: {
+        id: string;
+        hasClientSecret: boolean;
+        callbackUrl: string;
+      }[];
+    }>(added).providers;
+    expect(work).toMatchObject({ id: 'work', hasClientSecret: true });
+    expect(work.callbackUrl).toMatch(/\/api\/auth\/oidc\/callback\/work$/);
+    await user.http
+      .post('/api/admin/settings/oidc/providers')
+      .send({
+        id: 'work',
+        issuerUrl: 'https://x.e2e.test',
+        clientId: 'x',
+      })
+      .expect(409);
+
+    const config = bodyOf<{
+      providers: { id: string; name: string; clientId: string }[];
+    }>(await request(ctx.http).get('/api/auth/oidc/config').expect(200));
+    expect(config).toMatchObject({ enabled: true, providerName: 'Pocket ID' });
+    expect(config.providers).toEqual([
+      expect.objectContaining({ id: 'default', name: 'Pocket ID' }),
+      expect.objectContaining({ id: 'work', clientId: 'anchor-plus' }),
+    ]);
+    // No secret reaches the sign-in page.
+    expect(JSON.stringify(config)).not.toContain('shh');
+
+    await request(ctx.http)
+      .get('/api/auth/oidc/initiate?provider=nope')
+      .expect(400);
+
+    await user.http
+      .patch('/api/admin/settings/oidc/providers/work')
+      .send({ enabled: false })
+      .expect(200);
+    await user.http
+      .delete('/api/admin/settings/oidc/providers/default')
+      .expect(403);
+    await user.http
+      .delete('/api/admin/settings/oidc/providers/work')
+      .expect(200);
+    const after = bodyOf<{ providers: { id: string }[] }>(
+      await request(ctx.http).get('/api/auth/oidc/config').expect(200),
+    );
+    expect(after.providers.map((p) => p.id)).toEqual(['default']);
+  });
+
   it('keeps password sign-in while the provider is not set up', async () => {
     await setOidc({ ...providerOnly, oidc_issuer_url: '' });
 

@@ -22,6 +22,28 @@ export interface OidcConfig {
   disableInternalAuth: boolean;
 }
 
+/** One sign-in provider, of the several there can be. */
+export interface OidcProvider {
+  /** Its slug, in its callback URL; "default" for the first. */
+  id: string;
+  name: string;
+  enabled: boolean;
+  issuerUrl?: string;
+  clientId?: string;
+  clientSecret?: string;
+  /** A separate public client for the phone app, which can't keep a secret. */
+  mobileClientId?: string;
+  source: 'env' | 'database';
+}
+
+/** Which provider account a sign-in came from, for linking it. */
+export interface OidcIdentityKey {
+  /** The provider's issuer, normalized (no trailing slash). */
+  issuer: string;
+  /** The first provider also claims the links made before there were more. */
+  isPrimary: boolean;
+}
+
 interface OidcUserPayload {
   id: string;
   email: string;

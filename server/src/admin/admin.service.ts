@@ -12,7 +12,15 @@ import {
   SecondFactorService,
 } from '../auth/second-factor.service';
 import { OidcClientService } from '../auth/oidc/oidc-client.service';
+import {
+  PRIMARY_OIDC_PROVIDER_ID,
+  normalizeIssuer,
+} from '../auth/oidc/oidc-providers';
 import { CreateUserDto } from './dto/create-user.dto';
+import type {
+  CreateOidcProviderDto,
+  UpdateOidcProviderDto,
+} from './dto/oidc-provider.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NoteState } from 'src/generated/prisma/enums';
 import { UserStatus } from 'src/generated/prisma/enums';
@@ -96,7 +104,7 @@ export class AdminService {
           status: true,
           plan: true,
           storageQuotaMb: true,
-          oidcSubject: true,
+          oidcIdentities: { select: { issuer: true } },
           createdAt: true,
           updatedAt: true,
           _count: {
@@ -117,11 +125,12 @@ export class AdminService {
     const usedBytes = await this.storageQuota.usedBytesByUser(
       users.map((user) => user.id),
     );
-    const usersWithAuthMethod = users.map(({ oidcSubject, ...rest }) => {
+    const providerName = await this.providerNamer();
+    const usersWithAuthMethod = users.map(({ oidcIdentities, ...rest }) => {
       const limitMb = this.storageQuota.limitMb(rest.plan, rest.storageQuotaMb);
       return {
         ...rest,
-        authMethod: oidcSubject ? ('oidc' as const) : ('local' as const),
+        ...this.authMethodOf(oidcIdentities, providerName),
         storage: {
           usedBytes: usedBytes.get(rest.id) ?? 0,
           limitBytes: limitMb === null ? null : limitMb * 1024 * 1024,
@@ -148,18 +157,45 @@ export class AdminService {
         profileImage: true,
         isAdmin: true,
         status: true,
-        oidcSubject: true,
+        oidcIdentities: { select: { issuer: true } },
         createdAt: true,
         updatedAt: true,
       },
     });
 
-    const usersWithAuthMethod = users.map(({ oidcSubject, ...rest }) => ({
+    const providerName = await this.providerNamer();
+    const usersWithAuthMethod = users.map(({ oidcIdentities, ...rest }) => ({
       ...rest,
-      authMethod: oidcSubject ? ('oidc' as const) : ('local' as const),
+      ...this.authMethodOf(oidcIdentities, providerName),
     }));
 
     return usersWithAuthMethod;
+  }
+
+  /** The name of the provider a linked issuer belongs to. */
+  private async providerNamer() {
+    const providers = await this.oidcConfigService.getProviders();
+    return (issuer: string) =>
+      providers.find((p) =>
+        issuer === ''
+          ? p.id === PRIMARY_OIDC_PROVIDER_ID
+          : !!p.issuerUrl && normalizeIssuer(p.issuerUrl) === issuer,
+      )?.name;
+  }
+
+  /** How someone signs in: with a password, or a provider (and which). */
+  private authMethodOf(
+    links: { issuer: string }[],
+    providerName: (issuer: string) => string | undefined,
+  ) {
+    if (links.length === 0) return { authMethod: 'local' as const };
+    const names = links
+      .map((link) => providerName(link.issuer))
+      .filter((name): name is string => !!name);
+    return {
+      authMethod: 'oidc' as const,
+      ...(names.length ? { authProvider: names.join(', ') } : {}),
+    };
   }
 
   async createUser(createUserDto: CreateUserDto) {
@@ -397,6 +433,22 @@ export class AdminService {
       toSet.clientSecret = '';
     }
     await this.oidcConfigService.setOidcSettings(toSet);
+    return this.oidcConfigService.getOidcSettings();
+  }
+
+  /** Adds a sign-in provider; answers with all the settings. */
+  async createOidcProvider({ id, ...input }: CreateOidcProviderDto) {
+    await this.oidcConfigService.createProvider(id, input);
+    return this.oidcConfigService.getOidcSettings();
+  }
+
+  async updateOidcProvider(id: string, input: UpdateOidcProviderDto) {
+    await this.oidcConfigService.updateProvider(id, input);
+    return this.oidcConfigService.getOidcSettings();
+  }
+
+  async deleteOidcProvider(id: string) {
+    await this.oidcConfigService.deleteProvider(id);
     return this.oidcConfigService.getOidcSettings();
   }
 

@@ -94,7 +94,12 @@ async function resetPassword(
 ) {
   const user = await prisma.user.findFirst({
     where: { email: { equals: email, mode: 'insensitive' } },
-    select: { id: true, email: true, status: true, oidcSubject: true },
+    select: {
+      id: true,
+      email: true,
+      status: true,
+      _count: { select: { oidcIdentities: true } },
+    },
   });
   if (!user) {
     throw new Error(
@@ -115,7 +120,7 @@ async function resetPassword(
       'The account is still waiting for approval; approve it in the admin panel before signing in.',
     );
   }
-  if (user.oidcSubject) {
+  if (user._count.oidcIdentities > 0) {
     console.log(
       'The account is also linked to single sign-on, which keeps working.',
     );

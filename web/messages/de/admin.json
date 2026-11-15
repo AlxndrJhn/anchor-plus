@@ -187,5 +187,31 @@
     "copyRequest": "Anfrage für den Admin von {provider} kopieren",
     "unsaved": "Du hast ungespeicherte Änderungen am Single Sign-on.",
     "discard": "Verwerfen"
+  },
+  "otherProviders": {
+    "title": "Weitere Anbieter",
+    "description": "Jeder bekommt eine eigene Schaltfläche „Weiter mit …“ und eine eigene Callback-URL. Ein Konto lässt sich mit mehreren verbinden.",
+    "addOne": "Anbieter hinzufügen",
+    "add": "Anbieter hinzufügen",
+    "added": "Anbieter hinzugefügt",
+    "saved": "Anbieter gespeichert",
+    "addFailed": "Anbieter konnte nicht hinzugefügt werden",
+    "saveFailed": "Anbieter konnte nicht gespeichert werden",
+    "removed": "Anbieter entfernt",
+    "removeFailed": "Anbieter konnte nicht entfernt werden",
+    "removing": "Wird entfernt…",
+    "idInvalid": "Verwende Kleinbuchstaben, Ziffern und Bindestriche, höchstens 32 Zeichen.",
+    "idTaken": "Ein anderer Anbieter hat diese ID.",
+    "namePlaceholder": "Keycloak der Firma",
+    "id": "ID",
+    "idHelpNew": "Steht in der Callback-URL und lässt sich später nicht ändern.",
+    "idHelpFixed": "Lässt sich nicht ändern, da sie in der Callback-URL steht.",
+    "secretHelp": "Für einen öffentlichen Client leer lassen; den kann auch die Handy-App nutzen.",
+    "phoneClientIdHelp": "Ein öffentlicher Client nur für die Handy-App. Leer lassen, um die Client-ID zu nutzen.",
+    "showOnSignIn": "Auf der Anmeldeseite zeigen",
+    "fromServer": "Auf dem Server festgelegt",
+    "callbackUrl": "Callback-URL für {provider}",
+    "removeTitle": "{provider} entfernen?",
+    "removeDescription": "Die Schaltfläche verschwindet von der Anmeldeseite. Verbundene Konten bleiben verbunden und melden sich wieder damit an, wenn du den Anbieter mit derselben Issuer-URL erneut hinzufügst."
   }
 }

@@ -15,6 +15,7 @@ import '../../../core/widgets/page_heading.dart';
 import '../../../l10n/l10n.dart';
 import '../../server/presentation/server_link.dart';
 import '../domain/auth_failure.dart';
+import '../domain/oidc_config.dart';
 import '../domain/registration_mode.dart';
 import 'auth_controller.dart';
 import 'auth_error_message.dart';
@@ -104,9 +105,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with FormSubmit {
     );
   }
 
-  Future<void> _signInWithProvider() => submit(
-    () => ref.read(authControllerProvider.notifier).loginWithOidc(),
-    tag: _SignInMethod.provider,
+  Future<void> _signInWithProvider(String providerId) => submit(
+    () => ref
+        .read(authControllerProvider.notifier)
+        .loginWithOidc(providerId: providerId),
+    tag: (_SignInMethod.provider, providerId),
     onFailure: _failed,
   );
 
@@ -123,23 +126,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with FormSubmit {
     final oidc = ref.watch(oidcConfigProvider).value;
     final registration = ref.watch(registrationModeProvider).value;
     final hasPasswords = oidc == null || !oidc.disableInternalAuth;
-    final provider = oidc?.enabled == true ? oidc!.providerName : null;
+    final providers = oidc?.signInProviders ?? const <OidcProviderOption>[];
     final density = context.density;
     final l10n = context.l10n;
 
-    final providerButton = provider == null
-        ? null
-        : AppButton(
-            label: l10n.authContinueWith(provider),
-            busyLabel: l10n.authOpeningProvider(provider),
-            isBusy: isSubmitting(_SignInMethod.provider),
-            icon: LucideIcons.keyRound,
-            kind: hasPasswords
-                ? AppButtonKind.secondary
-                : AppButtonKind.primary,
-            hasShadow: !hasPasswords,
-            onPressed: isBusy ? null : _signInWithProvider,
-          );
+    // Without passwords the first provider takes the main button's place.
+    Widget providerButton(OidcProviderOption provider, {bool isMain = false}) =>
+        AppButton(
+          label: l10n.authContinueWith(provider.name),
+          busyLabel: l10n.authOpeningProvider(provider.name),
+          isBusy: isSubmitting((_SignInMethod.provider, provider.id)),
+          icon: LucideIcons.keyRound,
+          kind: isMain ? AppButtonKind.primary : AppButtonKind.secondary,
+          hasShadow: isMain,
+          onPressed: isBusy ? null : () => _signInWithProvider(provider.id),
+        );
+    final listedProviders = hasPasswords ? providers : providers.skip(1);
 
     return FormPage(
       title: l10n.authSignIn,
@@ -154,7 +156,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with FormSubmit {
               hasShadow: true,
               onPressed: isBusy ? null : _signIn,
             )
-          : providerButton,
+          : providers.isEmpty
+          ? null
+          : providerButton(providers.first, isMain: true),
       children: [
         PageHeading(
           title: l10n.authWelcomeBack,
@@ -175,13 +179,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with FormSubmit {
           errorMessage: errorMessage,
           offlineText: l10n.authOfflineSignIn,
         ),
-        if (providerButton != null && hasPasswords) ...[
+        if (listedProviders.isNotEmpty) ...[
           SizedBox(height: density.space8),
-          providerButton,
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: density.space16),
-            child: const OrDivider(),
-          ),
+          for (final (index, provider) in listedProviders.indexed) ...[
+            if (index > 0) SizedBox(height: density.space8),
+            providerButton(provider),
+          ],
+          if (hasPasswords)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: density.space16),
+              child: const OrDivider(),
+            ),
         ],
         if (hasPasswords) ...[
           AutofillGroup(

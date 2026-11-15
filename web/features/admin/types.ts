@@ -15,6 +15,8 @@ export interface AdminUser {
   isAdmin: boolean;
   status: "active" | "pending";
   authMethod?: "oidc" | "local";
+  /** The single sign-on providers it's linked to, by name. */
+  authProvider?: string;
   plan?: Plan;
   /** The admin's own storage limit in MB; null follows the plan. */
   storageQuotaMb?: number | null;
@@ -77,6 +79,36 @@ export interface OidcSettings {
   disableInternalAuth: boolean;
   isLocked: boolean;
   source: "env" | "database" | "default";
+  /** The providers after the first; missing from older servers. */
+  providers?: OidcProviderSettings[];
+}
+
+/** A provider after the first, set on the server or added here. */
+export interface OidcProviderSettings {
+  id: string;
+  name: string;
+  enabled: boolean;
+  issuerUrl?: string;
+  clientId?: string;
+  hasClientSecret: boolean;
+  mobileClientId?: string;
+  callbackUrl: string;
+  /** "env" ones are set on the server and can't be changed here. */
+  source: "env" | "database";
+}
+
+export interface UpdateOidcProviderDto {
+  name?: string;
+  enabled?: boolean;
+  issuerUrl?: string;
+  clientId?: string;
+  /** Empty clears it; left out keeps it. */
+  clientSecret?: string;
+  mobileClientId?: string;
+}
+
+export interface CreateOidcProviderDto extends UpdateOidcProviderDto {
+  id: string;
 }
 
 export type OidcIssuerTest =

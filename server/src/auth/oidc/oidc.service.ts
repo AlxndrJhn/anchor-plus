@@ -15,8 +15,13 @@ import { OidcClientService } from './oidc-client.service';
 import { OidcStateService } from './oidc-state.service';
 import { OidcUserService } from './oidc-user.service';
 import { UserStatus } from '../../generated/prisma/enums';
-import type { OidcAuthResult, OidcUserClaims } from './oidc.types';
+import type {
+  OidcAuthResult,
+  OidcIdentityKey,
+  OidcUserClaims,
+} from './oidc.types';
 import { getErrorMessage } from './oidc.utils';
+import { PRIMARY_OIDC_PROVIDER_ID, normalizeIssuer } from './oidc-providers';
 
 export type { OidcAuthResult } from './oidc.types';
 
@@ -38,7 +43,9 @@ export class OidcService {
   async getAuthorizationUrl(
     redirectUrl?: string,
     linkUserId?: string,
+    providerId: string = PRIMARY_OIDC_PROVIDER_ID,
   ): Promise<string> {
+    await this.requireProvider(providerId);
     const validatedRedirect = this.validateRedirectUrl(redirectUrl);
 
     // Generate state for CSRF protection
@@ -53,13 +60,39 @@ export class OidcService {
       pkce.codeVerifier,
       validatedRedirect,
       linkUserId,
+      providerId,
     );
 
     // Build authorization URL
     return this.oidcClientService.buildAuthorizationUrl(
       state,
       pkce.codeChallenge,
+      providerId,
     );
+  }
+
+  /** A provider people can sign in with, or a 400 naming the problem. */
+  private async requireProvider(providerId: string) {
+    const provider = await this.oidcConfigService.getProvider(providerId);
+    if (!provider?.issuerUrl) {
+      throw new BadRequestException(
+        (await this.oidcConfigService.isEnabled())
+          ? 'Unknown sign-in provider'
+          : 'OIDC is not enabled',
+      );
+    }
+    return { ...provider, issuerUrl: provider.issuerUrl };
+  }
+
+  /** How accounts are linked to this provider. */
+  private identityKey(provider: {
+    id: string;
+    issuerUrl: string;
+  }): OidcIdentityKey {
+    return {
+      issuer: normalizeIssuer(provider.issuerUrl),
+      isPrimary: provider.id === PRIMARY_OIDC_PROVIDER_ID,
+    };
   }
 
   /** The state belongs to a signed-in person connecting their account. */
@@ -73,8 +106,10 @@ export class OidcService {
   async handleCallback(
     callbackUrl: string,
     stateFromProvider: string,
+    providerId: string = PRIMARY_OIDC_PROVIDER_ID,
   ): Promise<OidcAuthResult | { linked: true }> {
-    // Retrieve and validate state
+    // Retrieve and validate state. It must come back to the callback of the
+    // provider it was sent to, so one provider can't answer for another.
     const storedState = this.oidcStateService.getState(stateFromProvider);
     if (!storedState) {
       throw new BadRequestException('Invalid or expired state');
@@ -82,8 +117,13 @@ export class OidcService {
 
     // Clean up state immediately after validation
     this.oidcStateService.deleteState(stateFromProvider);
+    if (storedState.providerId !== providerId) {
+      throw new BadRequestException('Invalid or expired state');
+    }
 
     try {
+      const provider = await this.requireProvider(providerId);
+
       // Parse callback URL
       const callbackUrlObj = new URL(callbackUrl);
 
@@ -92,6 +132,7 @@ export class OidcService {
         callbackUrlObj,
         storedState.state,
         storedState.codeVerifier,
+        providerId,
       );
 
       // Fetch user info (pass subject from ID token when available for OpenID spec validation)
@@ -102,20 +143,29 @@ export class OidcService {
         ? await this.oidcClientService.fetchUserInfo(
             tokenResponse.access_token,
             expectedSubject,
+            providerId,
           )
         : null;
 
       // Extract user claims from token response and userinfo
       const claims = this.extractUserClaims(tokenResponse, userinfo);
+      const identity = this.identityKey(provider);
 
       // A signed-in person connecting their account keeps their session.
       if (storedState.linkUserId) {
-        await this.oidcUserService.linkUser(storedState.linkUserId, claims);
+        await this.oidcUserService.linkUser(
+          storedState.linkUserId,
+          claims,
+          identity,
+        );
         return { linked: true };
       }
 
       // Find or create user (auto-links by email when match found)
-      const user = await this.oidcUserService.findOrCreateUser(claims);
+      const user = await this.oidcUserService.findOrCreateUser(
+        claims,
+        identity,
+      );
 
       // Check if user is pending approval
       if (user.status === UserStatus.pending) {
@@ -199,8 +249,16 @@ export class OidcService {
   /**
    * Exchange mobile IdP access token for app tokens.
    */
-  async exchangeMobileToken(accessToken: string): Promise<OidcAuthResult> {
-    const userinfo = await this.oidcClientService.fetchUserInfo(accessToken);
+  async exchangeMobileToken(
+    accessToken: string,
+    providerId: string = PRIMARY_OIDC_PROVIDER_ID,
+  ): Promise<OidcAuthResult> {
+    const provider = await this.requireProvider(providerId);
+    const userinfo = await this.oidcClientService.fetchUserInfo(
+      accessToken,
+      undefined,
+      providerId,
+    );
     if (!userinfo) {
       throw new UnauthorizedException(
         'Invalid or expired OIDC token. Please sign in again.',
@@ -212,7 +270,10 @@ export class OidcService {
     } as unknown as TokenEndpointResponse;
     const claims = this.extractUserClaims(emptyTokenResponse, userinfo);
 
-    const user = await this.oidcUserService.findOrCreateUser(claims);
+    const user = await this.oidcUserService.findOrCreateUser(
+      claims,
+      this.identityKey(provider),
+    );
 
     if (user.status === UserStatus.pending) {
       throw new UnauthorizedException(

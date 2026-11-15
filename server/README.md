@@ -101,11 +101,13 @@ go in `test/` and are reused across specs.
 
 ### OIDC Authentication
 
-- `GET /api/auth/oidc/config` - Get OIDC configuration (public)
-- `GET /api/auth/oidc/initiate` - Initiate OIDC login flow (redirects to provider)
-- `GET /api/auth/oidc/callback` - OIDC callback (handles provider redirect)
+- `GET /api/auth/oidc/config` - Get OIDC configuration (public): the first provider's fields, and `providers`, one entry per provider that's on
+- `GET /api/auth/oidc/initiate` - Initiate OIDC login flow (redirects to provider; `?provider=<id>`, the first when left out)
+- `GET /api/auth/oidc/callback` - The first provider's OIDC callback (handles provider redirect)
+- `GET /api/auth/oidc/callback/:provider` - Another provider's OIDC callback
+- `POST /api/auth/oidc/link` - Connect the signed-in account to a provider (`{ provider }`, the first when left out)
 - `POST /api/auth/oidc/exchange` - Exchange one-time code for tokens (web)
-- `POST /api/auth/oidc/exchange/mobile` - Exchange IdP access token for app tokens (mobile)
+- `POST /api/auth/oidc/exchange/mobile` - Exchange IdP access token for app tokens (mobile; `{ access_token, provider }`)
 
 ### Notes
 
@@ -162,7 +164,10 @@ go in `test/` and are reused across specs.
 - `GET /api/admin/settings/registration` - Get registration settings
 - `PATCH /api/admin/settings/registration` - Update registration mode (disabled if locked by env)
 - `GET /api/admin/settings/oidc` - Get OIDC settings
-- `PATCH /api/admin/settings/oidc` - Update OIDC settings (disabled if locked by env)
+- `PATCH /api/admin/settings/oidc` - Update the first provider's OIDC settings (disabled if locked by env)
+- `POST /api/admin/settings/oidc/providers` - Add another OIDC provider
+- `PATCH /api/admin/settings/oidc/providers/:id` - Change a provider added in the admin UI
+- `DELETE /api/admin/settings/oidc/providers/:id` - Remove a provider added in the admin UI
 - `GET /api/admin/users` - Get all users (supports `?skip=n` and `?take=n`)
 - `GET /api/admin/users/pending` - Get pending users awaiting approval
 - `POST /api/admin/users` - Create a new user

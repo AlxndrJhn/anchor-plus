@@ -20,6 +20,7 @@ import {
   ClientSecretPost,
 } from 'openid-client';
 import { OidcConfigService } from './oidc-config.service';
+import { PRIMARY_OIDC_PROVIDER_ID } from './oidc-providers';
 
 /**
  * Client auth for public clients (no secret).
@@ -46,19 +47,22 @@ export class OidcClientService {
   constructor(private readonly oidcConfigService: OidcConfigService) {}
 
   /**
-   * Get OIDC client configuration via OpenID discovery.
+   * Get a provider's OIDC client configuration via OpenID discovery.
    */
-  async getConfiguration(): Promise<Configuration> {
-    const oidcConfig = await this.oidcConfigService.getConfig();
-    if (!oidcConfig.enabled || !oidcConfig.issuerUrl || !oidcConfig.clientId) {
+  async getConfiguration(
+    providerId: string = PRIMARY_OIDC_PROVIDER_ID,
+  ): Promise<Configuration> {
+    const provider = await this.oidcConfigService.getProvider(providerId);
+    if (!provider?.issuerUrl || !provider.clientId) {
       throw new InternalServerErrorException('OIDC is not properly configured');
     }
 
     try {
       return await this.discover(
-        oidcConfig.issuerUrl,
-        oidcConfig.clientId,
-        oidcConfig.clientSecret,
+        provider.issuerUrl,
+        provider.clientId,
+        provider.clientSecret,
+        this.oidcConfigService.getOidcCallbackUrl(providerId),
       );
     } catch (error) {
       this.logger.error('Failed to initialize OIDC configuration:', error);
@@ -68,7 +72,12 @@ export class OidcClientService {
     }
   }
 
-  private discover(issuerUrl: string, clientId: string, clientSecret?: string) {
+  private discover(
+    issuerUrl: string,
+    clientId: string,
+    clientSecret?: string,
+    callbackUrl = this.oidcConfigService.getOidcCallbackUrl(),
+  ) {
     const issuer = new URL(issuerUrl);
     const clientAuth = clientSecret
       ? ClientSecretPost(clientSecret)
@@ -77,7 +86,7 @@ export class OidcClientService {
       issuer,
       clientId,
       {
-        redirect_uris: [this.getCallbackUrl()],
+        redirect_uris: [callbackUrl],
         response_types: ['code'],
       },
       clientAuth,
@@ -160,11 +169,12 @@ export class OidcClientService {
   async buildAuthorizationUrl(
     state: string,
     codeChallenge?: string,
+    providerId: string = PRIMARY_OIDC_PROVIDER_ID,
   ): Promise<string> {
-    const config = await this.getConfiguration();
+    const config = await this.getConfiguration(providerId);
 
     const params: Record<string, string> = {
-      redirect_uri: this.getCallbackUrl(),
+      redirect_uri: this.oidcConfigService.getOidcCallbackUrl(providerId),
       response_type: 'code',
       scope: 'openid email profile',
       state,
@@ -186,8 +196,9 @@ export class OidcClientService {
     callbackUrl: URL,
     expectedState: string,
     codeVerifier?: string,
+    providerId: string = PRIMARY_OIDC_PROVIDER_ID,
   ): Promise<TokenEndpointResponse> {
-    const config = await this.getConfiguration();
+    const config = await this.getConfiguration(providerId);
 
     const checks: { expectedState: string; pkceCodeVerifier?: string } = {
       expectedState,
@@ -206,9 +217,10 @@ export class OidcClientService {
   async fetchUserInfo(
     accessToken: string,
     expectedSubject?: string,
+    providerId: string = PRIMARY_OIDC_PROVIDER_ID,
   ): Promise<UserInfoResponse | null> {
     try {
-      const config = await this.getConfiguration();
+      const config = await this.getConfiguration(providerId);
       return await fetchUserInfo(
         config,
         accessToken,
@@ -237,12 +249,5 @@ export class OidcClientService {
    */
   generateState(): string {
     return randomState();
-  }
-
-  /**
-   * Get callback URL
-   */
-  private getCallbackUrl(): string {
-    return this.oidcConfigService.getOidcCallbackUrl();
   }
 }

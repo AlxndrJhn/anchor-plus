@@ -157,11 +157,16 @@ export class PasskeyService implements OnModuleDestroy {
     await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({
         where: { id: userId },
-        select: { passwordSignIn: true, password: true, oidcSubject: true },
+        select: {
+          passwordSignIn: true,
+          password: true,
+          _count: { select: { oidcIdentities: true } },
+        },
       });
       const count = await tx.passkey.count({ where: { userId } });
       const otherWayIn =
-        (user?.password && user.passwordSignIn) || user?.oidcSubject;
+        (user?.password && user.passwordSignIn) ||
+        !!user?._count.oidcIdentities;
       if (count <= 1 && !otherWayIn)
         throw new BadRequestException(
           'Turn password sign-in back on before removing your last passkey',

@@ -46,6 +46,10 @@ import { useOidcConfig } from "@/features/auth/hooks/use-oidc";
 import { useAuthStore } from "@/features/auth/store";
 import type { Passkey } from "@/features/auth/types";
 import { isPasskeyCancelled } from "@/features/auth/utils/sign-in-error";
+import {
+  isLinkedTo,
+  signInProviders,
+} from "@/features/auth/utils/sign-in-providers";
 import { copyText } from "@/lib/clipboard";
 import { useRetry } from "@/lib/hooks/use-retry";
 import { dateLocale, translate } from "@/lib/i18n";
@@ -152,8 +156,7 @@ export function SecuritySection() {
   });
 
   const oidc = useOidcConfig();
-  const providerTitle = oidc.data?.providerName || t("providerTitle");
-  const provider = oidc.data?.providerName || t("providerFallback");
+  const providers = signInProviders(oidc.data);
   const link = useMutation({
     mutationFn: startProviderLink,
     onSuccess: (url) => {
@@ -206,28 +209,34 @@ export function SecuritySection() {
         </Row>
       ) : (
         <>
-          {oidc.data?.enabled && (
-            <Row>
-              <RowText
-                title={providerTitle}
-                text={
-                  status.providerLinked
-                    ? t("providerLinked", { provider })
-                    : t("providerLink", { provider })
-                }
-              />
-              {!status.providerLinked && (
-                <Button
-                  variant="secondary"
-                  onClick={() => link.mutate()}
-                  busy={(link.isPending || link.isSuccess) && t("opening")}
-                >
-                  <KeyRound aria-hidden />
-                  {t("connect")}
-                </Button>
-              )}
-            </Row>
-          )}
+          {providers.map((provider) => {
+            const linked = isLinkedTo(status, provider.id);
+            const opening =
+              (link.isPending || link.isSuccess) &&
+              link.variables === provider.id;
+            return (
+              <Row key={provider.id}>
+                <RowText
+                  title={provider.name}
+                  text={
+                    linked
+                      ? t("providerLinked", { provider: provider.name })
+                      : t("providerLink", { provider: provider.name })
+                  }
+                />
+                {!linked && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => link.mutate(provider.id)}
+                    busy={opening && t("opening")}
+                  >
+                    <KeyRound aria-hidden />
+                    {t("connect")}
+                  </Button>
+                )}
+              </Row>
+            );
+          })}
           <Row>
             <RowText
               title={t("passkeys")}

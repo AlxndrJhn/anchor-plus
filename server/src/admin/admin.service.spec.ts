@@ -12,6 +12,18 @@ const noQuota = {
   limitMb: () => null,
 } as unknown as StorageQuotaService;
 
+const oidcConfig = {
+  getProviders: () =>
+    Promise.resolve([
+      {
+        id: 'default',
+        name: 'Pocket ID',
+        issuerUrl: 'https://id.example.com/',
+      },
+      { id: 'work', name: 'Work', issuerUrl: 'https://sso.example.org' },
+    ]),
+} as unknown as OidcConfigService;
+
 describe('AdminService.findUsers', () => {
   let findMany: ReturnType<typeof vi.fn>;
   let count: ReturnType<typeof vi.fn>;
@@ -23,14 +35,14 @@ describe('AdminService.findUsers', () => {
         id: 'u1',
         email: 'sam@example.com',
         name: 'Sam',
-        oidcSubject: 'sub-1',
+        oidcIdentities: [{ issuer: 'https://id.example.com' }],
       },
     ]);
     count = vi.fn().mockResolvedValue(7);
     service = new AdminService(
       { user: { findMany, count } } as unknown as PrismaService,
       {} as SettingsService,
-      {} as OidcConfigService,
+      oidcConfig,
       {} as SecondFactorService,
       {} as OidcClientService,
       noQuota,
@@ -47,7 +59,11 @@ describe('AdminService.findUsers', () => {
     });
     expect(count).toHaveBeenCalledWith({ where: {} });
     expect(page).toMatchObject({ total: 7, skip: 0, take: 50 });
-    expect(page.users[0]).toMatchObject({ id: 'u1', authMethod: 'oidc' });
+    expect(page.users[0]).toMatchObject({
+      id: 'u1',
+      authMethod: 'oidc',
+      authProvider: 'Pocket ID',
+    });
   });
 
   it('matches the name or email in any case, and counts only matches', async () => {
@@ -71,7 +87,7 @@ describe('AdminService.findUsers', () => {
         email: 'sam@example.com',
         name: 'Sam',
         profileImage: '/uploads/profiles/u1.jpg',
-        oidcSubject: null,
+        oidcIdentities: [],
       },
     ]);
 
@@ -110,13 +126,13 @@ describe('AdminService.getPendingUsers', () => {
         email: 'ana@example.com',
         name: 'Ana',
         profileImage: '/uploads/profiles/u2.png',
-        oidcSubject: 'sub-2',
+        oidcIdentities: [{ issuer: '' }],
       },
     ]);
     const service = new AdminService(
       { user: { findMany } } as unknown as PrismaService,
       {} as SettingsService,
-      {} as OidcConfigService,
+      oidcConfig,
       {} as SecondFactorService,
       {} as OidcClientService,
       noQuota,
@@ -135,6 +151,8 @@ describe('AdminService.getPendingUsers', () => {
         name: 'Ana',
         profileImage: '/uploads/profiles/u2.png',
         authMethod: 'oidc',
+        // Linked before there were several providers: the first one's.
+        authProvider: 'Pocket ID',
       },
     ]);
   });

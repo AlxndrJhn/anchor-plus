@@ -187,5 +187,31 @@
     "copyRequest": "Copy a request for your {provider} admin",
     "unsaved": "You have unsaved changes to single sign-on.",
     "discard": "Discard"
+  },
+  "otherProviders": {
+    "title": "More providers",
+    "description": "Each gets its own “Continue with …” button and callback URL. People can connect one account to several.",
+    "addOne": "Add a provider",
+    "add": "Add provider",
+    "added": "Provider added",
+    "saved": "Provider saved",
+    "addFailed": "Couldn’t add the provider",
+    "saveFailed": "Couldn’t save the provider",
+    "removed": "Provider removed",
+    "removeFailed": "Couldn’t remove the provider",
+    "removing": "Removing…",
+    "idInvalid": "Use lowercase letters, numbers and dashes, up to 32 of them.",
+    "idTaken": "Another provider has this ID.",
+    "namePlaceholder": "Work Keycloak",
+    "id": "ID",
+    "idHelpNew": "Goes in its callback URL, so it can’t change later.",
+    "idHelpFixed": "Can’t change, as it’s in the callback URL.",
+    "secretHelp": "Leave empty for a public client, which the phone app can use too.",
+    "phoneClientIdHelp": "A public client just for the phone app. Leave empty to use the client ID.",
+    "showOnSignIn": "Show on the sign-in page",
+    "fromServer": "Set on the server",
+    "callbackUrl": "{provider} callback URL",
+    "removeTitle": "Remove {provider}?",
+    "removeDescription": "Its button leaves the sign-in page. Accounts connected to it stay connected, and sign in with it again if you add it back with the same issuer URL."
   }
 }

@@ -21,7 +21,7 @@ export interface SecondFactorPolicy {
 const PASSWORD_ONLY = {
   password: { not: null },
   totpSecret: null,
-  oidcSubject: null,
+  oidcIdentities: { none: {} },
   passkeys: { none: {} },
 } as const;
 
@@ -113,8 +113,7 @@ export class SecondFactorService {
       where: { id: userId },
       select: {
         totpSecret: true,
-        oidcSubject: true,
-        _count: { select: { passkeys: true } },
+        _count: { select: { passkeys: true, oidcIdentities: true } },
       },
     });
     if (!user || user.totpSecret) return;
@@ -122,7 +121,7 @@ export class SecondFactorService {
       throw new ForbiddenException(
         'A password alone no longer signs you in. Sign in with your passkey.',
       );
-    if (user.oidcSubject)
+    if (user._count.oidcIdentities > 0)
       throw new ForbiddenException(
         'A password alone no longer signs you in. Sign in with your sign-in provider.',
       );
