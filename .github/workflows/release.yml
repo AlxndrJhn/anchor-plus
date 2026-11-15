@@ -7,8 +7,9 @@ name: Release
 # (pages.yml). Only what changed since the last release is built: a release
 # whose Android app, server or desktop app didn't change has no APKs, new
 # image or installers, and the apps only update to releases that have theirs.
-# The APKs also go to the F-Droid repositories on Pages (pages.yml), and a
-# new Windows installer to winget (the winget job).
+# The APKs also go to the F-Droid repositories on Pages (pages.yml). With
+# "winget" ticked, a new Windows installer is also sent to winget (the winget
+# job); it is off by default, so no pull request is opened there unasked.
 #
 # With "candidate" ticked (`gh workflow run release.yml --ref main -f
 # candidate=true`) it is a release candidate instead: a GitHub prerelease,
@@ -37,6 +38,10 @@ on:
         default: false
       bridge:
         description: Also publish under the old fork- tag and APK names, for apps installed before the rename
+        type: boolean
+        default: false
+      winget:
+        description: Also send the Windows installer to winget (opens a pull request on microsoft/winget-pkgs)
         type: boolean
         default: false
 
@@ -629,12 +634,13 @@ jobs:
   # opened from the WINGET_TOKEN owner's fork of it. Microsoft's checks and
   # reviewers merge it, and `winget install AlxndrJhn.AnchorPlus` (or
   # `winget upgrade`) then gets it. The first one adds the package. Without
-  # the secret (a classic token with public_repo) it is skipped. Candidates
-  # stay off winget, which has no previews.
+  # the secret (a classic token with public_repo) it is skipped. It only runs
+  # with the "winget" input ticked. Candidates stay off winget, which has no
+  # previews.
   winget:
     needs: [version, build-desktop, release]
     if: >-
-      github.ref == 'refs/heads/main' && !cancelled() &&
+      github.ref == 'refs/heads/main' && !cancelled() && inputs.winget &&
       needs.release.result == 'success' && needs.version.outputs.desktop == 'true' &&
       needs.version.outputs.candidate != 'true'
     runs-on: windows-latest

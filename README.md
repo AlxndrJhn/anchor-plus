@@ -695,8 +695,9 @@ Anchor+ in a folder you can write to, such as Applications; run from the disk
 image, the button opens the release page instead.
 
 Installed with winget, `winget upgrade AlxndrJhn.AnchorPlus` updates it too.
-Each release sends its Windows installer to winget, where it shows up once
-Microsoft's checks have passed, usually within a day.
+Releases published with "winget" ticked send their Windows installer to
+winget, where it shows up once Microsoft's checks have passed, usually within
+a day.
 
 Links to other websites open in your browser. To build it yourself:
 `cd web && pnpm install && pnpm build:local`, then
