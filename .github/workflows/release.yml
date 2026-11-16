@@ -285,6 +285,28 @@ jobs:
           name: anchor-plus-apk
           path: mobile/build/app/outputs/flutter-apk/anchor-plus*.apk
 
+      # The app bundle for Google Play, uploaded there by hand for now. Without
+      # RELEASE_BUILD and UPDATE_REPO the app doesn't update itself, and
+      # playStore leaves out the permission to install updates (Play doesn't
+      # allow either). Its build number is above every APK of the same
+      # release (2000 + build, plus up to 4000 for the processor type), so
+      # Play can update a phone that has the same release's APK installed.
+      - name: Build app bundle for Google Play
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          BUILD: ${{ needs.version.outputs.build }}
+          ORG_GRADLE_PROJECT_playStore: "true"
+        run: |
+          flutter build appbundle --release \
+            --build-name="$VERSION-g${GITHUB_SHA::7}" \
+            --build-number=$((7000 + BUILD))
+
+      - name: Upload app bundle artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: anchor-plus-play-aab
+          path: mobile/build/app/outputs/bundle/release/app-release.aab
+
   build-desktop:
     needs: version
     if: needs.version.outputs.desktop == 'true'

@@ -11,6 +11,11 @@ plugins {
 // others Anchor Notes. Every build is com.alxndrjhn.anchorplus.
 val isPlusBuild = (project.findProperty("anchorPlus") as String?) == "true"
 
+// Builds for Google Play (ORG_GRADLE_PROJECT_playStore=true) leave out the
+// permission to install the app's own updates: Play doesn't allow apps to
+// update themselves, and keeps them up to date itself.
+val isPlayBuild = (project.findProperty("playStore") as String?) == "true"
+
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
@@ -51,6 +56,10 @@ android {
             storeFile = keystoreProperties["storeFile"]?.let { file(it) }
             storePassword = keystoreProperties["storePassword"] as String?
         }
+    }
+
+    if (isPlayBuild) {
+        sourceSets.getByName("release").manifest.srcFile("src/play/AndroidManifest.xml")
     }
 
     buildTypes {

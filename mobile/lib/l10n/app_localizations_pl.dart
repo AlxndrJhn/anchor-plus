@@ -5012,4 +5012,77 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get scanFromGallery => 'Z galerii';
+
+  @override
+  String get settingsServer => 'Serwer';
+
+  @override
+  String get settingsServerAddresses => 'Adresy';
+
+  @override
+  String settingsServerAddressInUse(String address) {
+    return 'W użyciu: $address';
+  }
+
+  @override
+  String get serverAddressesTitle => 'Adresy serwera';
+
+  @override
+  String get serverAddressesOrder => 'Sprawdzane w tej kolejności';
+
+  @override
+  String get serverAddressesHelp =>
+      'Dodaj więcej adresów tego samego serwera, na przykład jego adres w domu i adres przez VPN na czas, gdy jesteś poza domem. Aplikacja sprawdza je po kolei i używa pierwszego, który odpowie. Twoje notatki i konto są takie same pod każdym adresem.';
+
+  @override
+  String get serverAddressesMain => 'Adres główny';
+
+  @override
+  String get serverAddressesInUse => 'W użyciu';
+
+  @override
+  String get serverAddressesMainInUse => 'Adres główny · W użyciu';
+
+  @override
+  String serverAddressesMoveUp(String address) {
+    return 'Przesuń $address w górę';
+  }
+
+  @override
+  String serverAddressesMoveDown(String address) {
+    return 'Przesuń $address w dół';
+  }
+
+  @override
+  String serverAddressesRemove(String address) {
+    return 'Usuń $address';
+  }
+
+  @override
+  String get serverAddressesAdd => 'Dodaj adres';
+
+  @override
+  String get serverAddressesAddHint => 'http://192.168.1.20:3000';
+
+  @override
+  String get serverAddressesAlreadyAdded => 'Ten adres jest już na liście';
+
+  @override
+  String get serverAddressesCheck => 'Sprawdź adresy teraz';
+
+  @override
+  String get serverAddressesChecking => 'Sprawdzanie…';
+
+  @override
+  String serverAddressesUsing(String address) {
+    return 'Używany: $address';
+  }
+
+  @override
+  String serverAddressesNoneAnswered(String address) {
+    return 'Żaden adres nie odpowiedział. Nadal używany: $address';
+  }
+
+  @override
+  String get serverAddressesNone => 'Brak połączonego serwera.';
 }

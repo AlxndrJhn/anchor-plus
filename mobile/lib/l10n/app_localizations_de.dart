@@ -4873,4 +4873,78 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get scanFromGallery => 'Aus Galerie';
+
+  @override
+  String get settingsServer => 'Server';
+
+  @override
+  String get settingsServerAddresses => 'Adressen';
+
+  @override
+  String settingsServerAddressInUse(String address) {
+    return 'Verwendet: $address';
+  }
+
+  @override
+  String get serverAddressesTitle => 'Serveradressen';
+
+  @override
+  String get serverAddressesOrder => 'In dieser Reihenfolge versucht';
+
+  @override
+  String get serverAddressesHelp =>
+      'Füge weitere Adressen für denselben Server hinzu, etwa seine Adresse zu Hause und eine über ein VPN für unterwegs. Die App versucht sie der Reihe nach und nimmt die erste, die antwortet. Deine Notizen und dein Konto sind unter jeder Adresse dieselben.';
+
+  @override
+  String get serverAddressesMain => 'Hauptadresse';
+
+  @override
+  String get serverAddressesInUse => 'Verwendet';
+
+  @override
+  String get serverAddressesMainInUse => 'Hauptadresse · Verwendet';
+
+  @override
+  String serverAddressesMoveUp(String address) {
+    return '$address nach oben';
+  }
+
+  @override
+  String serverAddressesMoveDown(String address) {
+    return '$address nach unten';
+  }
+
+  @override
+  String serverAddressesRemove(String address) {
+    return '$address entfernen';
+  }
+
+  @override
+  String get serverAddressesAdd => 'Adresse hinzufügen';
+
+  @override
+  String get serverAddressesAddHint => 'http://192.168.1.20:3000';
+
+  @override
+  String get serverAddressesAlreadyAdded =>
+      'Diese Adresse ist schon in der Liste';
+
+  @override
+  String get serverAddressesCheck => 'Adressen jetzt prüfen';
+
+  @override
+  String get serverAddressesChecking => 'Wird geprüft…';
+
+  @override
+  String serverAddressesUsing(String address) {
+    return 'Verwendet jetzt $address';
+  }
+
+  @override
+  String serverAddressesNoneAnswered(String address) {
+    return 'Keine Adresse hat geantwortet. Weiterhin $address';
+  }
+
+  @override
+  String get serverAddressesNone => 'Kein Server verbunden.';
 }
