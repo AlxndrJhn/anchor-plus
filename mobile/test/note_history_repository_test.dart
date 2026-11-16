@@ -32,7 +32,11 @@ void main() {
     'version': 1,
     'title': 'Groceries',
     'cause': 'edit',
-    'createdAt': '2026-08-18T10:00:00.000Z',
+    // Recent: the store drops versions older than 90 days.
+    'createdAt': DateTime.now()
+        .toUtc()
+        .subtract(const Duration(hours: 1))
+        .toIso8601String(),
     'content': null,
     'author': null,
   };
