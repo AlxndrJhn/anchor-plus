@@ -4947,4 +4947,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get serverAddressesNone => 'Kein Server verbunden.';
+
+  @override
+  String get regularServerCrumb => 'Normaler Anchor-Server';
+
+  @override
+  String get regularServerCrumbLabel =>
+      'Normaler Anchor-Server: Einige Anchor+-Funktionen sind aus. Zeigen, welche';
+
+  @override
+  String get regularServerTitle => 'Ein normaler Anchor-Server';
+
+  @override
+  String regularServerTitleHost(String host) {
+    return '$host ist ein normaler Anchor-Server';
+  }
+
+  @override
+  String get regularServerMessage =>
+      'Notizen, Tags, Erinnerungen, Teilen mit Personen und Backups funktionieren wie gewohnt. Die eigenen Funktionen von Anchor+ brauchen einen Anchor+-Server und sind daher aus: Notizen sperren, einfrieren und kopieren, gemeinsam live bearbeiten, Live-Bilder, öffentliche Links, Bildersuche, angemeldete Geräte und Notizen in eine eigene Reihenfolge ziehen.';
+
+  @override
+  String get regularServerConnect => 'Verbinden';
+
+  @override
+  String magicLoginNeedsPlus(String host) {
+    return '$host ist ein normaler Anchor-Server, der keine Anmeldung per Code kennt. Melde dich stattdessen mit deinem Passwort an.';
+  }
 }

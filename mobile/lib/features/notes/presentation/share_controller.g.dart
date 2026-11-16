@@ -155,7 +155,7 @@ final class NoteShareLinkControllerProvider
 }
 
 String _$noteShareLinkControllerHash() =>
-    r'e89806f6d4efecdd817f1df8752b387512941311';
+    r'0d327d45d1216a07498ba4d16e7aa22191d2f642';
 
 /// The note's share link; null when it has none.
 

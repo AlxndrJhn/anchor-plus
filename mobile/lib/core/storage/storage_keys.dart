@@ -10,6 +10,10 @@ class StorageKeys {
   /// The address of the server that last answered.
   static const serverActiveUrl = 'server_active_url';
   static const localOnly = 'local_only';
+
+  /// `regular` while the server is a regular Anchor server, without
+  /// Anchor+'s own features; absent for an Anchor+ server.
+  static const serverEdition = 'server_edition';
   static const allowSelfSignedCert = 'allow_self_signed_cert';
   static const serverHeaders = 'server_headers';
   static const accessToken = 'access_token';

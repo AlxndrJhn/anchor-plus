@@ -48,4 +48,4 @@ final class LiveSignalsProvider
   }
 }
 
-String _$liveSignalsHash() => r'59e8771faa3d7ae183c9635c4c2ee778277fc46e';
+String _$liveSignalsHash() => r'1dbe38509c729f3fc250da40e8645f666391a530';

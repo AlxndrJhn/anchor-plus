@@ -21,6 +21,7 @@ import '../../../../core/widgets/person_avatar.dart';
 import '../../../../core/widgets/pressable.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../auth/presentation/auth_controller.dart';
+import '../../../server/presentation/regular_server_crumb.dart';
 import '../../../tags/data/repository/tags_repository.dart';
 import '../../../tags/domain/tag.dart';
 import '../../../tags/domain/tag_order.dart';
@@ -322,7 +323,17 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
               ),
-              child: _Account(onTap: widget.onOpenSettings),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: RegularServerCrumb(),
+                  ),
+                  _Account(onTap: widget.onOpenSettings),
+                ],
+              ),
             ),
           ],
         ),

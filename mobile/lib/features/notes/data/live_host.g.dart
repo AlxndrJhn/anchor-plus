@@ -48,4 +48,4 @@ final class LiveHostProvider
   }
 }
 
-String _$liveHostHash() => r'ccf727af02f0eb7a8e15c9833582c00b45045106';
+String _$liveHostHash() => r'6f2d4814aa8410e97b0f1550f133c8e18995f6ac';

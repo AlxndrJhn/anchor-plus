@@ -1210,5 +1210,12 @@
   "serverAddressesChecking": "Wird geprüft…",
   "serverAddressesUsing": "Verwendet jetzt {address}",
   "serverAddressesNoneAnswered": "Keine Adresse hat geantwortet. Weiterhin {address}",
-  "serverAddressesNone": "Kein Server verbunden."
+  "serverAddressesNone": "Kein Server verbunden.",
+  "regularServerCrumb": "Normaler Anchor-Server",
+  "regularServerCrumbLabel": "Normaler Anchor-Server: Einige Anchor+-Funktionen sind aus. Zeigen, welche",
+  "regularServerTitle": "Ein normaler Anchor-Server",
+  "regularServerTitleHost": "{host} ist ein normaler Anchor-Server",
+  "regularServerMessage": "Notizen, Tags, Erinnerungen, Teilen mit Personen und Backups funktionieren wie gewohnt. Die eigenen Funktionen von Anchor+ brauchen einen Anchor+-Server und sind daher aus: Notizen sperren, einfrieren und kopieren, gemeinsam live bearbeiten, Live-Bilder, öffentliche Links, Bildersuche, angemeldete Geräte und Notizen in eine eigene Reihenfolge ziehen.",
+  "regularServerConnect": "Verbinden",
+  "magicLoginNeedsPlus": "{host} ist ein normaler Anchor-Server, der keine Anmeldung per Code kennt. Melde dich stattdessen mit deinem Passwort an."
 }

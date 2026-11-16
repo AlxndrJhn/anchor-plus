@@ -213,6 +213,7 @@ class SyncServerTag {
     required this.version,
     required this.updatedAt,
     this.position,
+    this.hasPositionField = false,
   });
 
   factory SyncServerTag.fromJson(Map<String, dynamic> json) => SyncServerTag(
@@ -220,6 +221,7 @@ class SyncServerTag {
     name: json['name'] as String? ?? '',
     color: json['color'] as String?,
     position: (json['position'] as num?)?.toDouble(),
+    hasPositionField: json.containsKey('position'),
     version: json['version'] as int? ?? 1,
     updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '')?.toUtc(),
   );
@@ -232,6 +234,10 @@ class SyncServerTag {
 
   /// Where it was dragged among the tags; null when never dragged.
   final double? position;
+
+  /// False from a regular Anchor server, which keeps no tag order: the one
+  /// on this phone stays.
+  final bool hasPositionField;
 }
 
 class SyncEntry {

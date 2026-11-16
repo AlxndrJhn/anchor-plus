@@ -17,6 +17,7 @@ import '../../../core/widgets/revival.dart';
 import '../../../l10n/l10n.dart';
 import '../../note_locks/presentation/note_lock_actions.dart';
 import '../../note_locks/presentation/note_lock_session.dart';
+import '../../server/data/server_edition.dart';
 import '../../settings/presentation/editor_preferences_controller.dart';
 import '../../tags/presentation/tags_controller.dart';
 import '../../tags/presentation/widgets/tag_sheets.dart';
@@ -203,6 +204,7 @@ class NoteActions {
         final isUnfreezing = unfreezesAll(notes);
         final canFreeze =
             !ref.read(isLocalOnlyProvider) &&
+            !ref.read(isRegularServerProvider) &&
             freezableIdsOf(notes, isFreezing: !isUnfreezing).isNotEmpty;
         final l10n = context.l10n;
         final choice = !canFreeze

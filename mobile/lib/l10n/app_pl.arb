@@ -1210,5 +1210,12 @@
   "serverAddressesChecking": "Sprawdzanie…",
   "serverAddressesUsing": "Używany: {address}",
   "serverAddressesNoneAnswered": "Żaden adres nie odpowiedział. Nadal używany: {address}",
-  "serverAddressesNone": "Brak połączonego serwera."
+  "serverAddressesNone": "Brak połączonego serwera.",
+  "regularServerCrumb": "Zwykły serwer Anchor",
+  "regularServerCrumbLabel": "Zwykły serwer Anchor: niektóre funkcje Anchor+ są wyłączone. Pokaż które",
+  "regularServerTitle": "Zwykły serwer Anchor",
+  "regularServerTitleHost": "{host} to zwykły serwer Anchor",
+  "regularServerMessage": "Notatki, tagi, przypomnienia, udostępnianie osobom i kopie zapasowe działają jak zwykle. Własne funkcje Anchor+ wymagają serwera Anchor+, więc są wyłączone: blokowanie, zamrażanie i kopiowanie notatek, wspólna edycja na żywo, obrazy na żywo, linki publiczne, wyszukiwanie obrazów, zalogowane urządzenia oraz przeciąganie notatek we własnej kolejności.",
+  "regularServerConnect": "Połącz",
+  "magicLoginNeedsPlus": "{host} to zwykły serwer Anchor, który nie obsługuje logowania kodem. Zaloguj się hasłem."
 }

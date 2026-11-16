@@ -105,7 +105,7 @@ final class PictureSearchStatusProvider
 }
 
 String _$pictureSearchStatusHash() =>
-    r'52c72c3c24b740e2eb5d2e59f300410511069f73';
+    r'870c2844103a14759efcddd05a83e4f9a2bebd6d';
 
 /// The ids of notes whose pictures look like [query], for users who turned
 /// picture search on, while online; none otherwise (offline, nothing is

@@ -5085,4 +5085,31 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get serverAddressesNone => 'Brak połączonego serwera.';
+
+  @override
+  String get regularServerCrumb => 'Zwykły serwer Anchor';
+
+  @override
+  String get regularServerCrumbLabel =>
+      'Zwykły serwer Anchor: niektóre funkcje Anchor+ są wyłączone. Pokaż które';
+
+  @override
+  String get regularServerTitle => 'Zwykły serwer Anchor';
+
+  @override
+  String regularServerTitleHost(String host) {
+    return '$host to zwykły serwer Anchor';
+  }
+
+  @override
+  String get regularServerMessage =>
+      'Notatki, tagi, przypomnienia, udostępnianie osobom i kopie zapasowe działają jak zwykle. Własne funkcje Anchor+ wymagają serwera Anchor+, więc są wyłączone: blokowanie, zamrażanie i kopiowanie notatek, wspólna edycja na żywo, obrazy na żywo, linki publiczne, wyszukiwanie obrazów, zalogowane urządzenia oraz przeciąganie notatek we własnej kolejności.';
+
+  @override
+  String get regularServerConnect => 'Połącz';
+
+  @override
+  String magicLoginNeedsPlus(String host) {
+    return '$host to zwykły serwer Anchor, który nie obsługuje logowania kodem. Zaloguj się hasłem.';
+  }
 }

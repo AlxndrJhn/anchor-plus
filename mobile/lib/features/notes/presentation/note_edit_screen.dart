@@ -37,6 +37,7 @@ import '../../../l10n/l10n.dart';
 import '../../note_locks/presentation/note_lock_actions.dart';
 import '../../reminders/presentation/reminder_permission_prompt.dart';
 import '../../reminders/presentation/reminder_sheet.dart';
+import '../../server/data/server_edition.dart';
 import '../../settings/presentation/editor_preferences_controller.dart';
 import '../../tags/domain/tag.dart';
 import '../../tags/presentation/tags_controller.dart';
@@ -612,6 +613,11 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
         NoteAction.share,
         NoteAction.freeze,
       ],
+      // A regular Anchor server shares, but doesn't freeze or copy.
+      if (ref.read(isRegularServerProvider)) ...[
+        NoteAction.freeze,
+        NoteAction.copy,
+      ],
       for (final action in preferences.quickActions)
         for (final option in action.noteActions)
           if (option != NoteAction.removeLock) option,
@@ -623,13 +629,20 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
   List<QuickAction> _barActions(List<QuickAction> quickActions) {
     final note = _draft.note;
     final isLocalOnly = ref.watch(isLocalOnlyProvider);
+    // Anchor+'s own features, which a regular Anchor server lacks.
+    final isRegular = ref.watch(isRegularServerProvider);
     return [
       for (final action in quickActions)
         if (switch (action) {
           QuickAction.share => !isLocalOnly && (note?.isOwner ?? true),
           QuickAction.history => !_draft.isViewOnly,
           QuickAction.freeze =>
-            !isLocalOnly && (note == null || (note.isOwner && note.isActive)),
+            !isLocalOnly &&
+                !isRegular &&
+                (note == null || (note.isOwner && note.isActive)),
+          QuickAction.copy => !isRegular,
+          // A locked note can still be unlocked.
+          QuickAction.lock => !isRegular || (note?.isLocked ?? false),
           QuickAction.addImage ||
           QuickAction.takePicture ||
           QuickAction.takeSeveral ||
@@ -665,9 +678,12 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
       isArchived: opened?.isArchived ?? _draft.newArchived,
       // A note this person froze can't be deleted until it's unfrozen.
       canTrash: opened != null && !opened.isOwnFrozen,
-      canCopy: !isTrashed,
-      // Notes not in the trash can be locked.
-      canLock: !isTrashed,
+      canCopy: !isTrashed && !ref.read(isRegularServerProvider),
+      // Notes not in the trash can be locked, but not on a regular Anchor
+      // server; a locked one can still be unlocked there.
+      canLock:
+          !isTrashed &&
+          (!ref.read(isRegularServerProvider) || (opened?.isLocked ?? false)),
       lock: opened?.lock,
       shareCount: opened?.shareIds?.length ?? 0,
       hasChecklist: (checklist?.items ?? 0) > 0,
@@ -1094,7 +1110,8 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
     final files = await showAddSheet(
       context,
       onTakeSeveral: _takeSeveralPictures,
-      onLiveCamera: _addLiveCamera,
+      // Live pictures go through an Anchor+ server.
+      onLiveCamera: ref.read(isRegularServerProvider) ? null : _addLiveCamera,
       onFlowchart: _addFlowchart,
       onScanDocument: _addScan,
     );
