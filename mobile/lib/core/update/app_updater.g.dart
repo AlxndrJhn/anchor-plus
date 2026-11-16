@@ -174,7 +174,7 @@ final class UpdateControllerProvider
   }
 }
 
-String _$updateControllerHash() => r'3b670a07d20b0c3e656146c2b2699ea86a75c0b0';
+String _$updateControllerHash() => r'7ab7ad95674cd488b5ac3c924e978abd150be7a3';
 
 /// Finds, downloads and installs newer releases from GitHub.
 

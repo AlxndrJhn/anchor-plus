@@ -27,6 +27,7 @@ class ServerConfig extends _$ServerConfig {
     if (normalizedUrl != state.value) {
       await _deleteQuietly(StorageKeys.serverOtherUrls);
       await _deleteQuietly(StorageKeys.serverActiveUrl);
+      await _deleteQuietly(StorageKeys.serverEdition);
     }
     await ref
         .read(secureStorageProvider)
@@ -49,6 +50,7 @@ class ServerConfig extends _$ServerConfig {
     await storage.delete(key: StorageKeys.serverUrl);
     await _deleteQuietly(StorageKeys.serverOtherUrls);
     await _deleteQuietly(StorageKeys.serverActiveUrl);
+    await _deleteQuietly(StorageKeys.serverEdition);
     state = const AsyncData(null);
   }
 }

@@ -11,7 +11,7 @@
   "packageManager": "pnpm@12.16.1",
   "scripts": {
     "start": "electron .",
-    "check": "node --check src/main.js && node --check src/headers.js && node --check src/preload.js && node --check src/setup.js && node --check src/welcome.js && node --check src/updater.js && node --check src/legal.js && node --check src/screen-picker.js && node --check src/screen-picker-preload.js && node --check src/screen-picker-page.js",
+    "check": "node --check src/main.js && node --check src/headers.js && node --check src/preload.js && node --check src/setup.js && node --check src/welcome.js && node --check src/updater.js && node --check src/legal.js && node --check src/edition.js && node --check src/screen-picker.js && node --check src/screen-picker-preload.js && node --check src/screen-picker-page.js",
     "test": "node --test test/",
     "build": "pnpm run check && electron-builder --dir --publish never",
     "dist:win": "electron-builder --win nsis --x64 --publish never",

@@ -85,7 +85,7 @@ final class NoteLockSecretsControllerProvider
 }
 
 String _$noteLockSecretsControllerHash() =>
-    r'13527b16062b1e77b361c3d8bbd7eccf8cc103a7';
+    r'4e5752a3c1b4246082b5a61b20eb2b7c21059120';
 
 /// The account's PIN and pattern hashes, kept in secure storage so locked
 /// notes open offline, and fetched again on start, after each sync and when

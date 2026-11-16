@@ -31,6 +31,7 @@ import '../../auth/presentation/magic_login_scan_screen.dart';
 import '../../sync/data/sync_compatibility.dart';
 import '../../sync/presentation/compatibility_messages.dart';
 import '../data/server_connector.dart';
+import '../data/server_edition.dart';
 import 'harbor_illustration.dart';
 
 class ServerConfigScreen extends ConsumerStatefulWidget {
@@ -160,14 +161,21 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
 
   /// Saves the headers with the address, so the new server gets them from
   /// the first request. Read now: the switch may outlive this screen.
+  /// What the last server checked is: a regular Anchor server, or Anchor+.
+  bool _isRegular = false;
+
   Future<void> Function() _switchTo(String url) {
     final headers = ref.read(savedServerHeadersProvider.notifier);
     final addresses = ref.read(serverAddressesProvider.notifier);
+    final edition = ref.read(serverIsRegularProvider.notifier);
+    final isRegular = _isRegular;
     final text = _headers.text;
     return () async {
       await headers.save(url, text);
       // One of the server's own addresses keeps the others.
       await addresses.connect(url);
+      // Known before the server's first answer, once connected.
+      await edition.remember(isRegular: isRegular);
     };
   }
 
@@ -186,7 +194,13 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
     final l10n = context.l10n;
     await submit(
       () async {
-        if (!await _isServerUsable(url, isSchemeAdded: false)) return;
+        if (!await _isServerUsable(
+          url,
+          isSchemeAdded: false,
+          isMagicLink: true,
+        )) {
+          return;
+        }
         await _switchTo(url)();
         // Signing in waits for the switch to the new server to settle.
         final auth = ref.read(authControllerProvider.notifier);
@@ -227,6 +241,7 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
   Future<bool> _isServerUsable(
     String url, {
     required bool isSchemeAdded,
+    bool isMagicLink = false,
   }) async {
     final l10n = context.l10n;
     final host = hostOf(url);
@@ -237,9 +252,11 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
       headers: parseServerHeaders(_headers.text).headers,
     ).check(url);
     final List<int> protocols;
+    final bool isRegular;
     switch (check) {
       case ServerFound(:final info):
         protocols = info.protocols;
+        isRegular = !info.isAnchorPlus;
       case NotAnchorServer():
         return _fail(l10n.serverNotAnchor(host));
       case UntrustedCertificate():
@@ -253,15 +270,34 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
         );
     }
 
+    // Signing in with a code is Anchor+'s; a regular server can't.
+    if (isRegular && isMagicLink) return _fail(l10n.magicLoginNeedsPlus(host));
+
     final words = compatibilityMessagesOf(compatibilityFor(protocols), l10n);
-    if (words == null) return mounted;
+    if (words != null) {
+      if (!mounted) return false;
+      final isAnyway = await showAnchorDialog(
+        context,
+        title: words.title,
+        message: words.message,
+        confirmLabel: l10n.serverConnectAnyway,
+      );
+      if (!isAnyway) return false;
+    }
     if (!mounted) return false;
-    return showAnchorDialog(
-      context,
-      title: words.title,
-      message: words.message,
-      confirmLabel: l10n.serverConnectAnyway,
-    );
+    if (isRegular) {
+      // Says first what a regular Anchor server lacks.
+      final isConnecting = await showAnchorDialog(
+        context,
+        icon: LucideIcons.server,
+        title: l10n.regularServerTitleHost(host),
+        message: l10n.regularServerMessage,
+        confirmLabel: l10n.regularServerConnect,
+      );
+      if (!isConnecting) return false;
+    }
+    _isRegular = isRegular;
+    return mounted;
   }
 
   bool _fail(String errorMessage) {

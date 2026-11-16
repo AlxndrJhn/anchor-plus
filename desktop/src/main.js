@@ -26,6 +26,7 @@ const { startUpdater } = require("./updater");
 const { REPOSITORY, sourceCodeUrl, licenseUrl } = require("./legal");
 const { anchorBuild } = require("../package.json");
 const { allowScreenSharing } = require("./screen-picker");
+const { editionOf, windowTitle, REGULAR_SERVER_DETAIL } = require("./edition");
 
 // The name the window, menu and About panel show, and the settings folder's.
 const APP_NAME = "Anchor+";
@@ -200,6 +201,7 @@ async function checkServer(serverUrl, { isSchemeAdded = false, headers = {} } = 
       ok: true,
       version: typeof body.version === "string" ? body.version : null,
       image: typeof body.image === "string" ? body.image : null,
+      edition: editionOf(body),
     };
   } catch (err) {
     const reason = controller.signal.aborted ? "It did not answer in time." : `${err.message}.`;
@@ -298,7 +300,7 @@ function createWindow() {
     ...asked,
     minWidth: 400,
     minHeight: 300,
-    title: APP_NAME,
+    title: currentTitle(),
     icon: iconPath(),
     show: false,
     backgroundColor: "#232838",
@@ -317,7 +319,8 @@ function createWindow() {
   if (saved?.maximized) mainWindow.maximize();
 
   mainWindow.once("ready-to-show", () => mainWindow.show());
-  // The window is always "Anchor+", whatever the page calls itself.
+  // The window is always "Anchor+" (and says when the server is a regular
+  // Anchor one), whatever the page calls itself.
   mainWindow.on("page-title-updated", (event) => event.preventDefault());
 
   let saveTimer = null;
@@ -407,6 +410,45 @@ function showSetup(state = {}) {
 }
 
 // The server's web client, or the built-in one while there is no server.
+// --- Regular Anchor servers --------------------------------------------------
+
+// What the connected server is, as last seen: "regular" for an Anchor server
+// without Anchor+'s features; unset for Anchor+ or no server.
+const currentEdition = () => (settings.serverUrl ? settings.serverEdition : undefined);
+
+const currentTitle = () => windowTitle(APP_NAME, currentEdition());
+
+function rememberEdition(edition) {
+  const value = edition === "regular" ? "regular" : undefined;
+  if (settings.serverEdition === value) return;
+  if (value) settings.serverEdition = value;
+  else delete settings.serverEdition;
+  saveSettings();
+  mainWindow?.setTitle(currentTitle());
+  buildMenu();
+}
+
+function explainRegularServer() {
+  const host = settings.serverUrl ? new URL(settings.serverUrl).host : "This server";
+  const options = {
+    type: "info",
+    title: APP_NAME,
+    message: `${host} is a regular Anchor server`,
+    detail: REGULAR_SERVER_DETAIL,
+    buttons: ["OK"],
+  };
+  return mainWindow ? dialog.showMessageBox(mainWindow, options) : dialog.showMessageBox(options);
+}
+
+// The server may have changed since (to Anchor+, or back): asked once a start.
+async function refreshEdition() {
+  if (!settings.serverUrl) return;
+  const server = await checkServer(settings.serverUrl, {
+    headers: headersFor(savedHeaders, settings.serverUrl),
+  });
+  if (server.ok) rememberEdition(server.edition);
+}
+
 function openServer() {
   setupState = { error: null, canRetry: false };
   mainWindow.loadURL(settings.serverUrl || LOCAL_URL);
@@ -487,11 +529,17 @@ ipcMain.handle("anchor:connect", async (event, input, headersText = "") => {
   const result = await checkServer(serverUrl, { isSchemeAdded, headers });
   if (!result.ok) return result;
   writeHeaders(serverUrl, headersText);
-  // The notes kept without a server move into the account once signed in.
-  if (!settings.serverUrl && settings.localOnly) await keepLocalNotesForMove();
+  const isRegular = result.edition === "regular";
+  // The notes kept without a server move into the account once signed in;
+  // only Anchor+'s web client takes them.
+  if (!settings.serverUrl && settings.localOnly && !isRegular) await keepLocalNotesForMove();
   settings.serverUrl = serverUrl;
+  if (isRegular) settings.serverEdition = "regular";
+  else delete settings.serverEdition;
   saveSettings();
+  mainWindow?.setTitle(currentTitle());
   buildMenu();
+  if (isRegular) explainRegularServer();
   const origin = insecureOrigin(serverUrl);
   if (origin && origin !== secureAtStart) {
     app.relaunch();
@@ -512,7 +560,9 @@ ipcMain.handle("anchor:retry", (event) => {
 ipcMain.handle("anchor:use-local", (event) => {
   if (!fromSetupPage(event)) throw new Error("Not allowed");
   delete settings.serverUrl;
+  delete settings.serverEdition;
   settings.localOnly = true;
+  mainWindow?.setTitle(currentTitle());
   saveSettings();
   // They are still here; nothing is left to move.
   fs.rmSync(localNotesFile(), { force: true });
@@ -681,6 +731,11 @@ function buildMenu() {
     registerAccelerator: false,
     click: (item) => setQuickNote(item.checked),
   };
+  // Says, in the menu, that the server lacks Anchor+'s features, and why.
+  const regularServerItems =
+    currentEdition() === "regular"
+      ? [{ label: "Regular Anchor Server: Some Features Are Off…", click: explainRegularServer }]
+      : [];
   const update = updater?.current();
   const updateItems = update
     ? [{ label: `Restart to Update (${update.version})`, click: () => updater.install() }, { type: "separator" }]
@@ -695,6 +750,7 @@ function buildMenu() {
               { type: "separator" },
               ...updateItems,
               changeServerItem,
+              ...regularServerItems,
               ...previewItems,
               quickNoteItem,
               { type: "separator" },
@@ -714,6 +770,7 @@ function buildMenu() {
             submenu: [
               ...updateItems,
               changeServerItem,
+              ...regularServerItems,
               ...previewItems,
               quickNoteItem,
               { type: "separator" },
@@ -784,6 +841,7 @@ if (!app.requestSingleInstanceLock()) {
     buildMenu();
     createWindow();
     start();
+    refreshEdition().catch(() => {});
     applyQuickNote();
     updater = startUpdater({ onReady: updateReady, openExternal, wantsCandidates });
     buildMenu();

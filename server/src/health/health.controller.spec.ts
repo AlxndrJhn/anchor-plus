@@ -23,6 +23,10 @@ describe('HealthController', () => {
     expect(Date.parse(body.timestamp)).not.toBeNaN();
   });
 
+  it('says it is an Anchor+ server, for the apps to tell it from Anchor', () => {
+    expect(controller().check().edition).toBe('anchor-plus');
+  });
+
   it('advertises the protocols clients are gated on', () => {
     expect(controller().check().protocols).toEqual(SUPPORTED_PROTOCOLS);
     expect(SUPPORTED_PROTOCOLS).toContain(ANCHOR_PROTOCOL);

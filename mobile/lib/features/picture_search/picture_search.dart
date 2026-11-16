@@ -5,6 +5,7 @@ import '../../core/network/connectivity_provider.dart';
 import '../../core/network/dio_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../notes/domain/note.dart';
+import '../server/data/server_edition.dart';
 
 part 'picture_search.g.dart';
 
@@ -167,6 +168,8 @@ class PictureSearchRepository {
 /// older server, or offline).
 @riverpod
 Future<PictureSearchStatus> pictureSearchStatus(Ref ref) async {
+  // Picture search is an Anchor+ server's; a regular Anchor server has none.
+  if (ref.watch(isRegularServerProvider)) return PictureSearchStatus.off;
   try {
     return await ref.watch(pictureSearchRepositoryProvider).status();
   } on DioException {

@@ -10,6 +10,7 @@ import '../../../core/logging/log_tags.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/session/active_user_id_provider.dart';
 import '../../../core/storage/secure_storage_provider.dart';
+import '../../server/data/server_edition.dart';
 import '../../sync/data/sync_manager.dart';
 import 'lock_hash.dart';
 
@@ -183,6 +184,8 @@ class NoteLockSecretsController extends _$NoteLockSecretsController {
   Future<NoteLockSecrets?> refresh() async {
     final userId = _userId;
     if (userId == null) return null;
+    // A regular Anchor server keeps no PIN or pattern.
+    if (ref.read(isRegularServerProvider)) return null;
     try {
       final secrets = await ref.read(noteLocksApiProvider).fetch();
       if (_userId != userId) return null;

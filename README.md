@@ -704,6 +704,25 @@ Links to other websites open in your browser. To build it yourself:
 `cd web && pnpm install && pnpm build:local`, then
 `cd desktop && pnpm install && pnpm run dist:win` (or `dist:mac`).
 
+### With a regular Anchor server
+
+The phone and desktop apps also work with a regular Anchor server, not only an
+Anchor+ one. An Anchor+ server says so when the apps ask it (`edition` in
+`/api/health`); a server that doesn't is taken for a regular one, and the apps
+turn off what it can't do:
+
+- **Phone app:** notes, tags, reminders, sharing with people and backups work
+  as usual. Locking, freezing and copying notes, editing together live, live
+  pictures, public links, picture search, signed-in devices, signing in with a
+  code, and dragging notes into your own order are off; tags you drag keep
+  their order on the phone only. A "Regular Anchor server" pill in the drawer
+  and at the bottom of Settings says why, and connecting to such a server says
+  so first.
+- **Desktop app:** it shows the server's own web client, so Anchor+'s
+  features aren't there. The window's title says "Regular Anchor server", and
+  the File menu (the app menu on macOS) explains. Notes kept on the computer
+  without a server stay there rather than moving into the account.
+
 ### Code signing policy
 
 Everything a release ships is signed, and only by this repository's

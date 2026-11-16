@@ -32,6 +32,9 @@ export class HealthController {
     return {
       status: 'ok',
       app: 'anchor',
+      // Tells the Anchor+ apps this server has Anchor+'s own features; a
+      // regular Anchor server leaves it out, and the apps turn those off.
+      edition: 'anchor-plus',
       version,
       protocols: SUPPORTED_PROTOCOLS,
       // The Docker image this runs from (see the Dockerfile), when it says.

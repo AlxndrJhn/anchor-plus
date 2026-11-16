@@ -34,6 +34,7 @@ import '../../../core/widgets/selection_bar.dart';
 import '../../../l10n/l10n.dart';
 import '../../reminders/data/reminder_permissions.dart';
 import '../../reminders/presentation/reminder_permission_prompt.dart';
+import '../../server/data/server_edition.dart';
 import '../../settings/presentation/editor_preferences_controller.dart';
 import '../../sync/data/sync_manager.dart';
 import '../../sync/presentation/sync_warning.dart';
@@ -582,8 +583,9 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       ViewType.list => CardLayout.list,
     };
     // Notes are dragged to new places in the default order, as on the web,
-    // while the whole list is shown.
+    // while the whole list is shown. A regular Anchor server keeps no places.
     final canReorder =
+        !ref.watch(isRegularServerProvider) &&
         folder == NoteFolder.notes &&
         !isSelecting &&
         !_searching &&
@@ -838,15 +840,21 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
           enabled: selectedNotes.isNotEmpty,
           actions: [
             for (final action in folder.selectionActions)
-              if (action.iconAndLabelFor(selectedNotes, context.l10n)
-                  case final appearance)
-                SelectionAction(
-                  icon: appearance.icon,
-                  label: appearance.label,
-                  isDanger: action.isDanger,
-                  onPressed: () =>
-                      _runOnSelection(action, selectedNotes, shown),
-                ),
+              // A regular Anchor server can't lock notes; locked ones can
+              // still be unlocked.
+              if (action != NoteAction.lock ||
+                  !ref.watch(isRegularServerProvider) ||
+                  (selectedNotes.isNotEmpty &&
+                      selectedNotes.every((note) => note.isLocked)))
+                if (action.iconAndLabelFor(selectedNotes, context.l10n)
+                    case final appearance)
+                  SelectionAction(
+                    icon: appearance.icon,
+                    label: appearance.label,
+                    isDanger: action.isDanger,
+                    onPressed: () =>
+                        _runOnSelection(action, selectedNotes, shown),
+                  ),
           ],
         ),
       ),

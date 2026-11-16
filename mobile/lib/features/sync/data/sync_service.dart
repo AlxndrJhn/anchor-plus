@@ -725,7 +725,9 @@ class SyncService {
             id: Value(tag.id),
             name: Value(tag.name),
             color: Value(tag.color),
-            position: Value(tag.position),
+            position: tag.hasPositionField
+                ? Value(tag.position)
+                : const Value.absent(),
             updatedAt: Value(tag.updatedAt),
             version: Value(tag.version),
             isSynced: const Value(true),

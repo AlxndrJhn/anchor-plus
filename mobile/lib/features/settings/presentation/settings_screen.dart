@@ -59,7 +59,9 @@ import '../../picture_search/picture_search.dart';
 import '../../reminders/domain/reminder_preferences.dart';
 import '../../reminders/presentation/reminder_preferences_controller.dart';
 import '../../reminders/presentation/time_wheel.dart';
+import '../../server/data/server_edition.dart';
 import '../../server/data/server_info_provider.dart';
+import '../../server/presentation/regular_server_crumb.dart';
 import '../../server/presentation/server_addresses_screen.dart';
 import '../../sync/data/sync_compatibility.dart';
 import '../../sync/presentation/compatibility_messages.dart';
@@ -108,6 +110,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final user = ref.watch(authControllerProvider).value;
     // The PIN, the pattern and picture search are kept on a server.
     final isLocalOnly = ref.watch(isLocalOnlyProvider);
+    // So is a regular Anchor server, which has neither.
+    final isRegularServer = ref.watch(isRegularServerProvider);
     final gap = SizedBox(height: Section.gapOf(context));
     return AppScaffold(
       title: context.l10n.settingsTitle,
@@ -127,7 +131,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               gap,
               const _RemindersSection(),
               gap,
-              if (!isLocalOnly) ...[
+              if (!isLocalOnly && !isRegularServer) ...[
                 const _PictureSearchSection(),
                 const _NoteLocksSection(),
                 gap,
@@ -829,12 +833,14 @@ class _AccountSection extends ConsumerWidget {
               label: l10n.settingsPassword,
               subtitle: managed,
             ),
-          GroupedListTile(
-            icon: LucideIcons.monitorSmartphone,
-            label: l10n.settingsDevices,
-            showChevron: true,
-            onTap: () => context.push(AppRoutes.devices),
-          ),
+          // A regular Anchor server doesn't list the devices signed in.
+          if (!ref.watch(isRegularServerProvider))
+            GroupedListTile(
+              icon: LucideIcons.monitorSmartphone,
+              label: l10n.settingsDevices,
+              showChevron: true,
+              onTap: () => context.push(AppRoutes.devices),
+            ),
           GroupedListTile(
             icon: LucideIcons.logOut,
             label: l10n.settingsSignOut,
@@ -1597,6 +1603,10 @@ class _About extends ConsumerWidget {
           Text(context.l10n.settingsTagline, style: style),
           const SizedBox(height: 8),
           server,
+          if (ref.watch(isRegularServerProvider)) ...[
+            const SizedBox(height: 8),
+            const RegularServerCrumb(),
+          ],
         ],
       ),
     );

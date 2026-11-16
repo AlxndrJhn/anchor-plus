@@ -44,7 +44,7 @@ final class ReminderPreferencesControllerProvider
 }
 
 String _$reminderPreferencesControllerHash() =>
-    r'e01798b509d2c9a0dbbffe8b890f4b2189ac1a1c';
+    r'1812dbcbfa809cc243cde384f028ee0e5b2c21d6';
 
 abstract class _$ReminderPreferencesController
     extends $Notifier<ReminderPreferences> {

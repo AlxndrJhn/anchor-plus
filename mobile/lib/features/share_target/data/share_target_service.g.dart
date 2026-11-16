@@ -92,7 +92,7 @@ final class ShareContextSyncProvider
   }
 }
 
-String _$shareContextSyncHash() => r'4c4cf8c40465dfcd460dd3c7bd2712a0d0902232';
+String _$shareContextSyncHash() => r'b02e6d4b6e5d73b007d88a7a4ebf03375b89a862';
 
 abstract class _$ShareContextSync extends $Notifier<void> {
   void build();

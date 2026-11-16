@@ -4860,4 +4860,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serverAddressesNone => 'No server connected.';
+
+  @override
+  String get regularServerCrumb => 'Regular Anchor server';
+
+  @override
+  String get regularServerCrumbLabel =>
+      'Regular Anchor server: some Anchor+ features are off. Show which';
+
+  @override
+  String get regularServerTitle => 'A regular Anchor server';
+
+  @override
+  String regularServerTitleHost(String host) {
+    return '$host is a regular Anchor server';
+  }
+
+  @override
+  String get regularServerMessage =>
+      'Notes, tags, reminders, sharing with people and backups work as usual. Anchor+\'s own features need an Anchor+ server, so they are off: locking, freezing and copying notes, editing together live, live pictures, public links, picture search, signed-in devices and dragging notes into your own order.';
+
+  @override
+  String get regularServerConnect => 'Connect';
+
+  @override
+  String magicLoginNeedsPlus(String host) {
+    return '$host is a regular Anchor server, which can’t sign in with a code. Sign in with your password instead.';
+  }
 }

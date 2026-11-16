@@ -20,6 +20,7 @@ import '../../../../core/widgets/pill.dart';
 import '../../../../core/widgets/pressable.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../auth/presentation/auth_controller.dart';
+import '../../../server/data/server_edition.dart';
 import '../../domain/note_dates.dart';
 import '../../domain/note_share.dart';
 import '../../domain/note_share_link.dart';
@@ -305,7 +306,11 @@ class _ShareSheetState extends ConsumerState<_ShareSheet> {
         online &&
         sharesState.hasError &&
         !sharesState.isLoading;
-    final linkState = ref.watch(noteShareLinkControllerProvider(widget.noteId));
+    // A regular Anchor server shares with people, but has no public links.
+    final hasLinks = !ref.watch(isRegularServerProvider);
+    final linkState = hasLinks
+        ? ref.watch(noteShareLinkControllerProvider(widget.noteId))
+        : const AsyncData<NoteShareLink?>(null);
     final link = linkState.value;
     final server = ref.watch(serverUrlProvider);
     final linkUrl = link == null || server == null ? null : link.urlOn(server);
@@ -477,7 +482,7 @@ class _ShareSheetState extends ConsumerState<_ShareSheet> {
                   else
                     const Center(child: Spinner()),
                 ],
-                if (online || linkState.hasValue) ...[
+                if (hasLinks && (online || linkState.hasValue)) ...[
                   SizedBox(height: Section.gapOf(context)),
                   Section(
                     label: l10n.shareLink,

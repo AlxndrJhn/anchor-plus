@@ -6406,5 +6406,45 @@
   "serverAddressesNone": "No server connected.",
   "@serverAddressesNone": {
     "description": "Shown on the server addresses screen when no server is connected."
+  },
+  "regularServerCrumb": "Regular Anchor server",
+  "@regularServerCrumb": {
+    "description": "Small pill in the drawer and Settings while the app syncs with a regular Anchor server (not Anchor+), whose own features are turned off. Tapping it explains."
+  },
+  "regularServerCrumbLabel": "Regular Anchor server: some Anchor+ features are off. Show which",
+  "@regularServerCrumbLabel": {
+    "description": "Screen reader label of the regular Anchor server pill."
+  },
+  "regularServerTitle": "A regular Anchor server",
+  "@regularServerTitle": {
+    "description": "Title of the dialog explaining that the server is a regular Anchor server, without Anchor+'s features."
+  },
+  "regularServerTitleHost": "{host} is a regular Anchor server",
+  "@regularServerTitleHost": {
+    "description": "Title of the dialog explaining that the server is a regular Anchor server, without Anchor+'s features.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "example": "notes.example.com"
+      }
+    }
+  },
+  "regularServerMessage": "Notes, tags, reminders, sharing with people and backups work as usual. Anchor+'s own features need an Anchor+ server, so they are off: locking, freezing and copying notes, editing together live, live pictures, public links, picture search, signed-in devices and dragging notes into your own order.",
+  "@regularServerMessage": {
+    "description": "Dialog message listing what works and what is turned off with a regular Anchor server."
+  },
+  "regularServerConnect": "Connect",
+  "@regularServerConnect": {
+    "description": "Button in the dialog shown before connecting to a regular Anchor server."
+  },
+  "magicLoginNeedsPlus": "{host} is a regular Anchor server, which can’t sign in with a code. Sign in with your password instead.",
+  "@magicLoginNeedsPlus": {
+    "description": "Error when a sign-in code or QR points at a regular Anchor server.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "example": "notes.example.com"
+      }
+    }
   }
 }

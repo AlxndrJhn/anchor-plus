@@ -10,6 +10,7 @@ import '../../../../core/network/server_config_provider.dart';
 import '../../../../core/session/active_user_id_provider.dart';
 import '../../../../core/storage/secure_storage_provider.dart';
 import '../../../../core/storage/storage_keys.dart';
+import '../../../server/data/server_edition.dart';
 import 'collab_session.dart';
 
 const String collabPath = '/api/collab';
@@ -62,12 +63,14 @@ Uri collabUri(String serverUrl) {
   );
 }
 
-/// Null while this app isn't signed in to a server: nothing to edit with.
+/// Null while this app isn't signed in to a server, or the server is a
+/// regular Anchor server, which edits nothing live: nothing to edit with.
 CollabOpener? collabOpenerOf(WidgetRef ref) {
   final userId = ref.read(activeUserIdProvider);
   final serverUrl = ref.read(serverUrlProvider);
   if (userId == null ||
       userId == localUserId ||
+      ref.read(isRegularServerProvider) ||
       serverUrl == null ||
       serverUrl.isEmpty) {
     return null;

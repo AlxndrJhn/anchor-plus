@@ -7365,6 +7365,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No server connected.'**
   String get serverAddressesNone;
+
+  /// Small pill in the drawer and Settings while the app syncs with a regular Anchor server (not Anchor+), whose own features are turned off. Tapping it explains.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular Anchor server'**
+  String get regularServerCrumb;
+
+  /// Screen reader label of the regular Anchor server pill.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular Anchor server: some Anchor+ features are off. Show which'**
+  String get regularServerCrumbLabel;
+
+  /// Title of the dialog explaining that the server is a regular Anchor server, without Anchor+'s features.
+  ///
+  /// In en, this message translates to:
+  /// **'A regular Anchor server'**
+  String get regularServerTitle;
+
+  /// Title of the dialog explaining that the server is a regular Anchor server, without Anchor+'s features.
+  ///
+  /// In en, this message translates to:
+  /// **'{host} is a regular Anchor server'**
+  String regularServerTitleHost(String host);
+
+  /// Dialog message listing what works and what is turned off with a regular Anchor server.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes, tags, reminders, sharing with people and backups work as usual. Anchor+\'s own features need an Anchor+ server, so they are off: locking, freezing and copying notes, editing together live, live pictures, public links, picture search, signed-in devices and dragging notes into your own order.'**
+  String get regularServerMessage;
+
+  /// Button in the dialog shown before connecting to a regular Anchor server.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get regularServerConnect;
+
+  /// Error when a sign-in code or QR points at a regular Anchor server.
+  ///
+  /// In en, this message translates to:
+  /// **'{host} is a regular Anchor server, which can’t sign in with a code. Sign in with your password instead.'**
+  String magicLoginNeedsPlus(String host);
 }
 
 class _AppLocalizationsDelegate
