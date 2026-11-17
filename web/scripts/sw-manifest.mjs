@@ -1,10 +1,13 @@
 // Lists the build's static files for the service worker (public/sw.js) to
 // keep, so every part of the app, even code loaded only when needed, works
-// offline. Runs after `next build`; served as /_next/static/sw-manifest.json.
-import { readdirSync, statSync, writeFileSync } from "node:fs";
+// offline. Runs after `next build`, into the exported site (out/); served as
+// /_next/static/sw-manifest.json.
+import { existsSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
-const dir = join(import.meta.dirname, "..", ".next", "static");
+const web = join(import.meta.dirname, "..");
+const exported = join(web, "out", "_next", "static");
+const dir = existsSync(exported) ? exported : join(web, ".next", "static");
 
 function walk(path) {
   return readdirSync(path).flatMap((name) => {

@@ -36,7 +36,7 @@ pg_restore --list "$DUMP" >/dev/null
 sed -n 's/^ *"\(created\|server\)": *"\(.*\)".*/[restore] backup \1: \2/p' "$MANIFEST" >&2
 
 echo "[restore] Stopping Anchor..." >&2
-supervisorctl -c /etc/supervisord.conf stop web api >/dev/null
+supervisorctl -c /etc/supervisord.conf stop api >/dev/null
 
 echo "[restore] Restoring the database..." >&2
 PGOPTIONS='-c client_min_messages=warning' psql "$DATABASE_URL" -q -v ON_ERROR_STOP=1 \

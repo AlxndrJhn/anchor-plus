@@ -41,6 +41,7 @@ docker run -d --name "$CONTAINER" -p "$PORT:3000" "$IMAGE" >/dev/null
 wait_until_ready
 curl -fsS -o /dev/null "$URL/api/health/ready" || fail "not ready for uptime monitors"
 curl -fsS -o /dev/null "$URL/login" || fail "the login page did not load"
+curl -fsS -o /dev/null "$URL/notes/any-note-id" || fail "a note's page did not load"
 post /api/auth/register "{$CREDENTIALS,\"name\":\"Image test\"}" || fail "could not register"
 TOKEN=$(curl -fsS -X POST -H "Content-Type: application/json" -d "{$CREDENTIALS}" "$URL/api/auth/login" | sed -E 's/.*"access_token":"([^"]+)".*/\1/')
 [ -n "$TOKEN" ] || fail "could not sign in"
