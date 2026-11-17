@@ -42,6 +42,9 @@ wait_until_ready
 curl -fsS -o /dev/null "$URL/api/health/ready" || fail "not ready for uptime monitors"
 curl -fsS -o /dev/null "$URL/login" || fail "the login page did not load"
 curl -fsS -o /dev/null "$URL/notes/any-note-id" || fail "a note's page did not load"
+# Reverse proxies set up before the web app moved into the server point at 3001.
+docker exec "$CONTAINER" curl -fsS -o /dev/null http://127.0.0.1:3001/api/health || fail "the API did not answer on 3001"
+docker exec "$CONTAINER" curl -fsS -o /dev/null http://127.0.0.1:3001/notes/any-note-id || fail "a note's page did not load on 3001"
 post /api/auth/register "{$CREDENTIALS,\"name\":\"Image test\"}" || fail "could not register"
 TOKEN=$(curl -fsS -X POST -H "Content-Type: application/json" -d "{$CREDENTIALS}" "$URL/api/auth/login" | sed -E 's/.*"access_token":"([^"]+)".*/\1/')
 [ -n "$TOKEN" ] || fail "could not sign in"

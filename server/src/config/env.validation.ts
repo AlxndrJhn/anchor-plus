@@ -55,6 +55,13 @@ export class EnvironmentVariables {
   WEB_DIR?: string;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  ALSO_PORT?: number;
+
+  @IsOptional()
   @IsString()
   CORS_ORIGINS?: string;
 

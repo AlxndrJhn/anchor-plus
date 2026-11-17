@@ -2,12 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HTTPError } from "ky";
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
@@ -72,16 +67,13 @@ import {
 } from "@/lib/hooks/use-shortcuts";
 import { swapView } from "@/lib/morph";
 import { hasShortcutKey } from "@/lib/platform";
+import { useRouteId } from "@/lib/route-id";
 import { useSearchHits } from "@/lib/search-hits";
 import { cn } from "@/lib/utils";
 
 export default function NoteEditorPage() {
-  const params = useParams();
   const pathname = usePathname();
-  // After a create in place, params.id stays "new"; the address has the id.
-  const routeId = pathname.startsWith("/notes/")
-    ? decodeURIComponent(pathname.slice("/notes/".length))
-    : (params.id as string);
+  const routeId = useRouteId("notes");
   const [newVisit, setNewVisit] = useState(0);
   const [createdHere, setCreatedHere] = useState<string | null>(null);
   const [seenPath, setSeenPath] = useState(pathname);

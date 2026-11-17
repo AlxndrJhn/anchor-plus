@@ -41,6 +41,17 @@
         "noArrayIndexKey": "off"
       },
       "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "next/navigation": {
+                "importNames": ["useParams"],
+                "message": "The static build has one page per dynamic route (e.g. /notes/new for every note), so useParams() returns its placeholder in production. Read the id from the address with useRouteId() from @/lib/route-id."
+              }
+            }
+          }
+        },
         "noNonNullAssertion": "off",
         "noDescendingSpecificity": "off"
       },

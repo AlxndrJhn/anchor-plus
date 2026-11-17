@@ -30,7 +30,8 @@ Nest.js backend for Anchor application.
     at least 16 characters. Optional: `APP_URL`, `DATA_DIR` (uploads root,
     defaults to `/data`), `CORS_ORIGINS` (comma-separated allowlist), `WEB_DIR`
     (the web app's static build, `../web/out`, to serve on the same port; unset
-    serves only the API).
+    serves only the API) and `ALSO_PORT` (a second port that answers like
+    `PORT`).
 
 3.  Start Database:
     From the project root:

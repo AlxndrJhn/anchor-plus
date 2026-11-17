@@ -12,7 +12,6 @@ import {
   RotateCw,
   Snowflake,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Delta, { type Op } from "quill-delta";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -36,6 +35,7 @@ import { parseStoredContent, stringifyDelta } from "@/features/notes/quill";
 import type { SharedNote } from "@/features/notes/types";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { isServerless } from "@/lib/local-backend/mode";
+import { useRouteId } from "@/lib/route-id";
 import { cn } from "@/lib/utils";
 
 // Long enough typing without a pause still saves this often, for others to see.
@@ -54,8 +54,7 @@ const statusOf = (error: unknown) =>
 /** A note opened by its share link: no account, no sidebar. */
 export default function SharedNotePage() {
   const t = useTranslations("auth.sharedNote");
-  // From the address: the static build has one page for every share link.
-  const token = decodeURIComponent(usePathname().split("/")[2] ?? "");
+  const token = useRouteId("s");
   const [live, setLive] = useState(false);
 
   // The note's pictures and files come through the link too.

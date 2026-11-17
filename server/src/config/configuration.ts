@@ -14,6 +14,14 @@ export const AppConfig = registerAs('app', () => ({
       .filter(Boolean) ?? [],
   /** The web app's static build (web/out) to serve too; unset serves only the API. */
   webDir: process.env.WEB_DIR?.trim() || undefined,
+  /**
+   * A second port that answers exactly like PORT. The Docker image sets it to
+   * 3001, where the API listened before it served the web app too, so a
+   * reverse proxy still pointing there keeps working.
+   */
+  alsoPort: process.env.ALSO_PORT
+    ? parseInt(process.env.ALSO_PORT, 10)
+    : undefined,
 }));
 
 export const DatabaseConfig = registerAs('database', () => ({
