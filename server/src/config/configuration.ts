@@ -12,6 +12,8 @@ export const AppConfig = registerAs('app', () => ({
     process.env.CORS_ORIGINS?.split(',')
       .map((origin) => origin.trim())
       .filter(Boolean) ?? [],
+  /** The web app's static build (web/out) to serve too; unset serves only the API. */
+  webDir: process.env.WEB_DIR?.trim() || undefined,
 }));
 
 export const DatabaseConfig = registerAs('database', () => ({

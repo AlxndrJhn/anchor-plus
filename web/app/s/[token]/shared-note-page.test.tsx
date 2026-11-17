@@ -9,7 +9,7 @@ import { WithIntl } from "@/lib/i18n/test-utils";
 import SharedNotePage from "./shared-note-page";
 
 vi.mock("next/navigation", () => ({
-  useParams: () => ({ token: "tok" }),
+  usePathname: () => "/s/tok",
 }));
 vi.mock("@/features/notes/api", () => ({
   fetchAttachmentBlob: vi.fn(),

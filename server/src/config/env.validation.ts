@@ -52,6 +52,10 @@ export class EnvironmentVariables {
 
   @IsOptional()
   @IsString()
+  WEB_DIR?: string;
+
+  @IsOptional()
+  @IsString()
   CORS_ORIGINS?: string;
 
   @IsOptional()

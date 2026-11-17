@@ -4,7 +4,7 @@ FROM node:26-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a
 COPY --from=ghcr.io/pnpm/pnpm:12.16.1-alpine /opt/pnpm /opt/pnpm
 RUN for bin in pnpm pn pnpx pnx; do ln -s "/opt/pnpm/$bin" "/usr/local/bin/$bin"; done
 
-# Next.js on Alpine can need libc compatibility
+# Some native Node modules on Alpine need libc compatibility
 RUN apk add --no-cache libc6-compat
 
 #
@@ -50,14 +50,14 @@ COPY --from=web_deps /app/web/node_modules ./node_modules
 COPY web/ ./
 
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV SERVER_URL=http://127.0.0.1:3001
 # The Anchor+ release the web app shows in Settings › About.
 ARG ANCHOR_VERSION=
 ENV ANCHOR_VERSION=$ANCHOR_VERSION
 RUN pnpm build
 
 #
-# Runtime image (single container: postgres + api + web)
+# Runtime image (single container: Postgres + the server, which also serves
+# the web app)
 #
 # Plain Alpine with Postgres from apk, not the postgres image: that one
 # declares a VOLUME for its own data directory, which Docker would create
@@ -67,7 +67,6 @@ FROM alpine:3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 ENV PGDATA=/data/postgres
 # The entrypoint refuses a database from another major version.
 ENV PG_MAJOR=18
@@ -97,10 +96,9 @@ COPY --from=server_builder /app/server/prisma ./server/prisma
 COPY --from=server_builder /app/server/package.json ./server/package.json
 COPY --from=server_builder /app/server/prisma.config.ts ./server/prisma.config.ts
 
-# Web runtime files (Next standalone output)
-COPY --from=web_builder /app/web/.next/standalone ./web
-COPY --from=web_builder /app/web/.next/static ./web/.next/static
-COPY --from=web_builder /app/web/public ./web/public
+# The web app: a static build the server hands out itself (no Next.js server)
+COPY --from=web_builder /app/web/out ./web
+ENV WEB_DIR=/app/web
 
 COPY docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 COPY docker/anchor-env.sh /app/anchor-env.sh
@@ -123,7 +121,7 @@ VOLUME ["/data"]
 
 EXPOSE 3000
 
-# Validates web and API routing via Next rewrite (/api/*), and the database
+# Validates the server, which serves the web app and /api, and the database
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=30s \
   CMD curl -f http://localhost:3000/api/health/ready || exit 1
 

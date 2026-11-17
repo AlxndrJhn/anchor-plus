@@ -161,10 +161,10 @@ echo "[anchor] Running migrations..."
 ./node_modules/.bin/prisma migrate deploy
 
 # -----------------------------------------------------------------------------
-# Start supervisord (manages API + Web processes)
+# Start supervisord (runs the server: API and web app)
 # -----------------------------------------------------------------------------
 # This shell stays PID 1, so that on `docker stop` (and so on every
-# `docker compose up --force-recreate`) it stops the API and web first, then
+# `docker compose up --force-recreate`) it stops the server first, then
 # shuts Postgres down cleanly (stop_services above). Were supervisord PID 1,
 # Postgres, which it doesn't manage, would be killed when it exited.
 echo "[anchor] Starting services..."

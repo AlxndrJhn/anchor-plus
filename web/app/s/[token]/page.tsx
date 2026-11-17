@@ -1,10 +1,10 @@
-import { isServerless } from "@/lib/local-backend/mode";
 import SharedNotePage from "./shared-note-page";
 
-// Share links need a server; a static build has a page here only so the
-// build has one to export.
+// One page for every share link: it reads the token from the address, and
+// the server (server/src/web-app.ts) hands it out for every /s/<token>. The
+// serverless builds have it only so there is one to export.
 export function generateStaticParams() {
-  return isServerless ? [{ token: "none" }] : [];
+  return [{ token: "none" }];
 }
 
 export default function Page() {

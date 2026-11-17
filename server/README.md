@@ -28,7 +28,9 @@ Nest.js backend for Anchor application.
     app fails fast with a clear message if a required value is missing or
     invalid. `DATABASE_URL` and `JWT_SECRET` are required; `JWT_SECRET` must be
     at least 16 characters. Optional: `APP_URL`, `DATA_DIR` (uploads root,
-    defaults to `/data`), `CORS_ORIGINS` (comma-separated allowlist).
+    defaults to `/data`), `CORS_ORIGINS` (comma-separated allowlist), `WEB_DIR`
+    (the web app's static build, `../web/out`, to serve on the same port; unset
+    serves only the API).
 
 3.  Start Database:
     From the project root:

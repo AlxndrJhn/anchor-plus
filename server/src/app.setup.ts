@@ -12,6 +12,7 @@ import {
 import { AppValidationPipe } from './common/pipes/app-validation.pipe';
 import { requestContextMiddleware } from './common/utils/request-context';
 import { PROFILE_IMAGE_EXTENSIONS } from './auth/utils/profile-image.util';
+import { serveWebApp } from './web-app';
 
 export function setupApp(app: NestExpressApplication): void {
   const appConfig = app.get<ConfigType<typeof AppConfig>>(AppConfig.KEY);
@@ -20,6 +21,8 @@ export function setupApp(app: NestExpressApplication): void {
   );
 
   app.useBodyParser('json', { limit: '30mb' });
+
+  serveWebApp(app, appConfig.webDir);
 
   app.use(helmet());
   app.use(requestContextMiddleware);

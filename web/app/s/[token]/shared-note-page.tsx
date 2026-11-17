@@ -12,7 +12,7 @@ import {
   RotateCw,
   Snowflake,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Delta, { type Op } from "quill-delta";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -54,7 +54,8 @@ const statusOf = (error: unknown) =>
 /** A note opened by its share link: no account, no sidebar. */
 export default function SharedNotePage() {
   const t = useTranslations("auth.sharedNote");
-  const { token } = useParams<{ token: string }>();
+  // From the address: the static build has one page for every share link.
+  const token = decodeURIComponent(usePathname().split("/")[2] ?? "");
   const [live, setLive] = useState(false);
 
   // The note's pictures and files come through the link too.

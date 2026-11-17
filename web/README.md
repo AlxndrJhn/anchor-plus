@@ -73,7 +73,7 @@ Edit `.env.local` (if using a custom server URL):
 SERVER_URL=http://localhost:3001
 ```
 
-**Note**: By default, the app proxies `/api/*` requests to `http://127.0.0.1:3001/api/*` via Next.js rewrites. The `SERVER_URL` environment variable is only needed if your backend runs on a different host/port.
+**Note**: By default, `pnpm dev` proxies `/api/*` requests to `http://127.0.0.1:3001/api/*` via Next.js rewrites. The `SERVER_URL` environment variable is only needed if your backend runs on a different host/port.
 
 4. Run the development server:
 
@@ -82,6 +82,17 @@ pnpm dev
 ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Production build
+
+`pnpm build` writes a static site to `out/`: plain files, no Next.js server.
+The Anchor+ server serves it itself when `WEB_DIR` points at it (the Docker
+image does this), on the same port as the API:
+
+```bash
+pnpm build
+cd ../server && WEB_DIR=../web/out pnpm start
+```
 
 ## Project Structure
 
@@ -134,11 +145,11 @@ web/
 
 ## Environment Variables
 
-| Variable     | Description                                 | Default                 |
-| ------------ | ------------------------------------------- | ----------------------- |
-| `SERVER_URL` | Backend API URL (used for Next.js rewrites) | `http://127.0.0.1:3001` |
+| Variable     | Description                                               | Default                 |
+| ------------ | --------------------------------------------------------- | ----------------------- |
+| `SERVER_URL` | Backend API URL (used for Next.js rewrites in `pnpm dev`) | `http://127.0.0.1:3001` |
 
-**Note**: The web app uses Next.js rewrites to proxy `/api/*` requests to the backend server. Client-side code makes requests to `/api/*` which are automatically rewritten to the backend. The `SERVER_URL` environment variable is only needed if your backend runs on a different host/port than the default.
+**Note**: Client-side code makes requests to `/api/*` on its own origin. In `pnpm dev`, Next.js rewrites forward them to the backend server; in production the server serves the web app itself, so they reach it directly. The `SERVER_URL` environment variable is only needed if your backend runs on a different host/port than the default in development.
 
 ## Development
 
