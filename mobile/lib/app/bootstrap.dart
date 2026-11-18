@@ -126,7 +126,7 @@ Future<AppBootstrap> initializeApp({
   final colorScheme = schemeById(savedScheme) == null
       ? anchorSchemeId
       : savedScheme!;
-  final appStyle = AppStyle.fromId(await preferences.getAppStyle());
+  unawaited(preferences.removeLegacyAppStyle());
   final customTheme = CustomTheme.decode(await preferences.getCustomTheme());
 
   final savedFont = await preferences.getNoteFont();
@@ -204,7 +204,6 @@ Future<AppBootstrap> initializeApp({
     motionSpeed: speed,
     appLanguage: language,
     colorScheme: colorScheme,
-    appStyle: appStyle,
     customTheme: customTheme,
     editorPreferences: editorPreferences,
     reminderPreferences: reminderPreferences,

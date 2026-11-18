@@ -607,10 +607,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsColorScheme => 'Color scheme';
 
   @override
-  String get settingsColorSchemeLofi =>
-      'Lo-fi draws in pencil grays, whatever the scheme.';
-
-  @override
   String get colorSchemeAnchor => 'Anchor+';
 
   @override
@@ -623,12 +619,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCustomThemeOn => 'On';
 
   @override
-  String get settingsCustomThemeLofi =>
-      'Lo-fi keeps its pencil grays, so the custom theme waits for another style.';
-
-  @override
   String get customThemeHelp =>
-      'Paste a theme as JSON: colors for light, dark or both. Anything left out keeps the color scheme\'s color. Kept on this device; the same JSON works on the web.';
+      'Paste a theme as JSON: colors for light, dark or both, and a style for fonts, corners, shadows and texture. Anything left out keeps the color scheme\'s color and Anchor\'s look. Kept on this device; the same JSON works on the web.';
 
   @override
   String get customThemeJsonLabel => 'Theme JSON';
@@ -663,7 +655,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customThemeNotObject =>
-      'The theme must be a JSON object with \"light\" or \"dark\" colors';
+      'The theme must be a JSON object with \"light\" or \"dark\" colors or a \"style\"';
 
   @override
   String customThemeUnknownKey(String key, String expected) {
@@ -694,34 +686,39 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get customThemeNoMode => 'Give at least one of \"light\" or \"dark\"';
+  String get customThemeNoMode =>
+      'Give at least one of \"light\", \"dark\" or \"style\"';
 
   @override
-  String get settingsStyle => 'Style';
+  String get customThemeStyleNotObject => 'style: must be an object';
 
   @override
-  String get styleDefault => 'Default';
+  String customThemeBadStyleValue(String key, String value, String expected) {
+    return '$key: $value is not one of $expected';
+  }
 
   @override
-  String get styleDefaultHelp => 'Anchor as designed';
+  String get customThemeRadiusNotValid =>
+      'style.radius: must be a number from 0 to 40 or four [x, y] corners';
 
   @override
-  String get styleSkeuomorphism => 'Skeuomorphism';
+  String customThemePatternNotObject(String key) {
+    return '$key: must be an object with shape, size, thickness, color and opacity';
+  }
 
   @override
-  String get styleSkeuomorphismHelp => 'Paper, linen and depth';
+  String customThemeNotNumber(String key, String min, String max) {
+    return '$key: must be a number from $min to $max';
+  }
 
   @override
-  String get styleNeoBrutalism => 'Neo-Brutalism';
+  String customThemeNotStyleColor(String key, String value) {
+    return '$key: $value is not a color or a color key; use #rgb, #rrggbb, #rrggbbaa or a key such as foreground';
+  }
 
   @override
-  String get styleNeoBrutalismHelp => 'Thick outlines, hard shadows';
-
-  @override
-  String get styleLofi => 'Lo-fi';
-
-  @override
-  String get styleLofiHelp => 'A pencil-and-paper prototype';
+  String get customThemeShadowNotValid =>
+      'style.shadow: must be \"none\" or an object';
 
   @override
   String get settingsTheme => 'Theme';

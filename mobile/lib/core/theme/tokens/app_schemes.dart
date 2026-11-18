@@ -481,39 +481,3 @@ const appSchemes = <AppScheme>[
     ),
   ),
 ];
-
-/// The Lo-fi style's own greys, used whatever the scheme.
-const lofiScheme = AppScheme(
-  id: 'lofi',
-  name: 'Lo-fi',
-  light: SchemePalette(
-      background: Color(0xFFF7F6F2),
-      card: Color(0xFFFFFFFF),
-      sidebar: Color(0xFFEFEEE9),
-      muted: Color(0xFFEBEAE5),
-      foreground: Color(0xFF2B2B2B),
-      mutedForeground: Color(0xFF5F5F5F),
-      accent: Color(0xFF3A3A3A),
-      accentStrong: Color(0xFF2B2B2B),
-      accentInk: Color(0xFF2B2B2B),
-      border: Color(0xFF9A9A9A),
-      divider: Color(0xFFCFCFCF),
-      input: Color(0xFF7A7A7A),
-      destructive: Color(0xFF7A2A2A),
-    ),
-  dark: SchemePalette(
-      background: Color(0xFF1F1F1F),
-      card: Color(0xFF2A2A2A),
-      sidebar: Color(0xFF1A1A1A),
-      muted: Color(0xFF333333),
-      foreground: Color(0xFFE6E6E6),
-      mutedForeground: Color(0xFFA8A8A8),
-      accent: Color(0xFFD0D0D0),
-      accentStrong: Color(0xFFD9D9D9),
-      accentInk: Color(0xFFE6E6E6),
-      border: Color(0xFF6E6E6E),
-      divider: Color(0xFF3A3A3A),
-      input: Color(0xFF8A8A8A),
-      destructive: Color(0xFFE39A9A),
-    ),
-);

@@ -8,6 +8,7 @@ import 'app/router/app_router.dart';
 import 'core/motion/springs.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/style_typography.dart';
+import 'core/theme/tokens/app_style.dart';
 import 'core/update/app_updater.dart';
 import 'features/auth/presentation/magic_link_handler.dart';
 import 'features/debug_recorder/data/debug_state_observer.dart';
@@ -71,7 +72,6 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
     final themeMode = ref.watch(themeModeControllerProvider);
     final density = ref.watch(displayDensityControllerProvider);
     final scheme = ref.watch(colorSchemeControllerProvider);
-    final style = ref.watch(appStyleControllerProvider);
     final customTheme = ref.watch(customThemeControllerProvider);
     final language = ref.watch(appLanguageControllerProvider);
     final (font, textSize, lineSpacing) = ref.watch(
@@ -106,7 +106,6 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
         font,
         textSize,
         scheme,
-        style,
         customTheme,
         lineSpacing,
       ),
@@ -115,7 +114,6 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
         font,
         textSize,
         scheme,
-        style,
         customTheme,
         lineSpacing,
       ),
@@ -125,7 +123,7 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
           : null,
       routerConfig: router,
       builder: (context, child) => StyleTypography(
-        style: style,
+        style: customTheme?.style ?? ThemeStyle.standard,
         // Debug mode: hold two fingers still for 3 s to film the app.
         child: DebugRecorderHost(child: BackdropGroup(child: child!)),
       ),

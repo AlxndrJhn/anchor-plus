@@ -13,7 +13,7 @@ export function applyThemeColor() {
 
 /**
  * Keeps the browser's theme color, and so an installed app's window, on the
- * chosen theme, scheme, style and custom theme. Only the two tags in the
+ * chosen theme, scheme and custom theme. Only the two tags in the
  * root layout would follow the system's light or dark, not the app's.
  */
 export function useThemeColor() {
@@ -22,12 +22,7 @@ export function useThemeColor() {
     const observer = new MutationObserver(applyThemeColor);
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: [
-        "class",
-        "data-scheme",
-        "data-style",
-        "data-custom-theme",
-      ],
+      attributeFilter: ["class", "data-scheme", "data-custom-theme"],
     });
     // A custom theme's colours are a style element's text.
     observer.observe(document.head, {

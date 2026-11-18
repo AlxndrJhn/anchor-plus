@@ -1,17 +1,18 @@
 /*
  * Settings › Appearance. The colour schemes themselves are generated into
- * schemes.css; this file holds what they share and the three styles.
- * A custom theme (lib/design/custom-theme) puts data-custom-theme on <html>
- * and its colours in a <style id="custom-theme">.
- * <html> carries data-scheme (any but Anchor's own) and data-style (any but
- * Default).
+ * schemes.css; this file holds what they share and what a custom theme's
+ * style does.
+ * A custom theme (lib/design/custom-theme) puts data-custom-theme on <html>,
+ * its colours in a <style id="custom-theme"> and its style as data-style-*
+ * attributes, one per setting that isn't the default (styleAttributes).
+ * THEMES.md puts the settings together into whole looks.
+ * <html> carries data-scheme for any scheme but Anchor's own.
  */
 
 /* A plain note takes the scheme's (or custom theme's) card colour instead of
    Anchor's white. */
 html[data-scheme] [data-note=""],
-html[data-custom-theme] [data-note=""],
-html[data-style] [data-note=""] {
+html[data-custom-theme] [data-note=""] {
   --note: var(--card);
   --note-surface: color-mix(in srgb, var(--foreground) 7%, var(--card));
   --note-border: var(--border);
@@ -20,241 +21,58 @@ html[data-style] [data-note=""] {
 }
 
 /* ------------------------------------------------------------------------ */
-/* Skeuomorphism: real materials. Linen behind, paper notes with a ruled     */
-/* body, glossy raised controls and soft, physical shadows.                 */
+/* font and titleFont                                                       */
 /* ------------------------------------------------------------------------ */
 
-html[data-style="skeuomorphism"] {
-  --radius-card: 10px;
-  --radius-note: 10px;
-  --radius-button: 9px;
-  --sh-xs:
-    0 1px 0 rgb(255 255 255 / 0.55) inset, 0 1px 2px rgb(0 0 0 / 0.18),
-    0 2px 6px rgb(0 0 0 / 0.1);
-  --sh-raised:
-    0 1px 0 rgb(255 255 255 / 0.5) inset, 0 2px 3px rgb(0 0 0 / 0.16),
-    0 10px 24px -6px rgb(0 0 0 / 0.28);
-  --sh-menu: 0 2px 4px rgb(0 0 0 / 0.2), 0 14px 32px -8px rgb(0 0 0 / 0.38);
-  --sh-dialog: 0 3px 6px rgb(0 0 0 / 0.22), 0 30px 60px -18px rgb(0 0 0 / 0.5);
+html[data-style-font="serif"] {
+  --font-sans: var(--font-playfair), Georgia, serif;
 }
-html.dark[data-style="skeuomorphism"] {
-  --sh-xs:
-    0 1px 0 rgb(255 255 255 / 0.07) inset, 0 1px 2px rgb(0 0 0 / 0.5),
-    0 3px 8px rgb(0 0 0 / 0.35);
-  --sh-raised:
-    0 1px 0 rgb(255 255 255 / 0.07) inset, 0 2px 4px rgb(0 0 0 / 0.5),
-    0 12px 28px -6px rgb(0 0 0 / 0.6);
-}
-/* Linen: two fine cross weaves over the page colour. */
-html[data-style="skeuomorphism"] [data-slot="app-shell"] {
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgb(0 0 0 / 0.05) 0 1px,
-      transparent 1px 3px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgb(255 255 255 / 0.08) 0 1px,
-      transparent 1px 3px
-    );
-}
-/* Paper: a light catching the top edge and a soft fall-off below. */
-html[data-style="skeuomorphism"] .nc {
-  background-image:
-    linear-gradient(180deg, rgb(255 255 255 / 0.35), transparent 40%),
-    var(--note-image, none);
-  box-shadow: var(--sh-raised);
-}
-/* Ruled paper behind the note's text, one rule per line. */
-html[data-style="skeuomorphism"] .ed .ql-editor {
-  background-image: linear-gradient(
-    to bottom,
-    transparent calc(1lh - 1px),
-    color-mix(in srgb, var(--note-muted) 22%, transparent) calc(1lh - 1px),
-    color-mix(in srgb, var(--note-muted) 22%, transparent) 1lh
-  );
-  background-size: 100% 1lh;
-  background-attachment: local;
-}
-html[data-style="skeuomorphism"] .n-title,
-html[data-style="skeuomorphism"] .nc-title,
-html[data-style="skeuomorphism"] h1 {
-  font-family: var(--font-serif);
-  letter-spacing: 0;
-}
-/* Glossy, pressable buttons. */
-html[data-style="skeuomorphism"] [data-slot="button"][data-variant="primary"],
-html[data-style="skeuomorphism"]
-  [data-slot="button"][data-variant="secondary"] {
-  background-image: linear-gradient(
-    180deg,
-    rgb(255 255 255 / 0.28),
-    rgb(255 255 255 / 0.05) 50%,
-    rgb(0 0 0 / 0.08)
-  );
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.45),
-    inset 0 -1px 0 rgb(0 0 0 / 0.12),
-    0 1px 2px rgb(0 0 0 / 0.25);
-}
-html[data-style="skeuomorphism"] [data-slot="button"]:active {
-  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.3);
-}
-/* Fields and the search box are pressed into the surface. */
-html[data-style="skeuomorphism"] [data-slot="input"],
-html[data-style="skeuomorphism"] [data-search-field] {
-  box-shadow:
-    inset 0 2px 4px rgb(0 0 0 / 0.14),
-    inset 0 0 0 1px var(--border),
-    0 1px 0 rgb(255 255 255 / 0.5);
-}
-
-/* ------------------------------------------------------------------------ */
-/* Neo-Brutalism: thick ink outlines, hard offset shadows, square-ish       */
-/* corners and a bold grotesque typeface, on the scheme's own colours.      */
-/* ------------------------------------------------------------------------ */
-
-html[data-style="neo-brutalism"] {
+html[data-style-font="grotesk"] {
   --font-sans:
     var(--font-space-grotesk), ui-sans-serif, system-ui, -apple-system,
     sans-serif;
-  --ink: var(--foreground);
-  --border: var(--foreground);
-  --divider: color-mix(in srgb, var(--foreground) 35%, transparent);
-  --radius-xs: 3px;
-  --radius-sm: 4px;
-  --radius-md: 5px;
-  --radius-lg: 6px;
-  --radius-xl: 6px;
-  --radius-2xl: 6px;
-  --radius-3xl: 8px;
-  --radius-4xl: 10px;
-  --radius-note: 6px;
-  --radius-card: 6px;
-  --radius-fab: 8px;
-  --radius-checkbox: 3px;
-  --radius-menu-item: 3px;
-  --radius-menu: 6px;
-  --radius-popover: 6px;
-  --radius-button: 6px;
-  --radius-field: 6px;
-  --radius-tile: 6px;
-  --radius-floating: 6px;
-  --radius-dialog: 8px;
-  --radius-sheet: 10px;
-  --sh-xs: 2px 2px 0 0 var(--ink);
-  --sh-sm: 3px 3px 0 0 var(--ink);
-  --sh-edge: 0 0 0 2px var(--ink);
-  --sh-control: 3px 3px 0 0 var(--ink);
-  --sh-raised: 0 0 0 2px var(--ink), 5px 5px 0 2px var(--ink);
-  --sh-floating: 0 0 0 2px var(--ink), 5px 5px 0 2px var(--ink);
-  --sh-menu: 0 0 0 2px var(--ink), 5px 5px 0 2px var(--ink);
-  --sh-lift: 0 0 0 2px var(--ink), 8px 8px 0 2px var(--ink);
-  --sh-dialog: 0 0 0 2px var(--ink), 8px 8px 0 2px var(--ink);
-  --sh-bar: 0 0 0 2px var(--ink), 6px 6px 0 2px var(--ink);
-  --sh-fab: 0 0 0 2px var(--ink), 5px 5px 0 2px var(--ink);
 }
-html[data-style="neo-brutalism"] .nc {
-  box-shadow:
-    0 0 0 2px var(--ink),
-    4px 4px 0 2px var(--ink);
-  transition:
-    transform var(--duration-hover),
-    box-shadow var(--duration-hover);
-}
-html[data-style="neo-brutalism"] .nc:hover {
-  transform: translate(-2px, -2px);
-  box-shadow:
-    0 0 0 2px var(--ink),
-    6px 6px 0 2px var(--ink);
-}
-html[data-style="neo-brutalism"]
-  [data-slot="button"]:is(
-    [data-variant="primary"],
-    [data-variant="secondary"],
-    [data-variant="destructive"]
-  ) {
-  background-image: none;
-  box-shadow:
-    0 0 0 2px var(--ink),
-    3px 3px 0 2px var(--ink);
-}
-html[data-style="neo-brutalism"] [data-slot="button"]:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 2px var(--ink);
-}
-/* Card-filled with ink text: readable on every scheme; the accent shows on hover. */
-html[data-style="neo-brutalism"]
-  :is([data-slot="button"][data-variant="primary"], [data-slot="new-note"]) {
-  background: var(--card);
-  color: var(--ink);
-}
-html[data-style="neo-brutalism"]
-  :is(
-    [data-slot="button"][data-variant="primary"],
-    [data-slot="new-note"]
-  ):hover {
-  background: color-mix(in srgb, var(--accent) 30%, var(--card));
-}
-html[data-style="neo-brutalism"]
-  :is(
-    [data-slot="input"],
-    [data-search-field],
-    [data-slot="menu"],
-    [data-slot="popover"],
-    [data-slot="dialog"]
-  ) {
-  box-shadow:
-    0 0 0 2px var(--ink),
-    4px 4px 0 2px var(--ink);
-}
-html[data-style="neo-brutalism"] :is(.n-title, .nc-title, h1, h2) {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-/* ------------------------------------------------------------------------ */
-/* Lo-fi: a paper prototype. Pencil greys (from schemes.css), handwriting, */
-/* wobbly hand-drawn outlines and no depth.                                 */
-/* ------------------------------------------------------------------------ */
-
-html[data-style="lofi"] {
+html[data-style-font="handwriting"] {
   --font-sans:
     var(--font-patrick-hand), "Comic Sans MS", "Segoe Print", cursive;
   --font-serif: var(--font-sans);
-  --pencil: color-mix(in srgb, var(--foreground) 75%, transparent);
-  --wobble: 255px 12px 225px 12px / 12px 225px 12px 255px;
-  --sh-xs: none;
-  --sh-sm: none;
-  --sh-raised: none;
-  --sh-floating: none;
-  --sh-menu: none;
-  --sh-lift: none;
-  --sh-dialog: none;
-  --sh-control: none;
-  --sh-bar: none;
-  --sh-fab: none;
-  --sh-edge: none;
 }
-/* Every note, coloured or not, is plain paper; pictures are sketched grey. */
-html[data-style="lofi"] [data-note] {
-  --note: var(--card);
-  --note-surface: color-mix(in srgb, var(--foreground) 6%, var(--card));
-  --note-border: var(--border);
-  --note-pattern: var(--card);
-  --note-muted: var(--muted-foreground);
-  --note-image: none;
-  --hl-yellow: #e4e4e4;
-  --hl-green: #e4e4e4;
-  --hl-blue: #e4e4e4;
-  --hl-pink: #e4e4e4;
-  --hl-purple: #e4e4e4;
+html[data-style-title-font="sans"] :is(.n-title, .nc-title, h1, h2) {
+  font-family:
+    var(--font-dm-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
 }
-html[data-style="lofi"] img {
-  filter: grayscale(1) contrast(1.1);
+html[data-style-title-font="serif"] :is(.n-title, .nc-title, h1) {
+  font-family: var(--font-playfair), Georgia, serif;
+  letter-spacing: 0;
 }
-html[data-style="lofi"]
+html[data-style-title-font="grotesk"] :is(.n-title, .nc-title, h1, h2) {
+  font-family:
+    var(--font-space-grotesk), ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+  letter-spacing: -0.01em;
+}
+html[data-style-title-font="handwriting"] :is(.n-title, .nc-title, h1, h2) {
+  font-family:
+    var(--font-patrick-hand), "Comic Sans MS", "Segoe Print", cursive;
+}
+
+/* ------------------------------------------------------------------------ */
+/* titleWeight; radius, outline and shadow set CSS variables of their own   */
+/* (styleOutput), used here and by every component.                         */
+/* ------------------------------------------------------------------------ */
+
+html[data-style-title-weight] :is(.n-title, .nc-title, h1, h2) {
+  font-weight: var(--title-weight);
+}
+
+/* A raised note card wears the theme's shadow. */
+html[data-style-shadow] .nc {
+  box-shadow: var(--sh-raised);
+}
+
+/* outline: a line around cards, fields, menus, dialogs and buttons. */
+html[data-style-outline]
   :is(
     .nc,
     [data-slot="input"],
@@ -262,59 +80,46 @@ html[data-style="lofi"]
     [data-slot="menu"],
     [data-slot="popover"],
     [data-slot="dialog"],
+    [data-slot="new-note"],
     [data-slot="button"]:is(
       [data-variant="primary"],
       [data-variant="secondary"],
       [data-variant="destructive"]
     )
-  ) {
-  border-radius: var(--wobble);
-  box-shadow: none;
-  outline: 1.75px solid var(--pencil);
-  outline-offset: -1px;
-}
-html[data-style="lofi"] .nc:nth-child(even) {
-  --wobble: 15px 225px 15px 255px / 255px 15px 225px 15px;
-}
-html[data-style="lofi"] [data-slot="button"][data-variant="primary"] {
-  background: transparent;
-  background-image: none;
-  color: var(--foreground);
-}
-/* Wireframe placeholders: a crossed box where a picture would be. */
-html[data-style="lofi"] .nc-pics .ph {
-  background:
-    linear-gradient(
-      to top right,
-      transparent calc(50% - 1px),
-      var(--pencil) 50%,
-      transparent calc(50% + 1px)
-    ),
-    linear-gradient(
-      to bottom right,
-      transparent calc(50% - 1px),
-      var(--pencil) 50%,
-      transparent calc(50% + 1px)
-    );
-}
-html[data-style="lofi"] [data-slot="app-shell"] {
-  background-image: radial-gradient(
-    color-mix(in srgb, var(--foreground) 14%, transparent) 1px,
-    transparent 1px
-  );
-  background-size: 18px 18px;
+  ):not(:focus-visible) {
+  outline: var(--style-outline) solid var(--style-outline-color);
+  outline-offset: 0;
 }
 
-html[data-style="lofi"] [data-slot="new-note"] {
-  background: transparent;
-  color: var(--foreground);
-  border-radius: var(--wobble);
-  box-shadow: none;
-  outline: 1.75px solid var(--pencil);
-  outline-offset: -1px;
+/* ------------------------------------------------------------------------ */
+/* pagePattern, notePattern, noteColor and highlightColor                   */
+/* ------------------------------------------------------------------------ */
+
+/* A pattern over the page colour. */
+html[data-style-page-pattern] [data-slot="app-shell"] {
+  background-image: var(--style-page-pattern);
+  background-size: var(--style-page-pattern-size);
 }
-html[data-style="neo-brutalism"] [data-slot="new-note"] {
-  box-shadow:
-    0 0 0 2px var(--ink),
-    3px 3px 0 2px var(--ink);
+/* A pattern behind the note's text, scrolling with it. */
+html[data-style-note-pattern] .ed .ql-editor {
+  background-image: var(--style-note-pattern);
+  background-size: var(--style-note-pattern-size);
+  background-attachment: local;
+}
+/* Every note in one colour, whatever its own colour or background. */
+html[data-style-note-color] [data-note] {
+  --note: var(--style-note);
+  --note-surface: color-mix(in srgb, var(--foreground) 6%, var(--style-note));
+  --note-border: var(--border);
+  --note-pattern: var(--style-note);
+  --note-muted: var(--muted-foreground);
+  --note-image: none;
+}
+/* Every highlight in one colour. */
+html[data-style-highlight-color] [data-note] {
+  --hl-yellow: var(--style-highlight);
+  --hl-green: var(--style-highlight);
+  --hl-blue: var(--style-highlight);
+  --hl-pink: var(--style-highlight);
+  --hl-purple: var(--style-highlight);
 }

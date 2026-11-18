@@ -32,37 +32,39 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'semantics_helpers.dart';
+import 'style_themes.dart';
 
-ThemeData _light(String scheme, [AppStyle style = AppStyle.standard]) =>
-    AppTheme.light(
-      DisplayDensity.standard,
-      NoteFont.sans,
-      NoteTextSize.standard,
-      scheme,
-      style,
-    );
+ThemeData _light(String scheme, [CustomTheme? custom]) => AppTheme.light(
+  DisplayDensity.standard,
+  NoteFont.sans,
+  NoteTextSize.standard,
+  scheme,
+  custom,
+);
 
-ThemeData _dark(String scheme, [AppStyle style = AppStyle.standard]) =>
-    AppTheme.dark(
-      DisplayDensity.standard,
-      NoteFont.sans,
-      NoteTextSize.standard,
-      scheme,
-      style,
-    );
+ThemeData _dark(String scheme, [CustomTheme? custom]) => AppTheme.dark(
+  DisplayDensity.standard,
+  NoteFont.sans,
+  NoteTextSize.standard,
+  scheme,
+  custom,
+);
 
-/// A grouped list and a line of text, in [scheme] and [style].
+/// A grouped list and a line of text, in [scheme] and the [custom] theme.
 class _Host extends StatelessWidget {
-  const _Host({required this.scheme, required this.style});
+  const _Host({required this.scheme, this.custom});
 
   final String scheme;
-  final AppStyle style;
+  final CustomTheme? custom;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    theme: _light(scheme, style),
+    theme: _light(scheme, custom),
     themeAnimationStyle: AnimationStyle.noAnimation,
-    builder: (context, child) => StyleTypography(style: style, child: child!),
+    builder: (context, child) => StyleTypography(
+      style: custom?.style ?? ThemeStyle.standard,
+      child: child!,
+    ),
     home: const Scaffold(
       body: Column(
         children: [
@@ -94,7 +96,6 @@ class _SettingsApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = ref.watch(colorSchemeControllerProvider);
-    final style = ref.watch(appStyleControllerProvider);
     final custom = ref.watch(customThemeControllerProvider);
     return MaterialApp(
       theme: AppTheme.light(
@@ -102,11 +103,13 @@ class _SettingsApp extends ConsumerWidget {
         NoteFont.sans,
         NoteTextSize.standard,
         scheme,
-        style,
         custom,
       ),
       themeAnimationStyle: AnimationStyle.noAnimation,
-      builder: (context, child) => StyleTypography(style: style, child: child!),
+      builder: (context, child) => StyleTypography(
+        style: custom?.style ?? ThemeStyle.standard,
+        child: child!,
+      ),
       home: const SettingsScreen(),
     );
   }
@@ -130,16 +133,16 @@ String? _familyOf(WidgetTester tester, String text) => tester
     .style
     ?.fontFamily;
 
-void main() {
-  tearDown(() => AppTypography.useStyle(AppStyle.standard));
+/// The Lo-fi theme's hand-drawn corners.
+const _wobbly = BorderRadius.only(
+  topLeft: Radius.elliptical(255, 12),
+  topRight: Radius.elliptical(12, 225),
+  bottomRight: Radius.elliptical(225, 12),
+  bottomLeft: Radius.elliptical(12, 255),
+);
 
-  test('style ids round-trip and fall back to Default', () {
-    for (final style in AppStyle.values) {
-      expect(AppStyle.fromId(style.id), style);
-    }
-    expect(AppStyle.fromId('nope'), AppStyle.standard);
-    expect(AppStyle.fromId(null), AppStyle.standard);
-  });
+void main() {
+  tearDown(() => AppTypography.useStyle(ThemeStyle.standard));
 
   test('every scheme id is unique and found', () {
     final ids = appSchemes.map((s) => s.id).toSet();
@@ -151,7 +154,7 @@ void main() {
     expect(schemeById(anchorSchemeId), isNull);
   });
 
-  test('a scheme colours the theme; Lo-fi uses its own greys', () {
+  test('a scheme colours the theme; the Lo-fi theme brings its greys', () {
     final nord = schemeById('nord')!;
     final theme = _dark('nord');
     final colors = theme.extension<AnchorColors>()!;
@@ -166,16 +169,16 @@ void main() {
     expect(colors.notes['none']!.bg, nord.dark.card);
     expect(colors.notes['yellow'], AnchorColors.dark.notes['yellow']);
 
-    final lofi = _light('nord', AppStyle.lofi);
-    expect(lofi.scaffoldBackgroundColor, lofiScheme.light.background);
-    expect(lofi.extension<AnchorStyle>()!.plainNotes, isTrue);
+    final sketched = _light('nord', lofi);
+    expect(sketched.scaffoldBackgroundColor, const Color(0xFFF7F6F2));
+    expect(sketched.extension<AnchorStyle>()!.uniformNotes, isTrue);
   });
 
   test('Anchor with Default keeps the original look', () {
     final theme = AppTheme.light();
     expect(theme.extension<AnchorColors>(), AnchorColors.light);
     final style = theme.extension<AnchorStyle>()!;
-    expect(style.style, AppStyle.standard);
+    expect(style.style, ThemeStyle.standard);
     expect(style.pattern, isNull);
     expect(
       style.corners(AnchorTokens.radiusCard),
@@ -185,12 +188,16 @@ void main() {
     expect(theme.textTheme.displayLarge!.fontFamily, AppTypography.serif);
   });
 
-  test('Neo-Brutalism draws ink outlines and a hard shadow', () {
-    final theme = _light('dracula', AppStyle.neoBrutalism);
+  test('the Neo-Brutalism theme draws ink outlines and a hard shadow', () {
+    final theme = _light('dracula', neoBrutalism);
     final colors = theme.extension<AnchorColors>()!;
     final ink = schemeById('dracula')!.light.foreground;
-    expect(colors.appBorder, ink);
+    expect(colors.shadowRaised, hasLength(2));
     expect(colors.shadowRaised.first.spreadRadius, 2);
+    expect(colors.shadowRaised.last.offset, const Offset(5, 5));
+    // Small controls get half the shadow, under the same outline.
+    expect(colors.shadowXs.last.offset, const Offset(2.5, 2.5));
+    expect(colors.shadowSm.single.offset, const Offset(2.5, 2.5));
     expect(colors.shadowRaised.every((s) => s.color == ink), isTrue);
     expect(colors.shadowRaised.every((s) => s.blurRadius == 0), isTrue);
     expect(
@@ -202,15 +209,26 @@ void main() {
       theme.extension<NoteTypography>()!.family,
       AppTypography.spaceGrotesk,
     );
+    expect(theme.textTheme.displayLarge!.fontWeight, FontWeight.w700);
+    // Every corner scales with the card's: 6 of 16.
+    expect(
+      theme.extension<AnchorStyle>()!.corners(AnchorTokens.radiusDialog),
+      BorderRadius.circular(7.5),
+    );
+    // Tight corners square off the new-note button too.
+    expect(theme.extension<AnchorStyle>()!.roundFab, isFalse);
   });
 
-  test('Lo-fi has no depth, wobbly corners, handwriting and grey marks', () {
-    final theme = _light(anchorSchemeId, AppStyle.lofi);
+  test('the Lo-fi theme has no depth, wobbly corners, handwriting and grey '
+      'marks', () {
+    final theme = _light(anchorSchemeId, lofi);
     final colors = theme.extension<AnchorColors>()!;
     final style = theme.extension<AnchorStyle>()!;
     expect(colors.shadowSm, isEmpty);
     expect(colors.shadowRaised.single.blurRadius, 0);
-    expect(style.corners(AnchorTokens.radiusCard), AnchorStyle.wobbly);
+    expect(colors.shadowRaised.single.spreadRadius, 1.75);
+    expect(colors.shadowRaised.single.color, const Color(0xFF5F5F5F));
+    expect(style.corners(AnchorTokens.radiusCard), _wobbly);
     // Small things keep round corners; pills stay pills.
     expect(
       style.corners(AnchorTokens.radiusLg),
@@ -220,15 +238,35 @@ void main() {
       style.corners(AnchorTokens.radiusPill),
       BorderRadius.circular(AnchorTokens.radiusPill),
     );
-    expect(style.pattern, isNotNull);
-    expect(colors.highlights.values.map((h) => h.fill).toSet(), hasLength(1));
+    // The dot grid in the text colour at 14 %.
+    expect(style.pattern, colors.appText.withValues(alpha: 0.14));
+    expect(style.style.pagePattern!.shape, PatternShape.dots);
+    // Every note in the card colour; every highlight in the muted one.
+    expect(colors.notes['none']!.bg, colors.appSurface);
+    expect(style.uniformNotes, isTrue);
+    expect(colors.highlights.values.map((h) => h.fill).toSet(), {
+      colors.appSubtle,
+    });
+    expect(style.highlight, colors.appSubtle);
     expect(theme.textTheme.bodyLarge!.fontFamily, AppTypography.patrickHand);
+    expect(style.roundFab, isFalse);
   });
 
-  test('Skeuomorphism keeps the fonts, softens corners, sets serif titles', () {
-    final theme = _light(anchorSchemeId, AppStyle.skeuomorphism);
+  test('the Skeuomorphism theme keeps the fonts, softens corners, sets serif '
+      'titles', () {
+    final theme = _light(anchorSchemeId, skeuomorphism);
     final style = theme.extension<AnchorStyle>()!;
     expect(style.corners(AnchorTokens.radiusCard), BorderRadius.circular(10));
+    expect(style.roundFab, isTrue);
+    expect(
+      theme.extension<AnchorColors>()!.shadowRaised.single,
+      const BoxShadow(
+        color: Color(0x47000000),
+        offset: Offset(0, 10),
+        blurRadius: 24,
+        spreadRadius: -6,
+      ),
+    );
     expect(style.pattern, isNotNull);
     expect(theme.textTheme.bodyLarge!.fontFamily, AppTypography.sans);
     final notes = theme.extension<NoteTypography>()!;
@@ -250,31 +288,28 @@ void main() {
     expect(pubspec, isNot(contains('google_fonts')));
   });
 
-  test('the share sheet keeps the scheme and style', () {
-    const context = ShareContext(colorScheme: 'nord', style: AppStyle.lofi);
+  test("the share sheet keeps the scheme and the theme's style", () {
+    final context = ShareContext(colorScheme: 'nord', customTheme: lofi);
     final read = ShareContext.fromJson(context.toJson());
     expect(read.colorScheme, 'nord');
-    expect(read.style, AppStyle.lofi);
-    final unknown = ShareContext.fromJson({'scheme': 'nope', 'style': 1});
+    expect(read.customTheme?.style, lofi.style);
+    // An older context's style is left behind.
+    final unknown = ShareContext.fromJson({'scheme': 'nope', 'style': 'lofi'});
     expect(unknown.colorScheme, anchorSchemeId);
-    expect(unknown.style, AppStyle.standard);
+    expect(unknown.customTheme, isNull);
   });
 
   testWidgets('switching scheme and style redraws colours, corners and font', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      const _Host(scheme: anchorSchemeId, style: AppStyle.standard),
-    );
+    await tester.pumpWidget(const _Host(scheme: anchorSchemeId));
     var group = _groupOf(tester, find.byType(GroupedList));
     expect(group.color, AnchorColors.light.appSurface);
     expect(group.borderRadius, BorderRadius.circular(AnchorTokens.radius2xl));
     expect(_familyOf(tester, 'Row'), AppTypography.sans);
     expect(_familyOf(tester, 'Plain'), AppTypography.sans);
 
-    await tester.pumpWidget(
-      const _Host(scheme: 'nord', style: AppStyle.neoBrutalism),
-    );
+    await tester.pumpWidget(_Host(scheme: 'nord', custom: neoBrutalism));
     final nord = schemeById('nord')!.light;
     group = _groupOf(tester, find.byType(GroupedList));
     expect(group.color, nord.card);
@@ -290,19 +325,17 @@ void main() {
       nord.background,
     );
 
-    await tester.pumpWidget(const _Host(scheme: 'nord', style: AppStyle.lofi));
+    await tester.pumpWidget(_Host(scheme: 'nord', custom: lofi));
     group = _groupOf(tester, find.byType(GroupedList));
-    expect(group.color, lofiScheme.light.card);
-    expect(group.borderRadius, AnchorStyle.wobbly);
+    expect(group.color, lofi.light!['card']);
+    expect(group.borderRadius, _wobbly);
     expect(_familyOf(tester, 'Plain'), AppTypography.patrickHand);
 
-    await tester.pumpWidget(
-      const _Host(scheme: anchorSchemeId, style: AppStyle.standard),
-    );
+    await tester.pumpWidget(const _Host(scheme: anchorSchemeId));
     expect(_familyOf(tester, 'Plain'), AppTypography.sans);
     expect(
       tester.element(find.byType(_PlainText)).appStyle.style,
-      AppStyle.standard,
+      ThemeStyle.standard,
     );
   });
 
@@ -371,12 +404,14 @@ void main() {
     expect(dark.destructive, const Color(0xFFFDA196));
   });
 
-  testWidgets('Lo-fi draws every note plain', (tester) async {
+  testWidgets('noteColor draws every note plain, in that colour', (
+    tester,
+  ) async {
     late NoteAppearance yellow;
     late NoteAppearance plain;
     await tester.pumpWidget(
       MaterialApp(
-        theme: _light('nord', AppStyle.lofi),
+        theme: _light('nord', lofi),
         home: Builder(
           builder: (context) {
             yellow = NoteAppearance.of(context, 'color_yellow');
@@ -387,8 +422,25 @@ void main() {
       ),
     );
     expect(yellow.palette, 'none');
-    expect(yellow.colors.bg, lofiScheme.light.card);
-    expect(plain.colors.bg, lofiScheme.light.card);
+    expect(yellow.colors.bg, lofi.light!['card']);
+    expect(plain.colors.bg, lofi.light!['card']);
+  });
+
+  test('a style colour paints notes, highlights and the page pattern', () {
+    final custom = parseCustomTheme(
+      '{"style": {"noteColor": "#fff4cc", "highlightColor": "accent", '
+      '"pagePattern": {"shape": "lines", "size": 24, "thickness": 2, '
+      '"color": "#ff0000", "opacity": 0.5}}}',
+    ).theme!;
+    final theme = _dark('nord', custom);
+    final colors = theme.extension<AnchorColors>()!;
+    final style = theme.extension<AnchorStyle>()!;
+    expect(colors.notes['none']!.bg, const Color(0xFFFFF4CC));
+    final accent = schemeById('nord')!.dark.accent;
+    expect(colors.highlightOn('yellow', 'pink').fill, accent);
+    expect(style.highlight, accent);
+    expect(style.pattern, const Color(0xFFFF0000).withValues(alpha: 0.5));
+    expect(style.roundFab, isTrue);
   });
 
   test('text and accents stay readable on every scheme', () {
@@ -502,7 +554,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('picks a colour scheme and a style, and keeps them', (
+    testWidgets('picks a colour scheme and keeps it; there is no Style row', (
       tester,
     ) async {
       final container = await pumpSettings(tester);
@@ -525,27 +577,9 @@ void main() {
         findsOneWidget,
       );
 
-      await choose(tester, 'Style', 'Neo-Brutalism');
-      expect(container.read(appStyleControllerProvider), AppStyle.neoBrutalism);
-      expect(
-        _groupOf(tester, appearance).borderRadius,
-        BorderRadius.circular(6),
-      );
-      expect(_familyOf(tester, 'Color scheme'), AppTypography.spaceGrotesk);
-
       const storage = FlutterSecureStorage();
       expect(await storage.read(key: StorageKeys.colorScheme), 'gruvbox');
-      expect(
-        await storage.read(key: StorageKeys.appStyle),
-        AppStyle.neoBrutalism.id,
-      );
-
-      await choose(tester, 'Style', 'Lo-fi');
-      expect(
-        find.text('Lo-fi draws in pencil grays, whatever the scheme.'),
-        findsOneWidget,
-      );
-      expect(_familyOf(tester, 'Color scheme'), AppTypography.patrickHand);
+      expect(find.text('Style'), findsNothing);
     });
 
     testWidgets('applies, checks, copies and resets a custom theme', (

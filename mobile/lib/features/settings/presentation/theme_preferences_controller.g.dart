@@ -227,59 +227,6 @@ abstract class _$ColorSchemeController extends $Notifier<String> {
   }
 }
 
-@ProviderFor(AppStyleController)
-final appStyleControllerProvider = AppStyleControllerProvider._();
-
-final class AppStyleControllerProvider
-    extends $NotifierProvider<AppStyleController, AppStyle> {
-  AppStyleControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'appStyleControllerProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$appStyleControllerHash();
-
-  @$internal
-  @override
-  AppStyleController create() => AppStyleController();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AppStyle value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AppStyle>(value),
-    );
-  }
-}
-
-String _$appStyleControllerHash() =>
-    r'5d044fa41baa1593b70fa421d42ce6b82d0a2edf';
-
-abstract class _$AppStyleController extends $Notifier<AppStyle> {
-  AppStyle build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AppStyle, AppStyle>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AppStyle, AppStyle>,
-              AppStyle,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
 /// The custom theme pasted in Settings, over the colour scheme; null for none.
 
 @ProviderFor(CustomThemeController)

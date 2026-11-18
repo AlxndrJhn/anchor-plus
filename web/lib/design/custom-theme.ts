@@ -1,14 +1,17 @@
 /**
  * A custom theme pasted as JSON in Settings › Appearance. The same JSON works
- * on Android (mobile/lib/core/theme/custom_theme.dart); README.md, "Custom
- * themes", describes it.
+ * on Android (mobile/lib/core/theme/custom_theme.dart); THEMES.md describes
+ * it.
  *
- *   { "name": "My theme", "light": { "background": "#fff", … }, "dark": { … } }
+ *   { "name": "My theme", "light": { "background": "#fff", … }, "dark": { … },
+ *     "style": { "font": "grotesk", "radius": 6, "outline": 2 } }
  *
- * Every key is optional except that one of light and dark must be there. A
- * mode's colours are the scheme palette's fields; a missing one keeps the
- * chosen scheme's colour. "lineSpacing" ("tight", "default" or "relaxed")
- * spaces the notes' lines; on Android it takes the place of Settings › Editor's.
+ * Every key is optional except that one of light, dark and style must be
+ * there. A mode's colours are the scheme palette's fields; a missing one keeps
+ * the chosen scheme's colour. The style (theme-style.ts) shapes everything
+ * else: fonts, corners, outlines, shadows, the page texture and notes. "lineSpacing"
+ * ("tight", "default" or "relaxed") spaces the notes' lines; on Android it
+ * takes the place of Settings › Editor's.
  */
 import { translate } from "@/lib/i18n";
 import {
@@ -17,6 +20,30 @@ import {
   PALETTE_FIELDS,
   type SchemePalette,
 } from "./schemes";
+import {
+  CORNER_RANGE,
+  type Corners,
+  PATTERN_KEYS,
+  PATTERN_NUMBERS,
+  PATTERN_SHAPES,
+  type Pattern,
+  type PatternNumber,
+  RADIUS_RANGE,
+  SHADOW_KEYS,
+  SHADOW_NUMBERS,
+  type Shadow,
+  type ShadowNumber,
+  STYLE_CHOICES,
+  STYLE_COLORS,
+  STYLE_CONFIG,
+  STYLE_KEYS,
+  STYLE_NUMBERS,
+  STYLE_PATTERNS,
+  type StyleChoice,
+  type StyleNumber,
+  styleOutput,
+  type ThemeStyle,
+} from "./theme-style";
 
 export type PaletteField = (typeof PALETTE_FIELDS)[number];
 export type ThemeMode = "light" | "dark";
@@ -36,6 +63,7 @@ export interface CustomTheme {
   name?: string;
   light?: Partial<Record<PaletteField, string>>;
   dark?: Partial<Record<PaletteField, string>>;
+  style?: ThemeStyle;
   lineSpacing?: LineSpacing;
 }
 
@@ -46,7 +74,7 @@ export type CustomThemeResult =
   | { ok: true; theme: CustomTheme }
   | { ok: false; errors: string[] };
 
-const TOP_LEVEL_KEYS = ["name", "light", "dark", "lineSpacing"];
+const TOP_LEVEL_KEYS = ["name", "light", "dark", "style", "lineSpacing"];
 const COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
 /** #rgb, #rrggbb or #rrggbbaa, as lower-case #rrggbb or #rrggbbaa. */
@@ -166,10 +194,203 @@ export function parseCustomTheme(text: string): CustomThemeResult {
     theme[mode] = palette;
   }
 
-  if (json.light === undefined && json.dark === undefined)
+  if (json.style !== undefined) {
+    const style = parseStyle(json.style, errors);
+    if (style) theme.style = style;
+  }
+
+  if (
+    json.light === undefined &&
+    json.dark === undefined &&
+    json.style === undefined
+  )
     errors.push(t("needOne"));
 
   return errors.length ? { ok: false, errors } : { ok: true, theme };
+}
+
+/** Reads a style colour: a colour, or the name of a palette key. */
+function parseStyleColor(
+  value: unknown,
+  path: string,
+  errors: string[],
+): string | null {
+  const t = translate("layout.customTheme");
+  if (typeof value === "string") {
+    if ((PALETTE_FIELDS as readonly string[]).includes(value)) return value;
+    const color = normalizeColor(value);
+    if (color) return color;
+  }
+  errors.push(
+    t("notStyleColour", {
+      path,
+      value: JSON.stringify(value),
+      keys: PALETTE_FIELDS.join(", "),
+    }),
+  );
+  return null;
+}
+
+/** Reads a number in [range], adding what's wrong to [errors]. */
+function parseNumber(
+  value: unknown,
+  path: string,
+  range: readonly number[],
+  errors: string[],
+): number | null {
+  if (typeof value === "number" && value >= range[0] && value <= range[1])
+    return value;
+  errors.push(
+    translate("layout.customTheme")("notNumber", {
+      path,
+      min: range[0],
+      max: range[1],
+    }),
+  );
+  return null;
+}
+
+function parseShadow(value: unknown, errors: string[]): Shadow | null {
+  const t = translate("layout.customTheme");
+  if (!isObject(value)) {
+    errors.push(t("shadowValue"));
+    return null;
+  }
+  const shadow: Shadow = {};
+  for (const [key, setting] of Object.entries(value)) {
+    const path = `style.shadow.${key}`;
+    if (key === "color") {
+      const color = parseStyleColor(setting, path, errors);
+      if (color) shadow.color = color;
+    } else if (key in SHADOW_NUMBERS) {
+      const range = SHADOW_NUMBERS[key as ShadowNumber];
+      const number = parseNumber(setting, path, range, errors);
+      if (number !== null) shadow[key as ShadowNumber] = number;
+    } else errors.push(unknownKey(path, key, SHADOW_KEYS));
+  }
+  return shadow;
+}
+
+/** Reads a pattern: a shape, and optionally its size, thickness, colour, opacity. */
+function parsePattern(
+  value: unknown,
+  path: string,
+  errors: string[],
+): Pattern | null {
+  const t = translate("layout.customTheme");
+  if (!isObject(value) || value.shape === undefined) {
+    errors.push(t("patternValue", { path }));
+    return null;
+  }
+  const pattern: Record<string, unknown> = {};
+  let ok = true;
+  for (const [key, setting] of Object.entries(value)) {
+    const keyPath = `${path}.${key}`;
+    if (key === "shape") {
+      if (
+        typeof setting === "string" &&
+        (PATTERN_SHAPES as readonly string[]).includes(setting)
+      )
+        pattern.shape = setting;
+      else {
+        ok = false;
+        errors.push(
+          t("notChoice", {
+            path: keyPath,
+            value: JSON.stringify(setting),
+            options: PATTERN_SHAPES.join(", "),
+          }),
+        );
+      }
+    } else if (key === "color") {
+      const color = parseStyleColor(setting, keyPath, errors);
+      if (color) pattern.color = color;
+    } else if (key in PATTERN_NUMBERS) {
+      const range = PATTERN_NUMBERS[key as PatternNumber];
+      const number = parseNumber(setting, keyPath, range, errors);
+      if (number !== null) pattern[key] = number;
+    } else errors.push(unknownKey(keyPath, key, PATTERN_KEYS));
+  }
+  return ok ? (pattern as Pattern) : null;
+}
+
+/** Reads `radius`: a number, or four [x, y] corners. */
+function parseRadius(
+  value: unknown,
+  errors: string[],
+): number | Corners | null {
+  const isCorner = (corner: unknown) =>
+    Array.isArray(corner) &&
+    corner.length === 2 &&
+    corner.every(
+      (n) =>
+        typeof n === "number" && n >= CORNER_RANGE[0] && n <= CORNER_RANGE[1],
+    );
+  if (
+    typeof value === "number" &&
+    value >= RADIUS_RANGE[0] &&
+    value <= RADIUS_RANGE[1]
+  )
+    return value;
+  if (Array.isArray(value) && value.length === 4 && value.every(isCorner))
+    return value as Corners;
+  errors.push(
+    translate("layout.customTheme")("radiusValue", {
+      min: RADIUS_RANGE[0],
+      max: RADIUS_RANGE[1],
+      cornerMax: CORNER_RANGE[1],
+    }),
+  );
+  return null;
+}
+
+/** Reads the theme's style, adding what's wrong to [errors]. */
+function parseStyle(value: unknown, errors: string[]): ThemeStyle | null {
+  const t = translate("layout.customTheme");
+  if (!isObject(value)) {
+    errors.push(t("styleObject"));
+    return null;
+  }
+  const style: Record<string, unknown> = {};
+  for (const [key, setting] of Object.entries(value)) {
+    const path = `style.${key}`;
+    if (key in STYLE_CHOICES) {
+      const choices: readonly string[] = STYLE_CHOICES[key as StyleChoice];
+      if (typeof setting === "string" && choices.includes(setting))
+        style[key] = setting;
+      else
+        errors.push(
+          t("notChoice", {
+            path,
+            value: JSON.stringify(setting),
+            options: choices.join(", "),
+          }),
+        );
+    } else if (key in STYLE_NUMBERS) {
+      const range = STYLE_NUMBERS[key as StyleNumber];
+      const number = parseNumber(setting, path, range, errors);
+      if (number === null) continue;
+      if (key === "titleWeight" && number % 100 !== 0)
+        errors.push(t("notWeight", { path }));
+      else style[key] = number;
+    } else if (key === "radius") {
+      const radius = parseRadius(setting, errors);
+      if (radius !== null) style.radius = radius;
+    } else if ((STYLE_COLORS as readonly string[]).includes(key)) {
+      const color = parseStyleColor(setting, path, errors);
+      if (color) style[key] = color;
+    } else if ((STYLE_PATTERNS as readonly string[]).includes(key)) {
+      const pattern = parsePattern(setting, path, errors);
+      if (pattern) style[key] = pattern;
+    } else if (key === "shadow") {
+      if (setting === "none") style.shadow = "none";
+      else {
+        const shadow = parseShadow(setting, errors);
+        if (shadow) style.shadow = shadow;
+      }
+    } else errors.push(unknownKey(path, key, STYLE_KEYS));
+  }
+  return style as ThemeStyle;
 }
 
 /** Anchor's own palette on the web, from app/styles/tokens.css. */
@@ -241,23 +462,21 @@ export function themeAsJson(
     );
   }
   if (theme?.lineSpacing) out.lineSpacing = theme.lineSpacing;
+  if (theme?.style && Object.keys(theme.style).length) out.style = theme.style;
   return JSON.stringify(out, null, 2);
 }
 
 /**
  * The selector a custom theme's colours go under. It outranks the schemes'
- * `html[data-scheme="…"].dark`, and leaves Lo-fi to its own greys.
+ * `html[data-scheme="…"].dark`.
  */
 export const customThemeSelector = (mode: ThemeMode) =>
-  `:root[data-custom-theme]:not([data-style="lofi"]).${mode}`;
+  `:root[data-custom-theme].${mode}`;
 
-/** The CSS that puts the theme's colours and line spacing on the page. */
+/** The CSS that puts the theme's colours, style and line spacing on the page. */
 export function customThemeCss(theme: CustomTheme): string {
-  // Spacing isn't colour: Lo-fi keeps it too.
   const spacing = theme.lineSpacing
-    ? [
-        `:root[data-custom-theme]{--note-line-height:${LINE_HEIGHTS[theme.lineSpacing]};}`,
-      ]
+    ? `:root[data-custom-theme]{--note-line-height:${LINE_HEIGHTS[theme.lineSpacing]};}`
     : [];
   return THEME_MODES.flatMap((mode) => {
     const colors = theme[mode];
@@ -271,5 +490,6 @@ export function customThemeCss(theme: CustomTheme): string {
       : [];
   })
     .concat(spacing)
+    .concat(styleOutput(theme.style, STYLE_CONFIG).css || [])
     .join("\n");
 }

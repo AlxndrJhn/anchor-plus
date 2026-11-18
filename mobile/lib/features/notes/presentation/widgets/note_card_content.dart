@@ -633,23 +633,19 @@ class _Thumbnail extends ConsumerWidget {
     final picture = ColoredBox(
       color: appearance.colors.surface,
       child: path != null
-          ? context.appStyle.picture(
-              Image.file(
-                File(path),
-                fit: BoxFit.cover,
-                cacheWidth: 400,
-                gaplessPlayback: true,
-                frameBuilder: (context, child, frame, sync) => sync
-                    ? child
-                    : AnimatedOpacity(
-                        opacity: frame == null ? 0 : 1,
-                        duration: context.motion(
-                          AnchorTokens.motionDurationSlow,
-                        ),
-                        child: child,
-                      ),
-                errorBuilder: (_, _, _) => missing,
-              ),
+          ? Image.file(
+              File(path),
+              fit: BoxFit.cover,
+              cacheWidth: 400,
+              gaplessPlayback: true,
+              frameBuilder: (context, child, frame, sync) => sync
+                  ? child
+                  : AnimatedOpacity(
+                      opacity: frame == null ? 0 : 1,
+                      duration: context.motion(AnchorTokens.motionDurationSlow),
+                      child: child,
+                    ),
+              errorBuilder: (_, _, _) => missing,
             )
           : loaded.isLoading
           ? Shimmer(color: appearance.colors.border.withValues(alpha: 0.6))

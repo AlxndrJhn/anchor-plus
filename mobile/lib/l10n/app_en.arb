@@ -842,10 +842,6 @@
   "@settingsColorScheme": {
     "description": "Label of the Appearance setting that picks the app's colors (Anchor, Nord, Dracula and so on)."
   },
-  "settingsColorSchemeLofi": "Lo-fi draws in pencil grays, whatever the scheme.",
-  "@settingsColorSchemeLofi": {
-    "description": "Under the Color scheme setting while the Lo-fi style is on, which ignores the scheme. Lo-fi is the style's name."
-  },
   "colorSchemeAnchor": "Anchor+",
   "@colorSchemeAnchor": {
     "description": "Name of the app's own color scheme, listed with Nord, Dracula and others. The app's name."
@@ -862,11 +858,7 @@
   "@settingsCustomThemeOn": {
     "description": "Value of the Custom theme setting while an unnamed custom theme is applied."
   },
-  "settingsCustomThemeLofi": "Lo-fi keeps its pencil grays, so the custom theme waits for another style.",
-  "@settingsCustomThemeLofi": {
-    "description": "Under the Custom theme setting while the Lo-fi style is on, which ignores custom colors. Lo-fi is the style's name."
-  },
-  "customThemeHelp": "Paste a theme as JSON: colors for light, dark or both. Anything left out keeps the color scheme's color. Kept on this device; the same JSON works on the web.",
+  "customThemeHelp": "Paste a theme as JSON: colors for light, dark or both, and a style for fonts, corners, shadows and texture. Anything left out keeps the color scheme's color and Anchor's look. Kept on this device; the same JSON works on the web.",
   "@customThemeHelp": {
     "description": "Explains the Custom theme sheet. JSON is a text format; light and dark are the app's two modes."
   },
@@ -918,7 +910,7 @@
       }
     }
   },
-  "customThemeNotObject": "The theme must be a JSON object with \"light\" or \"dark\" colors",
+  "customThemeNotObject": "The theme must be a JSON object with \"light\" or \"dark\" colors or a \"style\"",
   "@customThemeNotObject": {
     "description": "A pasted custom theme is JSON but not an object. Keep \"light\" and \"dark\" as they are: they are JSON keys."
   },
@@ -991,45 +983,72 @@
       }
     }
   },
-  "customThemeNoMode": "Give at least one of \"light\" or \"dark\"",
+  "customThemeNoMode": "Give at least one of \"light\", \"dark\" or \"style\"",
   "@customThemeNoMode": {
-    "description": "A pasted custom theme has neither light nor dark colors. Keep \"light\" and \"dark\" as they are: they are JSON keys."
+    "description": "A pasted custom theme has no light colors, dark colors or style. Keep \"light\", \"dark\" and \"style\" as they are: they are JSON keys."
   },
-  "settingsStyle": "Style",
-  "@settingsStyle": {
-    "description": "Label of the Appearance setting that changes the app's look: corners, outlines, shadows and font."
+  "customThemeStyleNotObject": "style: must be an object",
+  "@customThemeStyleNotObject": {
+    "description": "A pasted custom theme's \"style\" isn't a JSON object. Keep \"style\" as it is: it's a JSON key."
   },
-  "styleDefault": "Default",
-  "@styleDefault": {
-    "description": "The style that keeps the app as designed."
+  "customThemeBadStyleValue": "{key}: {value} is not one of {expected}",
+  "@customThemeBadStyleValue": {
+    "description": "A value in a pasted custom theme's style isn't one the app knows. key, value and expected are JSON, keep them as they are.",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "expected": {
+        "type": "String"
+      }
+    }
   },
-  "styleDefaultHelp": "Anchor as designed",
-  "@styleDefaultHelp": {
-    "description": "Under the Default style. Anchor is the app's name."
+  "customThemeRadiusNotValid": "style.radius: must be a number from 0 to 40 or four [x, y] corners",
+  "@customThemeRadiusNotValid": {
+    "description": "A pasted custom theme's style.radius is neither a number in range nor four [x, y] corners. Keep style.radius and [x, y] as they are."
   },
-  "styleSkeuomorphism": "Skeuomorphism",
-  "@styleSkeuomorphism": {
-    "description": "A style imitating real materials: paper, linen and soft shadows."
+  "customThemePatternNotObject": "{key}: must be an object with shape, size, thickness, color and opacity",
+  "@customThemePatternNotObject": {
+    "description": "A pattern in a pasted custom theme's style isn't a JSON object. key is the JSON key; keep shape, size, thickness, color and opacity as they are.",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
   },
-  "styleSkeuomorphismHelp": "Paper, linen and depth",
-  "@styleSkeuomorphismHelp": {
-    "description": "Under the Skeuomorphism style."
+  "customThemeNotNumber": "{key}: must be a number from {min} to {max}",
+  "@customThemeNotNumber": {
+    "description": "A number in a pasted custom theme's style is missing or out of range. key is the JSON key.",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
   },
-  "styleNeoBrutalism": "Neo-Brutalism",
-  "@styleNeoBrutalism": {
-    "description": "A style with thick ink outlines, hard shadows and square corners."
+  "customThemeNotStyleColor": "{key}: {value} is not a color or a color key; use #rgb, #rrggbb, #rrggbbaa or a key such as foreground",
+  "@customThemeNotStyleColor": {
+    "description": "A color in a pasted custom theme's style is neither a hex color nor the name of a palette color. key and value are JSON; keep foreground as it is.",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
   },
-  "styleNeoBrutalismHelp": "Thick outlines, hard shadows",
-  "@styleNeoBrutalismHelp": {
-    "description": "Under the Neo-Brutalism style."
-  },
-  "styleLofi": "Lo-fi",
-  "@styleLofi": {
-    "description": "A style that draws the app like a pencil sketch, in grays and handwriting."
-  },
-  "styleLofiHelp": "A pencil-and-paper prototype",
-  "@styleLofiHelp": {
-    "description": "Under the Lo-fi style."
+  "customThemeShadowNotValid": "style.shadow: must be \"none\" or an object",
+  "@customThemeShadowNotValid": {
+    "description": "A pasted custom theme's style.shadow isn't \"none\" or a JSON object. Keep style.shadow and \"none\" as they are."
   },
   "settingsTheme": "Theme",
   "@settingsTheme": {

@@ -614,10 +614,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingsColorScheme => 'Schemat kolorów';
 
   @override
-  String get settingsColorSchemeLofi =>
-      'Lo-fi rysuje ołówkowymi szarościami, niezależnie od schematu.';
-
-  @override
   String get colorSchemeAnchor => 'Anchor+';
 
   @override
@@ -630,12 +626,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingsCustomThemeOn => 'Włączony';
 
   @override
-  String get settingsCustomThemeLofi =>
-      'Lo-fi zachowuje ołówkowe szarości, więc motyw własny poczeka na inny styl.';
-
-  @override
   String get customThemeHelp =>
-      'Wklej motyw jako JSON: kolory dla trybu jasnego, ciemnego lub obu. Pominięte kolory zostają ze schematu kolorów. Zapisany na tym urządzeniu; ten sam JSON działa w przeglądarce.';
+      'Wklej motyw jako JSON: kolory dla trybu jasnego, ciemnego lub obu oraz styl czcionek, narożników, cieni i tekstury. Pominięte kolory zostają ze schematu kolorów, a reszta wygląda jak w Anchor. Zapisany na tym urządzeniu; ten sam JSON działa w przeglądarce.';
 
   @override
   String get customThemeJsonLabel => 'JSON motywu';
@@ -670,7 +662,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get customThemeNotObject =>
-      'Motyw musi być obiektem JSON z kolorami \"light\" lub \"dark\"';
+      'Motyw musi być obiektem JSON z kolorami \"light\" lub \"dark\" albo ze \"style\"';
 
   @override
   String customThemeUnknownKey(String key, String expected) {
@@ -702,34 +694,38 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get customThemeNoMode =>
-      'Podaj co najmniej jedno z: \"light\" lub \"dark\"';
+      'Podaj co najmniej jedno z: \"light\", \"dark\" lub \"style\"';
 
   @override
-  String get settingsStyle => 'Styl';
+  String get customThemeStyleNotObject => 'style: musi być obiektem';
 
   @override
-  String get styleDefault => 'Domyślny';
+  String customThemeBadStyleValue(String key, String value, String expected) {
+    return '$key: $value nie jest jedną z wartości $expected';
+  }
 
   @override
-  String get styleDefaultHelp => 'Anchor w zamierzonym wyglądzie';
+  String get customThemeRadiusNotValid =>
+      'style.radius: musi być liczbą od 0 do 40 albo czterema narożnikami [x, y]';
 
   @override
-  String get styleSkeuomorphism => 'Skeuomorfizm';
+  String customThemePatternNotObject(String key) {
+    return '$key: musi być obiektem z shape, size, thickness, color i opacity';
+  }
 
   @override
-  String get styleSkeuomorphismHelp => 'Papier, len i głębia';
+  String customThemeNotNumber(String key, String min, String max) {
+    return '$key: musi być liczbą od $min do $max';
+  }
 
   @override
-  String get styleNeoBrutalism => 'Neobrutalizm';
+  String customThemeNotStyleColor(String key, String value) {
+    return '$key: $value nie jest kolorem ani nazwą koloru; użyj #rgb, #rrggbb, #rrggbbaa lub nazwy takiej jak foreground';
+  }
 
   @override
-  String get styleNeoBrutalismHelp => 'Grube obrysy, twarde cienie';
-
-  @override
-  String get styleLofi => 'Lo-fi';
-
-  @override
-  String get styleLofiHelp => 'Prototyp z ołówka i papieru';
+  String get customThemeShadowNotValid =>
+      'style.shadow: musi być \"none\" lub obiektem';
 
   @override
   String get settingsTheme => 'Motyw';

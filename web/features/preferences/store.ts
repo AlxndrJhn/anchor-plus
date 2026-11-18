@@ -13,8 +13,6 @@ export type ViewMode = "masonry" | "grid" | "list";
 export type SortBy = "updatedAt" | "createdAt" | "title" | "size";
 export type SortOrder = "asc" | "desc";
 
-export type AppStyle = "default" | "skeuomorphism" | "neo-brutalism" | "lofi";
-
 /** Clean puts the tags under the text and folds the formatting bar away. */
 export type NoteLayout = "default" | "clean";
 
@@ -22,8 +20,7 @@ interface UIPreferences {
   sidebarCollapsed: boolean;
   /** A colour scheme id from lib/design/schemes, or "anchor". */
   colorScheme?: string;
-  style?: AppStyle;
-  /** Colours pasted as JSON in Settings, over the colour scheme. */
+  /** A theme pasted as JSON in Settings: colours over the scheme, and a style. */
   customTheme?: CustomTheme;
   /** The app’s language; unset follows the browser’s. */
   language?: LanguagePreference;
@@ -171,9 +168,13 @@ export const usePreferencesStore = create<PreferencesState>()(
       // Settings added later get their defaults.
       merge: (persisted, current) => {
         const saved = (persisted ?? {}) as Partial<PreferencesState>;
+        // The style setting before styles moved into the custom theme.
+        const { style: _style, ...ui } = (saved.ui ?? {}) as UIPreferences & {
+          style?: unknown;
+        };
         return {
           ...current,
-          ui: { ...current.ui, ...saved.ui },
+          ui: { ...current.ui, ...ui },
           notes: { ...current.notes, ...saved.notes },
           editor: { ...current.editor, ...saved.editor },
         };

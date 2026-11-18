@@ -30,7 +30,8 @@ const jetBrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-// The Neo-Brutalism and Lo-fi styles' typefaces, fetched only when used.
+// The grotesk and handwriting fonts a custom theme's style can pick,
+// fetched only when used.
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],

@@ -28,10 +28,7 @@ const FIELDS = [
   "destructive",
 ];
 
-for (const scheme of [
-  ...source.schemes,
-  { id: "lofi", light: source.lofi.light, dark: source.lofi.dark },
-])
+for (const scheme of source.schemes)
   for (const mode of ["light", "dark"])
     for (const field of FIELDS)
       if (!/^#[0-9A-Fa-f]{6}$/.test(scheme[mode]?.[field] ?? ""))
@@ -61,7 +58,7 @@ const CONTRAST = [
   { fields: ["input"], surfaces: ["background", "card"], min: 3 },
 ];
 const lowContrast = [];
-for (const scheme of [...source.schemes, { id: "lofi", ...source.lofi }])
+for (const scheme of source.schemes)
   for (const mode of ["light", "dark"])
     for (const { fields, surfaces, min } of CONTRAST)
       for (const field of fields)
@@ -114,9 +111,6 @@ const css = [
     `html[data-scheme="${s.id}"].light {\n${cssVars(s.light)}\n}`,
     `html[data-scheme="${s.id}"].dark {\n${cssVars(s.dark)}\n}`,
   ]),
-  "/* Lo-fi draws in its own greys, whatever the scheme. */",
-  `html[data-style="lofi"].light {\n${cssVars(source.lofi.light)}\n}`,
-  `html[data-style="lofi"].dark {\n${cssVars(source.lofi.dark)}\n}`,
   "",
 ].join("\n\n");
 
@@ -225,14 +219,6 @@ ${source.schemes
   )
   .join("\n")}
 ];
-
-/// The Lo-fi style's own greys, used whatever the scheme.
-const lofiScheme = AppScheme(
-  id: 'lofi',
-  name: 'Lo-fi',
-  light: ${dartPalette(source.lofi.light)},
-  dark: ${dartPalette(source.lofi.dark)},
-);
 `;
 
 const outputs = {

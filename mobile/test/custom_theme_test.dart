@@ -12,25 +12,22 @@ import 'package:anchor/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'style_themes.dart';
+
 final _en = lookupAppLocalizations(const Locale('en'));
 
 List<String> errorsOf(String text) => [
   for (final problem in parseCustomTheme(text).problems) problem.textIn(_en),
 ];
 
-ThemeData _theme(
-  Brightness brightness,
-  String scheme, [
-  AppStyle style = AppStyle.standard,
-  CustomTheme? custom,
-]) => (brightness == Brightness.dark ? AppTheme.dark : AppTheme.light)(
-  DisplayDensity.standard,
-  NoteFont.sans,
-  NoteTextSize.standard,
-  scheme,
-  style,
-  custom,
-);
+ThemeData _theme(Brightness brightness, String scheme, [CustomTheme? custom]) =>
+    (brightness == Brightness.dark ? AppTheme.dark : AppTheme.light)(
+      DisplayDensity.standard,
+      NoteFont.sans,
+      NoteTextSize.standard,
+      scheme,
+      custom,
+    );
 
 void main() {
   group('parseCustomTheme', () {
@@ -118,11 +115,156 @@ void main() {
       );
     });
 
-    test('wants light or dark', () {
-      expect(errorsOf('{"name": "Empty"}'), [
-        'Give at least one of "light" or "dark"',
+    test('wants light, dark or style', () {
+      const wanted = 'Give at least one of "light", "dark" or "style"';
+      expect(errorsOf('{"name": "Empty"}'), [wanted]);
+      expect(errorsOf('{}'), [wanted]);
+    });
+
+    test('reads a style on its own, with only what differs kept', () {
+      final theme = parseCustomTheme(
+        '{"style": {"font": "grotesk", "radius": 6, "outline": 0, '
+        '"outlineColor": "foreground", "noteColor": "card", '
+        '"shadow": {"x": 5, "y": 5, "color": "#00000080"}}}',
+      ).theme!;
+      expect(theme.light, isNull);
+      expect(theme.dark, isNull);
+      expect(
+        theme.style,
+        const ThemeStyle(
+          font: StyleFont.grotesk,
+          radius: 6,
+          noteColor: StyleColor.key('card'),
+          shadow: StyleShadow(
+            x: 5,
+            y: 5,
+            color: StyleColor.fixed(Color(0x80000000)),
+          ),
+        ),
+      );
+      expect(
+        theme.encode(),
+        '{"style":{"font":"grotesk","radius":6,'
+        '"shadow":{"x":5,"y":5,"color":"#00000080"},"noteColor":"card"}}',
+      );
+      expect(
+        parseCustomTheme(
+          '{"style": {"shadow": "none", "outline": 1.5, '
+          '"outlineColor": "mutedForeground", "titleWeight": 700}}',
+        ).theme!.encode(),
+        '{"style":{"titleWeight":700,"outline":1.5,'
+        '"outlineColor":"mutedForeground","shadow":"none"}}',
+      );
+      expect(CustomTheme.decode(theme.encode()), theme);
+      expect(
+        parseCustomTheme('{"style": {}}').theme!.style,
+        ThemeStyle.standard,
+      );
+    });
+
+    test('names a wrong style key, value or flag', () {
+      expect(
+        errorsOf('{"style": {"radios": 6}}').single,
+        startsWith('style.radios: unknown key (did you mean "radius"?)'),
+      );
+      expect(errorsOf('{"style": {"pagePattern": {"shape": "wood"}}}'), [
+        'style.pagePattern.shape: "wood" is not one of dots, lines, grid',
       ]);
-      expect(errorsOf('{}'), ['Give at least one of "light" or "dark"']);
+      expect(errorsOf('{"style": {"pagePattern": "dots"}}'), [
+        'style.pagePattern: must be an object with shape, size, thickness, '
+            'color and opacity',
+      ]);
+      expect(
+        errorsOf(
+          '{"style": {"notePattern": {"shape": "lines", "size": 1, '
+          '"opacity": 2, "colr": "#000"}}}',
+        ),
+        [
+          startsWith(
+            'style.notePattern.colr: unknown key (did you mean "color"?)',
+          ),
+          'style.notePattern.size: must be a number from 2 to 100',
+          'style.notePattern.opacity: must be a number from 0 to 1',
+        ],
+      );
+      expect(errorsOf('{"style": {"radius": [[1, 2], [3, 4]]}}'), [
+        'style.radius: must be a number from 0 to 40 or four [x, y] corners',
+      ]);
+      expect(
+        errorsOf('{"style": {"highlightColor": "yellow"}}').single,
+        startsWith('style.highlightColor: "yellow" is not a color'),
+      );
+      expect(errorsOf('{"style": {"radius": 50}}'), [
+        'style.radius: must be a number from 0 to 40',
+      ]);
+      expect(errorsOf('{"style": {"outline": "2"}}'), [
+        'style.outline: must be a number from 0 to 8',
+      ]);
+      expect(
+        errorsOf('{"style": {"titleWeight": 650}}').single,
+        startsWith('style.titleWeight: 650 is not one of 100, 200'),
+      );
+      expect(
+        errorsOf('{"style": {"outlineColor": "ink"}}').single,
+        startsWith('style.outlineColor: "ink" is not a color or a color key'),
+      );
+      expect(errorsOf('{"style": {"shadow": true}}'), [
+        'style.shadow: must be "none" or an object',
+      ]);
+      expect(
+        errorsOf('{"style": {"shadow": {"blur": -1, "colour": "#000"}}}'),
+        [
+          startsWith(
+            'style.shadow.colour: unknown key (did you mean "color"?)',
+          ),
+          'style.shadow.blur: must be a number from 0 to 80',
+        ],
+      );
+      expect(
+        errorsOf('{"style": {"greyPictures": true}}').single,
+        startsWith('style.greyPictures: unknown key'),
+      );
+      expect(errorsOf('{"style": {"font": 3}}'), [
+        'style.font: 3 is not one of sans, serif, grotesk, handwriting',
+      ]);
+      for (final gone in ['plainNotes', 'wobbly', 'texture', 'ruledLines']) {
+        expect(
+          errorsOf('{"style": {"$gone": true}}').single,
+          startsWith('style.$gone: unknown key'),
+        );
+      }
+      expect(errorsOf('{"style": []}'), ['style: must be an object']);
+    });
+
+    test('the old styles read as themes', () {
+      expect(skeuomorphism.style!.radius, 10);
+      expect(
+        skeuomorphism.style!.pagePattern,
+        const StylePattern(
+          shape: PatternShape.grid,
+          size: 3,
+          color: StyleColor.fixed(Color(0xFF000000)),
+          opacity: 0.05,
+        ),
+      );
+      expect(skeuomorphism.style!.notePattern!.shape, PatternShape.lines);
+      expect(skeuomorphism.style!.notePattern!.size, isNull);
+      expect(neoBrutalism.style!.font, StyleFont.grotesk);
+      expect(lofi.style!.corners, const [
+        Radius.elliptical(255, 12),
+        Radius.elliptical(12, 225),
+        Radius.elliptical(225, 12),
+        Radius.elliptical(12, 255),
+      ]);
+      expect(lofi.style!.radius, isNull);
+      expect(lofi.style!.noteColor, const StyleColor.key('card'));
+      expect(lofi.style!.highlightColor, const StyleColor.key('muted'));
+      // Each reads back the same from its own JSON.
+      for (final theme in [skeuomorphism, neoBrutalism, lofi]) {
+        expect(CustomTheme.decode(theme.encode()), theme);
+      }
+      expect(lofi.light!.keys, SchemePalette.fields);
+      expect(lofi.dark!.keys, SchemePalette.fields);
     });
 
     test('lists every problem at once', () {
@@ -180,6 +322,16 @@ void main() {
       expect(result.theme!.dark!['accent'], const Color(0xFFB8BB26));
       expect(result.theme!.dark!['background'], const Color(0xFF282828));
       expect(result.theme!.light!['background'], const Color(0xFFFBF1C7));
+      expect(result.theme!.style, isNull);
+      expect(json, isNot(contains('"style"')));
+    });
+
+    test("copies the theme's style with its colours", () {
+      final json = themeAsJson(schemeById('nord')!, neoBrutalism);
+      final copied = parseCustomTheme(json).theme!;
+      expect(copied.name, 'Neo-Brutalism');
+      expect(copied.style, neoBrutalism.style);
+      expect(copied.light!.keys, SchemePalette.fields);
     });
 
     test("Anchor's scheme is Anchor's own colours", () {
@@ -194,7 +346,7 @@ void main() {
       final custom = parseCustomTheme(
         '{"dark": {"background": "#101010", "foreground": "#fafafa"}}',
       ).theme!;
-      final dark = _theme(Brightness.dark, 'nord', AppStyle.standard, custom);
+      final dark = _theme(Brightness.dark, 'nord', custom);
       final nord = schemeById('nord')!;
       expect(dark.scaffoldBackgroundColor, const Color(0xFF101010));
       expect(dark.colorScheme.onSurface, const Color(0xFFFAFAFA));
@@ -203,7 +355,7 @@ void main() {
       expect(colors.appSurface, nord.dark.card);
       expect(colors.notes['none']!.bg, nord.dark.card);
       // Light mode has no custom colours, so it is plain Nord.
-      final light = _theme(Brightness.light, 'nord', AppStyle.standard, custom);
+      final light = _theme(Brightness.light, 'nord', custom);
       expect(light.scaffoldBackgroundColor, nord.light.background);
     });
 
@@ -211,12 +363,7 @@ void main() {
       final custom = parseCustomTheme(
         '{"light": {"accentStrong": "#ff0000", "card": "#fefefe"}}',
       ).theme;
-      final theme = _theme(
-        Brightness.light,
-        anchorSchemeId,
-        AppStyle.standard,
-        custom,
-      );
+      final theme = _theme(Brightness.light, anchorSchemeId, custom);
       final colors = theme.extension<AnchorColors>()!;
       expect(theme.colorScheme.tertiary, const Color(0xFFFF0000));
       expect(theme.textSelectionTheme.cursorColor, const Color(0xFFFF0000));
@@ -226,42 +373,48 @@ void main() {
       expect(colors.notes['none']!.bg, const Color(0xFFFEFEFE));
     });
 
-    test('Lo-fi keeps its greys over a custom theme', () {
+    test("a theme's style shapes the app; its colours still apply", () {
       final custom = parseCustomTheme(
-        '{"light": {"background": "#f00"}}',
+        '{"light": {"background": "#f00"}, "style": {"shadow": "none"}}',
       ).theme;
-      final theme = _theme(Brightness.light, 'nord', AppStyle.lofi, custom);
-      expect(theme.scaffoldBackgroundColor, lofiScheme.light.background);
+      final theme = _theme(Brightness.light, 'nord', custom);
+      expect(theme.scaffoldBackgroundColor, const Color(0xFFFF0000));
+      expect(theme.extension<AnchorColors>()!.shadowSm, isEmpty);
+      expect(
+        theme.extension<AnchorStyle>()!.style.shadow,
+        const StyleShadow.none(),
+      );
     });
 
-    test("a custom theme's line spacing wins over Settings', Lo-fi too", () {
-      final custom = parseCustomTheme(
-        '{"light": {}, "lineSpacing": "tight"}',
-      ).theme;
-      for (final style in [AppStyle.standard, AppStyle.lofi]) {
-        final typography = AppTheme.light(
-          DisplayDensity.standard,
-          NoteFont.sans,
-          NoteTextSize.standard,
+    test(
+      "a custom theme's line spacing wins over Settings', with a style too",
+      () {
+        for (final json in [
+          '{"light": {}, "lineSpacing": "tight"}',
+          '{"style": {"font": "handwriting"}, "lineSpacing": "tight"}',
+        ]) {
+          final typography = AppTheme.light(
+            DisplayDensity.standard,
+            NoteFont.sans,
+            NoteTextSize.standard,
+            anchorSchemeId,
+            parseCustomTheme(json).theme,
+            NoteLineSpacing.relaxed,
+          ).extension<NoteTypography>()!;
+          expect(typography.lineSpacing, NoteLineSpacing.tight);
+          expect(
+            typography.lineHeight,
+            closeTo(AnchorTokens.densityDefaultNoteLineHeight - 0.2, 1e-9),
+          );
+        }
+        final unset = _theme(
+          Brightness.light,
           anchorSchemeId,
-          style,
-          custom,
-          NoteLineSpacing.relaxed,
+          parseCustomTheme('{"light": {}}').theme,
         ).extension<NoteTypography>()!;
-        expect(typography.lineSpacing, NoteLineSpacing.tight);
-        expect(
-          typography.lineHeight,
-          closeTo(AnchorTokens.densityDefaultNoteLineHeight - 0.2, 1e-9),
-        );
-      }
-      final unset = _theme(
-        Brightness.light,
-        anchorSchemeId,
-        AppStyle.standard,
-        parseCustomTheme('{"light": {}}').theme,
-      ).extension<NoteTypography>()!;
-      expect(unset.lineSpacing, NoteLineSpacing.standard);
-    });
+        expect(unset.lineSpacing, NoteLineSpacing.standard);
+      },
+    );
 
     test('the share sheet keeps the custom theme', () {
       final custom = parseCustomTheme('{"dark": {"card": "#123456"}}').theme;

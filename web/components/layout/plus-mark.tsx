@@ -160,7 +160,7 @@ export function PlusMark({
     });
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["class", "data-scheme", "data-style", "style"],
+      attributeFilter: ["class", "data-scheme", "style"],
     });
     return () => observer.disconnect();
   }, [paint]);

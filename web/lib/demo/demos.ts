@@ -823,9 +823,8 @@ export const demos: Demo[] = [
   },
   {
     slug: "appearance",
-    title: "Colour schemes and styles",
-    summary:
-      "Nord, Dracula, OLED and more; Skeuomorphism, Neo-Brutalism and Lo-fi.",
+    title: "Colour schemes and themes",
+    summary: "Nord, Dracula, OLED and more, and themes of your own.",
     seed: base,
     start: "/settings",
     steps: [
@@ -840,19 +839,6 @@ export const demos: Demo[] = [
         click: {
           css: '[aria-label="Colour scheme"] [role=radio]',
           textStarts: "Dracula",
-        },
-      },
-      {
-        click: {
-          css: '[aria-label="Style"] [role=radio]',
-          textStarts: "Neo-Brutalism",
-        },
-        say: "…and a style.",
-      },
-      {
-        click: {
-          css: '[aria-label="Style"] [role=radio]',
-          textStarts: "Skeuomorphism",
         },
       },
       {

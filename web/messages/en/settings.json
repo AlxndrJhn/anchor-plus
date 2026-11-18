@@ -123,28 +123,7 @@
   "appearance": {
     "title": "Appearance",
     "colourScheme": "Colour scheme",
-    "colourSchemeLofi": "Lo-fi draws in its own greys; the scheme comes back with another style.",
     "colourSchemeText": "Popular palettes, each in a light and a dark version.",
-    "style": "Style",
-    "styleText": "Shapes, shadows and type.",
-    "styles": {
-      "default": {
-        "label": "Default",
-        "description": "Clean and soft"
-      },
-      "skeuomorphism": {
-        "label": "Skeuomorphism",
-        "description": "Paper, linen and gloss"
-      },
-      "neo-brutalism": {
-        "label": "Neo-Brutalism",
-        "description": "Bold outlines, hard shadows"
-      },
-      "lofi": {
-        "label": "Lo-fi",
-        "description": "A pencil sketch, in greys"
-      }
-    },
     "theme": "Theme",
     "themeText": "Choose how Anchor+ looks.",
     "light": "Light",
@@ -156,8 +135,7 @@
   },
   "customTheme": {
     "title": "Custom theme",
-    "text": "Paste a theme as JSON: colours for light, dark or both. Anything left out keeps the colour scheme’s colour. Kept on this device; the same JSON works in the Android app.",
-    "lofiNote": "Lo-fi draws in its own greys, so the custom theme waits for another style.",
+    "text": "Paste a theme as JSON: colours for light, dark or both, and a style (fonts, corners, outline, shadow, patterns, note colours). Anything left out keeps the colour scheme’s colour and the default look; THEMES.md on GitHub has ready-made ones. Kept on this device; the same JSON works in the Android app.",
     "applied": "Applied.",
     "appliedNamed": "Applied: {name}.",
     "appliedToast": "Custom theme applied",

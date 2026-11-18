@@ -235,10 +235,9 @@ class PreferencesRepository {
     await _storage.write(key: StorageKeys.colorScheme, value: scheme);
   }
 
-  Future<String?> getAppStyle() => _read(StorageKeys.appStyle);
-
-  Future<void> setAppStyle(String style) async {
-    await _storage.write(key: StorageKeys.appStyle, value: style);
+  /// Forgets the old Style setting: a custom theme's `style` does it now.
+  Future<void> removeLegacyAppStyle() async {
+    await _storage.delete(key: StorageKeys.legacyAppStyle);
   }
 
   /// The custom theme's JSON, as `CustomTheme.encode` writes it.

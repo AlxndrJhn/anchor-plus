@@ -20,7 +20,6 @@ abstract final class AppTheme {
       NoteFont,
       NoteTextSize,
       String,
-      AppStyle,
       String?,
       NoteLineSpacing,
     ),
@@ -35,7 +34,6 @@ abstract final class AppTheme {
     NoteFont font = NoteFont.sans,
     NoteTextSize textSize = NoteTextSize.standard,
     String scheme = anchorSchemeId,
-    AppStyle style = AppStyle.standard,
     CustomTheme? custom,
     NoteLineSpacing lineSpacing = NoteLineSpacing.standard,
   ]) => _cached(
@@ -44,7 +42,6 @@ abstract final class AppTheme {
     font,
     textSize,
     scheme,
-    style,
     custom,
     lineSpacing,
   );
@@ -54,7 +51,6 @@ abstract final class AppTheme {
     NoteFont font = NoteFont.sans,
     NoteTextSize textSize = NoteTextSize.standard,
     String scheme = anchorSchemeId,
-    AppStyle style = AppStyle.standard,
     CustomTheme? custom,
     NoteLineSpacing lineSpacing = NoteLineSpacing.standard,
   ]) => _cached(
@@ -63,7 +59,6 @@ abstract final class AppTheme {
     font,
     textSize,
     scheme,
-    style,
     custom,
     lineSpacing,
   );
@@ -74,7 +69,6 @@ abstract final class AppTheme {
     NoteFont font,
     NoteTextSize textSize,
     String scheme,
-    AppStyle style,
     CustomTheme? custom,
     NoteLineSpacing lineSpacing,
   ) => _cache.putIfAbsent(
@@ -84,7 +78,6 @@ abstract final class AppTheme {
       font,
       textSize,
       scheme,
-      style,
       custom?.encode(),
       lineSpacing,
     ),
@@ -94,7 +87,6 @@ abstract final class AppTheme {
       font,
       textSize,
       scheme,
-      style,
       custom,
       lineSpacing,
     ),
@@ -106,18 +98,14 @@ abstract final class AppTheme {
     NoteFont font,
     NoteTextSize textSize,
     String schemeId,
-    AppStyle style,
     CustomTheme? customTheme,
     NoteLineSpacing lineSpacing,
   ) {
     final spacing = AnchorDensity.of(density);
-    // Lo-fi draws in its own greys, whatever the scheme or custom theme; null
-    // keeps Anchor's own palette.
-    final lofi = style == AppStyle.lofi;
-    final palette = lofi
-        ? lofiScheme.of(brightness)
-        : schemeById(schemeId)?.of(brightness);
-    final custom = lofi ? null : customTheme?.of(brightness);
+    final style = customTheme?.style ?? ThemeStyle.standard;
+    // Null keeps Anchor's own palette.
+    final palette = schemeById(schemeId)?.of(brightness);
+    final custom = customTheme?.of(brightness);
     final colors = AnchorAppearance.colors(
       brightness,
       palette,
@@ -249,13 +237,15 @@ abstract final class AppTheme {
           lineSpacing: customTheme?.lineSpacing ?? lineSpacing,
           lineHeight: spacing.noteLineHeight,
           sansFamily: AppTypography.uiFamilyOf(style),
-          // Skeuomorphism sets note titles in the serif, as on the web.
-          titleFamily: style == AppStyle.skeuomorphism
-              ? AppTypography.serif
-              : null,
+          // A theme's title font sets note titles, as on the web.
+          titleFamily: AppTypography.titleFamilyOf(style),
+          titleWeight: style.titleFontWeight,
         ),
         colors,
-        AnchorStyle.of(style, colors.appText, brightness),
+        AnchorStyle.of(
+          style,
+          AnchorAppearance.namedColors(brightness, palette, custom: custom),
+        ),
       ],
     );
   }
