@@ -5,6 +5,7 @@ import { appearanceScript } from "@/lib/appearance-script";
 import {
   ANCHOR_PALETTE,
   customThemeCss,
+  LINE_SPACINGS,
   mergePalette,
   normalizeColor,
   parseCustomTheme,
@@ -193,22 +194,25 @@ describe("applying a custom theme", () => {
     ]);
   });
 
-  it("spaces the lines the same way before the first paint", () => {
-    const spaced = { ...theme, lineSpacing: "relaxed" as const };
-    const appended: { textContent?: string }[] = [];
-    new Function("localStorage", "document", appearanceScript)(
-      {
-        getItem: () =>
-          JSON.stringify({ state: { ui: { customTheme: spaced } } }),
-      },
-      {
-        documentElement: { dataset: {} },
-        head: { appendChild: (node: object) => appended.push(node) },
-        createElement: () => ({}),
-      },
-    );
-    expect(appended[0].textContent).toBe(customThemeCss(spaced));
-  });
+  it.each(LINE_SPACINGS)(
+    "spaces the lines %s the same way before the first paint",
+    (lineSpacing) => {
+      const spaced = { ...theme, lineSpacing };
+      const appended: { textContent?: string }[] = [];
+      new Function("localStorage", "document", appearanceScript)(
+        {
+          getItem: () =>
+            JSON.stringify({ state: { ui: { customTheme: spaced } } }),
+        },
+        {
+          documentElement: { dataset: {} },
+          head: { appendChild: (node: object) => appended.push(node) },
+          createElement: () => ({}),
+        },
+      );
+      expect(appended[0].textContent).toBe(customThemeCss(spaced));
+    },
+  );
 });
 
 describe("schemes", () => {
