@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anchor/core/links/source_code.dart';
 import 'package:anchor/core/network/connectivity_provider.dart';
 import 'package:anchor/core/network/server_config_provider.dart';
 import 'package:anchor/core/storage/preferences_repository.dart';
@@ -431,4 +432,24 @@ void main() {
       ]);
     },
   );
+
+  testWidgets('Help links the privacy policy, above the source code', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+    await tester.scrollUntilVisible(
+      find.text('Source code'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    final privacy = find.text('Privacy policy');
+    expect(privacy, findsOneWidget);
+    expect(
+      tester.getTopLeft(privacy).dy,
+      lessThan(tester.getTopLeft(find.text('Source code')).dy),
+    );
+    expect(privacyPolicyUrl, 'https://anchor-plus.app/privacy');
+  });
 }

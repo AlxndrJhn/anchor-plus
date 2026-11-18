@@ -1028,6 +1028,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsLogsHelp => 'Aktivitätsdetails zur Fehlersuche';
 
   @override
+  String get settingsPrivacyPolicy => 'Datenschutzerklärung';
+
+  @override
+  String get settingsPrivacyPolicyHelp =>
+      'Was die App auf diesem Handy speichert und an deinen Server sendet';
+
+  @override
   String get settingsSourceCode => 'Quellcode';
 
   @override

@@ -1750,6 +1750,18 @@ abstract class AppLocalizations {
   /// **'Activity details for troubleshooting'**
   String get settingsLogsHelp;
 
+  /// Row in Settings that opens the apps' privacy policy on anchor-plus.app.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get settingsPrivacyPolicy;
+
+  /// Under the Privacy policy row.
+  ///
+  /// In en, this message translates to:
+  /// **'What the app keeps on this phone and sends to your server'**
+  String get settingsPrivacyPolicyHelp;
+
   /// Row in Settings that opens the source code of this version of the app on GitHub.
   ///
   /// In en, this message translates to:
