@@ -580,6 +580,10 @@ class _EditorSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final editor = ref.watch(editorPreferencesControllerProvider);
     final controller = ref.read(editorPreferencesControllerProvider.notifier);
+    final themeSpacing = ref.watch(
+      customThemeControllerProvider.select((theme) => theme?.lineSpacing),
+    );
+    final lineSpacing = themeSpacing ?? editor.noteLineSpacing;
     final l10n = context.l10n;
     return Section(
       label: l10n.settingsEditor,
@@ -589,7 +593,7 @@ class _EditorSection extends ConsumerWidget {
             typography: NoteTypography(
               font: editor.noteFont,
               textSize: editor.noteTextSize,
-              lineSpacing: editor.noteLineSpacing,
+              lineSpacing: lineSpacing,
               lineHeight: context.density.noteLineHeight,
             ),
           ),
@@ -623,14 +627,19 @@ class _EditorSection extends ConsumerWidget {
           ),
           StackedListTile(
             label: l10n.settingsLineSpacing,
+            subtitle: themeSpacing == null
+                ? null
+                : l10n.settingsLineSpacingByTheme,
             child: SegmentedControl<NoteLineSpacing>(
               semanticLabel: l10n.settingsLineSpacing,
-              value: editor.noteLineSpacing,
+              value: lineSpacing,
               segments: [
                 for (final spacing in NoteLineSpacing.values)
                   Segment(value: spacing, label: spacing.labelIn(l10n)),
               ],
-              onChanged: controller.setNoteLineSpacing,
+              onChanged: themeSpacing == null
+                  ? controller.setNoteLineSpacing
+                  : null,
             ),
           ),
           SwitchRow(

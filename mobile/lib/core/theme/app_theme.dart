@@ -245,7 +245,8 @@ abstract final class AppTheme {
         NoteTypography(
           font: font,
           textSize: textSize,
-          lineSpacing: lineSpacing,
+          // A custom theme's spacing wins, Lo-fi or not.
+          lineSpacing: customTheme?.lineSpacing ?? lineSpacing,
           lineHeight: spacing.noteLineHeight,
           sansFamily: AppTypography.uiFamilyOf(style),
           // Skeuomorphism sets note titles in the serif, as on the web.

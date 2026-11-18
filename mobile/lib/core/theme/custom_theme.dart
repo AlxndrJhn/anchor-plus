@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
 import '../../l10n/app_localizations.dart';
+import 'note_typography.dart';
 import 'tokens/app_schemes.dart';
 
 /// A custom theme pasted as JSON in Settings › Appearance. The same JSON
@@ -13,14 +14,18 @@ import 'tokens/app_schemes.dart';
 ///
 /// Every key is optional except that one of light and dark must be there. A
 /// mode's colours are [SchemePalette.fields]; a missing one keeps the chosen
-/// scheme's colour.
+/// scheme's colour. "lineSpacing" ("tight", "default" or "relaxed") sets the
+/// notes' line spacing in place of Settings › Editor's.
 @immutable
 class CustomTheme {
-  const CustomTheme({this.name, this.light, this.dark});
+  const CustomTheme({this.name, this.light, this.dark, this.lineSpacing});
 
   final String? name;
   final Map<String, Color>? light;
   final Map<String, Color>? dark;
+
+  /// Null leaves it to Settings › Editor.
+  final NoteLineSpacing? lineSpacing;
 
   Map<String, Color>? of(Brightness brightness) =>
       brightness == Brightness.dark ? dark : light;
@@ -34,6 +39,7 @@ class CustomTheme {
     'name': ?name,
     if (light != null) 'light': _colorsToJson(light!),
     if (dark != null) 'dark': _colorsToJson(dark!),
+    'lineSpacing': ?lineSpacing?.jsonName,
   };
 
   /// The JSON, as one line: also what a theme is stored and compared as.
@@ -122,6 +128,17 @@ class NotAColor extends CustomThemeProblem {
       l10n.customThemeNotAColor(path, value);
 }
 
+/// [value] (as JSON) isn't one of the line spacings.
+class NotALineSpacing extends CustomThemeProblem {
+  const NotALineSpacing(this.value);
+
+  final String value;
+
+  @override
+  String textIn(AppLocalizations l10n) =>
+      l10n.customThemeNotALineSpacing(value);
+}
+
 class NoMode extends CustomThemeProblem {
   const NoMode();
 
@@ -140,7 +157,7 @@ class CustomThemeResult {
   bool get isOk => theme != null;
 }
 
-const _topLevelKeys = ['name', 'light', 'dark'];
+const _topLevelKeys = ['name', 'light', 'dark', 'lineSpacing'];
 const _modes = ['light', 'dark'];
 final _colorPattern = RegExp(
   r'^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$',
@@ -235,6 +252,14 @@ CustomThemeResult parseCustomTheme(String text) {
     }
   }
 
+  NoteLineSpacing? lineSpacing;
+  if (json.containsKey('lineSpacing')) {
+    lineSpacing = NoteLineSpacing.fromJson(json['lineSpacing']);
+    if (lineSpacing == null) {
+      problems.add(NotALineSpacing(jsonEncode(json['lineSpacing'])));
+    }
+  }
+
   final palettes = <String, Map<String, Color>>{};
   for (final mode in _modes) {
     if (!json.containsKey(mode)) continue;
@@ -265,7 +290,12 @@ CustomThemeResult parseCustomTheme(String text) {
 
   if (problems.isNotEmpty) return CustomThemeResult.failed(problems);
   return CustomThemeResult.ok(
-    CustomTheme(name: name, light: palettes['light'], dark: palettes['dark']),
+    CustomTheme(
+      name: name,
+      light: palettes['light'],
+      dark: palettes['dark'],
+      lineSpacing: lineSpacing,
+    ),
   );
 }
 
@@ -282,5 +312,6 @@ String themeAsJson(AppScheme scheme, CustomTheme? custom) {
     'name': custom?.name ?? scheme.name,
     'light': mode(Brightness.light),
     'dark': mode(Brightness.dark),
+    'lineSpacing': ?custom?.lineSpacing?.jsonName,
   });
 }

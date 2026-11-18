@@ -689,6 +689,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String customThemeNotALineSpacing(String value) {
+    return 'lineSpacing: $value is not one of \"tight\", \"default\" or \"relaxed\"';
+  }
+
+  @override
   String get customThemeNoMode => 'Give at least one of \"light\" or \"dark\"';
 
   @override
@@ -759,6 +764,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLineSpacing => 'Line spacing';
+
+  @override
+  String get settingsLineSpacingByTheme =>
+      'Set by your custom theme. Take \"lineSpacing\" out of it to pick here.';
 
   @override
   String get settingsMoveChecked => 'Move checked items to the bottom';

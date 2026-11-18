@@ -700,6 +700,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String customThemeNotALineSpacing(String value) {
+    return 'lineSpacing: $value ist nicht \"tight\", \"default\" oder \"relaxed\"';
+  }
+
+  @override
   String get customThemeNoMode => 'Gib mindestens \"light\" oder \"dark\" an';
 
   @override
@@ -770,6 +775,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsLineSpacing => 'Zeilenabstand';
+
+  @override
+  String get settingsLineSpacingByTheme =>
+      'Vom eigenen Theme festgelegt. Nimm \"lineSpacing\" dort heraus, um hier zu wählen.';
 
   @override
   String get settingsMoveChecked => 'Erledigte Einträge nach unten schieben';

@@ -34,7 +34,8 @@
   font-family: var(--font-sans);
   font-size: var(--text-body);
   font-weight: var(--text-body--font-weight);
-  line-height: 1.7;
+  /* A custom theme's lineSpacing sets --note-line-height. */
+  line-height: var(--note-line-height, 1.7);
   color: var(--foreground);
   overflow-y: visible;
   counter-reset: none;
@@ -229,7 +230,7 @@
   display: grid;
   place-items: center;
   width: 22px;
-  height: 1.7em;
+  height: calc(var(--note-line-height, 1.7) * 1em);
   margin: 0;
   color: var(--note-muted);
 }
@@ -268,7 +269,7 @@
   font-size: 0.9em;
   /* The same box as the text line, in this smaller font's units. */
   top: calc(0.1em / 0.9);
-  height: calc(1.7em / 0.9);
+  height: calc(var(--note-line-height, 1.7) * 1em / 0.9);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
 }

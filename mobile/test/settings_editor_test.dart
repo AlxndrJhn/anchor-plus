@@ -18,6 +18,7 @@ import 'package:anchor/features/notes/domain/quick_action.dart';
 import 'package:anchor/features/server/data/server_info_provider.dart';
 import 'package:anchor/features/settings/presentation/editor_preferences_controller.dart';
 import 'package:anchor/features/settings/presentation/settings_screen.dart';
+import 'package:anchor/features/settings/presentation/theme_preferences_controller.dart';
 import 'package:anchor/features/sync/data/sync_compatibility.dart';
 import 'package:anchor/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
@@ -279,6 +280,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(styleOf(tester, preview).height, closeTo(standard - 0.2, 0.001));
     expect(await repository.getNoteLineSpacing(), 'tight');
+  });
+
+  testWidgets('a custom theme that sets the line spacing greys the picker '
+      'out and says why', (tester) async {
+    final container = await pumpSettings(tester);
+    final standard = styleOf(tester, preview).height!;
+    final themes = container.read(customThemeControllerProvider.notifier);
+
+    await themes.apply('{"light": {}, "lineSpacing": "tight"}');
+    await tester.pumpAndSettle();
+
+    const note =
+        'Set by your custom theme. Take "lineSpacing" out of it to pick here.';
+    expect(find.text(note), findsOneWidget);
+    final picker = tester.widget<SegmentedControl<NoteLineSpacing>>(
+      find.byType(SegmentedControl<NoteLineSpacing>),
+    );
+    expect(picker.value, NoteLineSpacing.tight);
+    expect(picker.onChanged, isNull);
+    expect(styleOf(tester, preview).height, closeTo(standard - 0.2, 0.001));
+
+    await tester.tap(segment('Line spacing', 'Relaxed'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    final editor = container.read(editorPreferencesControllerProvider);
+    expect(editor.noteLineSpacing, NoteLineSpacing.standard);
+
+    await themes.reset();
+    await tester.pumpAndSettle();
+    expect(find.text(note), findsNothing);
+    expect(
+      tester
+          .widget<SegmentedControl<NoteLineSpacing>>(
+            find.byType(SegmentedControl<NoteLineSpacing>),
+          )
+          .onChanged,
+      isNotNull,
+    );
+    expect(styleOf(tester, preview).height, closeTo(standard, 0.001));
   });
 
   testWidgets('Burn deleted notes is on until turned off on this phone', (

@@ -7,7 +7,8 @@
  *
  * Every key is optional except that one of light and dark must be there. A
  * mode's colours are the scheme palette's fields; a missing one keeps the
- * chosen scheme's colour.
+ * chosen scheme's colour. "lineSpacing" ("tight", "default" or "relaxed")
+ * spaces the notes' lines; on Android it takes the place of Settings › Editor's.
  */
 import { translate } from "@/lib/i18n";
 import {
@@ -21,17 +22,31 @@ export type PaletteField = (typeof PALETTE_FIELDS)[number];
 export type ThemeMode = "light" | "dark";
 export const THEME_MODES: readonly ThemeMode[] = ["light", "dark"];
 
+export const LINE_SPACINGS = ["tight", "default", "relaxed"] as const;
+export type LineSpacing = (typeof LINE_SPACINGS)[number];
+
+/** A note's line height for each spacing, as on Android at Default density. */
+export const LINE_HEIGHTS: Record<LineSpacing, number> = {
+  tight: 1.5,
+  default: 1.7,
+  relaxed: 2,
+};
+
 export interface CustomTheme {
   name?: string;
   light?: Partial<Record<PaletteField, string>>;
   dark?: Partial<Record<PaletteField, string>>;
+  lineSpacing?: LineSpacing;
 }
+
+const isLineSpacing = (value: unknown): value is LineSpacing =>
+  (LINE_SPACINGS as readonly unknown[]).includes(value);
 
 export type CustomThemeResult =
   | { ok: true; theme: CustomTheme }
   | { ok: false; errors: string[] };
 
-const TOP_LEVEL_KEYS = ["name", "light", "dark"];
+const TOP_LEVEL_KEYS = ["name", "light", "dark", "lineSpacing"];
 const COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
 /** #rgb, #rrggbb or #rrggbbaa, as lower-case #rrggbb or #rrggbbaa. */
@@ -115,6 +130,14 @@ export function parseCustomTheme(text: string): CustomThemeResult {
   if (json.name !== undefined) {
     if (typeof json.name === "string") theme.name = json.name;
     else errors.push(t("nameString"));
+  }
+
+  if (json.lineSpacing !== undefined) {
+    if (isLineSpacing(json.lineSpacing)) theme.lineSpacing = json.lineSpacing;
+    else
+      errors.push(
+        t("notLineSpacing", { value: JSON.stringify(json.lineSpacing) }),
+      );
   }
 
   for (const mode of THEME_MODES) {
@@ -217,6 +240,7 @@ export function themeAsJson(
       PALETTE_FIELDS.map((field) => [field, palette[field].toLowerCase()]),
     );
   }
+  if (theme?.lineSpacing) out.lineSpacing = theme.lineSpacing;
   return JSON.stringify(out, null, 2);
 }
 
@@ -227,8 +251,14 @@ export function themeAsJson(
 export const customThemeSelector = (mode: ThemeMode) =>
   `:root[data-custom-theme]:not([data-style="lofi"]).${mode}`;
 
-/** The CSS that puts the theme's colours on the page. */
+/** The CSS that puts the theme's colours and line spacing on the page. */
 export function customThemeCss(theme: CustomTheme): string {
+  // Spacing isn't colour: Lo-fi keeps it too.
+  const spacing = theme.lineSpacing
+    ? [
+        `:root[data-custom-theme]{--note-line-height:${LINE_HEIGHTS[theme.lineSpacing]};}`,
+      ]
+    : [];
   return THEME_MODES.flatMap((mode) => {
     const colors = theme[mode];
     if (!colors) return [];
@@ -239,5 +269,7 @@ export function customThemeCss(theme: CustomTheme): string {
     return declarations
       ? [`${customThemeSelector(mode)}{${declarations}}`]
       : [];
-  }).join("\n");
+  })
+    .concat(spacing)
+    .join("\n");
 }

@@ -76,6 +76,7 @@
     "nameString": "name: muss ein Text sein",
     "modeObject": "{mode}: muss ein Objekt mit Farben sein",
     "notColour": "{path}: {value} ist keine Farbe; verwende #rgb, #rrggbb oder #rrggbbaa",
+    "notLineSpacing": "lineSpacing: {value} ist nicht „tight“, „default“ oder „relaxed“",
     "needOne": "Gib mindestens „light“ oder „dark“ an",
     "unknownKey": "{path}: unbekannter Schlüssel; erwartet wird einer von {options}",
     "unknownKeyGuess": "{path}: unbekannter Schlüssel (meintest du „{guess}“?); erwartet wird einer von {options}"

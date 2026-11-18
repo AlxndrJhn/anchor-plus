@@ -982,6 +982,15 @@
       }
     }
   },
+  "customThemeNotALineSpacing": "lineSpacing: {value} is not one of \"tight\", \"default\" or \"relaxed\"",
+  "@customThemeNotALineSpacing": {
+    "description": "Error for a pasted custom theme. lineSpacing, tight, default and relaxed are JSON and stay as they are.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "customThemeNoMode": "Give at least one of \"light\" or \"dark\"",
   "@customThemeNoMode": {
     "description": "A pasted custom theme has neither light nor dark colors. Keep \"light\" and \"dark\" as they are: they are JSON keys."
@@ -1077,6 +1086,10 @@
   "settingsLineSpacing": "Line spacing",
   "@settingsLineSpacing": {
     "description": "Setting that picks how far apart the lines of text in notes are."
+  },
+  "settingsLineSpacingByTheme": "Set by your custom theme. Take \"lineSpacing\" out of it to pick here.",
+  "@settingsLineSpacingByTheme": {
+    "description": "Under the Line spacing setting, greyed out because the custom theme (Settings › Appearance) sets it. \"lineSpacing\" is the JSON key and stays as it is."
   },
   "settingsMoveChecked": "Move checked items to the bottom",
   "@settingsMoveChecked": {

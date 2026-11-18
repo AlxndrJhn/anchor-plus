@@ -57,6 +57,16 @@ enum NoteLineSpacing {
   /// Added to the density's line height, in ems.
   final double offset;
 
+  /// As a custom theme's "lineSpacing" says it, as on the web.
+  String get jsonName => this == standard ? 'default' : name;
+
+  static NoteLineSpacing? fromJson(Object? value) {
+    for (final spacing in values) {
+      if (spacing.jsonName == value) return spacing;
+    }
+    return null;
+  }
+
   String labelIn(AppLocalizations l10n) => switch (this) {
     NoteLineSpacing.tight => l10n.lineSpacingTight,
     NoteLineSpacing.standard => l10n.textSizeDefault,
