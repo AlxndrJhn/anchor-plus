@@ -1012,6 +1012,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLogsHelp => 'Activity details for troubleshooting';
 
   @override
+  String get settingsPrivacyPolicy => 'Privacy policy';
+
+  @override
+  String get settingsPrivacyPolicyHelp =>
+      'What the app keeps on this phone and sends to your server';
+
+  @override
   String get settingsSourceCode => 'Source code';
 
   @override

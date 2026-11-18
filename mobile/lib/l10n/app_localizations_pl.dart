@@ -1030,6 +1030,13 @@ class AppLocalizationsPl extends AppLocalizations {
       'Szczegóły aktywności do rozwiązywania problemów';
 
   @override
+  String get settingsPrivacyPolicy => 'Polityka prywatności';
+
+  @override
+  String get settingsPrivacyPolicyHelp =>
+      'Co aplikacja przechowuje na tym telefonie i wysyła na Twój serwer';
+
+  @override
   String get settingsSourceCode => 'Kod źródłowy';
 
   @override

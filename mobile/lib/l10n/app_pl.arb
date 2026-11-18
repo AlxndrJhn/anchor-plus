@@ -279,6 +279,8 @@
   "settingsHelp": "Pomoc",
   "settingsLogs": "Logi",
   "settingsLogsHelp": "Szczegóły aktywności do rozwiązywania problemów",
+  "settingsPrivacyPolicy": "Polityka prywatności",
+  "settingsPrivacyPolicyHelp": "Co aplikacja przechowuje na tym telefonie i wysyła na Twój serwer",
   "settingsSourceCode": "Kod źródłowy",
   "settingsSourceCodeHelp": "Wolne oprogramowanie na licencji GNU AGPL v3, bez gwarancji",
   "settingsLicense": "Licencja",

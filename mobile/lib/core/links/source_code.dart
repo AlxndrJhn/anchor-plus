@@ -11,3 +11,7 @@ String sourceCodeUrl(String version) => '$_repository/tree/${_refOf(version)}';
 
 String licenseUrl(String version) =>
     '$_repository/blob/${_refOf(version)}/LICENSE';
+
+/// The apps' privacy policy, which Google Play asks to be linked from inside
+/// the app.
+const privacyPolicyUrl = 'https://anchor-plus.app/privacy';

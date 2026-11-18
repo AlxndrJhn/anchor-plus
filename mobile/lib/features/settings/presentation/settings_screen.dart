@@ -1281,6 +1281,13 @@ class _HelpSection extends StatelessWidget {
             onTap: () => context.push(AppRoutes.logs),
           ),
           GroupedListTile(
+            icon: LucideIcons.shieldCheck,
+            label: l10n.settingsPrivacyPolicy,
+            subtitle: l10n.settingsPrivacyPolicyHelp,
+            trailing: opensOutside,
+            onTap: () => launchExternal(context, privacyPolicyUrl),
+          ),
+          GroupedListTile(
             icon: LucideIcons.code,
             label: l10n.settingsSourceCode,
             subtitle: l10n.settingsSourceCodeHelp,
