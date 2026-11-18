@@ -157,6 +157,8 @@
     "sortCheckedText": "Abgehakte Einträge wandern unter die offenen.",
     "burnDeleted": "Gelöschte Notizen verbrennen",
     "burnDeletedText": "Eine gelöschte Notiz verbrennt an ihrer Stelle. Aus, verschwindet sie einfach. Nur auf diesem Gerät.",
+    "strikeSparks": "Funken, wenn Karten aufschlagen",
+    "strikeSparksText": "Nach dem Löschen sprühen Funken, wo die Karten an ihren neuen Platz schlagen. Nur auf diesem Gerät.",
     "insertDate": "Heutiges Datum einfügen",
     "insertDateText": "Schreibt in einer Notiz das Datum, z. B. {example}. Mit /date geht dasselbe.",
     "dateFormat": "Format des eingefügten Datums",

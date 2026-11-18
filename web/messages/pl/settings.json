@@ -157,6 +157,8 @@
     "sortCheckedText": "Zaznaczone pozycje trafiają pod niezaznaczone.",
     "burnDeleted": "Spalaj usunięte notatki",
     "burnDeletedText": "Usunięta notatka spala się w miejscu, w którym stała. Wyłączone: po prostu znika. Tylko na tym urządzeniu.",
+    "strikeSparks": "Iskry przy zderzeniu kart",
+    "strikeSparksText": "Po usunięciu lecą iskry tam, gdzie karty uderzają w swoje nowe miejsca. Tylko na tym urządzeniu.",
     "insertDate": "Wstaw dzisiejszą datę",
     "insertDateText": "W notatce wpisuje datę, np. {example}. Wpisanie /date robi to samo.",
     "dateFormat": "Format wstawianej daty",

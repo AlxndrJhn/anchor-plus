@@ -23,6 +23,10 @@ const _armedFor = Duration(milliseconds: 2500);
 DateTime? _armedUntil;
 DateTime? _lastKnock;
 
+/// Whether a strike throws sparks; kept in step with the setting by
+/// `EditorPreferencesController`.
+bool strikeThrowsSparks = false;
+
 /// Makes the cards that move in the next moments, as deleted notes leave
 /// their lists, fly into their new places and strike them; see
 /// [StrikeImpact].

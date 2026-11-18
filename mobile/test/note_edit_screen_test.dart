@@ -1161,6 +1161,11 @@ void main() {
     ) async {
       await pumpScreen(tester, note: mine, withCard: true);
       await tester.pumpAndSettle();
+      // Burning is off until turned on.
+      when(() => prefsRepo.setBurnDeleted(any())).thenAnswer((_) async {});
+      await ProviderScope.containerOf(
+        tester.element(find.byType(NoteEditScreen)),
+      ).read(editorPreferencesControllerProvider.notifier).setBurnDeleted(true);
 
       await tester.tap(barButton('Move to trash'));
       for (var i = 0; i < 6; i++) {

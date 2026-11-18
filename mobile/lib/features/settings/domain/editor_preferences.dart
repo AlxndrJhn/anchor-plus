@@ -8,6 +8,9 @@ class EditorPreferences {
   /// Deleted notes burn away where they stood, on this device.
   final bool burnDeleted;
 
+  /// Sparks fly where cards strike into place after a delete, on this device.
+  final bool strikeSparks;
+
   final NoteFont noteFont;
   final NoteTextSize noteTextSize;
   final NoteLineSpacing noteLineSpacing;
@@ -23,7 +26,8 @@ class EditorPreferences {
 
   const EditorPreferences({
     this.sortChecklistItems = true,
-    this.burnDeleted = true,
+    this.burnDeleted = false,
+    this.strikeSparks = false,
     this.noteFont = NoteFont.sans,
     this.noteTextSize = NoteTextSize.standard,
     this.noteLineSpacing = NoteLineSpacing.standard,
@@ -35,6 +39,7 @@ class EditorPreferences {
   EditorPreferences copyWith({
     bool? sortChecklistItems,
     bool? burnDeleted,
+    bool? strikeSparks,
     NoteFont? noteFont,
     NoteTextSize? noteTextSize,
     NoteLineSpacing? noteLineSpacing,
@@ -45,6 +50,7 @@ class EditorPreferences {
     return EditorPreferences(
       sortChecklistItems: sortChecklistItems ?? this.sortChecklistItems,
       burnDeleted: burnDeleted ?? this.burnDeleted,
+      strikeSparks: strikeSparks ?? this.strikeSparks,
       noteFont: noteFont ?? this.noteFont,
       noteTextSize: noteTextSize ?? this.noteTextSize,
       noteLineSpacing: noteLineSpacing ?? this.noteLineSpacing,

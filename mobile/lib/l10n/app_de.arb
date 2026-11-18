@@ -221,6 +221,8 @@
   "settingsMoveCheckedHelp": "Erledigte Einträge rutschen unter die offenen.",
   "settingsBurnDeleted": "Gelöschte Notizen verbrennen",
   "settingsBurnDeletedHelp": "Eine gelöschte Notiz verbrennt an ihrer Stelle. Ausgeschaltet verschwindet sie einfach.",
+  "settingsStrikeSparks": "Funken, wenn Karten aufschlagen",
+  "settingsStrikeSparksHelp": "Nach dem Löschen sprühen Funken, wo die Karten an ihren neuen Platz schlagen.",
   "settingsPreviewTitle": "Wochenende in Lissabon",
   "settingsPreviewText": "Reise mit leichtem Gepäck. Die Hügel sind steil, und die Straßenbahnen sind schon um neun voll.",
   "settingsAccount": "Konto",

@@ -30,6 +30,7 @@ class StorageKeys {
   static const customTheme = 'custom_theme';
   static const sortChecklistItems = 'editor_sort_checklist_items';
   static const burnDeleted = 'editor_burn_deleted';
+  static const strikeSparks = 'editor_strike_sparks';
   static const foldedChecklistNotes = 'editor_folded_checklist_notes';
   static const noteFont = 'editor_note_face';
   static const noteTextSize = 'editor_note_text_size';
@@ -72,6 +73,7 @@ class StorageKeys {
     customTheme,
     sortChecklistItems,
     burnDeleted,
+    strikeSparks,
     foldedChecklistNotes,
     noteFont,
     noteTextSize,

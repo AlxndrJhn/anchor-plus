@@ -1,3 +1,5 @@
+import { usePreferencesStore } from "@/features/preferences";
+
 /** How long a card flies into its new place, gathering speed. */
 export const STRIKE_TRAVEL = 230;
 /** How long the knock back from the impact takes. */
@@ -16,7 +18,7 @@ export function knockBack(dx: number, dy: number): [number, number] {
 /**
  * Moves [item], now in its new place [rect], from (dx, dy) away as if it
  * were struck there with a hammer: it speeds up, hits, knocks back a little
- * and throws a few sparks, like steel hit on an anvil. The sparks are drawn
+ * and, if sparks are on in Settings, throws a few, like steel hit on an anvil. They are drawn
  * in [layer], whose own place is [origin] (scrolled by [scroll]).
  */
 export function strikeIntoPlace(
@@ -45,6 +47,7 @@ export function strikeIntoPlace(
     ],
     { duration: STRIKE_TRAVEL + STRIKE_BOUNCE },
   );
+  if (usePreferencesStore.getState().editor.strikeSparks !== true) return;
   window.setTimeout(() => {
     if (!layer.isConnected) return;
     // It hits with its leading edge, the one it flies towards.

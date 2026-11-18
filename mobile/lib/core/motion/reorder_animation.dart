@@ -144,7 +144,9 @@ class _ReorderAnimatedBoxState extends State<ReorderAnimatedBox>
           if (progress >= 1) return child!;
           final t = _strikeTime;
           return CustomPaint(
-            foregroundPainter: StrikeSparksPainter(impact, t),
+            foregroundPainter: strikeThrowsSparks
+                ? StrikeSparksPainter(impact, t)
+                : null,
             child: Transform.translate(
               offset: impact.offsetAt(t),
               child: child,

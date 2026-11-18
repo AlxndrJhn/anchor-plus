@@ -135,6 +135,7 @@ Future<AppBootstrap> initializeApp({
   final editorPreferences = EditorPreferences(
     sortChecklistItems: await preferences.getSortChecklistItems(),
     burnDeleted: await preferences.getBurnDeleted(),
+    strikeSparks: await preferences.getStrikeSparks(),
     noteFont: NoteFont.values.firstWhere(
       (font) => font.name == savedFont,
       orElse: () => NoteFont.sans,

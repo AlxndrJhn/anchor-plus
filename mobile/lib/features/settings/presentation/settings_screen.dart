@@ -583,6 +583,12 @@ class _EditorSection extends ConsumerWidget {
             value: editor.burnDeleted,
             onChanged: controller.setBurnDeleted,
           ),
+          SwitchRow(
+            label: l10n.settingsStrikeSparks,
+            subtitle: l10n.settingsStrikeSparksHelp,
+            value: editor.strikeSparks,
+            onChanged: controller.setStrikeSparks,
+          ),
         ],
       ),
     );

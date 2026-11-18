@@ -43,14 +43,27 @@ class PreferencesRepository {
     );
   }
 
-  /// Deleted notes burn away; on unless turned off.
+  /// Deleted notes burn away; off unless turned on.
   Future<bool> getBurnDeleted() async {
     final value = await _read(StorageKeys.burnDeleted);
-    return value != 'false';
+    return value == 'true';
   }
 
   Future<void> setBurnDeleted(bool value) async {
     await _storage.write(key: StorageKeys.burnDeleted, value: value.toString());
+  }
+
+  /// Sparks fly when cards strike into place; off unless turned on.
+  Future<bool> getStrikeSparks() async {
+    final value = await _read(StorageKeys.strikeSparks);
+    return value == 'true';
+  }
+
+  Future<void> setStrikeSparks(bool value) async {
+    await _storage.write(
+      key: StorageKeys.strikeSparks,
+      value: value.toString(),
+    );
   }
 
   /// The note bar's actions, in order; null until changed.

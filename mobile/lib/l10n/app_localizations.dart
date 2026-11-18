@@ -1402,6 +1402,18 @@ abstract class AppLocalizations {
   /// **'A deleted note burns away where it stood. Off, it just goes.'**
   String get settingsBurnDeletedHelp;
 
+  /// Switch in Settings › Editor: after a delete, sparks fly where the remaining cards strike into their new places. A setting on this device.
+  ///
+  /// In en, this message translates to:
+  /// **'Sparks when cards collide'**
+  String get settingsStrikeSparks;
+
+  /// Help under the Sparks when cards collide switch.
+  ///
+  /// In en, this message translates to:
+  /// **'After a delete, sparks fly where the cards strike into their new places.'**
+  String get settingsStrikeSparksHelp;
+
   /// Title of a sample note that previews the font and text size.
   ///
   /// In en, this message translates to:

@@ -792,6 +792,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Eine gelöschte Notiz verbrennt an ihrer Stelle. Ausgeschaltet verschwindet sie einfach.';
 
   @override
+  String get settingsStrikeSparks => 'Funken, wenn Karten aufschlagen';
+
+  @override
+  String get settingsStrikeSparksHelp =>
+      'Nach dem Löschen sprühen Funken, wo die Karten an ihren neuen Platz schlagen.';
+
+  @override
   String get settingsPreviewTitle => 'Wochenende in Lissabon';
 
   @override

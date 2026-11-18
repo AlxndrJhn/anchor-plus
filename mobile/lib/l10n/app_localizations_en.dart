@@ -781,6 +781,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'A deleted note burns away where it stood. Off, it just goes.';
 
   @override
+  String get settingsStrikeSparks => 'Sparks when cards collide';
+
+  @override
+  String get settingsStrikeSparksHelp =>
+      'After a delete, sparks fly where the cards strike into their new places.';
+
+  @override
   String get settingsPreviewTitle => 'Weekend in Lisbon';
 
   @override

@@ -6,7 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  tearDown(disarmCardStrike);
+  tearDown(() {
+    disarmCardStrike();
+    strikeThrowsSparks = false;
+  });
 
   group('a struck card', () {
     const from = Offset(0, 100);
@@ -97,10 +100,16 @@ void main() {
   testWidgets('after a delete, the cards that move strike into place', (
     tester,
   ) async {
+    strikeThrowsSparks = true;
     final strike = await deleteFirst(tester, armed: true);
     expect(strike.sparked, isTrue);
     // One knock for both cards.
     expect(strike.knocks, 1);
+  });
+
+  testWidgets('with sparks off, they strike without sparks', (tester) async {
+    final strike = await deleteFirst(tester, armed: true);
+    expect(strike.sparked, isFalse);
   });
 
   testWidgets('cards that move otherwise just slide there', (tester) async {
