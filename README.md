@@ -146,7 +146,7 @@ and has ready-made themes to paste: Skeuomorphism, Neo-Brutalism and Lo-fi.
 - **Editing Together** - Everyone with a note open sees each other's text and cursors live, on the web and on Android. A reverse proxy in front of Anchor has to forward WebSockets for this (nginx: set the `Upgrade` and `Connection` headers; Caddy and Traefik do it by default); without them, notes sync as usual
 - **Note History** - Read earlier versions of a note and put one back
 - **Tags System** - Organize notes with custom tags and colors
-- **Attachments** - Attach images and audio to notes
+- **Attachments** - Attach images and audio to notes, up to 50 MB each. A reverse proxy in front of Anchor has to let uploads that big through (nginx accepts only 1 MB unless you set `client_max_body_size 50m;`; Caddy and Traefik have no limit by default); otherwise larger attachments stay on the device and show as failed to upload
 - **Note Backgrounds** - Customize notes with solid colors and patterns
 - **Pin Notes** - Pin important notes for quick access
 - **Archive Notes** - Archive notes for later reference
