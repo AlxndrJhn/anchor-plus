@@ -789,17 +789,39 @@ jobs:
             exit 0
           fi
           URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"
-          # Discord cuts an embed's description at 4096 characters.
-          NOTES=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body)
-          if [ ${#NOTES} -gt 3900 ]; then
-            NOTES="${NOTES:0:3900}"$'\n\n'"… [read the full notes]($URL)"
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > notes.md
+          # An embed's description holds at most 4096 characters. Longer notes
+          # are cut at the end of a line, with a code block left open closed.
+          # $thread names the post when the webhook is a forum channel's.
+          payload() {
+            jq -n --rawfile notes notes.md --arg title "Anchor+ $TAG" --arg url "$URL" --arg thread "$1" '
+              ($notes | rtrimstr("\n")) as $notes
+              | (if ($notes | length) <= 3900 then $notes
+                 else ($notes[:3900] | sub("\n[^\n]*$"; ""))
+                   | if ([scan("(?m)^```")] | length) % 2 == 1 then . + "\n```" else . end
+                   | . + "\n\n… [Read the full notes](\($url))"
+                 end) as $description
+              | {
+                  username: "Anchor+ Releases",
+                  content: "**\($title)** is out",
+                  embeds: [{title: $title, url: $url, description: $description, color: 5814783}],
+                  allowed_mentions: {parse: []}
+                }
+              + (if $thread == "" then {} else {thread_name: $thread} end)'
+          }
+          post() {
+            curl -sS -o response.json -w '%{http_code}' \
+              -H "Content-Type: application/json" --data-binary @- "$WEBHOOK?wait=true"
+          }
+          status=$(payload "" | post)
+          # 220001: a forum channel's webhook has to name a new post.
+          if [ "$status" = 400 ] && jq -e '.code == 220001' response.json >/dev/null 2>&1; then
+            status=$(payload "Anchor+ $TAG" | post)
           fi
-          jq -n --arg title "Anchor+ $TAG" --arg url "$URL" --arg notes "$NOTES" '{
-            username: "Anchor+ Releases",
-            content: "**\($title)** is out",
-            embeds: [{title: $title, url: $url, description: $notes, color: 5814783}],
-            allowed_mentions: {parse: []}
-          }' | curl -fsS -H "Content-Type: application/json" -d @- "$WEBHOOK?wait=true" >/dev/null
+          if [ "${status:0:1}" != 2 ]; then
+            echo "::error::Discord didn't take the announcement (HTTP $status): $(cat response.json)"
+            exit 1
+          fi
 
   # A candidate republishes Pages for the preview F-Droid repository, with
   # the last release's web app. It follows any release that went out, also
