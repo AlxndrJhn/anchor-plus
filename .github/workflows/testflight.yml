@@ -1,0 +1,132 @@
+name: TestFlight
+
+# Builds the iOS app and uploads it to App Store Connect, where it shows up
+# in TestFlight after Apple has processed it (and can then be submitted for
+# review from App Store Connect). Started by hand: Actions › TestFlight › Run
+# workflow, on main (`gh workflow run testflight.yml --ref main`).
+#
+# Signing is left to Xcode ("automatic", in the cloud): with an App Store
+# Connect API key it registers the app IDs and the app group, makes the
+# distribution certificate and the profiles, and keeps them current, so no
+# certificate or profile is kept in the secrets. That needs a team key with
+# the Admin role (App Store Connect › Users and Access › Integrations), in
+# ASC_ADMIN_KEY_P8 (the .p8 file's text) and ASC_ADMIN_KEY_ID; the issuer is
+# APPLE_API_ISSUER, which the macOS notarization uses too. The app itself must
+# already exist in App Store Connect (My Apps › New App, bundle ID
+# com.alxndrjhn.anchorplus), or the upload is turned away.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  testflight:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.9
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Set up the App Store Connect key
+        env:
+          KEY_P8: ${{ secrets.ASC_ADMIN_KEY_P8 }}
+          KEY_ID: ${{ secrets.ASC_ADMIN_KEY_ID }}
+          ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          if [ -z "$KEY_P8" ] || [ -z "$KEY_ID" ] || [ -z "$ISSUER" ]; then
+            echo "::error::Set the ASC_ADMIN_KEY_P8, ASC_ADMIN_KEY_ID and APPLE_API_ISSUER secrets (a team key with the Admin role) to sign and upload the app."
+            exit 1
+          fi
+          KEY_PATH="$RUNNER_TEMP/AuthKey_$KEY_ID.p8"
+          printf '%s\n' "$KEY_P8" > "$KEY_PATH"
+          {
+            echo "KEY_PATH=$KEY_PATH"
+            echo "KEY_ID=$KEY_ID"
+            echo "ISSUER=$ISSUER"
+          } >> "$GITHUB_ENV"
+
+      # The version is pubspec's (App Store versions are plain numbers, so
+      # without the -g<sha> the APKs carry). Every upload needs a build number
+      # higher than the last one of that version; the run counter gives that.
+      # No RELEASE_BUILD or UPDATE_REPO: on iOS the App Store updates the app.
+      - name: Configure the Xcode project
+        run: |
+          VERSION=$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "BUILD=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          flutter build ios --release --config-only \
+            --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+
+      - name: Archive
+        run: |
+          xcodebuild archive \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER" \
+            DEVELOPMENT_TEAM=QT7HFS4TLY
+
+      # destination "upload" sends the signed app straight to App Store
+      # Connect instead of writing an .ipa.
+      - name: Sign and upload to App Store Connect
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>upload</string>
+            <key>teamID</key>
+            <string>QT7HFS4TLY</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>manageAppVersionAndBuildNumber</key>
+            <false/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER"
+          {
+            echo "## TestFlight"
+            echo "Uploaded Anchor+ $VERSION ($BUILD) to App Store Connect. It shows up in TestFlight once Apple has processed it, usually within half an hour."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the key
+        if: always()
+        run: rm -f "$RUNNER_TEMP"/AuthKey_*.p8
