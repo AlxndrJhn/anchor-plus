@@ -824,6 +824,18 @@ destructive, so your client can ask before running them. Notes others share with
 can hold text aimed at Claude, so treat them as untrusted. Revoking the API
 token cuts Claude off.
 
+## Browser Extension
+
+[Save to Anchor](https://github.com/korderos/anchor_webextension), a
+community extension for Chrome, Edge, Brave and Firefox, saves the page
+you're on, a selection or a link as a note, with tags, a colour and a pin,
+and tells you when you've saved a page before. It works with Anchor+ as is:
+in its settings, enter your server's address and the API token from
+Settings › API token in the web app. If you set `CORS_ORIGINS`, allow the
+extension access to your server when it asks. An end-to-end test
+(`server/test/e2e/specs/browser-extension.e2e-spec.ts`) keeps the requests it
+makes working.
+
 ## OIDC Authentication
 
 Anchor supports OpenID Connect (OIDC) authentication for simplified credential management and streamlined multi-user deployments.
