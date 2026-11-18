@@ -423,7 +423,8 @@ jobs:
           [ "$SIGNED" = true ] || exit 0
           app=$(find dist -maxdepth 2 -name 'Anchor+.app' -type d | head -n1)
           codesign --verify --deep --strict --verbose=2 "$app"
-          codesign -dv "$app" 2>&1 | grep '^Authority=Developer ID Application'
+          # The Authority lines need verbosity 2 (-dvv); -dv leaves them out.
+          codesign -dvv "$app" 2>&1 | grep '^Authority=Developer ID Application'
           xcrun stapler validate "$app"
           spctl --assess --type execute --verbose=2 "$app"
 
