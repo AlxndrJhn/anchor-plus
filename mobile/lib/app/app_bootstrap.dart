@@ -19,7 +19,6 @@ class AppBootstrap {
     this.motionSpeed = MotionSpeed.normal,
     this.appLanguage,
     this.colorScheme = anchorSchemeId,
-    this.appStyle = AppStyle.standard,
     this.customTheme,
     this.editorPreferences = const EditorPreferences(),
     this.reminderPreferences = const ReminderPreferences(),
@@ -39,7 +38,6 @@ class AppBootstrap {
 
   /// A colour scheme id: [anchorSchemeId] or one of `appSchemes`.
   final String colorScheme;
-  final AppStyle appStyle;
 
   /// The custom theme over the colour scheme, if one is saved.
   final CustomTheme? customTheme;

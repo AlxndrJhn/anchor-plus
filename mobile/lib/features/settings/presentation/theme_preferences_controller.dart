@@ -60,18 +60,6 @@ class ColorSchemeController extends _$ColorSchemeController {
   }
 }
 
-@Riverpod(keepAlive: true)
-class AppStyleController extends _$AppStyleController {
-  @override
-  AppStyle build() => ref.watch(appBootstrapProvider).appStyle;
-
-  Future<void> setStyle(AppStyle style) async {
-    state = style;
-    final repository = ref.read(preferencesRepositoryProvider);
-    await repository.setAppStyle(style.id);
-  }
-}
-
 /// The custom theme pasted in Settings, over the colour scheme; null for none.
 @Riverpod(keepAlive: true)
 class CustomThemeController extends _$CustomThemeController {

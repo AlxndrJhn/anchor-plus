@@ -12,7 +12,6 @@ class ShareContext {
     this.themeMode = ThemeMode.system,
     this.density = DisplayDensity.standard,
     this.colorScheme = anchorSchemeId,
-    this.style = AppStyle.standard,
     this.customTheme,
     this.tags = const [],
   });
@@ -24,7 +23,6 @@ class ShareContext {
   final ThemeMode themeMode;
   final DisplayDensity density;
   final String colorScheme;
-  final AppStyle style;
   final CustomTheme? customTheme;
 
   /// In name order.
@@ -36,7 +34,6 @@ class ShareContext {
     'theme': themeMode.name,
     'density': density.name,
     'scheme': colorScheme,
-    'style': style.id,
     'customTheme': customTheme?.encode(),
     'tags': [
       for (final tag in tags)
@@ -59,10 +56,6 @@ class ShareContext {
       colorScheme: scheme is String && schemeById(scheme) != null
           ? scheme
           : anchorSchemeId,
-      style: AppStyle.fromId(switch (json['style']) {
-        final String id => id,
-        _ => null,
-      }),
       customTheme: switch (json['customTheme']) {
         final String stored => CustomTheme.decode(stored),
         _ => null,

@@ -101,7 +101,7 @@ class NoteMorphRoute extends PageRoute<void> {
         ? AnchorTokens.radiusFab
         : AnchorTokens.radiusCard;
     final corner = style.corners(token).topLeft;
-    // Lo-fi's wobbly corners morph from the plain one.
+    // Wobbly corners morph from the plain one.
     return corner.x == corner.y ? corner.x : token;
   }
 

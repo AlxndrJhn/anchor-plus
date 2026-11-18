@@ -3,8 +3,8 @@ import 'package:flutter/widgets.dart';
 import '../theme/context_extensions.dart';
 import '../theme/tokens/app_style.dart';
 
-/// The style's page texture over [child]: linen for Skeuomorphism, a dot grid
-/// for Lo-fi, nothing otherwise.
+/// The theme style's page pattern (`style.pagePattern`) over [child], if it
+/// has one.
 class StyleTexture extends StatelessWidget {
   const StyleTexture({super.key, required this.child});
 
@@ -13,59 +13,56 @@ class StyleTexture extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = context.appStyle;
+    final pattern = style.style.pagePattern;
     final color = style.pattern;
-    if (color == null) return child;
+    if (pattern == null || color == null) return child;
     return CustomPaint(
       isComplex: true,
       willChange: false,
-      foregroundPainter: style.style == AppStyle.lofi
-          ? _DotGridPainter(color)
-          : _LinenPainter(color),
+      foregroundPainter: StylePatternPainter(pattern, color),
       child: child,
     );
   }
 }
 
-/// Two fine cross weaves, as on the web.
-class _LinenPainter extends CustomPainter {
-  _LinenPainter(this.color);
+/// [pattern] in [color], as the web draws it: a dot of radius thickness
+/// centred in every size × size cell; a line thickness wide at the bottom of
+/// every size band; or both lines of a grid every size.
+class StylePatternPainter extends CustomPainter {
+  StylePatternPainter(this.pattern, this.color);
 
+  final StylePattern pattern;
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
+    final step = pattern.size ?? StylePattern.defaultSize;
+    final thickness = pattern.thickness;
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 1;
-    for (var y = 0.5; y < size.height; y += 3) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-    paint.color = color.withValues(alpha: color.a * 0.6);
-    for (var x = 0.5; x < size.width; x += 3) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_LinenPainter old) => old.color != color;
-}
-
-/// A dot every 18 points, as on the web.
-class _DotGridPainter extends CustomPainter {
-  _DotGridPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    for (var y = 9.0; y < size.height; y += 18) {
-      for (var x = 9.0; x < size.width; x += 18) {
-        canvas.drawCircle(Offset(x, y), 1, paint);
-      }
+      ..strokeWidth = thickness;
+    switch (pattern.shape) {
+      case PatternShape.dots:
+        for (var y = step / 2; y < size.height; y += step) {
+          for (var x = step / 2; x < size.width; x += step) {
+            canvas.drawCircle(Offset(x, y), thickness, paint);
+          }
+        }
+      case PatternShape.lines:
+        for (var y = step - thickness / 2; y < size.height; y += step) {
+          canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+        }
+      case PatternShape.grid:
+        for (var y = step - thickness / 2; y < size.height; y += step) {
+          canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+        }
+        for (var x = step - thickness / 2; x < size.width; x += step) {
+          canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+        }
     }
   }
 
   @override
-  bool shouldRepaint(_DotGridPainter old) => old.color != color;
+  bool shouldRepaint(StylePatternPainter old) =>
+      old.pattern != pattern || old.color != color;
 }

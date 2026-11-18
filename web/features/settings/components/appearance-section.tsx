@@ -2,9 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
-import type * as React from "react";
 import { RadioCards } from "@/components/ui/radio-cards";
-import { type AppStyle, usePreferencesStore } from "@/features/preferences";
+import { usePreferencesStore } from "@/features/preferences";
 import { COLOR_SCHEMES, type SchemeSwatch } from "@/lib/design/schemes";
 import { switchTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -74,101 +73,16 @@ function SchemeThumb({ swatch }: { swatch: SchemeSwatch }) {
   );
 }
 
-const STYLES: {
-  value: AppStyle;
-  picture: React.ReactNode;
-}[] = [
-  {
-    value: "default",
-    picture: (
-      <StyleThumb
-        card={{ borderRadius: 8, boxShadow: "0 2px 8px rgb(0 0 0 / .12)" }}
-      />
-    ),
-  },
-  {
-    value: "skeuomorphism",
-    picture: (
-      <StyleThumb
-        page={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, rgb(0 0 0 / .05) 0 1px, transparent 1px 3px)",
-        }}
-        card={{
-          borderRadius: 6,
-          backgroundImage:
-            "linear-gradient(180deg, rgb(255 255 255 / .5), transparent 45%), repeating-linear-gradient(to bottom, transparent 0 7px, rgb(0 0 0 / .12) 7px 8px)",
-          boxShadow: "inset 0 1px 0 #fff, 0 3px 6px rgb(0 0 0 / .3)",
-        }}
-      />
-    ),
-  },
-  {
-    value: "neo-brutalism",
-    picture: (
-      <StyleThumb
-        card={{
-          borderRadius: 3,
-          border: "2px solid currentColor",
-          boxShadow: "3px 3px 0 currentColor",
-        }}
-      />
-    ),
-  },
-  {
-    value: "lofi",
-    picture: (
-      <StyleThumb
-        page={{
-          backgroundImage:
-            "radial-gradient(rgb(0 0 0 / .18) 1px, transparent 1px)",
-          backgroundSize: "8px 8px",
-          filter: "grayscale(1)",
-        }}
-        card={{
-          borderRadius: "255px 8px 225px 8px / 8px 225px 8px 255px",
-          border: "1.5px solid currentColor",
-          background: "transparent",
-        }}
-      />
-    ),
-  },
-];
-
-/** A style in miniature: one card on a page. */
-function StyleThumb({
-  page,
-  card,
-}: {
-  page?: React.CSSProperties;
-  card: React.CSSProperties;
-}) {
-  return (
-    <div
-      className="relative mb-2 grid h-14 place-items-center overflow-hidden rounded-md bg-background text-foreground shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--border)_80%,transparent)]"
-      style={page}
-    >
-      <i className="block h-8 w-16 bg-card" style={card} />
-    </div>
-  );
-}
-
-function SchemeAndStyle() {
+function SchemeAndCustomTheme() {
   const t = useTranslations("settings.appearance");
   const { resolvedTheme } = useTheme();
   const mode = resolvedTheme === "dark" ? "dark" : "light";
   const scheme = usePreferencesStore((s) => s.ui.colorScheme ?? "anchor");
-  const style = usePreferencesStore((s) => s.ui.style ?? "default");
   const setUI = usePreferencesStore((s) => s.setUIPreference);
   return (
     <>
       <Row className="grid items-start gap-3.5">
-        <RowText
-          title={t("colourScheme")}
-          text={
-            style === "lofi" ? t("colourSchemeLofi") : t("colourSchemeText")
-          }
-        />
+        <RowText title={t("colourScheme")} text={t("colourSchemeText")} />
         <RadioCards
           aria-label={t("colourScheme")}
           value={scheme}
@@ -182,21 +96,6 @@ function SchemeAndStyle() {
         />
       </Row>
       <CustomThemeEditor />
-      <Row className="grid items-start gap-3.5">
-        <RowText title={t("style")} text={t("styleText")} />
-        <RadioCards
-          aria-label={t("style")}
-          value={style}
-          onValueChange={(value) => setUI("style", value)}
-          className="grid-cols-4 max-md:grid-cols-2"
-          options={STYLES.map(({ value, picture }) => ({
-            value,
-            picture,
-            label: t(`styles.${value}.label`),
-            description: t(`styles.${value}.description`),
-          }))}
-        />
-      </Row>
     </>
   );
 }
@@ -254,7 +153,7 @@ export function AppearanceSection() {
           ]}
         />
       </Row>
-      <SchemeAndStyle />
+      <SchemeAndCustomTheme />
     </Section>
   );
 }

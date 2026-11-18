@@ -614,32 +614,30 @@ class _InlineImageViewState extends State<_InlineImageView> {
     if (path == null) return placeholder(gone: isGone);
     return ClipRRect(
       borderRadius: radius,
-      child: context.appStyle.picture(
-        Image.file(
-          File(path),
-          fit: BoxFit.fitWidth,
-          gaplessPlayback: true,
-          // Room for the picture while it's read, so the text doesn't jump
-          // and it can already be held.
-          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) =>
-              frame == null && !wasSynchronouslyLoaded
-              ? AspectRatio(
-                  aspectRatio: 4 / 3,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Shimmer(color: fill),
-                      child,
-                    ],
-                  ),
-                )
-              : child,
-          cacheWidth:
-              (MediaQuery.sizeOf(context).width *
-                      MediaQuery.devicePixelRatioOf(context))
-                  .round(),
-          errorBuilder: (context, _, _) => placeholder(gone: true),
-        ),
+      child: Image.file(
+        File(path),
+        fit: BoxFit.fitWidth,
+        gaplessPlayback: true,
+        // Room for the picture while it's read, so the text doesn't jump
+        // and it can already be held.
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) =>
+            frame == null && !wasSynchronouslyLoaded
+            ? AspectRatio(
+                aspectRatio: 4 / 3,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Shimmer(color: fill),
+                    child,
+                  ],
+                ),
+              )
+            : child,
+        cacheWidth:
+            (MediaQuery.sizeOf(context).width *
+                    MediaQuery.devicePixelRatioOf(context))
+                .round(),
+        errorBuilder: (context, _, _) => placeholder(gone: true),
       ),
     );
   }

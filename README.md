@@ -103,8 +103,8 @@ Actions"; the workflow is `.github/workflows/pages.yml`, and
 | **Appearance** | | |
 | Colour schemes: Nord, Dracula, Solarized, Gruvbox, Catppuccin, Tokyo Night, One, Rosé Pine, Monokai, GitHub | ✓ | ✓ |
 | OLED colour scheme: pure black in dark mode, near-black outlined cards, white text | ✓ | ✓ |
-| Custom theme from JSON (Settings › Appearance), kept on the device; the same JSON works on both ([how](#custom-themes)) | ✓ | ✓ |
-| Styles: Skeuomorphism, Neo-Brutalism and Lo-fi | ✓ | ✓ |
+| Custom theme from JSON (Settings › Appearance), kept on the device; the same JSON works on both: colours, and a style of fonts, corners, outlines, shadows, patterns and note colours ([THEMES.md](THEMES.md)) | ✓ | ✓ |
+| Ready-made themes: Skeuomorphism, Neo-Brutalism and Lo-fi ([THEMES.md](THEMES.md#ready-made-themes)) | ✓ | ✓ |
 | A skeuomorphic app icon everywhere: Android (adaptive and themed), iOS, the splash screens, the in-app logo, the web app and its home-screen icons | ✓ | ✓ |
 | **Getting around** | | |
 | Google Keep keyboard shortcuts | ✓ | |
@@ -132,70 +132,11 @@ Actions"; the workflow is `.github/workflows/pages.yml`, and
 
 ### Custom themes
 
-Settings › Appearance › Custom theme takes a theme as JSON. Paste it and
-press Apply; Reset removes it; "Copy current theme as JSON" puts the colours
-you see now (scheme and custom theme together) in the box and on the
-clipboard, to start from. The theme is kept on that device only, like the
-other appearance settings, and the same JSON works on the web and on
-Android.
-
-A custom theme sits on top of the chosen colour scheme: any colour it leaves
-out is the scheme's. Lo-fi keeps its own pencil greys, so a custom theme
-waits until another style is picked.
-
-```json
-{
-  "name": "Ink",
-  "light": {
-    "background": "#f4f1ea",
-    "card": "#fffdf8",
-    "sidebar": "#ebe6db",
-    "muted": "#e6e0d3",
-    "foreground": "#1f1d1a",
-    "mutedForeground": "#5c574e",
-    "accent": "#2f6fdd",
-    "accentStrong": "#2459b8",
-    "accentInk": "#1d4a99",
-    "border": "#d6cfc1",
-    "divider": "#e3ddd0",
-    "input": "#8a8375",
-    "destructive": "#b3261e"
-  },
-  "dark": {
-    "background": "#000",
-    "card": "#111111",
-    "accent": "#7aa2f7",
-    "border": "#ffffff26"
-  }
-}
-```
-
-| Key | Meaning |
-|---|---|
-| `name` | Optional. Shown in Settings and used by "Copy current theme as JSON" |
-| `light`, `dark` | The colours for light and dark mode. At least one is needed; a mode left out is the scheme's own |
-| `lineSpacing` | Optional. `"tight"`, `"default"` or `"relaxed"`: how far apart a note's lines are. On Android it takes the place of Settings › Editor › Line spacing, which is greyed out while the theme sets it. It applies in Lo-fi too |
-| `background` | The page behind everything |
-| `card` | Note cards, menus, dialogs and settings cards; also a plain note's colour |
-| `sidebar` | The sidebar on the web; the drawer on Android |
-| `muted` | Quiet fills: inputs, chips, loading placeholders |
-| `foreground` | Text and icons |
-| `mutedForeground` | Secondary text: dates, hints, captions |
-| `accent` | Highlights: the selection on the web, links on dark panels (toasts) |
-| `accentStrong` | Focus rings, switches, the text cursor; the selection on Android |
-| `accentInk` | Links and accent-coloured text, where it has to read as text |
-| `border` | Card and control outlines |
-| `divider` | Lines between rows |
-| `input` | Text field outlines |
-| `destructive` | Delete buttons and error messages |
-
-Colours are `#rgb`, `#rrggbb` or `#rrggbbaa` (the last two hex digits are
-opacity), in upper or lower case. Any other key, or anything else as a
-colour, is refused with a message naming the key and what is wrong with it
-(`dark.backgroud: unknown key (did you mean "background"?)`), and nothing
-changes until the JSON is fixed. The colour keys are the fields of the built-in
-schemes in `design/schemes/schemes.json`; the parsers are
-`web/lib/design/custom-theme.ts` and `mobile/lib/core/theme/custom_theme.dart`.
+Settings › Appearance › Custom theme takes a theme as JSON: colours for
+light and dark mode over the colour scheme, the notes' line spacing, and a
+style as plain values (fonts, corners, outline, shadow, patterns, note and
+highlight colours). The same JSON works on the web and on Android. [THEMES.md](THEMES.md) describes every key
+and has ready-made themes to paste: Skeuomorphism, Neo-Brutalism and Lo-fi.
 
 ## Features
 

@@ -11,7 +11,7 @@ import 'tokens/app_style.dart';
 class StyleTypography extends StatefulWidget {
   const StyleTypography({super.key, required this.style, required this.child});
 
-  final AppStyle style;
+  final ThemeStyle style;
   final Widget child;
 
   @override

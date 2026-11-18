@@ -123,28 +123,7 @@
   "appearance": {
     "title": "Darstellung",
     "colourScheme": "Farbschema",
-    "colourSchemeLofi": "Lo-fi zeichnet in eigenen Grautönen; das Schema kehrt mit einem anderen Stil zurück.",
     "colourSchemeText": "Beliebte Paletten, jeweils in einer hellen und einer dunklen Version.",
-    "style": "Stil",
-    "styleText": "Formen, Schatten und Schrift.",
-    "styles": {
-      "default": {
-        "label": "Standard",
-        "description": "Klar und weich"
-      },
-      "skeuomorphism": {
-        "label": "Skeuomorphismus",
-        "description": "Papier, Leinen und Glanz"
-      },
-      "neo-brutalism": {
-        "label": "Neo-Brutalismus",
-        "description": "Kräftige Umrisse, harte Schatten"
-      },
-      "lofi": {
-        "label": "Lo-fi",
-        "description": "Eine Bleistiftskizze in Grau"
-      }
-    },
     "theme": "Design",
     "themeText": "Wähle, wie Anchor+ aussieht.",
     "light": "Hell",
@@ -156,8 +135,7 @@
   },
   "customTheme": {
     "title": "Eigenes Design",
-    "text": "Füge ein Design als JSON ein: Farben für Hell, Dunkel oder beides. Alles, was fehlt, behält die Farbe des Farbschemas. Wird auf diesem Gerät gespeichert; dasselbe JSON funktioniert in der Android-App.",
-    "lofiNote": "Lo-fi zeichnet in eigenen Grautönen, daher wartet das eigene Design auf einen anderen Stil.",
+    "text": "Füge ein Design als JSON ein: Farben für Hell, Dunkel oder beides und einen Stil (Schriften, Ecken, Umriss, Schatten, Muster, Notizfarben). Alles, was fehlt, behält die Farbe des Farbschemas und das normale Aussehen; THEMES.md auf GitHub hat fertige Designs. Wird auf diesem Gerät gespeichert; dasselbe JSON funktioniert in der Android-App.",
     "applied": "Angewendet.",
     "appliedNamed": "Angewendet: {name}.",
     "appliedToast": "Eigenes Design angewendet",

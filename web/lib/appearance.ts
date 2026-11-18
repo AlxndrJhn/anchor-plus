@@ -1,24 +1,32 @@
 "use client";
 
 import { useEffect } from "react";
-import { type AppStyle, usePreferencesStore } from "@/features/preferences";
+import { usePreferencesStore } from "@/features/preferences";
 import { CUSTOM_THEME_STYLE_ID } from "@/lib/appearance-script";
 import { type CustomTheme, customThemeCss } from "@/lib/design/custom-theme";
+import {
+  STYLE_ATTRIBUTES,
+  STYLE_CONFIG,
+  styleOutput,
+} from "@/lib/design/theme-style";
 
 /**
- * Puts the colour scheme, style and custom theme on <html>, where the CSS
- * reads them. A custom theme's colours go in a <style> of their own.
+ * Puts the colour scheme and custom theme on <html>, where the CSS reads
+ * them: the theme's colours and style variables in a <style> of their own,
+ * its style also as data-style-* attributes (app/styles/appearance.css).
  */
 export function applyAppearance(
   scheme: string | undefined,
-  style: AppStyle | undefined,
   customTheme?: CustomTheme,
 ) {
   const html = document.documentElement;
   if (scheme && scheme !== "anchor") html.dataset.scheme = scheme;
   else delete html.dataset.scheme;
-  if (style && style !== "default") html.dataset.style = style;
-  else delete html.dataset.style;
+  for (const name of STYLE_ATTRIBUTES) delete html.dataset[name];
+  Object.assign(
+    html.dataset,
+    styleOutput(customTheme?.style, STYLE_CONFIG).attributes,
+  );
 
   let sheet = document.getElementById(CUSTOM_THEME_STYLE_ID);
   if (customTheme) {
@@ -38,10 +46,6 @@ export function applyAppearance(
 /** Keeps <html> in step with Settings › Appearance. Call once, in the app. */
 export function useAppearance() {
   const scheme = usePreferencesStore((s) => s.ui.colorScheme);
-  const style = usePreferencesStore((s) => s.ui.style);
   const customTheme = usePreferencesStore((s) => s.ui.customTheme);
-  useEffect(
-    () => applyAppearance(scheme, style, customTheme),
-    [scheme, style, customTheme],
-  );
+  useEffect(() => applyAppearance(scheme, customTheme), [scheme, customTheme]);
 }

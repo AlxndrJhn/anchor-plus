@@ -12,7 +12,8 @@ import {
   schemePalette,
   themeAsJson,
 } from "./custom-theme";
-import { COLOR_SCHEMES, PALETTE_FIELDS } from "./schemes";
+import { COLOR_SCHEMES, PALETTE_CSS_VARS, PALETTE_FIELDS } from "./schemes";
+import { STYLE_CONFIG, styleOutput } from "./theme-style";
 
 const errorsOf = (text: string) => {
   const result = parseCustomTheme(text);
@@ -76,11 +77,96 @@ describe("parseCustomTheme", () => {
     );
   });
 
-  it("wants light or dark", () => {
-    expect(errorsOf('{"name": "Empty"}')).toEqual([
-      'Give at least one of "light" or "dark"',
+  it("wants light, dark or style", () => {
+    const needOne = 'Give at least one of "light", "dark" or "style"';
+    expect(errorsOf('{"name": "Empty"}')).toEqual([needOne]);
+    expect(errorsOf("{}")).toEqual([needOne]);
+  });
+
+  it("reads a style on its own", () => {
+    const result = parseCustomTheme(
+      JSON.stringify({
+        style: {
+          font: "grotesk",
+          titleWeight: 700,
+          radius: 6,
+          outline: 2,
+          outlineColor: "mutedForeground",
+          shadow: { x: 5, y: 5, color: "#000" },
+          pagePattern: { shape: "dots", size: 12, opacity: 0.2 },
+          noteColor: "card",
+          highlightColor: "#eee",
+        },
+      }),
+    );
+    expect(result).toEqual({
+      ok: true,
+      theme: {
+        style: {
+          font: "grotesk",
+          titleWeight: 700,
+          radius: 6,
+          outline: 2,
+          outlineColor: "mutedForeground",
+          shadow: { x: 5, y: 5, color: "#000000" },
+          pagePattern: { shape: "dots", size: 12, opacity: 0.2 },
+          noteColor: "card",
+          highlightColor: "#eeeeee",
+        },
+      },
+    });
+    const corners = [
+      [255, 12],
+      [12, 225],
+      [225, 12],
+      [12, 255],
+    ];
+    const wobbly = parseCustomTheme(
+      JSON.stringify({ style: { radius: corners } }),
+    );
+    expect(wobbly.ok && wobbly.theme.style).toEqual({ radius: corners });
+    expect(
+      parseCustomTheme('{"style": {"shadow": "none"}}').ok &&
+        parseCustomTheme('{"style": {"shadow": "none"}}'),
+    ).toEqual({ ok: true, theme: { style: { shadow: "none" } } });
+  });
+
+  it("says what's wrong with a style", () => {
+    expect(errorsOf('{"style": "lofi"}')).toEqual([
+      "style: must be an object of settings",
     ]);
-    expect(errorsOf("{}")).toEqual(['Give at least one of "light" or "dark"']);
+    expect(
+      errorsOf(
+        JSON.stringify({
+          style: {
+            pagePattern: { shape: "waves", sise: 3 },
+            notePattern: "lines",
+            radius: 60,
+            titleWeight: 650,
+            outlineColor: "ink",
+            shadow: { x: "5", colour: "#000" },
+            wobbly: true,
+          },
+        }),
+      ),
+    ).toEqual([
+      'style.pagePattern.shape: "waves" isn’t one of dots, lines, grid',
+      expect.stringMatching(
+        /^style\.pagePattern\.sise: unknown key \(did you mean "size"\?\)/,
+      ),
+      "style.notePattern: must be an object with a shape (dots, lines or grid) and optionally size, thickness, color and opacity",
+      "style.radius: must be a number from 0 to 40, or four [x, y] corners from 0 to 400",
+      "style.titleWeight: must be a multiple of 100, like 400 or 700",
+      expect.stringMatching(/^style\.outlineColor: "ink" is not a colour/),
+      "style.shadow.x: must be a number from -40 to 40",
+      expect.stringMatching(
+        /^style\.shadow\.colour: unknown key \(did you mean "color"\?\)/,
+      ),
+      expect.stringMatching(/^style\.wobbly: unknown key/),
+    ]);
+    expect(errorsOf('{"style": {"shadow": 3}}')).toEqual([
+      'style.shadow: must be "none" or an object with x, y, blur, spread and color',
+    ]);
   });
 
   it("lists every problem at once", () => {
@@ -146,8 +232,8 @@ describe("applying a custom theme", () => {
     const css = customThemeCss(theme);
     expect(css).toBe(
       [
-        ':root[data-custom-theme]:not([data-style="lofi"]).light{--card:#ffffff;--popover:#ffffff;--sidebar-accent:#ffffff;}',
-        ':root[data-custom-theme]:not([data-style="lofi"]).dark{--background:#000000;--accent:#ff0000;--inverse-foreground:#000000;--inverse-link:#ff0000;}',
+        ":root[data-custom-theme].light{--card:#ffffff;--popover:#ffffff;--sidebar-accent:#ffffff;}",
+        ":root[data-custom-theme].dark{--background:#000000;--accent:#ff0000;--inverse-foreground:#000000;--inverse-link:#ff0000;}",
       ].join("\n"),
     );
   });
@@ -215,6 +301,180 @@ describe("applying a custom theme", () => {
   );
 });
 
+describe("a theme's style", () => {
+  const out = (style: unknown) => styleOutput(style, STYLE_CONFIG);
+  const runScript = (style: unknown) => {
+    const html = { dataset: {} as Record<string, string> };
+    const appended: { textContent?: string }[] = [];
+    new Function("localStorage", "document", appearanceScript)(
+      {
+        getItem: () =>
+          JSON.stringify({ state: { ui: { customTheme: { style } } } }),
+      },
+      {
+        documentElement: html,
+        head: { appendChild: (node: object) => appended.push(node) },
+        createElement: () => ({}),
+      },
+    );
+    return { dataset: html.dataset, css: appended[0]?.textContent ?? "" };
+  };
+
+  it("leaves the defaults off <html>", () => {
+    expect(out(undefined)).toEqual({ attributes: {}, css: "" });
+    expect(
+      out({ font: "sans", outline: 0, pagePattern: { shape: "hex" } }),
+    ).toEqual({ attributes: {}, css: "" });
+  });
+
+  it("names each setting that differs, titles following the font", () => {
+    expect(
+      out({
+        font: "handwriting",
+        pagePattern: { shape: "dots" },
+        noteColor: "card",
+        highlightColor: "muted",
+      }).attributes,
+    ).toEqual({
+      styleFont: "handwriting",
+      styleTitleFont: "handwriting",
+      stylePagePattern: "",
+      styleNoteColor: "",
+      styleHighlightColor: "",
+    });
+    expect(out({ titleFont: "serif" }).attributes).toEqual({
+      styleTitleFont: "serif",
+    });
+    expect(out({ font: "grotesk", titleFont: "sans" }).attributes).toEqual({
+      styleFont: "grotesk",
+      styleTitleFont: "sans",
+    });
+  });
+
+  it("scales every corner with the radius, leaving pills alone", () => {
+    const { css } = out({ radius: 8 });
+    expect(css).toContain("--radius-card:8px");
+    expect(css).toContain("--radius-xs:3px");
+    expect(css).toContain("--radius-note:9px");
+    expect(css).not.toContain("--radius-pill");
+  });
+
+  it("gives the big corners four elliptical radii", () => {
+    const { css } = out({
+      radius: [
+        [255, 12],
+        [12, 225],
+        [225, 12],
+        [12, 255],
+      ],
+    });
+    expect(css).toContain(
+      "--radius-card:255px 12px 225px 12px / 12px 225px 12px 255px",
+    );
+    expect(css).not.toContain("--radius-button");
+  });
+
+  it("draws patterns and note colours from plain values", () => {
+    const { css } = out({
+      pagePattern: { shape: "grid", size: 3, color: "#000000", opacity: 0.05 },
+      notePattern: { shape: "lines", color: "mutedForeground", opacity: 0.22 },
+      noteColor: "card",
+      highlightColor: "#e4e4e4",
+    });
+    expect(css).toContain("--style-page-pattern-size:3px 3px");
+    expect(css).toContain("color-mix(in srgb, #000000 5%, transparent)");
+    expect(css).toContain("--style-note-pattern-size:100% 1lh");
+    expect(css).toContain("var(--muted-foreground) 22%");
+    expect(css).toContain("--style-note:var(--card)");
+    expect(css).toContain("--style-highlight:#e4e4e4");
+    expect(out({ pagePattern: { shape: "dots" } }).css).toContain(
+      "--style-page-pattern:radial-gradient(circle, color-mix(in srgb, var(--foreground) 100%, transparent) 1px",
+    );
+  });
+
+  it("draws the outline and shadow from plain values and palette keys", () => {
+    const { attributes, css } = out({
+      titleWeight: 700,
+      outline: 2,
+      shadow: { x: 4, y: 4, spread: 2, color: "foreground" },
+    });
+    expect(attributes).toEqual({
+      styleTitleWeight: "",
+      styleOutline: "",
+      styleShadow: "",
+    });
+    expect(css).toContain("--title-weight:700");
+    expect(css).toContain("--style-outline:2px");
+    expect(css).toContain("--style-outline-color:var(--foreground)");
+    expect(css).toContain("--sh-raised:4px 4px 0px 2px var(--foreground)");
+    expect(css).toContain("--sh-xs:2px 2px 0px 1px var(--foreground)");
+    expect(out({ outline: 1, outlineColor: "mutedForeground" }).css).toContain(
+      "--style-outline-color:var(--muted-foreground)",
+    );
+    expect(out({ shadow: "none" }).css).toContain("--sh-edge:none");
+  });
+
+  it("names palette keys by CSS variables that exist", () => {
+    const vars = Object.keys(PALETTE_CSS_VARS);
+    for (const name of Object.values(STYLE_CONFIG.colors))
+      expect(vars).toContain(name);
+  });
+
+  it("is applied the same way before the first paint", () => {
+    for (const style of [
+      { font: "grotesk", titleWeight: 700, radius: 6, outline: 2 },
+      { font: "grotesk", titleFont: "sans" },
+      {
+        titleFont: "serif",
+        pagePattern: { shape: "grid", size: 3, opacity: 0.05 },
+        notePattern: { shape: "lines", color: "mutedForeground" },
+      },
+      { shadow: { y: 10, blur: 24, spread: -6, color: "#00000047" } },
+      {
+        radius: [
+          [255, 12],
+          [12, 225],
+          [225, 12],
+          [12, 255],
+        ],
+        shadow: "none",
+        outlineColor: "border",
+        outline: 1.75,
+        noteColor: "card",
+        highlightColor: "muted",
+      },
+    ]) {
+      const { attributes, css } = out(style);
+      expect(runScript(style)).toEqual({
+        dataset: { ...attributes, customTheme: "" },
+        css,
+      });
+    }
+  });
+
+  it("skips a hand-edited style it can't use, before the first paint", () => {
+    expect(
+      runScript({
+        font: "nope",
+        radius: "8",
+        outline: 99,
+        shadow: { x: 999, color: "url(x)" },
+        noteColor: "url(x)",
+        pagePattern: { shape: "dots", size: "big" },
+      }),
+    ).toEqual({
+      dataset: { styleShadow: "", stylePagePattern: "", customTheme: "" },
+      css: expect.stringContaining("--sh-raised:0px 0px 0px 0px #00000040"),
+    });
+  });
+
+  it("copies the style with the theme", () => {
+    const json = themeAsJson("nord", { style: { radius: 4, outline: 2 } });
+    const result = parseCustomTheme(json);
+    expect(result.ok && result.theme.style).toEqual({ radius: 4, outline: 2 });
+  });
+});
+
 describe("schemes", () => {
   const css = readFileSync(
     path.resolve(__dirname, "../../app/styles/schemes.css"),
@@ -252,5 +512,35 @@ describe("schemes", () => {
       input: "#928374", // gray
       destructive: "#FDA196", // bright red, lightened
     });
+  });
+});
+
+describe("THEMES.md", () => {
+  const doc = readFileSync(
+    path.resolve(__dirname, "../../../THEMES.md"),
+    "utf8",
+  );
+  // Every JSON example with a name is a whole theme; the others are parts.
+  const themes = [...doc.matchAll(/```json\n([\s\S]*?)```/g)]
+    .map((m) => m[1])
+    .filter((text) => "name" in JSON.parse(text));
+
+  it("has the ready-made themes", () => {
+    const names = themes.map((text) => JSON.parse(text).name);
+    expect(names).toEqual(
+      expect.arrayContaining(["Skeuomorphism", "Neo-Brutalism", "Lo-fi"]),
+    );
+  });
+
+  it("holds only themes that apply", () => {
+    for (const text of themes) expect(errorsOf(text)).toEqual([]);
+  });
+});
+
+describe("the pre-paint script", () => {
+  it("embeds nothing that could end the <script> it sits in", () => {
+    expect(appearanceScript).not.toMatch(/<\/script/i);
+    for (const separator of [0x2028, 0x2029])
+      expect(appearanceScript).not.toContain(String.fromCharCode(separator));
   });
 });

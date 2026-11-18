@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'tokens/anchor_tokens.dart';
 import 'tokens/app_style.dart';
 
-/// The app's text styles. The UI family follows the active [AppStyle]: DM
-/// Sans by default, Space Grotesk for Neo-Brutalism, Patrick Hand for Lo-fi.
+/// The app's text styles. The UI family follows the active [ThemeStyle]'s
+/// font: DM Sans by default, or Playfair, Space Grotesk or Patrick Hand.
 /// The app root sets the style with [useStyle] (see `StyleTypography`) before
 /// anything below it builds, so every getter here resolves to the active
 /// style's family at build time.
@@ -30,32 +30,41 @@ abstract final class AppTypography {
   /// Literata covers what Playfair lacks, and is a serif too.
   static const List<String> serifFallback = [noteSerif, fallbackSans];
 
-  static AppStyle _style = AppStyle.standard;
+  static ThemeStyle _style = ThemeStyle.standard;
 
   /// The style the getters below draw in.
-  static AppStyle get style => _style;
+  static ThemeStyle get style => _style;
 
   /// Makes the getters below draw in [style]'s fonts. Returns whether that
   /// changed anything.
-  static bool useStyle(AppStyle style) {
+  static bool useStyle(ThemeStyle style) {
     if (style == _style) return false;
     _style = style;
     return true;
   }
 
-  /// The family UI text is set in for [style].
-  static String uiFamilyOf(AppStyle style) => switch (style) {
-    AppStyle.neoBrutalism => spaceGrotesk,
-    AppStyle.lofi => patrickHand,
-    _ => sans,
+  /// The bundled family for [font].
+  static String familyOf(StyleFont font) => switch (font) {
+    StyleFont.sans => sans,
+    StyleFont.serif => serif,
+    StyleFont.grotesk => spaceGrotesk,
+    StyleFont.handwriting => patrickHand,
   };
 
-  /// The family large titles are set in for [style].
-  static String displayFamilyOf(AppStyle style) => switch (style) {
-    AppStyle.neoBrutalism => spaceGrotesk,
-    AppStyle.lofi => patrickHand,
-    _ => serif,
-  };
+  /// The family UI text is set in for [style].
+  static String uiFamilyOf(ThemeStyle style) => familyOf(style.font);
+
+  /// The family large titles are set in for [style]: its title font, else
+  /// its font, with the serif standing in for the plain sans.
+  static String displayFamilyOf(ThemeStyle style) => familyOf(
+    style.titleFont ??
+        (style.font == StyleFont.sans ? StyleFont.serif : style.font),
+  );
+
+  /// The family note titles are set in for [style]; null follows the UI
+  /// family.
+  static String? titleFamilyOf(ThemeStyle style) =>
+      style.titleFont == null ? null : familyOf(style.titleFont!);
 
   /// The active style's UI family.
   static String get uiFamily => uiFamilyOf(_style);
@@ -85,19 +94,22 @@ abstract final class AppTypography {
   static List<String> _fallbackOf(String family) =>
       family == serif ? serifFallback : sansFallback;
 
-  static TextStyle _sansIn(AppStyle style, TextStyle base) => base
+  static TextStyle _sansIn(ThemeStyle style, TextStyle base) => base
       .copyWith(fontFamily: uiFamilyOf(style), fontFamilyFallback: sansFallback)
       .withSize(base.fontSize!);
 
   static TextStyle _sans(TextStyle base) => _sansIn(_style, base);
 
-  static TextStyle _largeTitleIn(AppStyle style) =>
-      AnchorTokens.typeLargeTitle.copyWith(
-        fontFamily: displayFamilyOf(style),
-        fontFamilyFallback: _fallbackOf(displayFamilyOf(style)),
-        fontFeatures: _liningFigures,
-        fontWeight: style == AppStyle.neoBrutalism ? FontWeight.w700 : null,
-      );
+  static TextStyle _largeTitleIn(ThemeStyle style) {
+    final family = displayFamilyOf(style);
+    return AnchorTokens.typeLargeTitle.copyWith(
+      fontFamily: family,
+      fontFamilyFallback: _fallbackOf(family),
+      fontFeatures: _liningFigures,
+      // A theme's title weight, else the token's.
+      fontWeight: style.titleFontWeight,
+    );
+  }
 
   static TextStyle get largeTitle => _largeTitleIn(_style);
 
@@ -182,7 +194,7 @@ abstract final class AppTypography {
   static TextTheme textTheme(
     Color text,
     Color muted, [
-    AppStyle style = AppStyle.standard,
+    ThemeStyle style = ThemeStyle.standard,
   ]) {
     TextStyle withColor(TextStyle base, [Color? color]) =>
         base.copyWith(color: color ?? text);

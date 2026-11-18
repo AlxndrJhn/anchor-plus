@@ -230,7 +230,6 @@ class _AppearanceSection extends ConsumerWidget {
     final density = ref.watch(displayDensityControllerProvider);
     final speed = ref.watch(motionSpeedControllerProvider);
     final scheme = ref.watch(colorSchemeControllerProvider);
-    final style = ref.watch(appStyleControllerProvider);
     final customTheme = ref.watch(customThemeControllerProvider);
     final language = ref.watch(appLanguageControllerProvider);
     final l10n = context.l10n;
@@ -253,10 +252,6 @@ class _AppearanceSection extends ConsumerWidget {
           GroupedListTile(
             icon: LucideIcons.swatchBook,
             label: l10n.settingsColorScheme,
-            // Lo-fi draws in its own greys.
-            subtitle: style == AppStyle.lofi
-                ? l10n.settingsColorSchemeLofi
-                : null,
             value: _SchemeChoice.nameOf(scheme, l10n),
             showChevron: true,
             onTap: () => _showSchemePicker(context),
@@ -264,22 +259,11 @@ class _AppearanceSection extends ConsumerWidget {
           GroupedListTile(
             icon: LucideIcons.braces,
             label: l10n.settingsCustomTheme,
-            // Lo-fi draws in its own greys.
-            subtitle: style == AppStyle.lofi && customTheme != null
-                ? l10n.settingsCustomThemeLofi
-                : null,
             value: customTheme == null
                 ? l10n.settingsCustomThemeOff
                 : customTheme.name ?? l10n.settingsCustomThemeOn,
             showChevron: true,
             onTap: () => showCustomThemeSheet(context),
-          ),
-          GroupedListTile(
-            icon: LucideIcons.brush,
-            label: l10n.settingsStyle,
-            value: style.labelIn(l10n),
-            showChevron: true,
-            onTap: () => _showStylePicker(context),
           ),
           StackedListTile(
             label: l10n.settingsDensity,
@@ -321,12 +305,6 @@ Future<void> _showSchemePicker(BuildContext context) => showAnchorSheet<void>(
   context,
   semanticLabel: context.l10n.settingsColorScheme,
   builder: (_) => const _SchemePickerSheet(),
-);
-
-Future<void> _showStylePicker(BuildContext context) => showAnchorSheet<void>(
-  context,
-  semanticLabel: context.l10n.settingsStyle,
-  builder: (_) => const _StylePickerSheet(),
 );
 
 /// A colour scheme as Settings lists it: Anchor's own, then the generated ones.
@@ -431,55 +409,6 @@ class _SchemeSwatch extends StatelessWidget {
           border: Border.all(color: scheme.accent, width: 3),
         ),
       ),
-    );
-  }
-}
-
-class _StylePickerSheet extends ConsumerWidget {
-  const _StylePickerSheet();
-
-  static const _icons = {
-    AppStyle.standard: LucideIcons.sparkles,
-    AppStyle.skeuomorphism: LucideIcons.layers,
-    AppStyle.neoBrutalism: LucideIcons.square,
-    AppStyle.lofi: LucideIcons.pencil,
-  };
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(appStyleControllerProvider);
-    final l10n = context.l10n;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SheetHeader(title: l10n.settingsStyle, showDone: true),
-        Flexible(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GroupedList(
-              semanticLabel: l10n.settingsStyle,
-              children: [
-                for (final style in AppStyle.values)
-                  GroupedListTile(
-                    icon: _icons[style],
-                    label: style.labelIn(l10n),
-                    subtitle: style.subtitleIn(l10n),
-                    checked: style == selected,
-                    onTap: () {
-                      if (style == selected) return;
-                      Haptics.selection();
-                      ref
-                          .read(appStyleControllerProvider.notifier)
-                          .setStyle(style);
-                    },
-                  ),
-              ],
-            ),
-          ),
-        ),
-        const SheetBottomSpace(),
-      ],
     );
   }
 }

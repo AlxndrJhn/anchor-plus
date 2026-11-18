@@ -4,8 +4,8 @@ import 'tokens/anchor_tokens.dart';
 import 'tokens/app_schemes.dart';
 import 'tokens/app_style.dart';
 
-/// Anchor's colours recoloured for a colour scheme and reshaped for a style,
-/// as Settings › Appearance chooses them. The web does the same in
+/// Anchor's colours recoloured for a colour scheme and reshaped for a custom
+/// theme's style, as Settings › Appearance chooses them. The web does the same in
 /// `web/app/styles/appearance.css`.
 abstract final class AnchorAppearance {
   /// [palette] null keeps Anchor's own colours. [custom] is a custom
@@ -14,14 +14,14 @@ abstract final class AnchorAppearance {
   static AnchorColors colors(
     Brightness brightness,
     SchemePalette? palette,
-    AppStyle style, {
+    ThemeStyle style, {
     Map<String, Color>? custom,
   }) {
     final isDark = brightness == Brightness.dark;
     var colors = isDark ? AnchorColors.dark : AnchorColors.light;
     if (palette != null) colors = _recolor(colors, palette.toMap());
     if (custom != null) colors = _recolor(colors, custom);
-    if (palette != null || custom != null || style != AppStyle.standard) {
+    if (palette != null || custom != null || !style.isStandard) {
       // A plain note takes the scheme's card colour.
       colors = colors.copyWith(
         notes: {
@@ -39,8 +39,12 @@ abstract final class AnchorAppearance {
         },
       );
     }
-    colors = _reshape(colors, style, isDark);
-    if (style == AppStyle.standard && isTrueBlack(colors.appPage)) {
+    // Style colours that name a palette key follow the final palette.
+    final named = namedColors(brightness, palette, custom: custom);
+    colors = _reshape(colors, style, named);
+    if (style.shadow == null &&
+        style.outline == 0 &&
+        isTrueBlack(colors.appPage)) {
       // Shadows vanish on a black page (OLED): outline what they'd lift
       // instead, as the web does.
       colors = colors.copyWith(
@@ -49,6 +53,14 @@ abstract final class AnchorAppearance {
     }
     return colors;
   }
+
+  /// The palette by `SchemePalette` field name, with [custom] over the
+  /// scheme (or Anchor's own): what a style colour naming a key resolves to.
+  static Map<String, Color> namedColors(
+    Brightness brightness,
+    SchemePalette? palette, {
+    Map<String, Color>? custom,
+  }) => {...(palette ?? anchorScheme.of(brightness)).toMap(), ...?custom};
 
   /// Black, or so close to it that an OLED screen leaves the pixel off.
   static bool isTrueBlack(Color color) => color.computeLuminance() < 0.001;
@@ -87,79 +99,84 @@ abstract final class AnchorAppearance {
 
   static AnchorColors _reshape(
     AnchorColors colors,
-    AppStyle style,
-    bool isDark,
+    ThemeStyle style,
+    Map<String, Color> named,
   ) {
-    final ink = colors.appText;
-    switch (style) {
-      case AppStyle.standard:
-        return colors;
-      case AppStyle.skeuomorphism:
-        BoxShadow soft(
-          double alpha,
-          double darkAlpha,
-          double y,
-          double blur, [
-          double spread = 0,
-        ]) => BoxShadow(
-          color: Colors.black.withValues(alpha: isDark ? darkAlpha : alpha),
-          offset: Offset(0, y),
-          blurRadius: blur,
-          spreadRadius: spread,
-        );
-        final raised = [soft(0.16, 0.5, 2, 3), soft(0.28, 0.6, 10, 24, -6)];
-        return colors.copyWith(
-          shadowXs: [soft(0.18, 0.5, 1, 2), soft(0.1, 0.35, 2, 6)],
-          shadowRaised: raised,
-          shadowFloating: raised,
-          shadowMenu: [soft(0.2, 0.5, 2, 4), soft(0.38, 0.6, 14, 32, -8)],
-          shadowDialog: [soft(0.22, 0.5, 3, 6), soft(0.5, 0.7, 30, 60, -18)],
-        );
-      case AppStyle.neoBrutalism:
-        // Ink outlines and hard offset shadows.
-        final ring = BoxShadow(color: ink, spreadRadius: 2);
-        List<BoxShadow> hard(double by) => [
-          ring,
-          BoxShadow(color: ink, offset: Offset(by, by), spreadRadius: 2),
-        ];
-        return colors.copyWith(
-          appBorder: ink,
-          appDivider: ink.withValues(alpha: 0.35),
-          shadowXs: hard(3),
-          shadowSm: [BoxShadow(color: ink, offset: const Offset(3, 3))],
-          shadowEdge: [ring],
-          shadowControl: [BoxShadow(color: ink, offset: const Offset(3, 3))],
-          shadowRaised: hard(5),
-          shadowFloating: hard(5),
-          shadowMenu: hard(5),
-          shadowFab: hard(5),
-          shadowLift: hard(8),
-          shadowDialog: hard(8),
-          shadowBar: hard(6),
-        );
-      case AppStyle.lofi:
-        // No depth, only pencil outlines; highlights in grey.
-        final pencil = [
-          BoxShadow(color: ink.withValues(alpha: 0.75), spreadRadius: 1.5),
-        ];
-        final grey = AnchorHighlight(
-          fill: isDark ? const Color(0xFF4A4A4A) : const Color(0xFFE4E4E4),
-          ink: colors.appMuted,
-        );
-        return colors.copyWith(
-          shadowXs: pencil,
-          shadowRaised: pencil,
-          shadowFloating: pencil,
-          shadowMenu: pencil,
-          shadowLift: pencil,
-          shadowDialog: pencil,
-          shadowFab: pencil,
-          shadowBar: pencil,
-          shadowSm: const [],
-          shadowControl: const [],
-          shadowEdge: const [],
-          highlights: {for (final name in colors.highlights.keys) name: grey},
-        );
+    final noteColor = style.noteColor?.resolve(named);
+    if (noteColor != null) {
+      // Every note is drawn as a plain one, in this colour.
+      colors = colors.copyWith(
+        notes: {
+          ...colors.notes,
+          'none': AnchorNoteColors(
+            bg: noteColor,
+            surface: Color.alphaBlend(
+              colors.appText.withValues(alpha: 0.06),
+              noteColor,
+            ),
+            border: colors.appBorder,
+            pattern: noteColor,
+            muted: colors.appMuted,
+          ),
+        },
+      );
     }
+    final highlightColor = style.highlightColor?.resolve(named);
+    if (highlightColor != null) {
+      // Every highlight in this colour, on every note.
+      final one = AnchorHighlight(fill: highlightColor, ink: colors.appMuted);
+      colors = colors.copyWith(
+        highlights: {for (final name in colors.highlights.keys) name: one},
+        notes: {
+          for (final MapEntry(:key, :value) in colors.notes.entries)
+            key: AnchorNoteColors(
+              bg: value.bg,
+              surface: value.surface,
+              border: value.border,
+              pattern: value.pattern,
+              muted: value.muted,
+            ),
+        },
+      );
+    }
+    final shadow = style.shadow;
+    if (shadow != null) {
+      // One shadow for what's raised, half of it for small controls.
+      final full = shadow.isNone ? <BoxShadow>[] : [shadow.resolve(named)];
+      final half = shadow.isNone ? <BoxShadow>[] : [shadow.resolve(named, 0.5)];
+      colors = colors.copyWith(
+        shadowXs: half,
+        shadowSm: half,
+        shadowControl: half,
+        shadowEdge: shadow.isNone ? const [] : null,
+        shadowRaised: full,
+        shadowFloating: full,
+        shadowMenu: full,
+        shadowLift: full,
+        shadowDialog: full,
+        shadowFab: full,
+        shadowBar: full,
+      );
+    }
+    if (style.outline > 0) {
+      // An outline is a ring under each of those shadows.
+      final ring = BoxShadow(
+        color: style.outlineColor.resolve(named),
+        spreadRadius: style.outline,
+      );
+      List<BoxShadow> ringed(List<BoxShadow> shadows) => [ring, ...shadows];
+      colors = colors.copyWith(
+        shadowXs: ringed(colors.shadowXs),
+        shadowEdge: [ring],
+        shadowRaised: ringed(colors.shadowRaised),
+        shadowFloating: ringed(colors.shadowFloating),
+        shadowMenu: ringed(colors.shadowMenu),
+        shadowLift: ringed(colors.shadowLift),
+        shadowDialog: ringed(colors.shadowDialog),
+        shadowFab: ringed(colors.shadowFab),
+        shadowBar: ringed(colors.shadowBar),
+      );
+    }
+    return colors;
   }
 }

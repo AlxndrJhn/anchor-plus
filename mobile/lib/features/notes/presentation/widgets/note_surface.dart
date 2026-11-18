@@ -19,9 +19,9 @@ class NoteAppearance {
   String? get pattern => background.pattern;
 
   static NoteAppearance of(BuildContext context, String? backgroundId) {
-    // Lo-fi draws every note as plain paper.
+    // A theme with a noteColor draws every note plain, in that colour.
     final background = AnchorBackgrounds.of(
-      context.appStyle.plainNotes ? null : backgroundId,
+      context.appStyle.uniformNotes ? null : backgroundId,
     );
     return NoteAppearance(
       background: background,
@@ -31,12 +31,12 @@ class NoteAppearance {
 
   PillColors get pillColors => (edge: colors.border, muted: colors.muted);
 
-  /// The fill for a highlight: a name, or a custom `#rrggbb` (grey in
-  /// Lo-fi, like the named ones).
+  /// The fill for a highlight: a name, or a custom `#rrggbb` (the theme's
+  /// highlightColor, if it has one, for every highlight).
   Color highlight(BuildContext context, String name) {
-    if (isCustomHighlight(name) && !context.appStyle.plainNotes) {
-      return parseHexColor(name)!;
-    }
+    final themed = context.appStyle.highlight;
+    if (themed != null) return themed;
+    if (isCustomHighlight(name)) return parseHexColor(name)!;
     return context.anchor
         .highlightOn(
           palette,

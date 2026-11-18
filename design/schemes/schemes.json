@@ -67,10 +67,5 @@
       "light": { "background": "#F0F4F8", "card": "#FFFFFF", "sidebar": "#E9EEF3", "muted": "#E8ECF1", "foreground": "#2D3142", "mutedForeground": "#4F5D75", "accent": "#1F8FA3", "accentStrong": "#13687A", "accentInk": "#0F5866", "border": "#D8DEE6", "divider": "#E6EBF1", "input": "#788497", "destructive": "#C0392B" },
       "dark": { "background": "#000000", "card": "#0E0E0E", "sidebar": "#000000", "muted": "#1A1A1A", "foreground": "#FFFFFF", "mutedForeground": "#B3B3B3", "accent": "#1F8FA3", "accentStrong": "#3FB0C3", "accentInk": "#6CC9D8", "border": "#2E2E2E", "divider": "#1C1C1C", "input": "#6B6B6B", "destructive": "#FF8A80" }
     }
-  ],
-  "lofi": {
-    "$description": "The Lo-fi style's own pencil-and-paper greys, used whatever the scheme.",
-    "light": { "background": "#F7F6F2", "card": "#FFFFFF", "sidebar": "#EFEEE9", "muted": "#EBEAE5", "foreground": "#2B2B2B", "mutedForeground": "#5F5F5F", "accent": "#3A3A3A", "accentStrong": "#2B2B2B", "accentInk": "#2B2B2B", "border": "#9A9A9A", "divider": "#CFCFCF", "input": "#7A7A7A", "destructive": "#7A2A2A" },
-    "dark": { "background": "#1F1F1F", "card": "#2A2A2A", "sidebar": "#1A1A1A", "muted": "#333333", "foreground": "#E6E6E6", "mutedForeground": "#A8A8A8", "accent": "#D0D0D0", "accentStrong": "#D9D9D9", "accentInk": "#E6E6E6", "border": "#6E6E6E", "divider": "#3A3A3A", "input": "#8A8A8A", "destructive": "#E39A9A" }
-  }
+  ]
 }

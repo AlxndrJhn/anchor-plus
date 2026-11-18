@@ -11,13 +11,12 @@ import { parseCustomTheme, themeAsJson } from "@/lib/design/custom-theme";
 import { Row, RowText } from "./settings-blocks";
 
 /**
- * Settings › Appearance › Custom theme: colours pasted as JSON, kept on this
- * device, over the chosen colour scheme.
+ * Settings › Appearance › Custom theme: colours and a style pasted as JSON,
+ * kept on this device, over the chosen colour scheme. THEMES.md has some.
  */
 export function CustomThemeEditor() {
   const t = useTranslations("settings.customTheme");
   const scheme = usePreferencesStore((s) => s.ui.colorScheme ?? "anchor");
-  const style = usePreferencesStore((s) => s.ui.style ?? "default");
   const customTheme = usePreferencesStore((s) => s.ui.customTheme);
   const setUI = usePreferencesStore((s) => s.setUIPreference);
   const [text, setText] = React.useState(() =>
@@ -67,13 +66,11 @@ export function CustomThemeEditor() {
           <>
             {t("text")}
             {customTheme &&
-              (style === "lofi"
-                ? ` ${t("lofiNote")}`
-                : ` ${
-                    customTheme.name
-                      ? t("appliedNamed", { name: customTheme.name })
-                      : t("applied")
-                  }`)}
+              ` ${
+                customTheme.name
+                  ? t("appliedNamed", { name: customTheme.name })
+                  : t("applied")
+              }`}
           </>
         }
       />

@@ -1114,12 +1114,6 @@ abstract class AppLocalizations {
   /// **'Color scheme'**
   String get settingsColorScheme;
 
-  /// Under the Color scheme setting while the Lo-fi style is on, which ignores the scheme. Lo-fi is the style's name.
-  ///
-  /// In en, this message translates to:
-  /// **'Lo-fi draws in pencil grays, whatever the scheme.'**
-  String get settingsColorSchemeLofi;
-
   /// Name of the app's own color scheme, listed with Nord, Dracula and others. The app's name.
   ///
   /// In en, this message translates to:
@@ -1144,16 +1138,10 @@ abstract class AppLocalizations {
   /// **'On'**
   String get settingsCustomThemeOn;
 
-  /// Under the Custom theme setting while the Lo-fi style is on, which ignores custom colors. Lo-fi is the style's name.
-  ///
-  /// In en, this message translates to:
-  /// **'Lo-fi keeps its pencil grays, so the custom theme waits for another style.'**
-  String get settingsCustomThemeLofi;
-
   /// Explains the Custom theme sheet. JSON is a text format; light and dark are the app's two modes.
   ///
   /// In en, this message translates to:
-  /// **'Paste a theme as JSON: colors for light, dark or both. Anything left out keeps the color scheme\'s color. Kept on this device; the same JSON works on the web.'**
+  /// **'Paste a theme as JSON: colors for light, dark or both, and a style for fonts, corners, shadows and texture. Anything left out keeps the color scheme\'s color and Anchor\'s look. Kept on this device; the same JSON works on the web.'**
   String get customThemeHelp;
 
   /// Accessibility label of the text box where a custom theme is pasted as JSON.
@@ -1213,7 +1201,7 @@ abstract class AppLocalizations {
   /// A pasted custom theme is JSON but not an object. Keep "light" and "dark" as they are: they are JSON keys.
   ///
   /// In en, this message translates to:
-  /// **'The theme must be a JSON object with \"light\" or \"dark\" colors'**
+  /// **'The theme must be a JSON object with \"light\" or \"dark\" colors or a \"style\"'**
   String get customThemeNotObject;
 
   /// A key in a pasted custom theme isn't one the app knows. key and expected are JSON keys, keep them as they are.
@@ -1252,65 +1240,53 @@ abstract class AppLocalizations {
   /// **'lineSpacing: {value} is not one of \"tight\", \"default\" or \"relaxed\"'**
   String customThemeNotALineSpacing(String value);
 
-  /// A pasted custom theme has neither light nor dark colors. Keep "light" and "dark" as they are: they are JSON keys.
+  /// A pasted custom theme has no light colors, dark colors or style. Keep "light", "dark" and "style" as they are: they are JSON keys.
   ///
   /// In en, this message translates to:
-  /// **'Give at least one of \"light\" or \"dark\"'**
+  /// **'Give at least one of \"light\", \"dark\" or \"style\"'**
   String get customThemeNoMode;
 
-  /// Label of the Appearance setting that changes the app's look: corners, outlines, shadows and font.
+  /// A pasted custom theme's "style" isn't a JSON object. Keep "style" as it is: it's a JSON key.
   ///
   /// In en, this message translates to:
-  /// **'Style'**
-  String get settingsStyle;
+  /// **'style: must be an object'**
+  String get customThemeStyleNotObject;
 
-  /// The style that keeps the app as designed.
+  /// A value in a pasted custom theme's style isn't one the app knows. key, value and expected are JSON, keep them as they are.
   ///
   /// In en, this message translates to:
-  /// **'Default'**
-  String get styleDefault;
+  /// **'{key}: {value} is not one of {expected}'**
+  String customThemeBadStyleValue(String key, String value, String expected);
 
-  /// Under the Default style. Anchor is the app's name.
+  /// A pasted custom theme's style.radius is neither a number in range nor four [x, y] corners. Keep style.radius and [x, y] as they are.
   ///
   /// In en, this message translates to:
-  /// **'Anchor as designed'**
-  String get styleDefaultHelp;
+  /// **'style.radius: must be a number from 0 to 40 or four [x, y] corners'**
+  String get customThemeRadiusNotValid;
 
-  /// A style imitating real materials: paper, linen and soft shadows.
+  /// A pattern in a pasted custom theme's style isn't a JSON object. key is the JSON key; keep shape, size, thickness, color and opacity as they are.
   ///
   /// In en, this message translates to:
-  /// **'Skeuomorphism'**
-  String get styleSkeuomorphism;
+  /// **'{key}: must be an object with shape, size, thickness, color and opacity'**
+  String customThemePatternNotObject(String key);
 
-  /// Under the Skeuomorphism style.
+  /// A number in a pasted custom theme's style is missing or out of range. key is the JSON key.
   ///
   /// In en, this message translates to:
-  /// **'Paper, linen and depth'**
-  String get styleSkeuomorphismHelp;
+  /// **'{key}: must be a number from {min} to {max}'**
+  String customThemeNotNumber(String key, String min, String max);
 
-  /// A style with thick ink outlines, hard shadows and square corners.
+  /// A color in a pasted custom theme's style is neither a hex color nor the name of a palette color. key and value are JSON; keep foreground as it is.
   ///
   /// In en, this message translates to:
-  /// **'Neo-Brutalism'**
-  String get styleNeoBrutalism;
+  /// **'{key}: {value} is not a color or a color key; use #rgb, #rrggbb, #rrggbbaa or a key such as foreground'**
+  String customThemeNotStyleColor(String key, String value);
 
-  /// Under the Neo-Brutalism style.
+  /// A pasted custom theme's style.shadow isn't "none" or a JSON object. Keep style.shadow and "none" as they are.
   ///
   /// In en, this message translates to:
-  /// **'Thick outlines, hard shadows'**
-  String get styleNeoBrutalismHelp;
-
-  /// A style that draws the app like a pencil sketch, in grays and handwriting.
-  ///
-  /// In en, this message translates to:
-  /// **'Lo-fi'**
-  String get styleLofi;
-
-  /// Under the Lo-fi style.
-  ///
-  /// In en, this message translates to:
-  /// **'A pencil-and-paper prototype'**
-  String get styleLofiHelp;
+  /// **'style.shadow: must be \"none\" or an object'**
+  String get customThemeShadowNotValid;
 
   /// Screen reader name of the group of light, dark and automatic theme choices.
   ///

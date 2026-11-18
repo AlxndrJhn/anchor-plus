@@ -23,7 +23,7 @@ extension ThemeContextX on BuildContext {
           ? AnchorColors.dark
           : AnchorColors.light);
 
-  /// The chosen style's corners, page texture and note treatment.
+  /// The custom theme style's corners, page pattern, notes and highlights.
   AnchorStyle get appStyle =>
       Theme.of(this).extension<AnchorStyle>() ?? AnchorStyle.standard;
 

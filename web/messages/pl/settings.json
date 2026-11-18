@@ -123,28 +123,7 @@
   "appearance": {
     "title": "Wygląd",
     "colourScheme": "Schemat kolorów",
-    "colourSchemeLofi": "Lo-fi rysuje własnymi odcieniami szarości; schemat wraca przy innym stylu.",
     "colourSchemeText": "Popularne palety, każda w jasnej i ciemnej wersji.",
-    "style": "Styl",
-    "styleText": "Kształty, cienie i czcionki.",
-    "styles": {
-      "default": {
-        "label": "Domyślny",
-        "description": "Czysty i miękki"
-      },
-      "skeuomorphism": {
-        "label": "Skeumorfizm",
-        "description": "Papier, len i połysk"
-      },
-      "neo-brutalism": {
-        "label": "Neobrutalizm",
-        "description": "Grube kontury, twarde cienie"
-      },
-      "lofi": {
-        "label": "Lo-fi",
-        "description": "Szkic ołówkiem w szarościach"
-      }
-    },
     "theme": "Motyw",
     "themeText": "Wybierz, jak wygląda Anchor+.",
     "light": "Jasny",
@@ -156,8 +135,7 @@
   },
   "customTheme": {
     "title": "Własny motyw",
-    "text": "Wklej motyw jako JSON: kolory dla jasnego, ciemnego lub obu. Pominięte kolory zostają ze schematu kolorów. Zapisywane na tym urządzeniu; ten sam JSON działa w aplikacji na Androida.",
-    "lofiNote": "Lo-fi rysuje własnymi odcieniami szarości, więc własny motyw czeka na inny styl.",
+    "text": "Wklej motyw jako JSON: kolory dla jasnego, ciemnego lub obu oraz styl (czcionki, narożniki, obrys, cień, wzory, kolory notatek). Pominięte kolory zostają ze schematu kolorów, a wygląd domyślny; gotowe motywy są w THEMES.md na GitHubie. Zapisywane na tym urządzeniu; ten sam JSON działa w aplikacji na Androida.",
     "applied": "Zastosowano.",
     "appliedNamed": "Zastosowano: {name}.",
     "appliedToast": "Zastosowano własny motyw",

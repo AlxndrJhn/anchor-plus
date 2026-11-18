@@ -24,7 +24,9 @@ class StorageKeys {
   static const motionSpeed = 'motion_speed';
   static const appLanguage = 'app_language';
   static const colorScheme = 'color_scheme';
-  static const appStyle = 'app_style';
+
+  /// The old Style setting, now part of the custom theme; only deleted.
+  static const legacyAppStyle = 'app_style';
   static const customTheme = 'custom_theme';
   static const sortChecklistItems = 'editor_sort_checklist_items';
   static const burnDeleted = 'editor_burn_deleted';
@@ -67,7 +69,6 @@ class StorageKeys {
     motionSpeed,
     appLanguage,
     colorScheme,
-    appStyle,
     customTheme,
     sortChecklistItems,
     burnDeleted,
