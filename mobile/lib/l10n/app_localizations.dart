@@ -262,6 +262,18 @@ abstract class AppLocalizations {
   /// **'Large'**
   String get textSizeLarge;
 
+  /// Note line spacing: lines closer together than by default.
+  ///
+  /// In en, this message translates to:
+  /// **'Tight'**
+  String get lineSpacingTight;
+
+  /// Note line spacing: lines further apart than by default.
+  ///
+  /// In en, this message translates to:
+  /// **'Relaxed'**
+  String get lineSpacingRelaxed;
+
   /// Error when a request fails because the phone has no internet.
   ///
   /// In en, this message translates to:
@@ -1371,6 +1383,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Text size'**
   String get settingsTextSize;
+
+  /// Setting that picks how far apart the lines of text in notes are.
+  ///
+  /// In en, this message translates to:
+  /// **'Line spacing'**
+  String get settingsLineSpacing;
 
   /// Switch in Settings for checklists in notes.
   ///

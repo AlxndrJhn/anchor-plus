@@ -74,9 +74,10 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
     final style = ref.watch(appStyleControllerProvider);
     final customTheme = ref.watch(customThemeControllerProvider);
     final language = ref.watch(appLanguageControllerProvider);
-    final (font, textSize) = ref.watch(
+    final (font, textSize, lineSpacing) = ref.watch(
       editorPreferencesControllerProvider.select(
-        (editor) => (editor.noteFont, editor.noteTextSize),
+        (editor) =>
+            (editor.noteFont, editor.noteTextSize, editor.noteLineSpacing),
       ),
     );
 
@@ -107,6 +108,7 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
         scheme,
         style,
         customTheme,
+        lineSpacing,
       ),
       darkTheme: AppTheme.dark(
         density,
@@ -115,6 +117,7 @@ class _AnchorAppState extends ConsumerState<AnchorApp>
         scheme,
         style,
         customTheme,
+        lineSpacing,
       ),
       themeMode: themeMode,
       themeAnimationStyle: isSystemMotionReduced

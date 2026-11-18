@@ -10,6 +10,7 @@ class EditorPreferences {
 
   final NoteFont noteFont;
   final NoteTextSize noteTextSize;
+  final NoteLineSpacing noteLineSpacing;
 
   /// How far an open note's body is pinched in, 1 being its own size.
   final double noteZoom;
@@ -25,6 +26,7 @@ class EditorPreferences {
     this.burnDeleted = true,
     this.noteFont = NoteFont.sans,
     this.noteTextSize = NoteTextSize.standard,
+    this.noteLineSpacing = NoteLineSpacing.standard,
     this.noteZoom = 1,
     this.quickActions = QuickAction.defaults,
     this.hiddenActions = const {},
@@ -35,6 +37,7 @@ class EditorPreferences {
     bool? burnDeleted,
     NoteFont? noteFont,
     NoteTextSize? noteTextSize,
+    NoteLineSpacing? noteLineSpacing,
     double? noteZoom,
     List<QuickAction>? quickActions,
     Set<QuickAction>? hiddenActions,
@@ -44,6 +47,7 @@ class EditorPreferences {
       burnDeleted: burnDeleted ?? this.burnDeleted,
       noteFont: noteFont ?? this.noteFont,
       noteTextSize: noteTextSize ?? this.noteTextSize,
+      noteLineSpacing: noteLineSpacing ?? this.noteLineSpacing,
       noteZoom: noteZoom ?? this.noteZoom,
       quickActions: quickActions ?? this.quickActions,
       hiddenActions: hiddenActions ?? this.hiddenActions,

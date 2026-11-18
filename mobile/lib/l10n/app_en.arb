@@ -132,6 +132,14 @@
   "@textSizeLarge": {
     "description": "Note text size."
   },
+  "lineSpacingTight": "Tight",
+  "@lineSpacingTight": {
+    "description": "Note line spacing: lines closer together than by default."
+  },
+  "lineSpacingRelaxed": "Relaxed",
+  "@lineSpacingRelaxed": {
+    "description": "Note line spacing: lines further apart than by default."
+  },
   "errorOffline": "No internet connection.",
   "@errorOffline": {
     "description": "Error when a request fails because the phone has no internet."
@@ -1065,6 +1073,10 @@
   "settingsTextSize": "Text size",
   "@settingsTextSize": {
     "description": "Setting that picks how big the text in notes is."
+  },
+  "settingsLineSpacing": "Line spacing",
+  "@settingsLineSpacing": {
+    "description": "Setting that picks how far apart the lines of text in notes are."
   },
   "settingsMoveChecked": "Move checked items to the bottom",
   "@settingsMoveChecked": {

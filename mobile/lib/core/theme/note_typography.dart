@@ -46,20 +46,43 @@ enum NoteTextSize {
   };
 }
 
+/// How far apart a note's lines are, beside the density's own spacing.
+enum NoteLineSpacing {
+  tight(-0.2),
+  standard(0),
+  relaxed(0.3);
+
+  const NoteLineSpacing(this.offset);
+
+  /// Added to the density's line height, in ems.
+  final double offset;
+
+  String labelIn(AppLocalizations l10n) => switch (this) {
+    NoteLineSpacing.tight => l10n.lineSpacingTight,
+    NoteLineSpacing.standard => l10n.textSizeDefault,
+    NoteLineSpacing.relaxed => l10n.lineSpacingRelaxed,
+  };
+}
+
 @immutable
 class NoteTypography extends ThemeExtension<NoteTypography> {
   const NoteTypography({
     this.font = NoteFont.sans,
     this.textSize = NoteTextSize.standard,
-    required this.lineHeight,
+    this.lineSpacing = NoteLineSpacing.standard,
+    required double lineHeight,
     this.sansFamily = AppTypography.sans,
     this.titleFamily,
-  });
+  }) : baseLineHeight = lineHeight;
 
   final NoteFont font;
   final NoteTextSize textSize;
+  final NoteLineSpacing lineSpacing;
 
-  final double lineHeight;
+  /// The density's line height, before [lineSpacing].
+  final double baseLineHeight;
+
+  double get lineHeight => baseLineHeight + lineSpacing.offset;
 
   /// What [NoteFont.sans] draws in: the style's UI family.
   final String sansFamily;
@@ -139,13 +162,15 @@ class NoteTypography extends ThemeExtension<NoteTypography> {
   NoteTypography copyWith({
     NoteFont? font,
     NoteTextSize? textSize,
+    NoteLineSpacing? lineSpacing,
     double? lineHeight,
     String? sansFamily,
     String? titleFamily,
   }) => NoteTypography(
     font: font ?? this.font,
     textSize: textSize ?? this.textSize,
-    lineHeight: lineHeight ?? this.lineHeight,
+    lineSpacing: lineSpacing ?? this.lineSpacing,
+    lineHeight: lineHeight ?? baseLineHeight,
     sansFamily: sansFamily ?? this.sansFamily,
     titleFamily: titleFamily ?? this.titleFamily,
   );
@@ -161,11 +186,18 @@ class NoteTypography extends ThemeExtension<NoteTypography> {
       other is NoteTypography &&
       other.font == font &&
       other.textSize == textSize &&
-      other.lineHeight == lineHeight &&
+      other.lineSpacing == lineSpacing &&
+      other.baseLineHeight == baseLineHeight &&
       other.sansFamily == sansFamily &&
       other.titleFamily == titleFamily;
 
   @override
-  int get hashCode =>
-      Object.hash(font, textSize, lineHeight, sansFamily, titleFamily);
+  int get hashCode => Object.hash(
+    font,
+    textSize,
+    lineSpacing,
+    baseLineHeight,
+    sansFamily,
+    titleFamily,
+  );
 }

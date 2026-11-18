@@ -99,6 +99,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get textSizeLarge => 'Duży';
 
   @override
+  String get lineSpacingTight => 'Ciasny';
+
+  @override
+  String get lineSpacingRelaxed => 'Luźny';
+
+  @override
   String get errorOffline => 'Brak połączenia z internetem.';
 
   @override
@@ -758,6 +764,9 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get settingsTextSize => 'Rozmiar tekstu';
+
+  @override
+  String get settingsLineSpacing => 'Odstęp między wierszami';
 
   @override
   String get settingsMoveChecked => 'Przenoś zaznaczone pozycje na dół';

@@ -589,6 +589,7 @@ class _EditorSection extends ConsumerWidget {
             typography: NoteTypography(
               font: editor.noteFont,
               textSize: editor.noteTextSize,
+              lineSpacing: editor.noteLineSpacing,
               lineHeight: context.density.noteLineHeight,
             ),
           ),
@@ -618,6 +619,18 @@ class _EditorSection extends ConsumerWidget {
                   Segment(value: size, label: size.labelIn(l10n)),
               ],
               onChanged: controller.setNoteTextSize,
+            ),
+          ),
+          StackedListTile(
+            label: l10n.settingsLineSpacing,
+            child: SegmentedControl<NoteLineSpacing>(
+              semanticLabel: l10n.settingsLineSpacing,
+              value: editor.noteLineSpacing,
+              segments: [
+                for (final spacing in NoteLineSpacing.values)
+                  Segment(value: spacing, label: spacing.labelIn(l10n)),
+              ],
+              onChanged: controller.setNoteLineSpacing,
             ),
           ),
           SwitchRow(

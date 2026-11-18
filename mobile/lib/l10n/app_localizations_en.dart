@@ -99,6 +99,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get textSizeLarge => 'Large';
 
   @override
+  String get lineSpacingTight => 'Tight';
+
+  @override
+  String get lineSpacingRelaxed => 'Relaxed';
+
+  @override
   String get errorOffline => 'No internet connection.';
 
   @override
@@ -750,6 +756,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsTextSize => 'Text size';
+
+  @override
+  String get settingsLineSpacing => 'Line spacing';
 
   @override
   String get settingsMoveChecked => 'Move checked items to the bottom';
