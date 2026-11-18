@@ -788,6 +788,13 @@ class AppLocalizationsPl extends AppLocalizations {
       'Usunięta notatka spala się w miejscu, gdzie była. Po wyłączeniu po prostu znika.';
 
   @override
+  String get settingsStrikeSparks => 'Iskry przy zderzeniu kart';
+
+  @override
+  String get settingsStrikeSparksHelp =>
+      'Po usunięciu lecą iskry tam, gdzie karty uderzają w swoje nowe miejsca.';
+
+  @override
   String get settingsPreviewTitle => 'Weekend w Lizbonie';
 
   @override

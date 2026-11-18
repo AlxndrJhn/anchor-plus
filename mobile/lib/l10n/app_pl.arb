@@ -221,6 +221,8 @@
   "settingsMoveCheckedHelp": "Zaznaczone pozycje trafiają pod niezaznaczone.",
   "settingsBurnDeleted": "Spalaj usunięte notatki",
   "settingsBurnDeletedHelp": "Usunięta notatka spala się w miejscu, gdzie była. Po wyłączeniu po prostu znika.",
+  "settingsStrikeSparks": "Iskry przy zderzeniu kart",
+  "settingsStrikeSparksHelp": "Po usunięciu lecą iskry tam, gdzie karty uderzają w swoje nowe miejsca.",
   "settingsPreviewTitle": "Weekend w Lizbonie",
   "settingsPreviewText": "Pakuj się lekko. Wzgórza są strome, a tramwaje zapełniają się przed dziewiątą.",
   "settingsAccount": "Konto",

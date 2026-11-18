@@ -75,7 +75,7 @@ Actions"; the workflow is `.github/workflows/pages.yml`, and
 | A tag's colour can be changed from its menu | ✓ | ✓ |
 | Text colour, font (serif, monospace, Comic Sans, handwriting, typewriter, rounded, slab, marker) and highlights in any colour, picked or preset | ✓ | ✓ |
 | Align a paragraph, heading, quote or list item left, centre, right or justified (web: the toolbar's Align button or `Ctrl/⌘ Shift L/E/R/J`; phone: Aa › Align, which steps through them). It syncs, shows on cards, shared links and print; Markdown has no alignment, so the export and the AI connector write the line unaligned | ✓ | ✓ |
-| A deleted note burns away like a destroyed card in Balatro, its last sparks fading out (off with reduced motion) | ✓ | ✓ |
+| A deleted note can burn away like a destroyed card in Balatro, its last sparks fading out, and the cards that move up can throw sparks where they strike into place (both off by default, in Settings › Editor; never with reduced motion) | ✓ | ✓ |
 | **Pictures, files and recordings** | | |
 | Grab image text (OCR): marks the text on a picture to select (drag over words or draw a box), copy or insert in the note | ✓ | ✓ |
 | Paste a picture to add it as an attachment | ✓ | ✓ |

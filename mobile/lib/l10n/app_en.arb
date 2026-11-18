@@ -1126,6 +1126,14 @@
   "@settingsBurnDeletedHelp": {
     "description": "Help under the Burn deleted notes switch."
   },
+  "settingsStrikeSparks": "Sparks when cards collide",
+  "@settingsStrikeSparks": {
+    "description": "Switch in Settings › Editor: after a delete, sparks fly where the remaining cards strike into their new places. A setting on this device."
+  },
+  "settingsStrikeSparksHelp": "After a delete, sparks fly where the cards strike into their new places.",
+  "@settingsStrikeSparksHelp": {
+    "description": "Help under the Sparks when cards collide switch."
+  },
   "settingsPreviewTitle": "Weekend in Lisbon",
   "@settingsPreviewTitle": {
     "description": "Title of a sample note that previews the font and text size."

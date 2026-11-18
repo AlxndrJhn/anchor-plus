@@ -68,9 +68,23 @@ export function EditorSection() {
         />
         <Switch
           id="burn-deleted"
-          checked={editor.burnDeleted !== false}
+          checked={editor.burnDeleted === true}
           onCheckedChange={(on) => {
             setEditorPreference("burnDeleted", on);
+            setSaveStatus("saved");
+          }}
+        />
+      </Row>
+      <Row>
+        <RowText
+          title={<label htmlFor="strike-sparks">{t("strikeSparks")}</label>}
+          text={t("strikeSparksText")}
+        />
+        <Switch
+          id="strike-sparks"
+          checked={editor.strikeSparks === true}
+          onCheckedChange={(on) => {
+            setEditorPreference("strikeSparks", on);
             setSaveStatus("saved");
           }}
         />

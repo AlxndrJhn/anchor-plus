@@ -17,6 +17,7 @@ import 'package:anchor/features/auth/presentation/auth_controller.dart';
 import 'package:anchor/features/auth/presentation/oidc_config_provider.dart';
 import 'package:anchor/features/notes/domain/quick_action.dart';
 import 'package:anchor/features/server/data/server_info_provider.dart';
+import 'package:anchor/features/settings/domain/editor_preferences.dart';
 import 'package:anchor/features/settings/presentation/editor_preferences_controller.dart';
 import 'package:anchor/features/settings/presentation/settings_screen.dart';
 import 'package:anchor/features/settings/presentation/theme_preferences_controller.dart';
@@ -211,7 +212,7 @@ void main() {
         (w) => w is Container && w.constraints?.maxHeight == 1,
       ),
     );
-    expect(dividersIn('Font'), findsNWidgets(4));
+    expect(dividersIn('Font'), findsNWidgets(5));
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 400));
     await tester.pumpAndSettle();
     // Lines only between Language, Color scheme, Custom theme, Density and
@@ -320,32 +321,40 @@ void main() {
     expect(styleOf(tester, preview).height, closeTo(standard, 0.001));
   });
 
-  testWidgets('Burn deleted notes is on until turned off on this phone', (
-    tester,
-  ) async {
-    final container = await pumpSettings(tester);
-    expect(
-      container.read(editorPreferencesControllerProvider).burnDeleted,
-      isTrue,
-    );
+  for (final (label, read, readSaved) in [
+    (
+      'Burn deleted notes',
+      (EditorPreferences p) => p.burnDeleted,
+      (PreferencesRepository r) => r.getBurnDeleted(),
+    ),
+    (
+      'Sparks when cards collide',
+      (EditorPreferences p) => p.strikeSparks,
+      (PreferencesRepository r) => r.getStrikeSparks(),
+    ),
+  ]) {
+    testWidgets('$label is off until turned on on this phone', (tester) async {
+      final container = await pumpSettings(tester);
+      expect(
+        read(container.read(editorPreferencesControllerProvider)),
+        isFalse,
+      );
 
-    await tester.scrollUntilVisible(
-      find.text('Burn deleted notes'),
-      100,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Burn deleted notes'));
-    await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
 
-    expect(
-      container.read(editorPreferencesControllerProvider).burnDeleted,
-      isFalse,
-    );
-    expect(
-      await container.read(preferencesRepositoryProvider).getBurnDeleted(),
-      isFalse,
-    );
-  });
+      expect(read(container.read(editorPreferencesControllerProvider)), isTrue);
+      expect(
+        await readSaved(container.read(preferencesRepositoryProvider)),
+        isTrue,
+      );
+    });
+  }
 
   testWidgets('the preview grows over the fade and the face changes at once', (
     tester,

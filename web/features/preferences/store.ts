@@ -43,8 +43,10 @@ interface NotesPreferences {
 
 interface EditorPreferences {
   sortChecklistItems: boolean;
-  /** Deleted notes burn away. Unset (older saves) means on. */
+  /** Deleted notes burn away. Unset means off. */
   burnDeleted?: boolean;
+  /** Sparks fly where cards strike into place after a delete. Unset means off. */
+  strikeSparks?: boolean;
   /** Inserts today's date; unset means the default (Ctrl+;). */
   dateShortcut?: Shortcut;
   /** Inserts the date and time; unset means Ctrl+Shift+;. */
@@ -99,7 +101,8 @@ const defaultNotesPreferences: NotesPreferences = {
 
 const defaultEditorPreferences: EditorPreferences = {
   sortChecklistItems: true,
-  burnDeleted: true,
+  burnDeleted: false,
+  strikeSparks: false,
   foldedChecklistNoteIds: [],
 };
 
@@ -165,6 +168,17 @@ export const usePreferencesStore = create<PreferencesState>()(
     }),
     {
       name: "preferences",
+      // 1: burning deleted notes went from on to off by default. Every
+      // earlier save holds the old default, so it starts over at the new one.
+      version: 1,
+      migrate: (persisted, version) => {
+        const saved = (persisted ?? {}) as Partial<PreferencesState>;
+        if (version < 1 && saved.editor) {
+          const { burnDeleted: _burn, ...editor } = saved.editor;
+          return { ...saved, editor } as PreferencesState;
+        }
+        return saved as PreferencesState;
+      },
       // Settings added later get their defaults.
       merge: (persisted, current) => {
         const saved = (persisted ?? {}) as Partial<PreferencesState>;

@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../app/app_bootstrap.dart';
 import '../../../core/storage/preferences_repository.dart';
 import '../../../core/theme/note_typography.dart';
+import '../../../core/widgets/destruction/strike.dart';
 import '../../notes/domain/quick_action.dart';
 import '../domain/editor_preferences.dart';
 
@@ -11,8 +12,11 @@ part 'editor_preferences_controller.g.dart';
 @Riverpod(keepAlive: true)
 class EditorPreferencesController extends _$EditorPreferencesController {
   @override
-  EditorPreferences build() =>
-      ref.watch(appBootstrapProvider).editorPreferences;
+  EditorPreferences build() {
+    final preferences = ref.watch(appBootstrapProvider).editorPreferences;
+    strikeThrowsSparks = preferences.strikeSparks;
+    return preferences;
+  }
 
   Future<void> setSortChecklistItems(bool value) async {
     state = state.copyWith(sortChecklistItems: value);
@@ -24,6 +28,13 @@ class EditorPreferencesController extends _$EditorPreferencesController {
     state = state.copyWith(burnDeleted: value);
     final repository = ref.read(preferencesRepositoryProvider);
     await repository.setBurnDeleted(value);
+  }
+
+  Future<void> setStrikeSparks(bool value) async {
+    state = state.copyWith(strikeSparks: value);
+    strikeThrowsSparks = value;
+    final repository = ref.read(preferencesRepositoryProvider);
+    await repository.setStrikeSparks(value);
   }
 
   Future<void> setNoteFont(NoteFont font) async {

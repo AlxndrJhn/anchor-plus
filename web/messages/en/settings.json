@@ -157,6 +157,8 @@
     "sortCheckedText": "Checked items move below the unchecked ones.",
     "burnDeleted": "Burn deleted notes",
     "burnDeletedText": "A deleted note burns away where it stood. Off, it just goes. On this device only.",
+    "strikeSparks": "Sparks when cards collide",
+    "strikeSparksText": "After a delete, sparks fly where the cards strike into their new places. On this device only.",
     "insertDate": "Insert today’s date",
     "insertDateText": "In a note, types the date, e.g. {example}. Typing /date does the same.",
     "dateFormat": "Inserted date format",

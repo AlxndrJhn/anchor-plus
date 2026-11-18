@@ -149,7 +149,7 @@ const NO_BURN: Burn = { done: Promise.resolve(), restore: () => {} };
 export function burnElement(el: HTMLElement): Burn {
   if (
     prefersReducedMotion() ||
-    usePreferencesStore.getState().editor.burnDeleted === false
+    usePreferencesStore.getState().editor.burnDeleted !== true
   )
     return NO_BURN;
   const first = el.getBoundingClientRect();
