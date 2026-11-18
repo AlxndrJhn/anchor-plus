@@ -5,6 +5,7 @@ import { appearanceScript } from "@/lib/appearance-script";
 import {
   ANCHOR_PALETTE,
   customThemeCss,
+  LINE_SPACINGS,
   mergePalette,
   normalizeColor,
   parseCustomTheme,
@@ -35,6 +36,17 @@ describe("parseCustomTheme", () => {
         dark: { card: "#11223380", border: "#112233" },
       },
     });
+  });
+
+  it("reads a line spacing and names a wrong one", () => {
+    const result = parseCustomTheme(
+      '{"dark": {"background": "#000"}, "lineSpacing": "relaxed"}',
+    );
+    expect(result.ok && result.theme.lineSpacing).toBe("relaxed");
+    expect(errorsOf('{"dark": {}, "lineSpacing": "loose"}')).toEqual([
+      'lineSpacing: "loose" is not one of "tight", "default" or "relaxed"',
+    ]);
+    expect(errorsOf('{"dark": {}, "lineSpacing": 2}')).toHaveLength(1);
   });
 
   it("takes just one mode", () => {
@@ -140,6 +152,22 @@ describe("applying a custom theme", () => {
     );
   });
 
+  it("spaces the notes' lines, in Lo-fi too", () => {
+    expect(customThemeCss({ dark: {}, lineSpacing: "tight" })).toBe(
+      ":root[data-custom-theme]{--note-line-height:1.5;}",
+    );
+    expect(customThemeCss({ ...theme, lineSpacing: "relaxed" })).toContain(
+      "\n:root[data-custom-theme]{--note-line-height:2;}",
+    );
+    expect(
+      JSON.parse(themeAsJson("anchor", { dark: {}, lineSpacing: "tight" }))
+        .lineSpacing,
+    ).toBe("tight");
+    expect(JSON.parse(themeAsJson("anchor", undefined))).not.toHaveProperty(
+      "lineSpacing",
+    );
+  });
+
   it("is applied the same way before the first paint", () => {
     const appended: { id?: string; textContent?: string }[] = [];
     const html = { dataset: {} as Record<string, string> };
@@ -165,6 +193,26 @@ describe("applying a custom theme", () => {
       { id: "custom-theme", textContent: customThemeCss(theme) },
     ]);
   });
+
+  it.each(LINE_SPACINGS)(
+    "spaces the lines %s the same way before the first paint",
+    (lineSpacing) => {
+      const spaced = { ...theme, lineSpacing };
+      const appended: { textContent?: string }[] = [];
+      new Function("localStorage", "document", appearanceScript)(
+        {
+          getItem: () =>
+            JSON.stringify({ state: { ui: { customTheme: spaced } } }),
+        },
+        {
+          documentElement: { dataset: {} },
+          head: { appendChild: (node: object) => appended.push(node) },
+          createElement: () => ({}),
+        },
+      );
+      expect(appended[0].textContent).toBe(customThemeCss(spaced));
+    },
+  );
 });
 
 describe("schemes", () => {

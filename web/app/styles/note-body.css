@@ -40,10 +40,12 @@
 .doc {
   --indent: var(--size-list-indent);
   --box: var(--size-checkbox);
+  /* A custom theme's lineSpacing sets --note-line-height. */
+  --note-lh: var(--note-line-height, 1.7);
   position: relative;
   font-size: var(--text-body);
   font-weight: var(--text-body--font-weight);
-  line-height: 1.7;
+  line-height: var(--note-lh);
   color: var(--foreground);
   /* Each block reads its own direction (dir="auto"), so RTL lines align right. */
   text-align: start;
@@ -135,7 +137,7 @@
   top: 0.1em;
   inset-inline-start: calc(var(--lvl) * var(--indent));
   width: 22px;
-  height: 1.7em;
+  height: calc(var(--note-lh) * 1em);
   display: grid;
   place-items: center;
   color: var(--note-muted);
@@ -276,6 +278,8 @@
 .doc.is-card {
   --indent: var(--size-list-indent-card);
   --box: var(--size-checkbox-card);
+  /* Cards keep their own spacing. */
+  --note-lh: 1.7;
   font-size: var(--text-card-body);
   font-weight: var(--text-card-body--font-weight);
   line-height: 1.5;

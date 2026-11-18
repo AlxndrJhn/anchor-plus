@@ -36,7 +36,9 @@ class SegmentedControl<T> extends StatelessWidget {
 
   final List<Segment<T>> segments;
   final T value;
-  final ValueChanged<T> onChanged;
+
+  /// Null greys the control out and ignores taps.
+  final ValueChanged<T>? onChanged;
   final String semanticLabel;
 
   @override
@@ -52,9 +54,11 @@ class SegmentedControl<T> extends StatelessWidget {
               1.2 +
           8,
     );
-    return Semantics(
+    final onChanged = this.onChanged;
+    final control = Semantics(
       label: semanticLabel,
       container: true,
+      enabled: onChanged != null,
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
@@ -99,11 +103,13 @@ class SegmentedControl<T> extends StatelessWidget {
                               style: PressStyle.button,
                               selected: i == index,
                               semanticLabel: segments[i].label,
-                              onTap: () {
-                                if (segments[i].value == value) return;
-                                Haptics.selection();
-                                onChanged(segments[i].value);
-                              },
+                              onTap: onChanged == null
+                                  ? null
+                                  : () {
+                                      if (segments[i].value == value) return;
+                                      Haptics.selection();
+                                      onChanged(segments[i].value);
+                                    },
                               child: _Label(
                                 segment: segments[i],
                                 isSelected: i == index,
@@ -121,6 +127,9 @@ class SegmentedControl<T> extends StatelessWidget {
         ),
       ),
     );
+    return onChanged == null
+        ? Opacity(opacity: DisabledOpacity.button, child: control)
+        : control;
   }
 }
 

@@ -184,6 +184,12 @@ class PreferencesRepository {
     await _storage.write(key: StorageKeys.noteTextSize, value: textSize);
   }
 
+  Future<String?> getNoteLineSpacing() => _read(StorageKeys.noteLineSpacing);
+
+  Future<void> setNoteLineSpacing(String lineSpacing) async {
+    await _storage.write(key: StorageKeys.noteLineSpacing, value: lineSpacing);
+  }
+
   /// How far an open note's body is pinched in; 1 when never pinched.
   Future<double> getNoteZoom() async {
     final value = double.tryParse(await _read(StorageKeys.noteZoom) ?? '');

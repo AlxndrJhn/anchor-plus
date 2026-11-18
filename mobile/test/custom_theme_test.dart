@@ -60,6 +60,28 @@ void main() {
       expect(CustomTheme.decode(null), isNull);
     });
 
+    test('reads a line spacing and names a wrong one', () {
+      final theme = parseCustomTheme(
+        '{"dark": {"background": "#000"}, "lineSpacing": "relaxed"}',
+      ).theme!;
+      expect(theme.lineSpacing, NoteLineSpacing.relaxed);
+      expect(parseCustomTheme(theme.encode()).theme, theme);
+      expect(
+        parseCustomTheme(
+          '{"dark": {}, "lineSpacing": "default"}',
+        ).theme!.lineSpacing,
+        NoteLineSpacing.standard,
+      );
+      expect(errorsOf('{"dark": {}, "lineSpacing": "loose"}'), [
+        'lineSpacing: "loose" is not one of "tight", "default" or "relaxed"',
+      ]);
+      expect(errorsOf('{"dark": {}, "lineSpacing": 2}'), hasLength(1));
+      expect(
+        jsonDecode(themeAsJson(appSchemes.first, theme))['lineSpacing'],
+        'relaxed',
+      );
+    });
+
     test('takes just one mode', () {
       final theme = parseCustomTheme('{"dark": {"background": "#000"}}').theme;
       expect(theme?.light, isNull);
@@ -210,6 +232,35 @@ void main() {
       ).theme;
       final theme = _theme(Brightness.light, 'nord', AppStyle.lofi, custom);
       expect(theme.scaffoldBackgroundColor, lofiScheme.light.background);
+    });
+
+    test("a custom theme's line spacing wins over Settings', Lo-fi too", () {
+      final custom = parseCustomTheme(
+        '{"light": {}, "lineSpacing": "tight"}',
+      ).theme;
+      for (final style in [AppStyle.standard, AppStyle.lofi]) {
+        final typography = AppTheme.light(
+          DisplayDensity.standard,
+          NoteFont.sans,
+          NoteTextSize.standard,
+          anchorSchemeId,
+          style,
+          custom,
+          NoteLineSpacing.relaxed,
+        ).extension<NoteTypography>()!;
+        expect(typography.lineSpacing, NoteLineSpacing.tight);
+        expect(
+          typography.lineHeight,
+          closeTo(AnchorTokens.densityDefaultNoteLineHeight - 0.2, 1e-9),
+        );
+      }
+      final unset = _theme(
+        Brightness.light,
+        anchorSchemeId,
+        AppStyle.standard,
+        parseCustomTheme('{"light": {}}').theme,
+      ).extension<NoteTypography>()!;
+      expect(unset.lineSpacing, NoteLineSpacing.standard);
     });
 
     test('the share sheet keeps the custom theme', () {

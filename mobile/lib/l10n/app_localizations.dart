@@ -262,6 +262,18 @@ abstract class AppLocalizations {
   /// **'Large'**
   String get textSizeLarge;
 
+  /// Note line spacing: lines closer together than by default.
+  ///
+  /// In en, this message translates to:
+  /// **'Tight'**
+  String get lineSpacingTight;
+
+  /// Note line spacing: lines further apart than by default.
+  ///
+  /// In en, this message translates to:
+  /// **'Relaxed'**
+  String get lineSpacingRelaxed;
+
   /// Error when a request fails because the phone has no internet.
   ///
   /// In en, this message translates to:
@@ -1234,6 +1246,12 @@ abstract class AppLocalizations {
   /// **'{key}: {value} is not a color; use #rgb, #rrggbb or #rrggbbaa'**
   String customThemeNotAColor(String key, String value);
 
+  /// Error for a pasted custom theme. lineSpacing, tight, default and relaxed are JSON and stay as they are.
+  ///
+  /// In en, this message translates to:
+  /// **'lineSpacing: {value} is not one of \"tight\", \"default\" or \"relaxed\"'**
+  String customThemeNotALineSpacing(String value);
+
   /// A pasted custom theme has neither light nor dark colors. Keep "light" and "dark" as they are: they are JSON keys.
   ///
   /// In en, this message translates to:
@@ -1371,6 +1389,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Text size'**
   String get settingsTextSize;
+
+  /// Setting that picks how far apart the lines of text in notes are.
+  ///
+  /// In en, this message translates to:
+  /// **'Line spacing'**
+  String get settingsLineSpacing;
+
+  /// Under the Line spacing setting, greyed out because the custom theme (Settings › Appearance) sets it. "lineSpacing" is the JSON key and stays as it is.
+  ///
+  /// In en, this message translates to:
+  /// **'Set by your custom theme. Take \"lineSpacing\" out of it to pick here.'**
+  String get settingsLineSpacingByTheme;
 
   /// Switch in Settings for checklists in notes.
   ///

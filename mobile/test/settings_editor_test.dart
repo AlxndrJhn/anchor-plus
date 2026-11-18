@@ -7,6 +7,7 @@ import 'package:anchor/core/theme/app_theme.dart';
 import 'package:anchor/core/theme/app_typography.dart';
 import 'package:anchor/core/theme/display_density.dart';
 import 'package:anchor/core/theme/note_typography.dart';
+import 'package:anchor/core/theme/tokens/app_style.dart';
 import 'package:anchor/core/widgets/grouped_list.dart';
 import 'package:anchor/core/widgets/segmented_control.dart';
 import 'package:anchor/features/auth/domain/oidc_config.dart';
@@ -17,6 +18,7 @@ import 'package:anchor/features/notes/domain/quick_action.dart';
 import 'package:anchor/features/server/data/server_info_provider.dart';
 import 'package:anchor/features/settings/presentation/editor_preferences_controller.dart';
 import 'package:anchor/features/settings/presentation/settings_screen.dart';
+import 'package:anchor/features/settings/presentation/theme_preferences_controller.dart';
 import 'package:anchor/features/sync/data/sync_compatibility.dart';
 import 'package:anchor/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
@@ -45,6 +47,10 @@ class _App extends ConsumerWidget {
         DisplayDensity.standard,
         editor.noteFont,
         editor.noteTextSize,
+        anchorSchemeId,
+        AppStyle.standard,
+        null,
+        editor.noteLineSpacing,
       ),
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(
@@ -138,9 +144,8 @@ void main() {
       'Pack light. The hills are steep, and the trams fill up by '
       'nine.';
 
-  testWidgets('Editor shows a preview, Font, Text size, then the switches', (
-    tester,
-  ) async {
+  testWidgets('Editor shows a preview, Font, Text size, Line spacing, then '
+      'the switches', (tester) async {
     await pumpSettings(tester);
 
     final tops = [
@@ -149,6 +154,7 @@ void main() {
         preview,
         'Font',
         'Text size',
+        'Line spacing',
         'Move checked items to the bottom',
         'Burn deleted notes',
       ])
@@ -205,7 +211,7 @@ void main() {
         (w) => w is Container && w.constraints?.maxHeight == 1,
       ),
     );
-    expect(dividersIn('Font'), findsNWidgets(3));
+    expect(dividersIn('Font'), findsNWidgets(4));
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 400));
     await tester.pumpAndSettle();
     // Lines only between Language, Color scheme, Custom theme, Style,
@@ -244,6 +250,74 @@ void main() {
       AppTypography.noteSerif,
     );
     expect(styleOf(tester, preview).fontSize, closeTo(16.5 * 1.12, 0.001));
+  });
+
+  testWidgets('picking a line spacing saves it on this phone and spaces '
+      'the notes’ lines', (tester) async {
+    final container = await pumpSettings(tester);
+    final standard = styleOf(tester, preview).height!;
+    final standardHeight = tester.getSize(find.text(preview)).height;
+
+    await tester.tap(segment('Line spacing', 'Relaxed'));
+    await tester.pumpAndSettle();
+
+    final editor = container.read(editorPreferencesControllerProvider);
+    expect(editor.noteLineSpacing, NoteLineSpacing.relaxed);
+    final repository = container.read(preferencesRepositoryProvider);
+    expect(await repository.getNoteLineSpacing(), 'relaxed');
+    final typography = Theme.of(
+      tester.element(find.text('Font')),
+    ).extension<NoteTypography>()!;
+    expect(typography.lineSpacing, NoteLineSpacing.relaxed);
+    expect(typography.lineHeight, closeTo(standard + 0.3, 0.001));
+    expect(styleOf(tester, preview).height, closeTo(standard + 0.3, 0.001));
+    expect(
+      tester.getSize(find.text(preview)).height,
+      greaterThan(standardHeight),
+    );
+
+    await tester.tap(segment('Line spacing', 'Tight'));
+    await tester.pumpAndSettle();
+    expect(styleOf(tester, preview).height, closeTo(standard - 0.2, 0.001));
+    expect(await repository.getNoteLineSpacing(), 'tight');
+  });
+
+  testWidgets('a custom theme that sets the line spacing greys the picker '
+      'out and says why', (tester) async {
+    final container = await pumpSettings(tester);
+    final standard = styleOf(tester, preview).height!;
+    final themes = container.read(customThemeControllerProvider.notifier);
+
+    await themes.apply('{"light": {}, "lineSpacing": "tight"}');
+    await tester.pumpAndSettle();
+
+    const note =
+        'Set by your custom theme. Take "lineSpacing" out of it to pick here.';
+    expect(find.text(note), findsOneWidget);
+    final picker = tester.widget<SegmentedControl<NoteLineSpacing>>(
+      find.byType(SegmentedControl<NoteLineSpacing>),
+    );
+    expect(picker.value, NoteLineSpacing.tight);
+    expect(picker.onChanged, isNull);
+    expect(styleOf(tester, preview).height, closeTo(standard - 0.2, 0.001));
+
+    await tester.tap(segment('Line spacing', 'Relaxed'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    final editor = container.read(editorPreferencesControllerProvider);
+    expect(editor.noteLineSpacing, NoteLineSpacing.standard);
+
+    await themes.reset();
+    await tester.pumpAndSettle();
+    expect(find.text(note), findsNothing);
+    expect(
+      tester
+          .widget<SegmentedControl<NoteLineSpacing>>(
+            find.byType(SegmentedControl<NoteLineSpacing>),
+          )
+          .onChanged,
+      isNotNull,
+    );
+    expect(styleOf(tester, preview).height, closeTo(standard, 0.001));
   });
 
   testWidgets('Burn deleted notes is on until turned off on this phone', (

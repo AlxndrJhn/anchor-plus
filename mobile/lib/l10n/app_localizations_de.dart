@@ -99,6 +99,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get textSizeLarge => 'Groß';
 
   @override
+  String get lineSpacingTight => 'Eng';
+
+  @override
+  String get lineSpacingRelaxed => 'Weit';
+
+  @override
   String get errorOffline => 'Keine Internetverbindung.';
 
   @override
@@ -694,6 +700,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String customThemeNotALineSpacing(String value) {
+    return 'lineSpacing: $value ist nicht \"tight\", \"default\" oder \"relaxed\"';
+  }
+
+  @override
   String get customThemeNoMode => 'Gib mindestens \"light\" oder \"dark\" an';
 
   @override
@@ -761,6 +772,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsTextSize => 'Textgröße';
+
+  @override
+  String get settingsLineSpacing => 'Zeilenabstand';
+
+  @override
+  String get settingsLineSpacingByTheme =>
+      'Vom eigenen Theme festgelegt. Nimm \"lineSpacing\" dort heraus, um hier zu wählen.';
 
   @override
   String get settingsMoveChecked => 'Erledigte Einträge nach unten schieben';

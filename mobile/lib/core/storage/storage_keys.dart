@@ -31,6 +31,7 @@ class StorageKeys {
   static const foldedChecklistNotes = 'editor_folded_checklist_notes';
   static const noteFont = 'editor_note_face';
   static const noteTextSize = 'editor_note_text_size';
+  static const noteLineSpacing = 'editor_note_line_spacing';
   static const noteZoom = 'editor_note_zoom';
   static const quickActions = 'editor_quick_actions';
   static const hiddenActions = 'editor_hidden_actions';
@@ -73,6 +74,7 @@ class StorageKeys {
     foldedChecklistNotes,
     noteFont,
     noteTextSize,
+    noteLineSpacing,
     noteZoom,
     quickActions,
     hiddenActions,

@@ -38,6 +38,12 @@ class EditorPreferencesController extends _$EditorPreferencesController {
     await repository.setNoteTextSize(textSize.name);
   }
 
+  Future<void> setNoteLineSpacing(NoteLineSpacing lineSpacing) async {
+    state = state.copyWith(noteLineSpacing: lineSpacing);
+    final repository = ref.read(preferencesRepositoryProvider);
+    await repository.setNoteLineSpacing(lineSpacing.name);
+  }
+
   /// Keeps the zoom a pinch on an open note's body ended at.
   Future<void> setNoteZoom(double zoom) async {
     if (zoom == state.noteZoom) return;

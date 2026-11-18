@@ -131,6 +131,7 @@ Future<AppBootstrap> initializeApp({
 
   final savedFont = await preferences.getNoteFont();
   final savedTextSize = await preferences.getNoteTextSize();
+  final savedLineSpacing = await preferences.getNoteLineSpacing();
   final editorPreferences = EditorPreferences(
     sortChecklistItems: await preferences.getSortChecklistItems(),
     burnDeleted: await preferences.getBurnDeleted(),
@@ -141,6 +142,10 @@ Future<AppBootstrap> initializeApp({
     noteTextSize: NoteTextSize.values.firstWhere(
       (textSize) => textSize.name == savedTextSize,
       orElse: () => NoteTextSize.standard,
+    ),
+    noteLineSpacing: NoteLineSpacing.values.firstWhere(
+      (lineSpacing) => lineSpacing.name == savedLineSpacing,
+      orElse: () => NoteLineSpacing.standard,
     ),
     noteZoom: clampNoteZoom(await preferences.getNoteZoom()),
     quickActions: QuickAction.decode(await preferences.getQuickActions()),

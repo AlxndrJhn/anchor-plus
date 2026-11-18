@@ -174,6 +174,7 @@ waits until another style is picked.
 |---|---|
 | `name` | Optional. Shown in Settings and used by "Copy current theme as JSON" |
 | `light`, `dark` | The colours for light and dark mode. At least one is needed; a mode left out is the scheme's own |
+| `lineSpacing` | Optional. `"tight"`, `"default"` or `"relaxed"`: how far apart a note's lines are. On Android it takes the place of Settings › Editor › Line spacing, which is greyed out while the theme sets it. It applies in Lo-fi too |
 | `background` | The page behind everything |
 | `card` | Note cards, menus, dialogs and settings cards; also a plain note's colour |
 | `sidebar` | The sidebar on the web; the drawer on Android |
@@ -192,7 +193,7 @@ Colours are `#rgb`, `#rrggbb` or `#rrggbbaa` (the last two hex digits are
 opacity), in upper or lower case. Any other key, or anything else as a
 colour, is refused with a message naming the key and what is wrong with it
 (`dark.backgroud: unknown key (did you mean "background"?)`), and nothing
-changes until the JSON is fixed. The keys are the fields of the built-in
+changes until the JSON is fixed. The colour keys are the fields of the built-in
 schemes in `design/schemes/schemes.json`; the parsers are
 `web/lib/design/custom-theme.ts` and `mobile/lib/core/theme/custom_theme.dart`.
 

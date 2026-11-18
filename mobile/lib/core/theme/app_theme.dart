@@ -22,6 +22,7 @@ abstract final class AppTheme {
       String,
       AppStyle,
       String?,
+      NoteLineSpacing,
     ),
     ThemeData
   >
@@ -36,8 +37,17 @@ abstract final class AppTheme {
     String scheme = anchorSchemeId,
     AppStyle style = AppStyle.standard,
     CustomTheme? custom,
-  ]) =>
-      _cached(Brightness.light, density, font, textSize, scheme, style, custom);
+    NoteLineSpacing lineSpacing = NoteLineSpacing.standard,
+  ]) => _cached(
+    Brightness.light,
+    density,
+    font,
+    textSize,
+    scheme,
+    style,
+    custom,
+    lineSpacing,
+  );
 
   static ThemeData dark([
     DisplayDensity density = DisplayDensity.standard,
@@ -46,8 +56,17 @@ abstract final class AppTheme {
     String scheme = anchorSchemeId,
     AppStyle style = AppStyle.standard,
     CustomTheme? custom,
-  ]) =>
-      _cached(Brightness.dark, density, font, textSize, scheme, style, custom);
+    NoteLineSpacing lineSpacing = NoteLineSpacing.standard,
+  ]) => _cached(
+    Brightness.dark,
+    density,
+    font,
+    textSize,
+    scheme,
+    style,
+    custom,
+    lineSpacing,
+  );
 
   static ThemeData _cached(
     Brightness brightness,
@@ -57,15 +76,29 @@ abstract final class AppTheme {
     String scheme,
     AppStyle style,
     CustomTheme? custom,
-  ) => _cache.putIfAbsent((
-    brightness,
-    density,
-    font,
-    textSize,
-    scheme,
-    style,
-    custom?.encode(),
-  ), () => _build(brightness, density, font, textSize, scheme, style, custom));
+    NoteLineSpacing lineSpacing,
+  ) => _cache.putIfAbsent(
+    (
+      brightness,
+      density,
+      font,
+      textSize,
+      scheme,
+      style,
+      custom?.encode(),
+      lineSpacing,
+    ),
+    () => _build(
+      brightness,
+      density,
+      font,
+      textSize,
+      scheme,
+      style,
+      custom,
+      lineSpacing,
+    ),
+  );
 
   static ThemeData _build(
     Brightness brightness,
@@ -75,6 +108,7 @@ abstract final class AppTheme {
     String schemeId,
     AppStyle style,
     CustomTheme? customTheme,
+    NoteLineSpacing lineSpacing,
   ) {
     final spacing = AnchorDensity.of(density);
     // Lo-fi draws in its own greys, whatever the scheme or custom theme; null
@@ -211,6 +245,8 @@ abstract final class AppTheme {
         NoteTypography(
           font: font,
           textSize: textSize,
+          // A custom theme's spacing wins, Lo-fi or not.
+          lineSpacing: customTheme?.lineSpacing ?? lineSpacing,
           lineHeight: spacing.noteLineHeight,
           sansFamily: AppTypography.uiFamilyOf(style),
           // Skeuomorphism sets note titles in the serif, as on the web.
