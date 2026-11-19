@@ -5,15 +5,17 @@ name: TestFlight
 # review from App Store Connect). Started by hand: Actions › TestFlight › Run
 # workflow, on main (`gh workflow run testflight.yml --ref main`).
 #
-# Signing is left to Xcode ("automatic", in the cloud): with an App Store
-# Connect API key it registers the app IDs and the app group, makes the
-# distribution certificate and the profiles, and keeps them current, so no
-# certificate or profile is kept in the secrets. That needs a team key with
-# the Admin role (App Store Connect › Users and Access › Integrations), in
-# ASC_ADMIN_KEY_P8 (the .p8 file's text) and ASC_ADMIN_KEY_ID; the issuer is
-# APPLE_API_ISSUER, which the macOS notarization uses too. The app itself must
-# already exist in App Store Connect (My Apps › New App, bundle ID
-# com.alxndrjhn.anchorplus), or the upload is turned away.
+# Signed by hand, not by Xcode's cloud signing (whose login from xcodebuild
+# was turned down with a valid key): the Release builds of the app and the
+# share extension name the "Apple Distribution" certificate and their App
+# Store profiles ("Anchor Plus App Store", "Anchor Plus Share Extension App
+# Store"), which come from the secrets:
+#   IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD  the certificate, as .p12
+#   IOS_PROFILE_APP_BASE64, IOS_PROFILE_SHARE_BASE64  the two profiles
+# The certificate and the profiles run out after a year (next 2027-11-19).
+# The upload uses an App Store Connect team key, ASC_ADMIN_KEY_P8 (the .p8
+# file's text) and ASC_ADMIN_KEY_ID, with the issuer APPLE_API_ISSUER that
+# the macOS notarization uses too.
 
 on:
   workflow_dispatch:
@@ -46,20 +48,51 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Set up the App Store Connect key
+      - name: Set up signing
         env:
+          CERT_P12: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          PROFILE_APP: ${{ secrets.IOS_PROFILE_APP_BASE64 }}
+          PROFILE_SHARE: ${{ secrets.IOS_PROFILE_SHARE_BASE64 }}
           KEY_P8: ${{ secrets.ASC_ADMIN_KEY_P8 }}
           KEY_ID: ${{ secrets.ASC_ADMIN_KEY_ID }}
           ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: |
-          if [ -z "$KEY_P8" ] || [ -z "$KEY_ID" ] || [ -z "$ISSUER" ]; then
-            echo "::error::Set the ASC_ADMIN_KEY_P8, ASC_ADMIN_KEY_ID and APPLE_API_ISSUER secrets (a team key with the Admin role) to sign and upload the app."
-            exit 1
-          fi
-          KEY_PATH="$RUNNER_TEMP/AuthKey_$KEY_ID.p8"
-          printf '%s\n' "$KEY_P8" > "$KEY_PATH"
+          for v in CERT_P12 CERT_PASSWORD PROFILE_APP PROFILE_SHARE KEY_P8 KEY_ID ISSUER; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Set the IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD, IOS_PROFILE_APP_BASE64, IOS_PROFILE_SHARE_BASE64, ASC_ADMIN_KEY_P8, ASC_ADMIN_KEY_ID and APPLE_API_ISSUER secrets to sign and upload the app."
+              exit 1
+            fi
+          done
+
+          # The certificate, in a keychain of its own that codesign may use
+          # without asking.
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 16)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          echo "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/dist.p12"
+          security import "$RUNNER_TEMP/dist.p12" -k "$KEYCHAIN" -P "$CERT_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          rm "$RUNNER_TEMP/dist.p12"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          echo "KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
+
+          # The profiles, where Xcode looks for them (the old place and the
+          # one Xcode 16 moved to).
+          for dir in "$HOME/Library/MobileDevice/Provisioning Profiles" \
+            "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+            mkdir -p "$dir"
+            echo "$PROFILE_APP" | base64 --decode > "$dir/anchor-plus-app.mobileprovision"
+            echo "$PROFILE_SHARE" | base64 --decode > "$dir/anchor-plus-share.mobileprovision"
+          done
+
+          # altool finds the key by its ID in this folder.
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          printf '%s\n' "$KEY_P8" > "$HOME/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8"
           {
-            echo "KEY_PATH=$KEY_PATH"
             echo "KEY_ID=$KEY_ID"
             echo "ISSUER=$ISSUER"
           } >> "$GITHUB_ENV"
@@ -84,15 +117,9 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" \
-            -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER" \
-            DEVELOPMENT_TEAM=QT7HFS4TLY
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN"
 
-      # destination "upload" sends the signed app straight to App Store
-      # Connect instead of writing an .ipa.
-      - name: Sign and upload to App Store Connect
+      - name: Export the .ipa
         run: |
           cat > "$RUNNER_TEMP/ExportOptions.plist" << EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -101,12 +128,19 @@ jobs:
           <dict>
             <key>method</key>
             <string>app-store-connect</string>
-            <key>destination</key>
-            <string>upload</string>
             <key>teamID</key>
             <string>QT7HFS4TLY</string>
             <key>signingStyle</key>
-            <string>automatic</string>
+            <string>manual</string>
+            <key>signingCertificate</key>
+            <string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.alxndrjhn.anchorplus</key>
+              <string>Anchor Plus App Store</string>
+              <key>com.alxndrjhn.anchorplus.ShareExtension</key>
+              <string>Anchor Plus Share Extension App Store</string>
+            </dict>
             <key>uploadSymbols</key>
             <true/>
             <key>manageAppVersionAndBuildNumber</key>
@@ -117,16 +151,21 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
-            -exportPath "$RUNNER_TEMP/export" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" \
-            -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER"
+            -exportPath "$RUNNER_TEMP/export"
+          ls -l "$RUNNER_TEMP/export"
+
+      - name: Upload to App Store Connect
+        run: |
+          xcrun altool --upload-app --type ios \
+            --file "$(ls "$RUNNER_TEMP"/export/*.ipa)" \
+            --apiKey "$KEY_ID" --apiIssuer "$ISSUER"
           {
             echo "## TestFlight"
             echo "Uploaded Anchor+ $VERSION ($BUILD) to App Store Connect. It shows up in TestFlight once Apple has processed it, usually within half an hour."
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Remove the key
+      - name: Remove the key and the keychain
         if: always()
-        run: rm -f "$RUNNER_TEMP"/AuthKey_*.p8
+        run: |
+          rm -rf "$HOME/.appstoreconnect/private_keys"
+          [ -n "$KEYCHAIN" ] && security delete-keychain "$KEYCHAIN" || true
