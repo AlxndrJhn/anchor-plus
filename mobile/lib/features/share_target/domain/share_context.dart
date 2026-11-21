@@ -12,6 +12,7 @@ class ShareContext {
     this.themeMode = ThemeMode.system,
     this.density = DisplayDensity.standard,
     this.colorScheme = anchorSchemeId,
+    this.materialYou = false,
     this.customTheme,
     this.tags = const [],
   });
@@ -23,6 +24,10 @@ class ShareContext {
   final ThemeMode themeMode;
   final DisplayDensity density;
   final String colorScheme;
+
+  /// Whether Material You is on; the sheet reads the wallpaper colours
+  /// itself.
+  final bool materialYou;
   final CustomTheme? customTheme;
 
   /// In name order.
@@ -34,6 +39,7 @@ class ShareContext {
     'theme': themeMode.name,
     'density': density.name,
     'scheme': colorScheme,
+    'materialYou': materialYou,
     'customTheme': customTheme?.encode(),
     'tags': [
       for (final tag in tags)
@@ -56,6 +62,7 @@ class ShareContext {
       colorScheme: scheme is String && schemeById(scheme) != null
           ? scheme
           : anchorSchemeId,
+      materialYou: json['materialYou'] == true,
       customTheme: switch (json['customTheme']) {
         final String stored => CustomTheme.decode(stored),
         _ => null,

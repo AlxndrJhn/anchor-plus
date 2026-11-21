@@ -1114,6 +1114,18 @@ abstract class AppLocalizations {
   /// **'Color scheme'**
   String get settingsColorScheme;
 
+  /// Label of the Android Appearance switch that gives the app Android's own Material 3 design. 'Material You' is Google's name for it; keep it as is.
+  ///
+  /// In en, this message translates to:
+  /// **'Material You'**
+  String get settingsMaterialYou;
+
+  /// Explains the Material You switch: the app takes the phone's wallpaper colours, Material Design shapes and touch ripples, in place of the chosen colour scheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Your wallpaper\'s colors, Material\'s shapes and ripples. Replaces the color scheme.'**
+  String get settingsMaterialYouHelp;
+
   /// Name of the app's own color scheme, listed with Nord, Dracula and others. The app's name.
   ///
   /// In en, this message translates to:

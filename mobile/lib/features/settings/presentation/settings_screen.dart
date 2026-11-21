@@ -231,6 +231,7 @@ class _AppearanceSection extends ConsumerWidget {
     final speed = ref.watch(motionSpeedControllerProvider);
     final scheme = ref.watch(colorSchemeControllerProvider);
     final customTheme = ref.watch(customThemeControllerProvider);
+    final materialYou = ref.watch(materialYouControllerProvider);
     final language = ref.watch(appLanguageControllerProvider);
     final l10n = context.l10n;
     return Section(
@@ -238,6 +239,16 @@ class _AppearanceSection extends ConsumerWidget {
       child: GroupedList(
         children: [
           const _ThemePicker(),
+          // Android's own design, so only on Android.
+          if (!context.isCupertino)
+            SwitchRow(
+              label: l10n.settingsMaterialYou,
+              subtitle: l10n.settingsMaterialYouHelp,
+              value: materialYou != null,
+              onChanged: ref
+                  .read(materialYouControllerProvider.notifier)
+                  .setEnabled,
+            ),
           GroupedListTile(
             icon: LucideIcons.languages,
             label: l10n.settingsLanguage,
@@ -252,9 +263,14 @@ class _AppearanceSection extends ConsumerWidget {
           GroupedListTile(
             icon: LucideIcons.swatchBook,
             label: l10n.settingsColorScheme,
-            value: _SchemeChoice.nameOf(scheme, l10n),
-            showChevron: true,
-            onTap: () => _showSchemePicker(context),
+            // Material You brings its own colours.
+            value: materialYou != null
+                ? l10n.settingsMaterialYou
+                : _SchemeChoice.nameOf(scheme, l10n),
+            showChevron: materialYou == null,
+            onTap: materialYou != null
+                ? null
+                : () => _showSchemePicker(context),
           ),
           GroupedListTile(
             icon: LucideIcons.braces,

@@ -227,6 +227,69 @@ abstract class _$ColorSchemeController extends $Notifier<String> {
   }
 }
 
+/// Material You's colours while it is on, in place of the colour scheme;
+/// null while it is off.
+
+@ProviderFor(MaterialYouController)
+final materialYouControllerProvider = MaterialYouControllerProvider._();
+
+/// Material You's colours while it is on, in place of the colour scheme;
+/// null while it is off.
+final class MaterialYouControllerProvider
+    extends $NotifierProvider<MaterialYouController, MaterialYou?> {
+  /// Material You's colours while it is on, in place of the colour scheme;
+  /// null while it is off.
+  MaterialYouControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'materialYouControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$materialYouControllerHash();
+
+  @$internal
+  @override
+  MaterialYouController create() => MaterialYouController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MaterialYou? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MaterialYou?>(value),
+    );
+  }
+}
+
+String _$materialYouControllerHash() =>
+    r'49196c2fafafd4537ab6e1862cfd4635ee5bd7db';
+
+/// Material You's colours while it is on, in place of the colour scheme;
+/// null while it is off.
+
+abstract class _$MaterialYouController extends $Notifier<MaterialYou?> {
+  MaterialYou? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<MaterialYou?, MaterialYou?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<MaterialYou?, MaterialYou?>,
+              MaterialYou?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// The custom theme pasted in Settings, over the colour scheme; null for none.
 
 @ProviderFor(CustomThemeController)

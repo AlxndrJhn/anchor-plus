@@ -6,6 +6,7 @@ import '../../../core/motion/motion_speed.dart';
 import '../../../core/storage/preferences_repository.dart';
 import '../../../core/theme/custom_theme.dart';
 import '../../../core/theme/display_density.dart';
+import '../../../core/theme/material_you.dart';
 import '../../../core/theme/tokens/app_style.dart';
 
 part 'theme_preferences_controller.g.dart';
@@ -57,6 +58,20 @@ class ColorSchemeController extends _$ColorSchemeController {
     state = scheme;
     final repository = ref.read(preferencesRepositoryProvider);
     await repository.setColorScheme(scheme);
+  }
+}
+
+/// Material You's colours while it is on, in place of the colour scheme;
+/// null while it is off.
+@Riverpod(keepAlive: true)
+class MaterialYouController extends _$MaterialYouController {
+  @override
+  MaterialYou? build() => ref.watch(appBootstrapProvider).materialYou;
+
+  Future<void> setEnabled(bool enabled) async {
+    final repository = ref.read(preferencesRepositoryProvider);
+    await repository.setMaterialYou(enabled);
+    state = enabled ? await MaterialYou.load() : null;
   }
 }
 

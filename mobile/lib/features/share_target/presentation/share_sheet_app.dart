@@ -7,10 +7,10 @@ import 'package:flutter/services.dart';
 import '../../../core/motion/springs.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/context_extensions.dart';
+import '../../../core/theme/material_you.dart';
 import '../../../core/theme/note_typography.dart';
 import '../../../core/theme/style_typography.dart';
 import '../../../core/theme/system_bars.dart';
-import '../../../core/theme/tokens/app_style.dart';
 import '../../../core/widgets/anchor_sheet.dart';
 import '../../../l10n/l10n.dart';
 import '../data/share_inbox.dart';
@@ -27,12 +27,16 @@ Future<void> runShareSheet() async {
   final inbox = await ShareInbox.find();
   final shareContext = await inbox?.readContext() ?? const ShareContext();
   final intake = await channel.load();
+  final materialYou = shareContext.materialYou
+      ? await MaterialYou.load()
+      : null;
   runApp(
     ShareSheetApp(
       channel: channel,
       inbox: inbox,
       shareContext: shareContext,
       intake: intake,
+      materialYou: materialYou,
     ),
   );
 }
@@ -44,12 +48,14 @@ class ShareSheetApp extends StatelessWidget {
     required this.inbox,
     required this.shareContext,
     required this.intake,
+    this.materialYou,
   });
 
   final ShareSheetChannel channel;
   final ShareInbox? inbox;
   final ShareContext shareContext;
   final SharedIntake intake;
+  final MaterialYou? materialYou;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +70,8 @@ class ShareSheetApp extends StatelessWidget {
         NoteTextSize.standard,
         colorScheme,
         customTheme,
+        NoteLineSpacing.standard,
+        materialYou,
       ),
       darkTheme: AppTheme.dark(
         density,
@@ -71,6 +79,8 @@ class ShareSheetApp extends StatelessWidget {
         NoteTextSize.standard,
         colorScheme,
         customTheme,
+        NoteLineSpacing.standard,
+        materialYou,
       ),
       themeMode: shareContext.themeMode,
       themeAnimationStyle: AnimationStyle.noAnimation,
@@ -87,7 +97,7 @@ class ShareSheetApp extends StatelessWidget {
             statusBarIconBrightness: behind.statusBarIconBrightness,
           ),
           child: StyleTypography(
-            style: customTheme?.style ?? ThemeStyle.standard,
+            style: AppTheme.styleOf(customTheme, materialYou),
             child: child!,
           ),
         );

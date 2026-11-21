@@ -173,6 +173,8 @@
   "animationsNormal": "Normalne",
   "animationsFast": "Szybkie",
   "settingsColorScheme": "Schemat kolorów",
+  "settingsMaterialYou": "Material You",
+  "settingsMaterialYouHelp": "Kolory z tapety, kształty i fale Material. Zastępuje schemat kolorów.",
   "colorSchemeAnchor": "Anchor+",
   "settingsCustomTheme": "Motyw własny",
   "settingsCustomThemeOff": "Brak",

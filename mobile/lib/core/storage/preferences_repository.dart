@@ -248,6 +248,14 @@ class PreferencesRepository {
     await _storage.write(key: StorageKeys.colorScheme, value: scheme);
   }
 
+  /// Material You; off unless turned on.
+  Future<bool> getMaterialYou() async =>
+      await _read(StorageKeys.materialYou) == 'true';
+
+  Future<void> setMaterialYou(bool value) async {
+    await _storage.write(key: StorageKeys.materialYou, value: value.toString());
+  }
+
   /// Forgets the old Style setting: a custom theme's `style` does it now.
   Future<void> removeLegacyAppStyle() async {
     await _storage.delete(key: StorageKeys.legacyAppStyle);
