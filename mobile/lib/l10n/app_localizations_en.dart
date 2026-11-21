@@ -607,6 +607,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsColorScheme => 'Color scheme';
 
   @override
+  String get settingsMaterialYou => 'Material You';
+
+  @override
+  String get settingsMaterialYouHelp =>
+      'Your wallpaper\'s colors, Material\'s shapes and ripples. Replaces the color scheme.';
+
+  @override
   String get colorSchemeAnchor => 'Anchor+';
 
   @override

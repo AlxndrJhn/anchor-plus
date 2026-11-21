@@ -8,6 +8,7 @@ import 'package:anchor/core/theme/app_typography.dart';
 import 'package:anchor/core/theme/context_extensions.dart';
 import 'package:anchor/core/theme/custom_theme.dart';
 import 'package:anchor/core/theme/display_density.dart';
+import 'package:anchor/core/theme/material_you.dart';
 import 'package:anchor/core/theme/note_typography.dart';
 import 'package:anchor/core/theme/style_typography.dart';
 import 'package:anchor/core/theme/tokens/anchor_tokens.dart';
@@ -24,6 +25,7 @@ import 'package:anchor/features/settings/presentation/settings_screen.dart';
 import 'package:anchor/features/settings/presentation/theme_preferences_controller.dart';
 import 'package:anchor/features/share_target/domain/share_context.dart';
 import 'package:anchor/features/sync/data/sync_compatibility.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,6 +99,7 @@ class _SettingsApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = ref.watch(colorSchemeControllerProvider);
     final custom = ref.watch(customThemeControllerProvider);
+    final material = ref.watch(materialYouControllerProvider);
     return MaterialApp(
       theme: AppTheme.light(
         DisplayDensity.standard,
@@ -104,10 +107,12 @@ class _SettingsApp extends ConsumerWidget {
         NoteTextSize.standard,
         scheme,
         custom,
+        NoteLineSpacing.standard,
+        material,
       ),
       themeAnimationStyle: AnimationStyle.noAnimation,
       builder: (context, child) => StyleTypography(
-        style: custom?.style ?? ThemeStyle.standard,
+        style: AppTheme.styleOf(custom, material),
         child: child!,
       ),
       home: const SettingsScreen(),
@@ -580,6 +585,52 @@ void main() {
       const storage = FlutterSecureStorage();
       expect(await storage.read(key: StorageKeys.colorScheme), 'gruvbox');
       expect(find.text('Style'), findsNothing);
+    });
+
+    testWidgets('Material You recolours Settings, keeps it, and takes the '
+        'colour scheme’s place until it is off', (tester) async {
+      // A phone without wallpaper colours.
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        DynamicColorPlugin.channel,
+        (_) async => null,
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          DynamicColorPlugin.channel,
+          null,
+        ),
+      );
+      final container = await pumpSettings(tester);
+      final appearance = find.ancestor(
+        of: find.text('Color scheme'),
+        matching: find.byType(GroupedList),
+      );
+
+      await tester.ensureVisible(find.text('Material You'));
+      await tester.tap(find.text('Material You'));
+      await tester.pumpAndSettle();
+      final material = container.read(materialYouControllerProvider);
+      expect(material, MaterialYou.fromSeed());
+      expect(
+        _groupOf(tester, appearance).color,
+        material!.light.surfaceContainer,
+      );
+      // The scheme row names Material You and opens no picker.
+      expect(
+        find.descendant(of: appearance, matching: find.text('Material You')),
+        findsNWidgets(2),
+      );
+      await tester.tap(find.text('Color scheme'));
+      await tester.pumpAndSettle();
+      expect(find.text('Gruvbox'), findsNothing);
+      const storage = FlutterSecureStorage();
+      expect(await storage.read(key: StorageKeys.materialYou), 'true');
+
+      await tester.tap(find.text('Material You').first);
+      await tester.pumpAndSettle();
+      expect(container.read(materialYouControllerProvider), isNull);
+      expect(_groupOf(tester, appearance).color, AnchorColors.light.appSurface);
+      expect(await storage.read(key: StorageKeys.materialYou), 'false');
     });
 
     testWidgets('applies, checks, copies and resets a custom theme', (

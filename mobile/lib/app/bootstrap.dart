@@ -21,6 +21,7 @@ import '../core/storage/preferences_repository.dart';
 import '../core/storage/storage_keys.dart';
 import '../core/theme/custom_theme.dart';
 import '../core/theme/display_density.dart';
+import '../core/theme/material_you.dart';
 import '../core/theme/note_typography.dart';
 import '../core/theme/tokens/app_style.dart';
 import '../features/home_widget/data/home_widget_payload.dart';
@@ -126,6 +127,10 @@ Future<AppBootstrap> initializeApp({
   final colorScheme = schemeById(savedScheme) == null
       ? anchorSchemeId
       : savedScheme!;
+  // Before the first frame, so the app doesn't flash Anchor's colours.
+  final materialYou = await preferences.getMaterialYou()
+      ? await MaterialYou.load()
+      : null;
   unawaited(preferences.removeLegacyAppStyle());
   final customTheme = CustomTheme.decode(await preferences.getCustomTheme());
 
@@ -205,6 +210,7 @@ Future<AppBootstrap> initializeApp({
     motionSpeed: speed,
     appLanguage: language,
     colorScheme: colorScheme,
+    materialYou: materialYou,
     customTheme: customTheme,
     editorPreferences: editorPreferences,
     reminderPreferences: reminderPreferences,

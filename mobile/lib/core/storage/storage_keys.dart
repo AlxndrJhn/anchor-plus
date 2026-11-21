@@ -24,6 +24,7 @@ class StorageKeys {
   static const motionSpeed = 'motion_speed';
   static const appLanguage = 'app_language';
   static const colorScheme = 'color_scheme';
+  static const materialYou = 'material_you';
 
   /// The old Style setting, now part of the custom theme; only deleted.
   static const legacyAppStyle = 'app_style';
@@ -70,6 +71,7 @@ class StorageKeys {
     motionSpeed,
     appLanguage,
     colorScheme,
+    materialYou,
     customTheme,
     sortChecklistItems,
     burnDeleted,

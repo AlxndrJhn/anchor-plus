@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../core/motion/motion_speed.dart';
 import '../core/theme/custom_theme.dart';
 import '../core/theme/display_density.dart';
+import '../core/theme/material_you.dart';
 import '../core/theme/tokens/app_style.dart';
 import '../features/notes/presentation/notes_view_options.dart';
 import '../features/reminders/domain/reminder_preferences.dart';
@@ -19,6 +20,7 @@ class AppBootstrap {
     this.motionSpeed = MotionSpeed.normal,
     this.appLanguage,
     this.colorScheme = anchorSchemeId,
+    this.materialYou,
     this.customTheme,
     this.editorPreferences = const EditorPreferences(),
     this.reminderPreferences = const ReminderPreferences(),
@@ -38,6 +40,10 @@ class AppBootstrap {
 
   /// A colour scheme id: [anchorSchemeId] or one of `appSchemes`.
   final String colorScheme;
+
+  /// Material You's colours, loaded before the first frame; null while it
+  /// is off.
+  final MaterialYou? materialYou;
 
   /// The custom theme over the colour scheme, if one is saved.
   final CustomTheme? customTheme;
