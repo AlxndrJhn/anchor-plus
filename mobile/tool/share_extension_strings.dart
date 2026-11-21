@@ -37,8 +37,9 @@ String shareExtensionStrings(Map<String, Map<String, Object?>> arbs) {
       'comment': ?description,
       'extractionState': 'manual',
       'localizations': {
-        for (final MapEntry(key: locale, value: arb) in arbs.entries)
-          if (arb[key] case final String translated)
+        // Sorted, as Xcode keeps them, whatever order the files list in.
+        for (final locale in arbs.keys.toList()..sort())
+          if (arbs[locale]![key] case final String translated)
             locale: _localization(translated),
       },
     };
