@@ -34,6 +34,10 @@ class DrawerHostState extends State<DrawerHost>
 
   bool _isClosing = false;
 
+  /// Whether the page drag under way started in the system's back-gesture
+  /// strip, so it belongs to Back and leaves the drawer alone.
+  bool _isSystemDrag = false;
+
   bool get isOpen => _drawer.value > 0.5;
 
   /// True while any of the drawer shows, opening or closing.
@@ -55,6 +59,19 @@ class DrawerHostState extends State<DrawerHost>
   void close([double velocity = 0]) {
     _isClosing = true;
     _drawer.springTo(0, velocity: velocity);
+  }
+
+  void _pageDragStart(DragStartDetails details) {
+    final inset = MediaQuery.systemGestureInsetsOf(context).left;
+    _isSystemDrag = details.globalPosition.dx < inset;
+  }
+
+  void _pageDragUpdate(DragUpdateDetails details) {
+    if (!_isSystemDrag) _dragUpdate(details);
+  }
+
+  void _pageDragEnd(DragEndDetails details) {
+    if (!_isSystemDrag && _drawer.value > 0) _dragEnd(details);
   }
 
   void _dragUpdate(DragUpdateDetails details) {
@@ -140,7 +157,26 @@ class DrawerHostState extends State<DrawerHost>
           ],
         );
       },
-      child: PageCoverScope(notifier: _isCovered, child: widget.child),
+      child: PageCoverScope(
+        notifier: _isCovered,
+        // Android keeps the screen edge for Back, so a swipe to the right
+        // anywhere on the page opens the drawer. Wrapping the page lets
+        // anything inside that scrolls sideways take the swipe first. It
+        // stays in the tree when off, so the page keeps its state.
+        child: Builder(
+          builder: (context) {
+            final swipes = widget.canSwipeOpen && !context.isCupertino;
+            return GestureDetector(
+              // Blank parts of the page take the swipe too.
+              behavior: HitTestBehavior.translucent,
+              onHorizontalDragStart: swipes ? _pageDragStart : null,
+              onHorizontalDragUpdate: swipes ? _pageDragUpdate : null,
+              onHorizontalDragEnd: swipes ? _pageDragEnd : null,
+              child: widget.child,
+            );
+          },
+        ),
+      ),
     );
     // Back closes the drawer instead of leaving the page.
     return ValueListenableBuilder<bool>(
