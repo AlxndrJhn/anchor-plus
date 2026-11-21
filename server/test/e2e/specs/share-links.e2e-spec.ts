@@ -62,6 +62,7 @@ describe('share links', () => {
       version: 1,
     });
     expect(opened.body).not.toHaveProperty('userId');
+    expect(opened.headers['cache-control']).toBe('no-store');
 
     await anyone()
       .patch(`/api/shared/${link.token}`)

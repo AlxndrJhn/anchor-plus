@@ -89,6 +89,20 @@ describe('serveWebApp', () => {
     expect(res.headers['cache-control']).toBe('no-cache');
   });
 
+  it("keeps a share link's page out of search engines and referrers", async () => {
+    const res = await request(app.getHttpServer())
+      .get('/s/token-1')
+      .expect(200);
+    expect(res.text).toBe('shared page');
+    expect(res.headers['x-robots-tag']).toBe('noindex, nofollow');
+    expect(res.headers['referrer-policy']).toBe('no-referrer');
+
+    const note = await request(app.getHttpServer())
+      .get('/notes/abc123')
+      .expect(200);
+    expect(note.headers).not.toHaveProperty('x-robots-tag');
+  });
+
   it('lets browsers keep the hashed code for good', async () => {
     const res = await request(app.getHttpServer())
       .get('/_next/static/chunks/app.js')
