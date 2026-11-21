@@ -123,6 +123,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    // The list builds lazily: scroll the preview into being first.
+    await tester.scrollUntilVisible(
+      find.text('Weekend in Lisbon'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await Scrollable.ensureVisible(
       tester.element(find.text('Weekend in Lisbon')),
       alignment: 0.2,
@@ -215,13 +221,13 @@ void main() {
     expect(dividersIn('Font'), findsNWidgets(5));
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 400));
     await tester.pumpAndSettle();
-    // Lines only between Language, Color scheme, Custom theme, Density and
-    // Animations; none under the theme tiles.
-    expect(dividersIn('Density'), findsNWidgets(4));
+    // Lines only between Material You, Language, Color scheme, Custom theme,
+    // Density and Animations; none under the theme tiles.
+    expect(dividersIn('Density'), findsNWidgets(5));
     final themeTiles = tester.getRect(find.text('Light')).bottom;
     for (final line in tester.widgetList(dividersIn('Density'))) {
       final top = tester.getRect(find.byWidget(line)).top;
-      expect(top, greaterThan(tester.getRect(find.text('Language')).top));
+      expect(top, greaterThan(tester.getRect(find.text('Material You')).top));
       expect(top, greaterThan(themeTiles));
     }
   });

@@ -618,6 +618,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsColorScheme => 'Farbschema';
 
   @override
+  String get settingsMaterialYou => 'Material You';
+
+  @override
+  String get settingsMaterialYouHelp =>
+      'Die Farben deines Hintergrundbilds, Materials Formen und Wellen. Ersetzt das Farbschema.';
+
+  @override
   String get colorSchemeAnchor => 'Anchor+';
 
   @override

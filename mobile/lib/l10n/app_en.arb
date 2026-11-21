@@ -842,6 +842,14 @@
   "@settingsColorScheme": {
     "description": "Label of the Appearance setting that picks the app's colors (Anchor, Nord, Dracula and so on)."
   },
+  "settingsMaterialYou": "Material You",
+  "@settingsMaterialYou": {
+    "description": "Label of the Android Appearance switch that gives the app Android's own Material 3 design. 'Material You' is Google's name for it; keep it as is."
+  },
+  "settingsMaterialYouHelp": "Your wallpaper's colors, Material's shapes and ripples. Replaces the color scheme.",
+  "@settingsMaterialYouHelp": {
+    "description": "Explains the Material You switch: the app takes the phone's wallpaper colours, Material Design shapes and touch ripples, in place of the chosen colour scheme."
+  },
   "colorSchemeAnchor": "Anchor+",
   "@colorSchemeAnchor": {
     "description": "Name of the app's own color scheme, listed with Nord, Dracula and others. The app's name."

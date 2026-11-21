@@ -614,6 +614,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingsColorScheme => 'Schemat kolorów';
 
   @override
+  String get settingsMaterialYou => 'Material You';
+
+  @override
+  String get settingsMaterialYouHelp =>
+      'Kolory z tapety, kształty i fale Material. Zastępuje schemat kolorów.';
+
+  @override
   String get colorSchemeAnchor => 'Anchor+';
 
   @override

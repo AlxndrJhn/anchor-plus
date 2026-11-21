@@ -173,6 +173,8 @@
   "animationsNormal": "Normal",
   "animationsFast": "Schnell",
   "settingsColorScheme": "Farbschema",
+  "settingsMaterialYou": "Material You",
+  "settingsMaterialYouHelp": "Die Farben deines Hintergrundbilds, Materials Formen und Wellen. Ersetzt das Farbschema.",
   "colorSchemeAnchor": "Anchor+",
   "settingsCustomTheme": "Eigenes Design",
   "settingsCustomThemeOff": "Keins",
