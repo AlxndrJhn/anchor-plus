@@ -643,6 +643,18 @@ describe('AuthService', () => {
         UnauthorizedException,
       );
     });
+
+    it('signs out all of that person’s sessions when none is kept', async () => {
+      addUser({ id: 'u1' });
+      addUser({ id: 'u2' });
+      addToken('laptop', 'u1');
+      addToken('phone', 'u1');
+      addToken('someone-else', 'u2');
+
+      await service.revokeOtherRefreshTokens('u1', undefined);
+
+      expect([...refreshTokens.keys()]).toEqual(['someone-else']);
+    });
   });
 
   describe('sessions', () => {

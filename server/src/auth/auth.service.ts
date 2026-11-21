@@ -355,10 +355,15 @@ export class AuthService {
     }
   }
 
+  /** Signs out every device but [keepRefreshToken]'s, or all without one. */
   async revokeOtherRefreshTokens(
     userId: string,
-    keepRefreshToken: string,
+    keepRefreshToken?: string,
   ): Promise<void> {
+    if (!keepRefreshToken) {
+      await this.prisma.refreshToken.deleteMany({ where: { userId } });
+      return;
+    }
     const kept = await this.prisma.refreshToken.findUnique({
       where: { token: keepRefreshToken },
     });

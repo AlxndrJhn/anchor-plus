@@ -105,10 +105,12 @@ export class AdminService {
           plan: true,
           storageQuotaMb: true,
           oidcIdentities: { select: { issuer: true } },
+          totpSecret: true,
           createdAt: true,
           updatedAt: true,
           _count: {
             select: {
+              passkeys: true,
               notes: {
                 where: {
                   state: { not: NoteState.deleted },
@@ -126,17 +128,30 @@ export class AdminService {
       users.map((user) => user.id),
     );
     const providerName = await this.providerNamer();
-    const usersWithAuthMethod = users.map(({ oidcIdentities, ...rest }) => {
-      const limitMb = this.storageQuota.limitMb(rest.plan, rest.storageQuotaMb);
-      return {
-        ...rest,
-        ...this.authMethodOf(oidcIdentities, providerName),
-        storage: {
-          usedBytes: usedBytes.get(rest.id) ?? 0,
-          limitBytes: limitMb === null ? null : limitMb * 1024 * 1024,
-        },
-      };
-    });
+    const usersWithAuthMethod = users.map(
+      ({
+        oidcIdentities,
+        totpSecret,
+        _count: { passkeys, ...counts },
+        ...rest
+      }) => {
+        const limitMb = this.storageQuota.limitMb(
+          rest.plan,
+          rest.storageQuotaMb,
+        );
+        return {
+          ...rest,
+          _count: counts,
+          // Never the key itself, only whether there is one.
+          signInSecurity: { authenticator: !!totpSecret, passkeys },
+          ...this.authMethodOf(oidcIdentities, providerName),
+          storage: {
+            usedBytes: usedBytes.get(rest.id) ?? 0,
+            limitBytes: limitMb === null ? null : limitMb * 1024 * 1024,
+          },
+        };
+      },
+    );
 
     return {
       users: usersWithAuthMethod,
@@ -360,6 +375,33 @@ export class AdminService {
         ? 'Password reset successfully'
         : 'Password reset successfully. New password generated.',
     };
+  }
+
+  /**
+   * Removes someone's authenticator app and passkeys, lets their password
+   * sign in again, and signs them out everywhere. With an admin-required
+   * second factor, they set one up again at their next sign-in.
+   */
+  async resetSignInSecurity(id: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id },
+        data: {
+          totpSecret: null,
+          totpLastStep: null,
+          totpRecoveryCodes: [],
+          passwordSignIn: true,
+        },
+      }),
+      this.prisma.passkey.deleteMany({ where: { userId: id } }),
+      this.prisma.refreshToken.deleteMany({ where: { userId: id } }),
+    ]);
   }
 
   async approveUser(id: string) {

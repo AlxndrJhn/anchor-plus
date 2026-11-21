@@ -22,6 +22,8 @@ export interface AdminUser {
   storageQuotaMb?: number | null;
   /** limitBytes null: no limit. */
   storage?: { usedBytes: number; limitBytes: number | null };
+  /** What it signs in with besides a password or single sign-on. */
+  signInSecurity?: { authenticator: boolean; passkeys: number };
   createdAt: string;
   updatedAt: string;
   _count?: {

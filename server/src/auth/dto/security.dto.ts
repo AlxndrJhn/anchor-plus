@@ -19,6 +19,13 @@ export class TwoStepCodeDto {
   code: string;
 }
 
+export class EnableTwoStepDto extends TwoStepCodeDto {
+  // The session turning it on stays signed in; every other one is signed out.
+  @IsOptional()
+  @IsString()
+  refreshToken?: string;
+}
+
 export class PasswordSignInDto {
   @IsBoolean()
   enabled: boolean;

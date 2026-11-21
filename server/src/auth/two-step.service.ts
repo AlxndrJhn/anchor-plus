@@ -1,10 +1,15 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
+  Logger,
+  OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { AuthConfig } from '../config/configuration';
 import { PrismaService } from '../prisma/prisma.service';
 import { AttemptLimiter } from '../common/utils/attempt-limiter';
 import {
@@ -15,6 +20,7 @@ import {
   SECURITY_SETUP_VALIDITY_MS,
 } from './constants/auth.constants';
 import { generateTotpSecret, totpUri, verifyTotp } from './utils/totp';
+import { SecretBox } from './utils/secret-box';
 
 /** What sign-in answers when the password was right but a code is missing. */
 export const TWO_STEP_REQUIRED = 'two_step_required';
@@ -38,7 +44,8 @@ function newRecoveryCodes() {
  * code from the app, or one of the recovery codes given when it was set up.
  */
 @Injectable()
-export class TwoStepService {
+export class TwoStepService implements OnModuleInit {
+  private readonly logger = new Logger(TwoStepService.name);
   private readonly failedCodes = new AttemptLimiter(
     MAX_FAILED_GUESSES,
     FAILED_GUESS_WINDOW_MS,
@@ -49,7 +56,36 @@ export class TwoStepService {
     { secret: string; expiresAt: number }
   >();
 
-  constructor(private prisma: PrismaService) {}
+  // The app's key is stored sealed, so a database copy alone makes no codes.
+  private readonly box: SecretBox;
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(AuthConfig.KEY) authConfig: ConfigType<typeof AuthConfig>,
+  ) {
+    this.box = new SecretBox(authConfig.jwtSecret, 'totp');
+  }
+
+  /** Seals the keys stored before they were sealed. */
+  async onModuleInit() {
+    const users = await this.prisma.user.findMany({
+      where: {
+        totpSecret: { not: null },
+        NOT: { totpSecret: { startsWith: 'v1:' } },
+      },
+      select: { id: true, totpSecret: true },
+    });
+    for (const { id, totpSecret } of users) {
+      if (!totpSecret) continue;
+      // Only if it wasn't changed meanwhile.
+      await this.prisma.user.updateMany({
+        where: { id, totpSecret },
+        data: { totpSecret: this.box.seal(totpSecret) },
+      });
+    }
+    if (users.length)
+      this.logger.log(`Sealed ${users.length} authenticator app key(s)`);
+  }
 
   async start(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -90,7 +126,7 @@ export class TwoStepService {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        totpSecret: pending.secret,
+        totpSecret: this.box.seal(pending.secret),
         totpLastStep: step,
         totpRecoveryCodes: hashes,
       },
@@ -168,7 +204,10 @@ export class TwoStepService {
     });
     if (!user?.totpSecret) throw new BadRequestException('Two-step is off');
 
-    const step = verifyTotp(user.totpSecret, code, user.totpLastStep);
+    // Unreadable after JWT_SECRET changed: only recovery codes work then.
+    const secret = this.box.open(user.totpSecret);
+    const step =
+      secret === null ? null : verifyTotp(secret, code, user.totpLastStep);
     if (step !== null) {
       // Only if no other request used this step meanwhile.
       const { count } = await this.prisma.user.updateMany({
