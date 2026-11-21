@@ -11,6 +11,8 @@
 			<string>en</string>
 			<string>de</string>
 			<string>pl</string>
+			<string>zh-Hans</string>
+			<string>zh-Hant</string>
 		</array>
 		<key>CFBundleDisplayName</key>
 		<string>Anchor Notes</string>

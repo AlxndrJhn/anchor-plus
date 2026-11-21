@@ -97,10 +97,13 @@ List<({String form, String text})> _branches(String body) {
   return branches;
 }
 
+/// The ARB files in [folder] by Apple language tag: app_zh_Hant.arb is
+/// "zh-Hant", and app_zh.arb, Simplified Chinese, is "zh-Hans".
 Map<String, Map<String, Object?>> readArbs(Directory folder) => {
   for (final file in folder.listSync().whereType<File>())
     if (RegExp(r'app_(\w+)\.arb$').firstMatch(file.path) case final match?)
-      match[1]!: jsonDecode(file.readAsStringSync()) as Map<String, Object?>,
+      (match[1] == 'zh' ? 'zh-Hans' : match[1]!.replaceAll('_', '-')):
+          jsonDecode(file.readAsStringSync()) as Map<String, Object?>,
 };
 
 void main() {
