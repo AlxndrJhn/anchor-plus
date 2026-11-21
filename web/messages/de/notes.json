@@ -61,6 +61,7 @@
     "masonry": "Kacheln",
     "grid": "Raster",
     "list": "Liste",
+    "columns": "Spalten",
     "sortBy": "Sortieren nach",
     "order": "Reihenfolge",
     "picturesOnCards": "Bilder auf Karten",
@@ -309,7 +310,17 @@
     "freeze": "Einfrieren",
     "print": "Drucken",
     "unarchive": "Aus dem Archiv holen",
-    "archive": "Archivieren"
+    "archive": "Archivieren",
+    "notesTagged": "{count, plural, one {# Notiz} other {# Notizen}} mit #{name} getaggt",
+    "couldNotTag": "{count, plural, one {Notiz konnte} other {Notizen konnten}} nicht getaggt werden",
+    "noNoteOpen": "Keine Notiz geöffnet",
+    "noNoteOpenHelp": "Wähle eine Notiz aus der Liste oder drücke C für eine neue.",
+    "notesSelected": "{count, plural, one {# Notiz} other {# Notizen}} ausgewählt",
+    "selectNotes": "Notizen auswählen",
+    "selectNotesHelp": "Klicke auf den Kreis einer Notiz oder klicke sie mit {key} an. Mit Umschalt wählst du einen Bereich.",
+    "andMore": "{titles} und {count} weitere",
+    "untitled": "Ohne Titel",
+    "notesList": "Notizen"
   },
   "archivePage": {
     "unarchived": "{count, plural, one {Notiz aus dem Archiv geholt} other {# Notizen aus dem Archiv geholt}}",

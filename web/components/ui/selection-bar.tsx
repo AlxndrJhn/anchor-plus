@@ -145,7 +145,10 @@ export function SelectionBar({
             }}
           >
             {action.icon}
-            <span className="max-md:hidden">{action.label}</span>
+            {/* Icons only where the bar is narrow: phones, and the note pane in columns. */}
+            <span className="max-md:hidden @max-4xl/pane:hidden">
+              {action.label}
+            </span>
           </button>
         </Tip>
       ))}

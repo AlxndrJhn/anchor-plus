@@ -40,7 +40,7 @@ export function NoteListActions({
       />
       <FilterMenu list={list} showTags={showTagFilter} />
       <ViewOptions
-        layout={list.layout}
+        layout={list.viewMode}
         sortBy={list.sortBy}
         sortOrder={list.sortOrder}
         onLayout={list.setLayout}

@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 import { AppPage, Fab, PageTitle } from "@/components/layout/app-page";
@@ -34,14 +34,17 @@ import { SelectionBar } from "@/components/ui/selection-bar";
 import { toast } from "@/components/ui/toast";
 import { Tip } from "@/components/ui/tooltip";
 import {
+  bulkAddTagsToNotes,
   bulkArchiveNotes,
   bulkDeleteNotes,
   bulkPinNotes,
   getNotes,
   restoreNote,
+  saveNote,
   setNotePosition,
   unarchiveNote,
 } from "@/features/notes/api";
+import { type DropTarget, noteHref } from "@/features/notes/columns";
 import { BulkColorPicker } from "@/features/notes/components/bulk-color-picker";
 import { BulkTagPicker } from "@/features/notes/components/bulk-tag-picker";
 import { BulkLockDialog } from "@/features/notes/components/lock/bulk-lock-dialog";
@@ -63,6 +66,7 @@ import {
 import { useNoteList } from "@/features/notes/hooks/use-note-list";
 import { useRefreshNotes } from "@/features/notes/hooks/use-refresh-notes";
 import { matchesFilters } from "@/features/notes/note-filters";
+import { NotePaneHidden } from "@/features/notes/note-pane";
 import { printNoteList } from "@/features/notes/print";
 import { positionBetween } from "@/features/notes/sort";
 import type { Note } from "@/features/notes/types";
@@ -73,6 +77,7 @@ import { eachLimited } from "@/lib/each";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { useShortcuts } from "@/lib/hooks/use-shortcuts";
 import { rememberNewNoteButton } from "@/lib/morph";
+import { isMac } from "@/lib/platform";
 
 const NO_NOTES: Note[] = [];
 const NO_PICKS = new Set<string>();
@@ -121,17 +126,34 @@ const UNDOABLE_ACTIONS = {
 
 type NoteActionKind = keyof typeof UNDOABLE_ACTIONS | "trash";
 
-export default function NotesPage() {
-  const tagId = useSearchParams().get("tagId");
-  // Next keeps the page mounted when only the tag changes.
-  return <NotesView key={tagId ?? ""} tagId={tagId} />;
-}
+const openNoteId = (pathname: string) => {
+  const id = pathname.startsWith("/notes/")
+    ? decodeURIComponent(pathname.slice("/notes/".length))
+    : null;
+  return id && id !== "new" ? id : null;
+};
 
-function NotesView({ tagId }: { tagId: string | null }) {
+/**
+ * The notes of one tag, or all of them. In columns, `openNote` is the page
+ * beside the list: the open note, or nothing yet.
+ */
+export function NotesView({
+  tagId,
+  openNote,
+}: {
+  tagId: string | null;
+  openNote?: React.ReactNode;
+}) {
   const t = useTranslations("notes.notesPage");
   const tb = useTranslations("notes.bulkDelete");
   const tc = useTranslations("common");
+  const isColumns = openNote !== undefined;
   const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const openId = isColumns ? openNoteId(pathname) : null;
+  const listHref = tagId
+    ? `/notes?tagId=${encodeURIComponent(tagId)}`
+    : "/notes";
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const refresh = useRefreshNotes();
@@ -300,6 +322,8 @@ function NotesView({ tagId }: { tagId: string | null }) {
         refresh();
       };
       if (kind === "trash") {
+        // The open note went to the trash: close it.
+        if (openId && ids.includes(openId)) router.replace(listHref);
         const ownedIds = context?.ownedIds ?? [];
         toast.success(
           tb("deleted", {
@@ -347,6 +371,80 @@ function NotesView({ tagId }: { tagId: string | null }) {
     ).length;
     if (sharedCount) setConfirmRemove({ ids, sharedCount });
     else noteAction.mutate({ kind: "trash", ids });
+  };
+
+  // The first Ctrl-click beside an open note picks that note too.
+  const { picking, onPick: pick, shown } = list;
+  const onPick = React.useCallback(
+    (id: string, range: boolean) => {
+      if (
+        !picking &&
+        openId &&
+        openId !== id &&
+        shown.some((n) => n.id === openId)
+      )
+        pick(openId, false);
+      pick(id, range);
+    },
+    [picking, pick, shown, openId],
+  );
+
+  const tagNotes = useMutation({
+    mutationFn: async ({ tagId, ids }: { tagId: string; ids: string[] }) => {
+      await bulkAddTagsToNotes(ids, [tagId]);
+    },
+    onSuccess: (_, { tagId, ids }) => {
+      refresh();
+      list.stopPicking();
+      const before = new Map(
+        list.shown.map((n) => [n.id, n.tagIds ?? []] as const),
+      );
+      toast.success(
+        t("notesTagged", {
+          count: ids.length,
+          name: tagMap.get(tagId)?.name ?? "",
+        }),
+        {
+          undo: async () => {
+            try {
+              await eachLimited(ids, async (id) => {
+                const result = await saveNote(id, {
+                  tagIds: before.get(id) ?? [],
+                });
+                if (result.status !== "saved") throw new Error("not saved");
+              });
+            } catch {
+              toast.error(tc("couldNotUndo"));
+            }
+            refresh();
+          },
+        },
+      );
+    },
+    onError: (_, variables) =>
+      toast.error(t("couldNotTag", { count: variables.ids.length }), {
+        retry: () => tagNotes.mutate(variables),
+      }),
+  });
+
+  // Columns: cards let go on a tag, Archive or Trash in the sidebar.
+  const dropNotes = (ids: string[], target: DropTarget) => {
+    const dropped = list.shown.filter((n) => ids.includes(n.id));
+    if (target.kind === "trash") return deleteNotes(dropped);
+    if (target.kind === "archive") {
+      const toArchive = dropped.filter((n) => !n.isArchived).map((n) => n.id);
+      if (toArchive.length)
+        noteAction.mutate({ kind: "archive", ids: toArchive });
+      return;
+    }
+    const untagged = dropped.filter(
+      (n) => !(n.tagIds ?? []).includes(target.tagId),
+    );
+    if (untagged.length)
+      tagNotes.mutate({
+        tagId: target.tagId,
+        ids: untagged.map((n) => n.id),
+      });
   };
 
   // The selection bar's keys, for the focused card when nothing is selected.
@@ -402,7 +500,8 @@ function NotesView({ tagId }: { tagId: string | null }) {
   const clearSearch = () => list.setQuery("");
   useShortcuts(
     { Escape: list.query ? clearSearch : leaveTag },
-    (!!list.query || !!tagId) && !list.picking,
+    // A note open beside the list (columns) has Esc for itself.
+    (!!list.query || (!!tagId && !openId)) && !list.picking,
   );
   const noNotes =
     !isLoading &&
@@ -467,259 +566,294 @@ function NotesView({ tagId }: { tagId: string | null }) {
 
   const removeCount = confirmRemove?.ids.length ?? 0;
   const removeSharedCount = confirmRemove?.sharedCount ?? 0;
+  const page = (
+    <AppPage
+      scrollKey={`notes:${tagId ?? ""}`}
+      title={title}
+      actions={
+        !noNotes &&
+        !loadFailed && (
+          <NoteListActions
+            list={list}
+            placeholder={
+              tag ? t("searchTag", { name: tag.name }) : t("searchNotes")
+            }
+            autoFocus={searchParams.has("search")}
+            showTagFilter={!tagId}
+            onSearchFocus={archived.loadForSearch}
+          />
+        )
+      }
+    >
+      <NotesBoardSkeleton
+        loading={
+          isLoading ||
+          (isArchiveLoading &&
+            (list.isSearching ? !visible.length : !notes.length))
+        }
+      />
+      {loadFailed && (
+        <LoadFailedState
+          title={t("couldNotLoad")}
+          onRetry={() => refetch()}
+          isRetrying={isFetching}
+        />
+      )}
+      {noNotes &&
+        (tag ? (
+          <EmptyState
+            illustration="notes"
+            title={t("noNotesTagged", { name: tag.name })}
+            action={newNoteButton}
+          >
+            {t("noNotesTaggedHelp")}
+          </EmptyState>
+        ) : (
+          <EmptyState
+            illustration="notes"
+            title={t("noNotesYet")}
+            action={newNoteButton}
+          >
+            {t("noNotesYetHelp")}
+          </EmptyState>
+        ))}
+      {noResults && <NoSearchResults list={list} />}
+      {(visible.length > 0 || (hasArchivedSection && !isLoading)) && (
+        <NotesBoard
+          searchTerm={list.term || undefined}
+          dateLabel={list.sortBy === "size" ? storageSizeLabel : undefined}
+          onReorder={
+            list.sortBy === "updatedAt" &&
+            list.sortOrder === "desc" &&
+            !list.searching &&
+            !list.picking
+              ? reorderNote
+              : undefined
+          }
+          ref={list.boardRef}
+          layout={list.layout}
+          picking={list.picking}
+          picked={list.picked}
+          onPick={onPick}
+          onShare={setSharingNote}
+          onTogglePin={togglePin}
+          onCardKey={onCardKey}
+          noteHref={isColumns ? (id) => noteHref(id, tagId) : undefined}
+          openId={openId}
+          onDropOut={isColumns ? dropNotes : undefined}
+          groups={[
+            ...(pinned.length
+              ? [
+                  {
+                    key: "pinned",
+                    label: t("pinned"),
+                    icon: <Pin aria-hidden />,
+                    notes: pinned,
+                  },
+                ]
+              : []),
+            ...(others.length
+              ? [
+                  {
+                    key: "others",
+                    label: pinned.length ? t("others") : undefined,
+                    notes: others,
+                  },
+                ]
+              : []),
+            ...(hasArchivedSection
+              ? [
+                  {
+                    key: "archived",
+                    label: t("archived"),
+                    icon: <Archive aria-hidden />,
+                    notes: list.archived,
+                    isFixed: true,
+                    fold: list.isArchivedFoldable
+                      ? {
+                          isOpen: list.isArchivedOpen,
+                          onToggle: () => {
+                            list.prepareCardMotion();
+                            archived.toggleFold();
+                          },
+                        }
+                      : undefined,
+                    fallback: archiveFailed ? (
+                      <LoadFailedRow
+                        message={t("couldNotLoadArchived")}
+                        onRetry={() => archived.query.refetch()}
+                        isRetrying={archived.query.isFetching}
+                      />
+                    ) : undefined,
+                  },
+                ]
+              : []),
+          ]}
+        />
+      )}
+      {pictureMatches.length > 0 && !list.picking && (
+        <NotesBoard
+          layout={list.layout}
+          picking={false}
+          picked={NO_PICKS}
+          onShare={setSharingNote}
+          onTogglePin={togglePin}
+          onCardKey={onCardKey}
+          groups={[
+            {
+              key: "pictures",
+              label: t("picturesMayMatch"),
+              icon: <Images aria-hidden />,
+              notes: pictureMatches,
+            },
+          ]}
+        />
+      )}
+    </AppPage>
+  );
+  const fab = !list.picking && (
+    <Fab label={t("newNote")} asChild>
+      <Link
+        href={newNote}
+        data-new-note="fab"
+        onClick={(e) => rememberNewNoteButton(e.currentTarget)}
+      >
+        <Plus aria-hidden />
+      </Link>
+    </Fab>
+  );
+  const selectionBar = (
+    <SelectionBar
+      open={list.picking}
+      count={chosen.length}
+      total={list.shown.length}
+      onToggleAll={list.toggleAll}
+      onClose={list.stopPicking}
+      actions={[
+        {
+          key: "tag",
+          label: t("tag"),
+          icon: <TagIcon aria-hidden />,
+          onClick: (button) =>
+            setTagAnchor((current) => (current ? null : button)),
+        },
+        {
+          key: "color",
+          label: t("colour"),
+          icon: <Palette aria-hidden />,
+          onClick: (button) =>
+            setColorAnchor((current) => (current ? null : button)),
+        },
+        allPinned
+          ? {
+              key: "unpin",
+              label: t("unpin"),
+              icon: <PinOff aria-hidden />,
+              keys: ["f"],
+              onClick: () =>
+                noteAction.mutate({
+                  kind: "unpin",
+                  ids: chosen.map((n) => n.id),
+                }),
+            }
+          : {
+              key: "pin",
+              label: t("pin"),
+              icon: <Pin aria-hidden />,
+              keys: ["f"],
+              onClick: () =>
+                noteAction.mutate({
+                  kind: "pin",
+                  ids: chosen.filter((n) => !n.isPinned).map((n) => n.id),
+                }),
+            },
+        {
+          key: "lock",
+          label: t("lock"),
+          icon: <Lock aria-hidden />,
+          onClick: () => setLocking(true),
+        },
+        ...(ownChosen.length
+          ? [
+              {
+                key: "freeze",
+                label: allFrozen ? t("unfreeze") : t("freeze"),
+                icon: <Snowflake aria-hidden />,
+                onClick: freezeChosen,
+              },
+            ]
+          : []),
+        {
+          key: "print",
+          label: t("print"),
+          icon: <Printer aria-hidden />,
+          onClick: () => printNoteList(chosen),
+        },
+        allArchived
+          ? {
+              key: "unarchive",
+              label: t("unarchive"),
+              icon: <ArchiveRestore aria-hidden />,
+              keys: ["e"],
+              onClick: () =>
+                noteAction.mutate({
+                  kind: "unarchive",
+                  ids: chosen.map((n) => n.id),
+                }),
+            }
+          : {
+              key: "archive",
+              label: t("archive"),
+              icon: <Archive aria-hidden />,
+              keys: ["e"],
+              onClick: () =>
+                noteAction.mutate({
+                  kind: "archive",
+                  ids: chosen.filter((n) => !n.isArchived).map((n) => n.id),
+                }),
+            },
+        {
+          key: "delete",
+          label: tc("delete"),
+          icon: <Trash2 aria-hidden />,
+          onClick: () => deleteNotes(chosen),
+          keys: ["Delete"],
+        },
+      ]}
+    />
+  );
+
   return (
     <>
-      <AppPage
-        scrollKey={`notes:${tagId ?? ""}`}
-        title={title}
-        actions={
-          !noNotes &&
-          !loadFailed && (
-            <NoteListActions
-              list={list}
-              placeholder={
-                tag ? t("searchTag", { name: tag.name }) : t("searchNotes")
-              }
-              autoFocus={searchParams.has("search")}
-              showTagFilter={!tagId}
-              onSearchFocus={archived.loadForSearch}
-            />
-          )
-        }
-      >
-        <NotesBoardSkeleton
-          loading={
-            isLoading ||
-            (isArchiveLoading &&
-              (list.isSearching ? !visible.length : !notes.length))
-          }
-        />
-        {loadFailed && (
-          <LoadFailedState
-            title={t("couldNotLoad")}
-            onRetry={() => refetch()}
-            isRetrying={isFetching}
-          />
-        )}
-        {noNotes &&
-          (tag ? (
-            <EmptyState
-              illustration="notes"
-              title={t("noNotesTagged", { name: tag.name })}
-              action={newNoteButton}
-            >
-              {t("noNotesTaggedHelp")}
-            </EmptyState>
-          ) : (
-            <EmptyState
-              illustration="notes"
-              title={t("noNotesYet")}
-              action={newNoteButton}
-            >
-              {t("noNotesYetHelp")}
-            </EmptyState>
-          ))}
-        {noResults && <NoSearchResults list={list} />}
-        {(visible.length > 0 || (hasArchivedSection && !isLoading)) && (
-          <NotesBoard
-            searchTerm={list.term || undefined}
-            dateLabel={list.sortBy === "size" ? storageSizeLabel : undefined}
-            onReorder={
-              list.sortBy === "updatedAt" &&
-              list.sortOrder === "desc" &&
-              !list.searching &&
-              !list.picking
-                ? reorderNote
-                : undefined
-            }
-            ref={list.boardRef}
-            layout={list.layout}
-            picking={list.picking}
-            picked={list.picked}
-            onPick={list.onPick}
-            onShare={setSharingNote}
-            onTogglePin={togglePin}
-            onCardKey={onCardKey}
-            groups={[
-              ...(pinned.length
-                ? [
-                    {
-                      key: "pinned",
-                      label: t("pinned"),
-                      icon: <Pin aria-hidden />,
-                      notes: pinned,
-                    },
-                  ]
-                : []),
-              ...(others.length
-                ? [
-                    {
-                      key: "others",
-                      label: pinned.length ? t("others") : undefined,
-                      notes: others,
-                    },
-                  ]
-                : []),
-              ...(hasArchivedSection
-                ? [
-                    {
-                      key: "archived",
-                      label: t("archived"),
-                      icon: <Archive aria-hidden />,
-                      notes: list.archived,
-                      isFixed: true,
-                      fold: list.isArchivedFoldable
-                        ? {
-                            isOpen: list.isArchivedOpen,
-                            onToggle: () => {
-                              list.prepareCardMotion();
-                              archived.toggleFold();
-                            },
-                          }
-                        : undefined,
-                      fallback: archiveFailed ? (
-                        <LoadFailedRow
-                          message={t("couldNotLoadArchived")}
-                          onRetry={() => archived.query.refetch()}
-                          isRetrying={archived.query.isFetching}
-                        />
-                      ) : undefined,
-                    },
-                  ]
-                : []),
-            ]}
-          />
-        )}
-        {pictureMatches.length > 0 && !list.picking && (
-          <NotesBoard
-            layout={list.layout}
-            picking={false}
-            picked={NO_PICKS}
-            onShare={setSharingNote}
-            onTogglePin={togglePin}
-            onCardKey={onCardKey}
-            groups={[
-              {
-                key: "pictures",
-                label: t("picturesMayMatch"),
-                icon: <Images aria-hidden />,
-                notes: pictureMatches,
-              },
-            ]}
-          />
-        )}
-      </AppPage>
-
-      {!list.picking && (
-        <Fab label={t("newNote")} asChild>
-          <Link
-            href={newNote}
-            data-new-note="fab"
-            onClick={(e) => rememberNewNoteButton(e.currentTarget)}
+      {isColumns ? (
+        <div data-columns className="flex min-h-0 min-w-0 flex-1">
+          <section
+            aria-label={t("notesList")}
+            className="notes-pane flex w-84 shrink-0 flex-col border-divider border-r"
           >
-            <Plus aria-hidden />
-          </Link>
-        </Fab>
+            {page}
+          </section>
+          <div className="@container/pane relative flex min-w-0 flex-1 flex-col">
+            {/* Stays mounted while picking, so Esc brings the note back. */}
+            <div
+              hidden={list.picking}
+              className="absolute inset-0 flex flex-col"
+            >
+              <NotePaneHidden.Provider value={list.picking}>
+                {openNote}
+              </NotePaneHidden.Provider>
+            </div>
+            {list.picking && <PickedSummary notes={chosen} />}
+            {selectionBar}
+          </div>
+        </div>
+      ) : (
+        <>
+          {page}
+          {fab}
+          {selectionBar}
+        </>
       )}
-
-      <SelectionBar
-        open={list.picking}
-        count={chosen.length}
-        total={list.shown.length}
-        onToggleAll={list.toggleAll}
-        onClose={list.stopPicking}
-        actions={[
-          {
-            key: "tag",
-            label: t("tag"),
-            icon: <TagIcon aria-hidden />,
-            onClick: (button) =>
-              setTagAnchor((current) => (current ? null : button)),
-          },
-          {
-            key: "color",
-            label: t("colour"),
-            icon: <Palette aria-hidden />,
-            onClick: (button) =>
-              setColorAnchor((current) => (current ? null : button)),
-          },
-          allPinned
-            ? {
-                key: "unpin",
-                label: t("unpin"),
-                icon: <PinOff aria-hidden />,
-                keys: ["f"],
-                onClick: () =>
-                  noteAction.mutate({
-                    kind: "unpin",
-                    ids: chosen.map((n) => n.id),
-                  }),
-              }
-            : {
-                key: "pin",
-                label: t("pin"),
-                icon: <Pin aria-hidden />,
-                keys: ["f"],
-                onClick: () =>
-                  noteAction.mutate({
-                    kind: "pin",
-                    ids: chosen.filter((n) => !n.isPinned).map((n) => n.id),
-                  }),
-              },
-          {
-            key: "lock",
-            label: t("lock"),
-            icon: <Lock aria-hidden />,
-            onClick: () => setLocking(true),
-          },
-          ...(ownChosen.length
-            ? [
-                {
-                  key: "freeze",
-                  label: allFrozen ? t("unfreeze") : t("freeze"),
-                  icon: <Snowflake aria-hidden />,
-                  onClick: freezeChosen,
-                },
-              ]
-            : []),
-          {
-            key: "print",
-            label: t("print"),
-            icon: <Printer aria-hidden />,
-            onClick: () => printNoteList(chosen),
-          },
-          allArchived
-            ? {
-                key: "unarchive",
-                label: t("unarchive"),
-                icon: <ArchiveRestore aria-hidden />,
-                keys: ["e"],
-                onClick: () =>
-                  noteAction.mutate({
-                    kind: "unarchive",
-                    ids: chosen.map((n) => n.id),
-                  }),
-              }
-            : {
-                key: "archive",
-                label: t("archive"),
-                icon: <Archive aria-hidden />,
-                keys: ["e"],
-                onClick: () =>
-                  noteAction.mutate({
-                    kind: "archive",
-                    ids: chosen.filter((n) => !n.isArchived).map((n) => n.id),
-                  }),
-              },
-          {
-            key: "delete",
-            label: tc("delete"),
-            icon: <Trash2 aria-hidden />,
-            onClick: () => deleteNotes(chosen),
-            keys: ["Delete"],
-          },
-        ]}
-      />
 
       <ConfirmationDialog
         open={!!confirmRemove}
@@ -764,5 +898,44 @@ function NotesView({ tagId }: { tagId: string | null }) {
         />
       )}
     </>
+  );
+}
+
+function PickedSummary({ notes }: { notes: Note[] }) {
+  const t = useTranslations("notes.notesPage");
+  const titles = notes.map((note) => note.title.trim() || t("untitled"));
+  const named = titles.slice(0, 3).join(", ");
+  return (
+    <div className="grid flex-1 place-content-center justify-items-center gap-2 px-6 pb-24 text-center">
+      <div aria-hidden className="mb-4 grid w-72 *:col-start-1 *:row-start-1">
+        {titles
+          .slice(0, 3)
+          .reverse()
+          .map((title, i, shown) => (
+            <div
+              key={`${i}-${title}`}
+              style={{
+                translate: `0 ${(shown.length - 1 - i) * -10}px`,
+                scale: 1 - (shown.length - 1 - i) * 0.05,
+              }}
+              className="truncate rounded-card bg-card px-4.5 py-4 text-left font-semibold text-card-title shadow-[inset_0_0_0_1px_var(--border)]"
+            >
+              {title}
+            </div>
+          ))}
+      </div>
+      <h2 className="m-0 text-heading">
+        {notes.length
+          ? t("notesSelected", { count: notes.length })
+          : t("selectNotes")}
+      </h2>
+      <p className="m-0 max-w-90 text-muted-foreground text-ui">
+        {notes.length
+          ? notes.length > 3
+            ? t("andMore", { titles: named, count: notes.length - 3 })
+            : named
+          : t("selectNotesHelp", { key: isMac() ? "⌘" : "Ctrl" })}
+      </p>
+    </div>
   );
 }
