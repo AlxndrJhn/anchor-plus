@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { getAccessToken, useAuthStore } from "@/features/auth";
 import { receiveLiveSignal } from "@/features/notes/live-hub";
+import { ORDER_SAVE_KEY } from "@/features/notes/order-saves";
 import { refreshAccessToken } from "@/lib/api/client";
 import { connectSyncEvents } from "./events";
 
@@ -28,7 +29,16 @@ export function useSync(): void {
     if (!isAuthenticated) return;
 
     const pull = () => {
+      // While a new order is on its way, notes and tags wait: pulled now,
+      // they'd snap back to the old order. The last save pulls them.
+      const isSavingOrder =
+        queryClient.isMutating({ mutationKey: ORDER_SAVE_KEY }) > 0;
       for (const queryKey of syncedQueryKeys) {
+        if (
+          isSavingOrder &&
+          (queryKey[0] === "notes" || queryKey[0] === "tags")
+        )
+          continue;
         void queryClient.invalidateQueries({ queryKey });
       }
     };

@@ -11,7 +11,7 @@ export interface Tag {
   };
 }
 
-export type TagLabel = Pick<Tag, "id" | "name" | "color">;
+export type TagLabel = Pick<Tag, "id" | "name" | "color" | "position">;
 
 export interface CreateTagDto {
   name: string;

@@ -4,6 +4,8 @@ import * as MenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
+  ArrowDownAZ,
+  ArrowUpDown,
   ChevronsUpDown,
   CloudOff,
   Download,
@@ -38,6 +40,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -47,6 +51,11 @@ import { toast } from "@/components/ui/toast";
 import { Tip } from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth";
 import { listSessions } from "@/features/auth/api";
+import {
+  orderSaveOptions,
+  pullAfterLastOrderSave,
+} from "@/features/notes/order-saves";
+import type { TagSort } from "@/features/preferences";
 import { usePreferencesStore } from "@/features/preferences";
 import {
   isPhone,
@@ -62,7 +71,9 @@ import {
   tagColorName,
   tagColorStyle,
   updateTag,
+  useTagOrder,
   useTagReorder,
+  useTagSort,
   useTags,
 } from "@/features/tags";
 import { TAG_COLORS } from "@/lib/design/tokens";
@@ -193,7 +204,11 @@ export function Sidebar({
   const tagsLoaded = tagsQuery.data !== undefined;
   // isError clears while Try again runs.
   const tagsFailed = !tagsLoaded && tagsQuery.errorUpdatedAt > 0;
-  const orderedTags = React.useMemo(() => orderTags(tags), [tags]);
+  const tagSort = useTagSort();
+  const listTags = useTagOrder();
+  const orderedTags = React.useMemo(() => listTags(tags), [listTags, tags]);
+  const setNotesPreference = usePreferencesStore((s) => s.setNotesPreference);
+  const setTagSort = (mode: TagSort) => setNotesPreference("tagSort", mode);
 
   const [tagDialog, setTagDialog] = React.useState<{ tag: Tag | null } | null>(
     null,
@@ -321,8 +336,7 @@ export function Sidebar({
   React.useEffect(() => () => releaseHeld.current?.(), []);
 
   const reorderMutation = useMutation({
-    mutationKey: ["tag-order"],
-    scope: { id: "tag-order" },
+    ...orderSaveOptions("tags"),
     mutationFn: reorderTags,
     onMutate: async (ids) => {
       await queryClient.cancelQueries({ queryKey: ["tags"] });
@@ -331,14 +345,22 @@ export function Sidebar({
       );
     },
     onError: () => toast.error(t("moveFailed")),
-    onSettled: () => {
-      if (queryClient.isMutating({ mutationKey: ["tag-order"] }) <= 1)
-        queryClient.invalidateQueries({ queryKey: ["tags"] });
-    },
+    onSettled: () => pullAfterLastOrderSave(queryClient),
   });
-  const tagDrag = useTagReorder(orderedTags, (ids) =>
-    reorderMutation.mutate(ids),
-  );
+  // The first drag while tags are listed by name switches to Custom, from
+  // the order shown; Undo puts the name order and the old places back.
+  const tagDrag = useTagReorder(orderedTags, (ids) => {
+    reorderMutation.mutate(ids);
+    if (tagSort === "custom") return;
+    const before = orderTags(tags).map((tag) => tag.id);
+    setTagSort("custom");
+    toast(t("tagsSwitchedToCustom"), {
+      undo: () => {
+        setTagSort("name");
+        reorderMutation.mutate(before);
+      },
+    });
+  });
   const sortedTags = tagDrag.shown;
 
   const countNotes = (tag: Tag) => tag._count?.notes ?? 0;
@@ -431,6 +453,37 @@ export function Sidebar({
       <div className="relative mt-3.5 flex h-7.5 items-center gap-1.5 whitespace-nowrap pr-0.5 pl-[11.5px] text-label text-muted-foreground uppercase">
         <span aria-hidden className={cn("flex-1", hideClass)}>
           {t("tags")}
+        </span>
+        <span className={hideClass}>
+          <DropdownMenu>
+            <Tip label={t("sortTags")}>
+              <DropdownMenuTrigger asChild>
+                <IconButton size="sm" label={t("sortTags")}>
+                  <ArrowUpDown />
+                </IconButton>
+              </DropdownMenuTrigger>
+            </Tip>
+            <DropdownMenuContent
+              align="end"
+              className="normal-case"
+              aria-label={t("sortTags")}
+            >
+              <DropdownMenuLabel>{t("sortTags")}</DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={tagSort}
+                onValueChange={(mode) => setTagSort(mode as TagSort)}
+              >
+                <DropdownMenuRadioItem value="custom">
+                  <GripVertical />
+                  {t("tagSortCustom")}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="name">
+                  <ArrowDownAZ />
+                  {t("tagSortName")}
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </span>
         <span className={hideClass}>
           <Tip label={t("newTag")}>

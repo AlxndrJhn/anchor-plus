@@ -74,7 +74,9 @@
     "lastEdited": "Ostatnia edycja",
     "dateCreated": "Data utworzenia",
     "title": "Tytuł",
-    "size": "Rozmiar"
+    "size": "Rozmiar",
+    "custom": "Własna kolejność",
+    "customHint": "Przeciągaj notatki, aby ułożyć je po swojemu."
   },
   "filterMenu": {
     "filterActiveLabel": "Filtr, włączone: {count}",
@@ -320,7 +322,9 @@
     "selectNotesHelp": "Kliknij kółko na notatce albo kliknij ją z {key}. Shift zaznacza zakres.",
     "andMore": "{titles} i {count} więcej",
     "untitled": "Bez tytułu",
-    "notesList": "Notatki"
+    "notesList": "Notatki",
+    "dropToPin": "Upuść tutaj, aby przypiąć",
+    "switchedToCustom": "Przełączono na własną kolejność"
   },
   "archivePage": {
     "unarchived": "{count, plural, one {Przywrócono notatkę z archiwum} few {Przywrócono # notatki z archiwum} many {Przywrócono # notatek z archiwum} other {Przywrócono # notatki z archiwum}}",

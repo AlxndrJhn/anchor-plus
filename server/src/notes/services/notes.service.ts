@@ -157,6 +157,35 @@ export class NotesService {
   }
 
   /**
+   * Puts several notes in place at once: a whole list's order when it turns
+   * custom, or putting it back. Notes this person can't see are left out;
+   * only notes whose place changed go to their devices, and only theirs.
+   */
+  async setPositions(
+    userId: string,
+    places: { noteId: string; position: number | null }[],
+  ) {
+    const latest = new Map(places.map((p) => [p.noteId, p.position]));
+    const accessibleIds = await this.accessibleNoteIds(userId, [
+      ...latest.keys(),
+    ]);
+    if (accessibleIds.length === 0) return { count: 0 };
+    await this.prisma.$transaction(async (tx) => {
+      const changed: string[] = [];
+      for (const noteId of accessibleIds) {
+        if (await setNotePosition(tx, userId, noteId, latest.get(noteId)))
+          changed.push(noteId);
+      }
+      if (changed.length)
+        await this.syncEmitter.emit(
+          tx,
+          changed.flatMap((noteId) => noteEmissions([userId], noteId)),
+        );
+    });
+    return { count: accessibleIds.length };
+  }
+
+  /**
    * "Make a copy": a new note of this person's with the same title, text,
    * colour, their tags, its lock and copies of the attachments. Reminders,
    * pins and sharing stay with the original.

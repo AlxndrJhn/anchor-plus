@@ -10,7 +10,10 @@ import type { LanguagePreference } from "@/lib/i18n/locales";
 import type { DateDisplay, TimeDisplay, WeekStart } from "./date-time";
 
 export type ViewMode = "masonry" | "grid" | "list" | "columns";
-export type SortBy = "updatedAt" | "createdAt" | "title" | "size";
+/** "custom" is the order notes were dragged into. */
+export type SortBy = "updatedAt" | "createdAt" | "title" | "size" | "custom";
+/** The sidebar and every tag list: dragged order, or by name. */
+export type TagSort = "custom" | "name";
 export type SortOrder = "asc" | "desc";
 
 /** Clean puts the tags under the text and folds the formatting bar away. */
@@ -39,6 +42,8 @@ interface NotesPreferences {
   /** Pictures across the top of note cards. Unset (older saves) means on. */
   showPictures?: boolean;
   openArchivedTagIds: string[];
+  /** How tags are listed. Unset means custom (dragged, the rest by name). */
+  tagSort?: TagSort;
 }
 
 interface EditorPreferences {

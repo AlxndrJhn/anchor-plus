@@ -1,10 +1,12 @@
 import { NotePositionDto } from '../dto/note-position.dto';
+import { NotePositionsDto } from '../dto/note-positions.dto';
 import {
   Controller,
   Get,
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   UseGuards,
@@ -57,6 +59,14 @@ export class NotesController {
   @Get(':id')
   findOne(@CurrentUser('id') userId: string, @Param('id') id: string) {
     return this.notesService.findOne(userId, id);
+  }
+
+  @Put('positions')
+  setPositions(
+    @CurrentUser('id') userId: string,
+    @Body() dto: NotePositionsDto,
+  ) {
+    return this.notesService.setPositions(userId, dto.positions);
   }
 
   @Patch(':id/position')

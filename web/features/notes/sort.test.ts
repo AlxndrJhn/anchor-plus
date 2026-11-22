@@ -2,9 +2,13 @@ import { describe, expect, it } from "vitest";
 import type { SortBy, SortOrder } from "@/features/preferences";
 import {
   compareNotes,
+  customKey,
   keptPlace,
+  moveNextToNeighbours,
+  numberOrder,
   positionBetween,
   type SortableNote,
+  STEP,
   sortKey,
 } from "./sort";
 
@@ -163,7 +167,7 @@ describe("dragged notes in newest-first order", () => {
     const moved = n(
       "a",
       "2026-01-03T00:00:00Z",
-      positionBetween(b, c),
+      positionBetween(b, c) ?? undefined,
       "2026-01-04T00:00:00Z",
     );
     expect(order([moved, b, c])).toEqual(["b", "a", "c"]);
@@ -174,7 +178,7 @@ describe("dragged notes in newest-first order", () => {
     const editedLater = n(
       "c",
       "2026-01-05T00:00:00Z",
-      positionBetween(b, undefined),
+      positionBetween(b, undefined) ?? undefined,
       "2026-01-04T00:00:00Z",
     );
     expect(order([a, b, editedLater])).toEqual(["c", "a", "b"]);
@@ -202,7 +206,7 @@ describe("dragged notes in newest-first order", () => {
 
   it("places a note between neighbours, or just past the ends", () => {
     expect(positionBetween(a, b)).toBe((sortKey(a) + sortKey(b)) / 2);
-    expect(positionBetween(undefined, a)).toBe(sortKey(a) + 1000);
+    expect(positionBetween(undefined, a, 0)).toBe(sortKey(a) + 1000);
     expect(positionBetween(c, undefined)).toBe(sortKey(c) - 1000);
   });
 
@@ -211,5 +215,87 @@ describe("dragged notes in newest-first order", () => {
     expect(
       [moved, b, c].sort(compareNotes("updatedAt", "asc")).map((x) => x.id),
     ).toEqual(["c", "b", "a"]);
+  });
+});
+
+describe("custom order", () => {
+  const n = (
+    id: string,
+    createdAt: string,
+    position: number | null = null,
+  ) => ({
+    id,
+    title: id,
+    createdAt,
+    updatedAt: "2026-02-01T00:00:00Z",
+    position,
+    positionedAt: position === null ? null : "2026-01-10T00:00:00Z",
+  });
+  const order = (notes: ReturnType<typeof n>[]) =>
+    [...notes].sort(compareNotes("custom", "asc")).map((x) => x.id);
+
+  it("sorts never-placed notes newest made first, and ignores edits", () => {
+    const old = n("old", "2026-01-01T00:00:00Z");
+    const recent = n("new", "2026-01-05T00:00:00Z");
+    expect(order([old, recent])).toEqual(["new", "old"]);
+    expect(customKey(old)).toBe(Date.parse("2026-01-01T00:00:00Z"));
+  });
+
+  it("puts a placed note where it was put, whichever way the order points", () => {
+    const top = n(
+      "top",
+      "2026-01-01T00:00:00Z",
+      Date.parse("2026-03-01T00:00:00Z"),
+    );
+    const recent = n("new", "2026-01-05T00:00:00Z");
+    expect(order([recent, top])).toEqual(["top", "new"]);
+    expect(
+      [recent, top].sort(compareNotes("custom", "desc")).map((x) => x.id),
+    ).toEqual(["top", "new"]);
+  });
+
+  it("splits the gap between neighbours, and gives up when there is none", () => {
+    const a = n("a", "2026-01-01T00:00:00Z", 2000);
+    const b = n("b", "2026-01-01T00:00:00Z", 1000);
+    expect(positionBetween(a, b)).toBe(1500);
+    const close = n("c", "2026-01-01T00:00:00Z", 1000.0005);
+    expect(positionBetween(close, b)).toBeNull();
+  });
+
+  it("puts a note dropped on top no lower than now, and one at the end a step below", () => {
+    const a = n("a", "2026-01-01T00:00:00Z", 2000);
+    expect(positionBetween(undefined, a, 5000)).toBe(5000);
+    expect(positionBetween(undefined, a, 10)).toBe(2000 + STEP);
+    expect(positionBetween(a, undefined)).toBe(2000 - STEP);
+  });
+
+  it("numbers a whole order down from now", () => {
+    expect(numberOrder(["x", "y", "z"], 10_000)).toEqual([
+      { id: "x", position: 10_000 },
+      { id: "y", position: 10_000 - STEP },
+      { id: "z", position: 10_000 - 2 * STEP },
+    ]);
+  });
+
+  it("moves a note next to its new neighbours in a part of the order", () => {
+    // A tag's view shows b, d and f; f is dragged between b and d.
+    const all = ["a", "b", "c", "d", "e", "f"];
+    expect(moveNextToNeighbours(all, "f", ["b", "f", "d"])).toEqual([
+      "a",
+      "b",
+      "f",
+      "c",
+      "d",
+      "e",
+    ]);
+    // Dropped first: right before the one below it.
+    expect(moveNextToNeighbours(all, "f", ["f", "b", "d"])).toEqual([
+      "a",
+      "f",
+      "b",
+      "c",
+      "d",
+      "e",
+    ]);
   });
 });

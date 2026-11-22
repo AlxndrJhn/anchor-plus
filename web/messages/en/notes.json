@@ -74,7 +74,9 @@
     "lastEdited": "Last edited",
     "dateCreated": "Date created",
     "title": "Title",
-    "size": "Size"
+    "size": "Size",
+    "custom": "Custom",
+    "customHint": "Drag notes into the order you like."
   },
   "filterMenu": {
     "filterActiveLabel": "Filter, {count} on",
@@ -320,7 +322,9 @@
     "selectNotesHelp": "Click the circle on a note, or {key}-click it. Shift-click picks a range.",
     "andMore": "{titles} and {count} more",
     "untitled": "Untitled",
-    "notesList": "Notes"
+    "notesList": "Notes",
+    "dropToPin": "Drop here to pin",
+    "switchedToCustom": "Switched to Custom order"
   },
   "archivePage": {
     "unarchived": "{count, plural, one {Note unarchived} other {# notes unarchived}}",

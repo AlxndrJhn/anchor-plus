@@ -5,6 +5,7 @@ import {
   CalendarPlus,
   Check,
   Columns3,
+  GripVertical,
   HardDrive,
   LayoutDashboard,
   LayoutGrid,
@@ -60,6 +61,8 @@ const ORDER_OPTIONS: Record<SortBy, [SortOrder, OrderLabel][]> = {
     ["desc", "largestFirst"],
     ["asc", "smallestFirst"],
   ],
+  // The order notes were dragged into has no other way round.
+  custom: [],
 };
 
 const headingClass = "m-0 mb-2 text-label text-muted-foreground uppercase";
@@ -119,16 +122,22 @@ export function ViewOptions({
           </h2>
           <SortChoices sortBy={sortBy} onSort={onSort} />
         </div>
-        <SegmentedControl
-          full
-          aria-label={t("order")}
-          value={sortOrder}
-          onValueChange={(order) => onSort(sortBy, order)}
-          options={ORDER_OPTIONS[sortBy].map(([value, label]) => ({
-            value,
-            label: t(label),
-          }))}
-        />
+        {ORDER_OPTIONS[sortBy].length > 0 ? (
+          <SegmentedControl
+            full
+            aria-label={t("order")}
+            value={sortOrder}
+            onValueChange={(order) => onSort(sortBy, order)}
+            options={ORDER_OPTIONS[sortBy].map(([value, label]) => ({
+              value,
+              label: t(label),
+            }))}
+          />
+        ) : (
+          <p className="m-0 px-0.5 text-muted-foreground text-ui">
+            {t("customHint")}
+          </p>
+        )}
         <div className="flex items-center justify-between gap-3 border-0 border-border border-t border-solid pt-3 text-ui">
           <label htmlFor="cards-pictures" className="cursor-pointer">
             {t("picturesOnCards")}
@@ -149,6 +158,7 @@ const SORT_CHOICES = [
   ["createdAt", "dateCreated", CalendarPlus],
   ["title", "title", ALargeSmall],
   ["size", "size", HardDrive],
+  ["custom", "custom", GripVertical],
 ] as const;
 
 function SortChoices({

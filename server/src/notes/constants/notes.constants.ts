@@ -131,6 +131,8 @@ export const NOTE_LIST_ORDER = [
 // Bulk action limits; the client splits a larger selection into batches.
 export const BULK_MAX_NOTE_IDS = 200;
 export const BULK_MAX_TAG_IDS = 50;
+// Notes placed in one request: a whole list's order when it turns custom.
+export const POSITIONS_MAX_NOTES = 500;
 
 // A note's edit history is paged; the client asks for more with the cursor.
 export const DEFAULT_REVISION_PAGE_SIZE = 30;

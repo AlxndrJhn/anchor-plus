@@ -74,7 +74,9 @@
     "lastEdited": "Zuletzt bearbeitet",
     "dateCreated": "Erstellungsdatum",
     "title": "Titel",
-    "size": "Größe"
+    "size": "Größe",
+    "custom": "Eigene Reihenfolge",
+    "customHint": "Ziehe Notizen in die Reihenfolge, die du möchtest."
   },
   "filterMenu": {
     "filterActiveLabel": "Filter, {count} aktiv",
@@ -320,7 +322,9 @@
     "selectNotesHelp": "Klicke auf den Kreis einer Notiz oder klicke sie mit {key} an. Mit Umschalt wählst du einen Bereich.",
     "andMore": "{titles} und {count} weitere",
     "untitled": "Ohne Titel",
-    "notesList": "Notizen"
+    "notesList": "Notizen",
+    "dropToPin": "Hier ablegen zum Anheften",
+    "switchedToCustom": "Auf eigene Reihenfolge umgestellt"
   },
   "archivePage": {
     "unarchived": "{count, plural, one {Notiz aus dem Archiv geholt} other {# Notizen aus dem Archiv geholt}}",

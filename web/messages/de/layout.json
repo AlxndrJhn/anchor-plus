@@ -136,7 +136,11 @@
     "themeSystem": "Wie System",
     "colorFailed": "Farbe von #{name} konnte nicht geändert werden",
     "deleteFailed": "#{name} konnte nicht gelöscht werden",
-    "moveFailed": "Tag konnte nicht verschoben werden"
+    "moveFailed": "Tag konnte nicht verschoben werden",
+    "sortTags": "Tags sortieren",
+    "tagSortCustom": "Eigene Reihenfolge",
+    "tagSortName": "Name A–Z",
+    "tagsSwitchedToCustom": "Tags auf eigene Reihenfolge umgestellt"
   },
   "skipLink": {
     "label": "Zum Inhalt springen"

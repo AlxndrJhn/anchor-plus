@@ -1,6 +1,7 @@
 "use client";
 
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { Check } from "lucide-react";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,27 @@ function DropdownMenuItem({
   );
 }
 
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+
+/** A choice of one among its group's items; the chosen one is ticked. */
+function DropdownMenuRadioItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
+  return (
+    <DropdownMenuPrimitive.RadioItem
+      className={cn(menuItem, "pr-8", className)}
+      {...props}
+    >
+      {children}
+      <DropdownMenuPrimitive.ItemIndicator className="absolute right-2.5 flex text-accent-strong [&>svg]:size-3.75">
+        <Check aria-hidden />
+      </DropdownMenuPrimitive.ItemIndicator>
+    </DropdownMenuPrimitive.RadioItem>
+  );
+}
+
 function DropdownMenuSeparator({
   className,
   ...props
@@ -98,6 +120,8 @@ export {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   menuItem,

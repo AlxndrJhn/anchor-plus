@@ -31,6 +31,11 @@ export class NotesApi {
     return bodyOf<NoteOnWire>(res);
   }
 
+  /** Puts several notes in place at once; returns the HTTP response. */
+  setPositions(positions: { noteId: string; position: number | null }[]) {
+    return this.http.put('/api/notes/positions').send({ positions });
+  }
+
   async trash(id: string): Promise<void> {
     await this.http.delete(`/api/notes/${id}`).expect(200);
   }
