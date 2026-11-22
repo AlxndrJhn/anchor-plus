@@ -40,18 +40,69 @@ export function keptPlace(
 }
 
 /**
+ * Where a note sorts in "Custom": where it was put or, never placed, when it
+ * was made, so new notes come out on top. Edits never move it.
+ */
+export function customKey(note: Pick<Note, "createdAt" | "position">): number {
+  return note.position ?? new Date(note.createdAt).getTime();
+}
+
+/** Places closer than this are renumbered rather than split again. */
+export const MIN_GAP = 0.001;
+/** The gap between notes when a whole order is numbered. */
+export const STEP = 1000;
+
+/**
  * The place for a note dropped between `above` and `below` (either may be
- * missing at the ends), in `sortKey` terms.
+ * missing at the ends), in `customKey` terms; null when the two are too
+ * close to fit another place between them.
  */
 export function positionBetween(
-  above: SortableNote | undefined,
-  below: SortableNote | undefined,
-): number {
-  const step = 1000;
-  if (above && below) return (sortKey(above) + sortKey(below)) / 2;
-  if (above) return sortKey(above) - step;
-  if (below) return sortKey(below) + step;
-  return Date.now();
+  above: Pick<Note, "createdAt" | "position"> | undefined,
+  below: Pick<Note, "createdAt" | "position"> | undefined,
+  now = Date.now(),
+): number | null {
+  if (above && below) {
+    const high = customKey(above);
+    const low = customKey(below);
+    return high - low < MIN_GAP * 2 ? null : (high + low) / 2;
+  }
+  if (above) return customKey(above) - STEP;
+  // On top: no lower than now, so a note made later still comes out above.
+  if (below) return Math.max(customKey(below) + STEP, now);
+  return now;
+}
+
+/**
+ * Places for a whole order, top first: down from `now` in even steps, so
+ * they read like the times they stand in for.
+ */
+export function numberOrder(ids: readonly string[], now = Date.now()) {
+  return ids.map((id, i) => ({ id, position: now - i * STEP }));
+}
+
+/**
+ * The full order with `noteId` moved next to its new neighbours in
+ * `groupIds`, a part of it (one section, or a tag's notes): right after the
+ * one above it, or else right before the one below.
+ */
+export function moveNextToNeighbours(
+  orderIds: readonly string[],
+  noteId: string,
+  groupIds: readonly string[],
+): string[] {
+  const rest = orderIds.filter((id) => id !== noteId);
+  const at = groupIds.indexOf(noteId);
+  const above = groupIds[at - 1];
+  const below = groupIds[at + 1];
+  const index =
+    above !== undefined && rest.includes(above)
+      ? rest.indexOf(above) + 1
+      : below !== undefined && rest.includes(below)
+        ? rest.indexOf(below)
+        : rest.length;
+  rest.splice(index, 0, noteId);
+  return rest;
 }
 
 export const compareNotes =
@@ -73,6 +124,10 @@ export const compareNotes =
     } else if (sortBy === "createdAt") {
       comparison =
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    } else if (sortBy === "custom") {
+      // Highest place first, whichever way round: the order is the person's.
+      const placed = customKey(b) - customKey(a);
+      if (placed !== 0) return placed;
     } else if (sortBy === "size") {
       comparison = (a.storageSize ?? 0) - (b.storageSize ?? 0);
     }

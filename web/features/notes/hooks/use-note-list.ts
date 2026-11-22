@@ -83,10 +83,7 @@ export function useNoteList(
     sortOrder,
     showPictures,
   } = usePreferencesStore((s) => s.notes);
-  // A "Custom" sort saved by an earlier version: dragging now works in the
-  // default order instead.
-  const sortBy: SortBy =
-    (storedSortBy as string) === "custom" ? "updatedAt" : storedSortBy;
+  const sortBy: SortBy = storedSortBy;
   const setNotesPreference = usePreferencesStore((s) => s.setNotesPreference);
   const boardRef = React.useRef<HTMLDivElement>(null);
   const searchRef = React.useRef<HTMLInputElement>(null);

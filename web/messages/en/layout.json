@@ -136,7 +136,11 @@
     "themeSystem": "Match system",
     "colorFailed": "Couldn’t change the color of #{name}",
     "deleteFailed": "Couldn’t delete #{name}",
-    "moveFailed": "Couldn’t move the tag"
+    "moveFailed": "Couldn’t move the tag",
+    "sortTags": "Sort tags",
+    "tagSortCustom": "Custom",
+    "tagSortName": "Name A–Z",
+    "tagsSwitchedToCustom": "Tags switched to Custom order"
   },
   "skipLink": {
     "label": "Skip to content"

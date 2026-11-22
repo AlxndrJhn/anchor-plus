@@ -1,4 +1,5 @@
 import type * as React from "react";
+import type { TagSort } from "@/features/preferences";
 import { TAG_COLORS } from "@/lib/design/tokens";
 import { translate } from "@/lib/i18n";
 import type { Tag } from "./types";
@@ -59,6 +60,14 @@ export function orderTags<T extends Pick<Tag, "name" | "position">>(
         (b.position ?? Number.POSITIVE_INFINITY) ||
       a.name.localeCompare(b.name),
   );
+}
+
+/** The tags as the person lists them: dragged order, or by name. */
+export function sortTags<T extends Pick<Tag, "name" | "position">>(
+  tags: readonly T[],
+  mode: TagSort,
+): T[] {
+  return mode === "name" ? sortTagsByName(tags) : orderTags(tags);
 }
 
 /** [items] with the one at [from] moved to [to]. */

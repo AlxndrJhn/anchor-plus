@@ -5,6 +5,7 @@ import {
   Check,
   CloudOff,
   Globe,
+  GripVertical,
   ImageOff,
   Lock,
   LockOpen,
@@ -32,8 +33,8 @@ import {
   usePreferencesStore,
 } from "@/features/preferences";
 import { MoreChip, TagChip } from "@/features/tags/components/tag-chip";
+import { useTagOrder } from "@/features/tags/hooks";
 import type { TagLabel } from "@/features/tags/types";
-import { sortTagsByName } from "@/features/tags/utils";
 import { useHighlightPaint } from "@/lib/highlight-paint";
 import { useNearScreen } from "@/lib/hooks/use-near-screen";
 import { singleKeyAllowed } from "@/lib/hooks/use-shortcuts";
@@ -169,7 +170,8 @@ export const NoteCard = React.memo(function NoteCard({
     showPictures && !lockHidden ? (note.imagePreviewIds ?? []) : [];
   const attachmentCount = note.attachmentCount ?? 0;
   const loadPictures = useNearScreen(cardRef, pictureIds.length > 0);
-  const tags = sortTagsByName(
+  const orderTags = useTagOrder();
+  const tags = orderTags(
     (note.tagIds ?? []).flatMap((id) => tagMap.get(id) ?? []),
   );
   const actions = renderActions?.(note);
@@ -367,6 +369,12 @@ export const NoteCard = React.memo(function NoteCard({
           onMove(note.id, step);
         }}
       />
+      {/* A list row is dragged by its grip; a finger needn't hold it first. */}
+      {isList && onMove && !picking && (
+        <span className="nc-grip" aria-hidden="true">
+          <GripVertical />
+        </span>
+      )}
       {/* Picking (after Select) shows the check; otherwise the pin. */}
       {!picking &&
         onTogglePin &&

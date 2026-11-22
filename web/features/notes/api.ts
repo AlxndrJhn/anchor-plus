@@ -44,6 +44,19 @@ export async function setNotePosition(
   await api.patch(`api/notes/${id}/position`, { json: { position } });
 }
 
+/** Notes placed in one request; more go in several, one after another. */
+const POSITIONS_PER_REQUEST = 500;
+
+/** Puts several notes in place at once, such as a whole list's order. */
+export async function setNotePositions(
+  positions: { noteId: string; position: number | null }[],
+): Promise<void> {
+  for (let i = 0; i < positions.length; i += POSITIONS_PER_REQUEST)
+    await api.put("api/notes/positions", {
+      json: { positions: positions.slice(i, i + POSITIONS_PER_REQUEST) },
+    });
+}
+
 /** Locks the note for this person with `lock`, or takes the lock off. */
 export async function setNoteLock(
   id: string,

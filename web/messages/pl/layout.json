@@ -136,7 +136,11 @@
     "themeSystem": "Jak system",
     "colorFailed": "Nie udało się zmienić koloru #{name}",
     "deleteFailed": "Nie udało się usunąć #{name}",
-    "moveFailed": "Nie udało się przenieść tagu"
+    "moveFailed": "Nie udało się przenieść tagu",
+    "sortTags": "Sortuj tagi",
+    "tagSortCustom": "Własna kolejność",
+    "tagSortName": "Nazwa A–Z",
+    "tagsSwitchedToCustom": "Tagi przełączono na własną kolejność"
   },
   "skipLink": {
     "label": "Przejdź do treści"

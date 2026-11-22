@@ -10,8 +10,9 @@ import { ShortcutHints } from "@/components/ui/shortcut-hints";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import { useDelayedFlag } from "@/lib/hooks/use-delayed-flag";
 import { cn } from "@/lib/utils";
+import { useTagOrder } from "../hooks";
 import type { Tag } from "../types";
-import { nextTagColor, orderTags, tagColorStyle } from "../utils";
+import { nextTagColor, tagColorStyle } from "../utils";
 
 export type TagCheckState = boolean | "mixed";
 
@@ -47,7 +48,8 @@ export function TagPicker({
   const listId = React.useId();
   const term = query.trim();
   const lowerTerm = term.toLowerCase();
-  const sorted = React.useMemo(() => orderTags(tags), [tags]);
+  const orderTags = useTagOrder();
+  const sorted = React.useMemo(() => orderTags(tags), [orderTags, tags]);
   const matches = sorted.filter((t) =>
     t.name.toLowerCase().includes(lowerTerm),
   );

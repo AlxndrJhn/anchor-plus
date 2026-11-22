@@ -302,6 +302,23 @@ export class LocalServer {
     if (id === "archive" && method === "GET")
       return this.list((n) => n.state === "active" && n.isArchived);
     if (id === "bulk") return this.bulk(action, body);
+    if (id === "positions" && method === "PUT") {
+      const places = (body.positions ?? []) as {
+        noteId: string;
+        position: number | null;
+      }[];
+      let count = 0;
+      for (const { noteId, position } of places) {
+        const note = this.data.notes.find(
+          (n) => n.id === noteId && n.state !== "deleted",
+        );
+        if (!note) continue;
+        note.position = position ?? null;
+        note.positionedAt = note.position === null ? null : now();
+        count++;
+      }
+      return { count };
+    }
 
     if (action === "revisions")
       return this.revisions(method, id, subId, subAction, req);

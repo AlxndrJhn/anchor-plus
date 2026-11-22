@@ -32,7 +32,7 @@ import {
   formatShortDate,
   usePreferencesStore,
 } from "@/features/preferences";
-import { sortTagsByName, type Tag, TagChip, TagPicker } from "@/features/tags";
+import { type Tag, TagChip, TagPicker, useTagOrder } from "@/features/tags";
 import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
 import { translate } from "@/lib/i18n";
 import { useFlip } from "@/lib/use-flip";
@@ -801,7 +801,8 @@ function TagRow({
   const roving = useRovingFocus<HTMLDivElement>();
   const row = roving.ref;
   const flip = useFlip(row, { pop: true });
-  const tags = sortTagsByName(
+  const orderTags = useTagOrder();
+  const tags = orderTags(
     props.tagIds.flatMap((id) => props.allTags.find((t) => t.id === id) ?? []),
   );
   const showReminder = withReminder && !!props.reminder && props.canSetReminder;

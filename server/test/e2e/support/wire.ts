@@ -17,6 +17,8 @@ export interface NoteOnWire {
   userId: string;
   createdAt: string;
   updatedAt: string;
+  /** Where this person put it among their notes; null if never placed. */
+  position?: number | null;
   reminder?: ReminderOnWire | null;
   lock?: 'tap' | 'pin' | 'pattern' | 'biometric' | null;
   isFrozen: boolean;

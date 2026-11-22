@@ -67,7 +67,9 @@ function useCardContentChange() {
             })
           : outcome;
       }
-      if (outcome.status === "saved" && keepPlace) {
+      // In "Custom" an edit never moves a note, so its place stays as it is.
+      const { sortBy } = usePreferencesStore.getState().notes;
+      if (outcome.status === "saved" && keepPlace && sortBy !== "custom") {
         // Placed where it was, as a dragged note is: still there until it's
         // next edited in the note itself.
         putInLists({

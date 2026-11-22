@@ -39,7 +39,6 @@ import {
   bulkPinNotes,
   getNotes,
   restoreNote,
-  setNotePosition,
   unarchiveNote,
 } from "@/features/notes/api";
 import { BulkColorPicker } from "@/features/notes/components/bulk-color-picker";
@@ -61,10 +60,10 @@ import {
   useApplyFreeze,
 } from "@/features/notes/hooks/use-note-freeze";
 import { useNoteList } from "@/features/notes/hooks/use-note-list";
+import { useNoteReorder } from "@/features/notes/hooks/use-note-reorder";
 import { useRefreshNotes } from "@/features/notes/hooks/use-refresh-notes";
 import { matchesFilters } from "@/features/notes/note-filters";
 import { printNoteList } from "@/features/notes/print";
-import { positionBetween } from "@/features/notes/sort";
 import type { Note } from "@/features/notes/types";
 import { usePictureMatches } from "@/features/picture-search/use-picture-matches";
 import { tagColorStyle, useTagMap } from "@/features/tags";
@@ -193,10 +192,8 @@ function NotesView({ tagId }: { tagId: string | null }) {
   const allPinned = chosen.length > 0 && chosen.every((n) => n.isPinned);
   const allArchived = chosen.length > 0 && chosen.every((n) => n.isArchived);
 
-  /**
-   * A note let go at a new place, as in Google Keep: it goes between its new
-   * neighbours, and stays there until it is next edited.
-   */
+  // A note let go at a new place: see useNoteReorder.
+  const { onReorder } = useNoteReorder({ list, notes, tagId });
   // Pinned or unpinned from its card: it moves to its section at once.
   const prepareCardMotion = list.prepareCardMotion;
   const togglePin = React.useCallback(
@@ -224,37 +221,6 @@ function NotesView({ tagId }: { tagId: string | null }) {
     },
     [prepareCardMotion, queryClient, refresh, t],
   );
-
-  const reorderNote = (noteId: string, ids: string[]) => {
-    const index = ids.indexOf(noteId);
-    const byId = new Map(notes.map((n) => [n.id, n]));
-    const position = positionBetween(
-      byId.get(ids[index - 1]),
-      byId.get(ids[index + 1]),
-    );
-    const before = byId.get(noteId);
-    const place = (fields: Pick<Note, "position" | "positionedAt">) =>
-      queryClient.setQueriesData<unknown>(
-        { queryKey: ["notes"] },
-        (data: unknown) =>
-          Array.isArray(data)
-            ? (data as Note[]).map((n) =>
-                n.id === noteId ? { ...n, ...fields } : n,
-              )
-            : data,
-      );
-    place({ position, positionedAt: new Date().toISOString() });
-    setNotePosition(noteId, position).catch(() => {
-      list.prepareCardMotion();
-      place({
-        position: before?.position ?? null,
-        positionedAt: before?.positionedAt ?? null,
-      });
-      toast.error(t("couldNotMove"), {
-        retry: () => reorderNote(noteId, ids),
-      });
-    });
-  };
 
   const noteAction = useMutation({
     mutationFn: async ({
@@ -524,14 +490,8 @@ function NotesView({ tagId }: { tagId: string | null }) {
           <NotesBoard
             searchTerm={list.term || undefined}
             dateLabel={list.sortBy === "size" ? storageSizeLabel : undefined}
-            onReorder={
-              list.sortBy === "updatedAt" &&
-              list.sortOrder === "desc" &&
-              !list.searching &&
-              !list.picking
-                ? reorderNote
-                : undefined
-            }
+            onReorder={!list.searching && !list.picking ? onReorder : undefined}
+            onHold={(noteId) => list.onPick(noteId, false)}
             ref={list.boardRef}
             layout={list.layout}
             picking={list.picking}
@@ -541,16 +501,13 @@ function NotesView({ tagId }: { tagId: string | null }) {
             onTogglePin={togglePin}
             onCardKey={onCardKey}
             groups={[
-              ...(pinned.length
-                ? [
-                    {
-                      key: "pinned",
-                      label: t("pinned"),
-                      icon: <Pin aria-hidden />,
-                      notes: pinned,
-                    },
-                  ]
-                : []),
+              {
+                key: "pinned",
+                label: t("pinned"),
+                icon: <Pin aria-hidden />,
+                notes: pinned,
+                dropHint: t("dropToPin"),
+              },
               ...(others.length
                 ? [
                     {

@@ -36,6 +36,20 @@ interface NotesBoardGroup {
   fallback?: React.ReactNode;
   /** Its notes keep their places when others are dragged. */
   isFixed?: boolean;
+  /**
+   * Shown while a note is dragged and the group has none, as a place to drop
+   * it ("Drop here to pin"). Such a group is left out while it's empty.
+   */
+  dropHint?: string;
+}
+
+/** A note let go at a new place, maybe in another group. */
+export interface NoteDrop {
+  noteId: string;
+  from: string;
+  to: string;
+  /** The new order of the group it landed in. */
+  ids: string[];
 }
 
 interface NotesBoardProps {
@@ -54,11 +68,13 @@ interface NotesBoardProps {
   /** The search the notes were found by. */
   searchTerm?: string;
   /**
-   * Lets cards be dragged to new places within their group, as in Google
-   * Keep; called with the group's new order when one is let go. Alt+Arrow
-   * keys on a card move it one place.
+   * Lets cards be dragged to new places, as in Google Keep, also into
+   * another group; called when one is let go. Alt+Arrow keys on a card move
+   * it one place within its group.
    */
-  onReorder?: (draggedId: string, ids: string[]) => void;
+  onReorder?: (drop: NoteDrop) => void;
+  /** A finger held a card and let go without moving it. */
+  onHold?: (noteId: string) => void;
   /**
    * A key pressed on a focused card while nothing is selected, such as
    * Delete; returns whether it acted.
@@ -80,6 +96,7 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
       dateLabel,
       searchTerm,
       onReorder,
+      onHold,
       onCardKey,
     },
     ref,
@@ -94,7 +111,8 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
     useCardColumns(boardRef, rulerRef);
     const drag = useCardDrag({
       enabled: !!onReorder && !picking,
-      onDrop: (draggedId, ids) => onReorder?.(draggedId, ids),
+      onDrop: (noteId, from, to, ids) => onReorder?.({ noteId, from, to, ids }),
+      onHold,
     });
     // Keyboard moves: Alt+Arrow keys on a focused card.
     const [announcement, setAnnouncement] = React.useState("");
@@ -113,7 +131,12 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
         const to = ids.indexOf(noteId) + step;
         if (to < 0 || to >= ids.length) return;
         refocus.current = noteId;
-        onReorder(noteId, moveItem(ids, ids.indexOf(noteId), to));
+        onReorder({
+          noteId,
+          from: group.key,
+          to: group.key,
+          ids: moveItem(ids, ids.indexOf(noteId), to),
+        });
         setAnnouncement(t("movedTo", { position: to + 1, total: ids.length }));
       },
       [t],
@@ -129,6 +152,16 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
       );
       if (link && document.activeElement !== link) link.focus();
     }, [groups]);
+
+    // Every group a dragged note may land in, with its order.
+    const dropGroups = Object.fromEntries(
+      groups
+        .filter((g) => !g.isFixed)
+        .map((g) => [g.key, g.notes.map((n) => n.id)]),
+    );
+    const allNotes = new Map(
+      groups.flatMap((g) => g.notes.map((n) => [n.id, n] as const)),
+    );
 
     // A let-go order is held until the notes arrive in it.
     const { preview, settled } = drag;
@@ -237,12 +270,26 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
           className="pointer-events-none absolute inset-x-0 top-0 h-0"
         />
         {groups.map((group) => {
+          const shownNotes = inPreviewOrder(group, drag.preview, allNotes);
+          if (group.dropHint && !shownNotes.length) {
+            if (!drag.preview || drag.preview.settling) return null;
+            return (
+              <div
+                key={group.key}
+                data-drag-group={group.key}
+                className={cn("cards-drop", isList && "list")}
+              >
+                {group.icon}
+                {group.dropHint}
+              </div>
+            );
+          }
           const heading = (
             <>
               {group.icon}
               {group.label}
               <span className="ml-0.5 font-medium tracking-normal tabular-nums">
-                {group.notes.length}
+                {shownNotes.length}
               </span>
             </>
           );
@@ -285,6 +332,9 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
                 // biome-ignore lint/a11y/noStaticElementInteractions: the pointer drag surface; Alt+Arrow keys on each card move it
                 <div
                   id={cardsId}
+                  data-drag-group={
+                    drag.enabled && !group.isFixed ? group.key : undefined
+                  }
                   className={cn("cards", layout, picking && "picking")}
                   // A card is a link; the browser's own link dragging would
                   // take the pointer away from ours.
@@ -294,15 +344,10 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
                   onPointerDown={
                     group.isFixed
                       ? undefined
-                      : (e) =>
-                          drag.onPointerDown(
-                            e,
-                            group.key,
-                            group.notes.map((n) => n.id),
-                          )
+                      : (e) => drag.onPointerDown(e, group.key, dropGroups)
                   }
                 >
-                  {inPreviewOrder(group, drag.preview).map((note) => (
+                  {shownNotes.map((note) => (
                     <NoteCard
                       key={note.id}
                       note={note}
@@ -333,17 +378,25 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
 );
 NotesBoard.displayName = "NotesBoard";
 
-/** A group's notes in the order a drag is showing, if one is under way. */
+/**
+ * A group's notes in the order a drag is showing, if one is under way: the
+ * group it would land in shows it, the one it left goes without.
+ */
 function inPreviewOrder(
   group: NotesBoardGroup,
   preview: DragPreview | null,
+  allNotes: Map<string, Note>,
 ): Note[] {
-  if (!preview || preview.group !== group.key) return group.notes;
-  const byId = new Map(group.notes.map((n) => [n.id, n]));
-  const shown = preview.ids.flatMap((id) => byId.get(id) ?? []);
+  if (!preview) return group.notes;
+  if (preview.group !== group.key)
+    return preview.from === group.key
+      ? group.notes.filter((n) => n.id !== preview.draggedId)
+      : group.notes;
+  const shown = preview.ids.flatMap((id) => allNotes.get(id) ?? []);
   // A note that arrived during the drag goes at the end.
   for (const note of group.notes)
-    if (!preview.ids.includes(note.id)) shown.push(note);
+    if (!preview.ids.includes(note.id) && note.id !== preview.draggedId)
+      shown.push(note);
   return shown;
 }
 

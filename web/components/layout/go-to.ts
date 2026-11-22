@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import * as React from "react";
-import { orderTags, useTags } from "@/features/tags";
+import { useTagOrder, useTags } from "@/features/tags";
 
 /** A page or tag a person can jump to by typing part of its name. */
 export interface GoToTarget {
@@ -27,6 +27,7 @@ const NO_TAGS: never[] = [];
 export function useGoToTargets({ pages }: { pages: boolean }) {
   const t = useTranslations("common");
   const { data: tags = NO_TAGS } = useTags();
+  const orderTags = useTagOrder();
   return React.useMemo(
     () => [
       ...(pages
@@ -47,7 +48,7 @@ export function useGoToTargets({ pages }: { pages: boolean }) {
         color: tag.color,
       })),
     ],
-    [pages, tags, t],
+    [pages, tags, t, orderTags],
   );
 }
 

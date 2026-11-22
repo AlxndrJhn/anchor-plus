@@ -73,7 +73,9 @@
     "lastEdited": "Last edited",
     "dateCreated": "Date created",
     "title": "Title",
-    "size": "Size"
+    "size": "Size",
+    "custom": "Custom",
+    "customHint": "Drag notes into the order you like."
   },
   "filterMenu": {
     "filterActiveLabel": "Filter, {count} on",
@@ -309,7 +311,9 @@
     "freeze": "Freeze",
     "print": "Print",
     "unarchive": "Unarchive",
-    "archive": "Archive"
+    "archive": "Archive",
+    "dropToPin": "Drop here to pin",
+    "switchedToCustom": "Switched to Custom order"
   },
   "archivePage": {
     "unarchived": "{count, plural, one {Note unarchived} other {# notes unarchived}}",

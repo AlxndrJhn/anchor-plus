@@ -41,7 +41,7 @@ Actions"; the workflow is `.github/workflows/pages.yml`, and
 | | Web | Android |
 |---|:---:|:---:|
 | **Notes and lists** | | |
-| Drag notes to arrange them, as in Google Keep: the others make room as you drag, and a moved note stays put until it is edited again (Android: hold a card, then drag) | ✓ | ✓ |
+| Drag notes to arrange them, as in Google Keep: the others make room as you drag, and a moved note stays put until it is edited again (Android: hold a card, then drag). On the web the first drag switches to a Custom order (with Undo) that edits never change; dropping a note into or out of Pinned pins or unpins it; on a touch screen a card lifts after a short hold (a quick swipe still scrolls), and list rows drag by their grip | ✓ | ✓ |
 | A Select button for choosing several notes; holding a card without moving still selects it | | ✓ |
 | Edit a note together, live: text merges as people type, and everyone's cursor shows, with their name (a public link's visitors see no names). Without a connection, edits sync as usual | ✓ | ✓ |
 | A note with a public link says so: a globe on its card, and in the open note whether anyone with the link can view or edit it | ✓ | ✓ |
@@ -71,7 +71,7 @@ Actions"; the workflow is `.github/workflows/pages.yml`, and
 | The searched words are marked in the note you open | ✓ | ✓ |
 | The search is kept when you come back from a note | ✓ | ✓ |
 | Tag counts include archived notes, and a tag lists them | ✓ | ✓ |
-| Tags can be put in any order by dragging their handle; the order syncs | ✓ | ✓ |
+| Tags can be put in any order by dragging their handle; the order syncs, and cards and the tag picker follow it. On the web, Sort tags lists them by name instead | ✓ | ✓ |
 | A tag's colour can be changed from its menu | ✓ | ✓ |
 | Text colour, font (serif, monospace, Comic Sans, handwriting, typewriter, rounded, slab, marker) and highlights in any colour, picked or preset | ✓ | ✓ |
 | Align a paragraph, heading, quote or list item left, centre, right or justified (web: the toolbar's Align button or `Ctrl/⌘ Shift L/E/R/J`; phone: Aa › Align, which steps through them). It syncs, shows on cards, shared links and print; Markdown has no alignment, so the export and the AI connector write the line unaligned | ✓ | ✓ |

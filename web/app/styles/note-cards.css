@@ -89,9 +89,111 @@
   }
 }
 /* Dragging to arrange, as in Google Keep: the card lifts off and follows
-   the pointer, and its place stays open as a gap the others move around. */
+   the pointer, and its place stays open as a dashed gap the others move
+   around, marking where it will land. */
 .nc[data-dragging] {
+  background: color-mix(in srgb, var(--muted) 45%, transparent);
+  box-shadow: none;
+  transform: none;
+}
+.nc[data-dragging] > * {
+  visibility: hidden;
+}
+.nc[data-dragging]::after {
+  box-shadow: none;
+  border: 2px dashed
+    color-mix(in srgb, var(--muted-foreground) 45%, transparent);
+}
+/* Where a dragged note goes to be pinned when nothing is pinned yet. */
+.cards-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: --spacing(2);
+  min-height: 72px;
+  border: 2px dashed
+    color-mix(in srgb, var(--muted-foreground) 40%, transparent);
+  border-radius: var(--radius-card);
+  color: var(--muted-foreground);
+  font-size: var(--text-ui);
+}
+.cards-drop.list {
+  width: 100%;
+  max-width: 780px;
+  justify-self: center;
+}
+.cards-drop svg {
+  width: 16px;
+  height: 16px;
+}
+/* Cards that can be dragged: a held finger lifts the card rather than
+   opening the browser's menu for its link or selecting its text. */
+[data-drag-group] > .nc {
+  -webkit-touch-callout: none;
+}
+html.note-holding,
+html.note-holding * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* The ring that grows under a finger holding a card, and stays once the
+   card can be moved. */
+.hold-ring {
+  position: fixed;
+  z-index: var(--z-float);
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  border: 2.5px solid var(--accent-strong);
+  pointer-events: none;
   opacity: 0;
+  scale: 0.4;
+  animation: hold-ring var(--hold, 250ms) var(--ease-standard) 60ms forwards;
+}
+.hold-ring.held {
+  opacity: 1;
+  scale: 1;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+@keyframes hold-ring {
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hold-ring {
+    animation: none;
+  }
+}
+/* A list row's grip: drags the row at once, also by finger. */
+.nc-grip {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  flex: none;
+  padding: 0 0 0 --spacing(1.5);
+  margin-right: --spacing(-2);
+  color: var(--note-muted);
+  cursor: grab;
+  touch-action: none;
+  opacity: 0;
+  transition: opacity var(--duration-hover);
+}
+.nc-grip svg {
+  width: 16px;
+  height: 16px;
+}
+.nc:hover .nc-grip,
+.nc:focus-within .nc-grip {
+  opacity: 1;
+}
+@media (hover: none) {
+  .nc-grip {
+    opacity: 1;
+  }
 }
 .nc-ghost {
   z-index: var(--z-float);
