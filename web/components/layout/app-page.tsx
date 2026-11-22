@@ -176,7 +176,11 @@ export function TopBarButton({
       {...props}
     >
       {icon}
-      {children && <span className="max-md:sr-only">{children}</span>}
+      {children && (
+        <span className="max-md:sr-only in-[.notes-pane]:sr-only">
+          {children}
+        </span>
+      )}
     </Comp>
   );
 }

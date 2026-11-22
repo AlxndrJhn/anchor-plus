@@ -9,7 +9,7 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "@/components/ui/toast";
@@ -56,6 +56,7 @@ import {
   takeReturnCaret,
 } from "@/features/notes/note-caret";
 import { isLockHidden, useUnlockedNotes } from "@/features/notes/note-lock";
+import { NotePaneHidden } from "@/features/notes/note-pane";
 import { sendNote } from "@/features/notes/note-text";
 import { printNotes } from "@/features/notes/print";
 import { parseStoredContent } from "@/features/notes/quill";
@@ -289,6 +290,7 @@ function NoteEditor({
     else document.querySelector<HTMLElement>(".ed .ql-editor")?.focus();
   };
   const trash = () => canTrash && actions.trash();
+  const paneHidden = useContext(NotePaneHidden);
   // Google Keep's keys while no text field has focus.
   useShortcuts(
     lockedOut
@@ -308,12 +310,12 @@ function NoteEditor({
           f: () => canEditNote && editor.setIsPinned((was) => !was),
           i: resumeTyping,
         },
-    !editor.historyOpen,
+    !editor.historyOpen && !paneHidden,
   );
   // Ctrl+Enter finishes from anywhere but a checklist item, which it ticks;
   // Esc first leaves the text field.
   useEffect(() => {
-    if (editor.historyOpen) return;
+    if (editor.historyOpen || paneHidden) return;
     let overlayAtPress = false;
     // Caught before Quill, which takes every Enter.
     const capture = (e: KeyboardEvent) => {
@@ -354,7 +356,7 @@ function NoteEditor({
       window.removeEventListener("keydown", capture, true);
       window.removeEventListener("keydown", onKey);
     };
-  }, [editor.historyOpen]);
+  }, [editor.historyOpen, paneHidden]);
 
   // A new note opens with the caret in its text, ready to type ("New list",
   // the L key, starts a checklist there).

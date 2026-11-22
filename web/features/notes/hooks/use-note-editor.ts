@@ -38,6 +38,7 @@ import {
   type NoteDraft,
   noteDraftsEqual,
   noteToDraft,
+  personalChanges,
   rebaseDraft,
   replacesText,
   type SaveFailure,
@@ -153,6 +154,8 @@ export function useNoteEditor({
   const noteVersionRef = useRef<number | undefined>(undefined);
   // The reminder the server last told us about.
   const serverReminderRef = useRef<NoteReminder | null>(null);
+  // The same for this person's tags and pin.
+  const serverPersonalRef = useRef({ tagIds: [] as string[], isPinned: false });
 
   const replacesOtherEdit = useRef(false);
   // Edits that waited for the server, here or kept from before a reload.
@@ -443,6 +446,7 @@ export function useNoteEditor({
     setLastSaved(hydrated);
     noteVersionRef.current = note.version;
     serverReminderRef.current = hydrated.reminder;
+    serverPersonalRef.current = hydrated;
     queue.setBaseVersion(note.version);
     hydratedNoteIdRef.current = note.id;
   }, [note, queue]);
@@ -462,6 +466,22 @@ export function useNoteEditor({
     setReminder(incoming);
     setLastSaved((saved) => (saved ? { ...saved, reminder: incoming } : saved));
   }, [note, reminder]);
+
+  // Tags and the pin changed elsewhere (a drop on a sidebar tag, another
+  // device) leave the version alone as well.
+  useEffect(() => {
+    if (!note || hydratedNoteIdRef.current !== note.id) return;
+    const incoming = noteToDraft(note);
+    const changes = personalChanges(incoming, serverPersonalRef.current, {
+      tagIds: selectedTagIds,
+      isPinned,
+    });
+    serverPersonalRef.current = incoming;
+    if (changes.tagIds) setSelectedTagIds(changes.tagIds);
+    if (changes.isPinned !== undefined) setIsPinned(changes.isPinned);
+    if (changes.tagIds || changes.isPinned !== undefined)
+      setLastSaved((saved) => (saved ? { ...saved, ...changes } : saved));
+  }, [note, selectedTagIds, isPinned]);
 
   // A newer copy arrived from somewhere else: it replaces what is on screen,
   // apart from any unsaved edit, which stays and goes up next.
