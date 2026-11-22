@@ -237,6 +237,9 @@ importers:
       dotenv:
         specifier: ^18.0.9
         version: 18.0.9
+      express:
+        specifier: 5.3.0
+        version: 5.3.0
       helmet:
         specifier: ^8.3.0
         version: 8.3.0

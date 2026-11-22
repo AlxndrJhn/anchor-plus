@@ -133,8 +133,8 @@ const ATTACHMENTS_HELP =
   'Pictures (JPEG, PNG, WebP, GIF) show in the note, recordings (MP3, WAV, ' +
   'M4A, OGG, AAC, WebM) play in it, and any other file is attached as a ' +
   `file. Each can be up to ${ATTACHMENT_MAX_FILE_SIZE / 1024 / 1024} MB, and ` +
-  `all together up to ${ATTACHMENTS_MAX_SENT_BYTES / 1024 / 1024} MB in one ` +
-  'call.';
+  `the files sent in one call up to ${ATTACHMENTS_MAX_SENT_BYTES / 1024 / 1024} ` +
+  'MB together.';
 
 type Tag = { id: string; name: string };
 type Content = CallToolResult['content'][number];

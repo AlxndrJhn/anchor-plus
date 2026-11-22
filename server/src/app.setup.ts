@@ -1,5 +1,5 @@
 import type { ConfigType } from '@nestjs/config';
-import type { Response } from 'express';
+import { json, type Response } from 'express';
 import helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as fs from 'fs';
@@ -13,6 +13,7 @@ import { AppValidationPipe } from './common/pipes/app-validation.pipe';
 import { requestContextMiddleware } from './common/utils/request-context';
 import { PROFILE_IMAGE_EXTENSIONS } from './auth/utils/profile-image.util';
 import { serveWebApp } from './web-app';
+import { MCP_REQUEST_MAX_BYTES } from './mcp/attachment-input.util';
 
 export function setupApp(app: NestExpressApplication): void {
   const appConfig = app.get<ConfigType<typeof AppConfig>>(AppConfig.KEY);
@@ -20,6 +21,9 @@ export function setupApp(app: NestExpressApplication): void {
     StorageConfig.KEY,
   );
 
+  // MCP clients send attachments as base64 inside the JSON, so that route
+  // takes more; its parser runs first and the one after leaves the body be.
+  app.use('/api/mcp', json({ limit: MCP_REQUEST_MAX_BYTES }));
   app.useBodyParser('json', { limit: '30mb' });
 
   serveWebApp(app, appConfig.webDir);

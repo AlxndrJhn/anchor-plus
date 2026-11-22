@@ -4,6 +4,7 @@ import {
   decodeAttachments,
   mimeTypeForFilename,
 } from './attachment-input.util';
+import { ATTACHMENT_MAX_FILE_SIZE } from '../notes/constants/notes.constants';
 
 const b64 = (text: string) => Buffer.from(text).toString('base64');
 
@@ -50,8 +51,18 @@ describe('decodeAttachments', () => {
     ).toThrow('no filename');
   });
 
+  it('takes a file as big as an attachment can be', () => {
+    const [file] = decodeAttachments([
+      {
+        filename: 'a.bin',
+        data: Buffer.alloc(ATTACHMENT_MAX_FILE_SIZE).toString('base64'),
+      },
+    ]);
+    expect(file.size).toBe(ATTACHMENT_MAX_FILE_SIZE);
+  });
+
   it('refuses attachments too big to send together', () => {
-    const big = Buffer.alloc(11 * 1024 * 1024).toString('base64');
+    const big = Buffer.alloc(30 * 1024 * 1024).toString('base64');
     expect(() =>
       decodeAttachments([
         { filename: 'a.bin', data: big },
