@@ -1028,6 +1028,8 @@
   "cameraFailed": "无法启动相机",
   "cameraSwitch": "切换相机",
   "cameraShutter": "拍照",
+  "cameraPointAtPage": "对准一页纸",
+  "cameraPageFound": "已识别页面",
   "cameraTaken": "{count, plural, =1{已拍 1 张} other{已拍 {count} 张}}",
   "cameraPicturesAdded": "{count, plural, =1{已添加 1 张图片} other{已添加 {count} 张图片}}",
   "inlinePicture": "图片",

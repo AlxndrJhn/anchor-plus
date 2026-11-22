@@ -807,7 +807,7 @@ class _PageHint extends StatelessWidget {
           borderRadius: BorderRadius.circular(AnchorTokens.radiusPill),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           child: Text(
             isFound ? l10n.cameraPageFound : l10n.cameraPointAtPage,
             key: const ValueKey('live-page-hint'),
