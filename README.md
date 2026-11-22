@@ -750,6 +750,7 @@ Claude gets these tools, and sees only what your account sees:
 | `list_note_versions`, `get_note_version`, `restore_note_version` | Browses a note's history and puts an earlier version back |
 | `add_attachments`, `delete_attachment` | Attaches files to a note, or deletes one for good |
 | `find_users`, `list_shares`, `share_note`, `unshare_note` | Shares a note with people on your server, as viewer or editor, and stops sharing it |
+| `get_public_link`, `create_public_link`, `remove_public_link` | Makes a public link anyone can open without an account (view or edit), changes it and turns it off; the address uses `APP_URL` |
 | `list_tags`, `create_tag`, `update_tag`, `delete_tag` | Lists, makes, renames or recolours, and deletes your tags |
 
 Notes are written as Markdown: headings, lists, checklists (`- [ ] item`),

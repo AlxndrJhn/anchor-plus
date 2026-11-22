@@ -55,6 +55,7 @@ import { PictureSearchModule } from '../picture-search/picture-search.module';
     NoteAccessService,
     NoteAttachmentsService,
     NoteHistoryService,
+    NoteShareLinksService,
   ],
 })
 export class NotesModule {}
