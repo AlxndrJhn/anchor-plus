@@ -60,6 +60,7 @@ export function PlusMark({
   const hoverStart = React.useRef<number | null>(null);
   const burstStart = React.useRef<number | null>(null);
   const frame = React.useRef(0);
+  // How far into the hover, in cycles: 0 up to 2, one turn of the sparks.
   const phase = React.useRef(0);
 
   const paint = React.useCallback(() => {
@@ -113,7 +114,8 @@ export function PlusMark({
     let isRunning = false;
     if (hoverStart.current !== null) {
       const elapsed = now - hoverStart.current;
-      phase.current = (elapsed % HOVER_MS) / HOVER_MS;
+      // Counts over two cycles, so the sparks' slower turn wraps whole too.
+      phase.current = (elapsed % (2 * HOVER_MS)) / HOVER_MS;
       isRunning = true;
     }
     if (burstStart.current !== null) {
@@ -254,21 +256,28 @@ function paintPlus(
   };
   for (const s of sparks) if (s[0] < 0) spark(s);
 
-  // The cross: rounded bars with a light running across them.
+  // The cross: rounded bars with a light running across them. The band runs
+  // from well before the cross to well after it, so it starts and ends each
+  // cycle on plain ink and the loop has no seam. The gradient line reaches
+  // past the cross by as much, so none of the band's stops get clamped.
   const bar = side * 0.24;
   const arm = side * 0.5;
-  const sweep = phase * 3 - 1;
-  const clamp = (v: number) => Math.max(0, Math.min(1, v));
+  const sweep = (phase % 1) * 3 - 1;
+  const from = -1.5;
+  const span = 4;
+  const at = (u: number) => (u - from) / span;
   const light = ctx.createLinearGradient(
-    cx - arm,
-    cy - arm,
-    cx + arm,
-    cy + arm,
+    cx - arm + 2 * arm * from,
+    cy - arm + 2 * arm * from,
+    cx - arm + 2 * arm * (from + span),
+    cy - arm + 2 * arm * (from + span),
   );
   light.addColorStop(0, ink);
-  light.addColorStop(clamp(sweep - 0.25), accent);
-  light.addColorStop(clamp(sweep), "#ffffff");
-  light.addColorStop(clamp(sweep + 0.25), accent);
+  light.addColorStop(at(sweep - 0.5), ink);
+  light.addColorStop(at(sweep - 0.25), accent);
+  light.addColorStop(at(sweep), "#ffffff");
+  light.addColorStop(at(sweep + 0.25), accent);
+  light.addColorStop(at(sweep + 0.5), ink);
   light.addColorStop(1, ink);
   ctx.fillStyle = light;
   ctx.beginPath();
