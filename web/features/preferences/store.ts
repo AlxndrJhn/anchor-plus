@@ -9,7 +9,7 @@ import type { CustomTheme } from "@/lib/design/custom-theme";
 import type { LanguagePreference } from "@/lib/i18n/locales";
 import type { DateDisplay, TimeDisplay, WeekStart } from "./date-time";
 
-export type ViewMode = "masonry" | "grid" | "list";
+export type ViewMode = "masonry" | "grid" | "list" | "columns";
 /** "custom" is the order notes were dragged into. */
 export type SortBy = "updatedAt" | "createdAt" | "title" | "size" | "custom";
 /** The sidebar and every tag list: dragged order, or by name. */

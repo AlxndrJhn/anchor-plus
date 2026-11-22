@@ -25,6 +25,16 @@ const MISSING_PAGE = '/missing.html';
 /** Left to the API: it answers these itself, 404s included. */
 const API_PREFIXES = ['/api/', '/uploads/'];
 
+/**
+ * A share link's page: the token in its address is the key to the note, so
+ * search engines leave it out and links in the note don't pass it on.
+ */
+const SHARE_LINK_PREFIX = '/s/';
+const SHARE_LINK_HEADERS = {
+  'X-Robots-Tag': 'noindex, nofollow',
+  'Referrer-Policy': 'no-referrer',
+};
+
 /** File names carry a hash of their content, so they never change. */
 const IMMUTABLE_PREFIX = '/_next/static/';
 
@@ -94,6 +104,8 @@ export function serveWebApp(
     if (API_PREFIXES.some((prefix) => address.startsWith(prefix))) {
       return next();
     }
+
+    if (address.startsWith(SHARE_LINK_PREFIX)) res.set(SHARE_LINK_HEADERS);
 
     const file = resolveWebFile(files, address);
     if (!file) {

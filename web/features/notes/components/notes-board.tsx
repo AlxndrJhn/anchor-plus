@@ -20,6 +20,7 @@ import {
   reachFollowedCard,
   refocusLeftCard,
 } from "../card-focus";
+import type { DropTarget } from "../columns";
 import { useCardColumns } from "../hooks/use-card-columns";
 import { type DragPreview, useCardDrag } from "../hooks/use-card-drag";
 import type { Note } from "../types";
@@ -80,6 +81,11 @@ interface NotesBoardProps {
    * Delete; returns whether it acted.
    */
   onCardKey?: (note: Note, key: string) => boolean;
+  /** Columns: where a card opens, and which note is open beside the list. */
+  noteHref?: (noteId: string) => string;
+  openId?: string | null;
+  /** Columns: cards, or all picked ones, can be let go on the sidebar. */
+  onDropOut?: (noteIds: string[], target: DropTarget) => void;
 }
 
 export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
@@ -98,6 +104,9 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
       onReorder,
       onHold,
       onCardKey,
+      noteHref,
+      openId,
+      onDropOut,
     },
     ref,
   ) => {
@@ -109,10 +118,15 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
     const boardId = React.useId();
     React.useImperativeHandle(ref, () => boardRef.current as HTMLDivElement);
     useCardColumns(boardRef, rulerRef);
+    const shownIds = React.useMemo(
+      () => groups.flatMap((g) => g.notes.map((n) => n.id)),
+      [groups],
+    );
     const drag = useCardDrag({
       enabled: !!onReorder && !picking,
       onDrop: (noteId, from, to, ids) => onReorder?.({ noteId, from, to, ids }),
       onHold,
+      dropOut: onDropOut ? { picked, shownIds, onDrop: onDropOut } : undefined,
     });
     // Keyboard moves: Alt+Arrow keys on a focused card.
     const [announcement, setAnnouncement] = React.useState("");
@@ -333,18 +347,28 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
                 <div
                   id={cardsId}
                   data-drag-group={
-                    drag.enabled && !group.isFixed ? group.key : undefined
+                    drag.active && (!group.isFixed || onDropOut)
+                      ? group.key
+                      : undefined
                   }
                   className={cn("cards", layout, picking && "picking")}
                   // A card is a link; the browser's own link dragging would
                   // take the pointer away from ours.
                   onDragStart={
-                    drag.enabled ? (e) => e.preventDefault() : undefined
+                    drag.active ? (e) => e.preventDefault() : undefined
                   }
                   onPointerDown={
-                    group.isFixed
+                    group.isFixed && !onDropOut
                       ? undefined
-                      : (e) => drag.onPointerDown(e, group.key, dropGroups)
+                      : group.isFixed
+                        ? (e) =>
+                            drag.onPointerDown(
+                              e,
+                              group.key,
+                              { [group.key]: group.notes.map((n) => n.id) },
+                              false,
+                            )
+                        : (e) => drag.onPointerDown(e, group.key, dropGroups)
                   }
                 >
                   {shownNotes.map((note) => (
@@ -362,6 +386,8 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
                       dateLabel={dateLabel?.(note)}
                       searchTerm={searchTerm}
                       onMove={canMove && !group.isFixed ? moveCard : undefined}
+                      href={noteHref?.(note.id)}
+                      isOpen={note.id === openId}
                     />
                   ))}
                 </div>

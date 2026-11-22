@@ -3,6 +3,12 @@
 import * as React from "react";
 import { DURATION, EASE } from "@/lib/design/tokens";
 import { prefersReducedMotion } from "@/lib/motion";
+import {
+  DROP_ATTRIBUTE,
+  type DropTarget,
+  draggedNoteIds,
+  parseDropTarget,
+} from "../columns";
 
 /** The order the cards would take if the dragged one were let go now. */
 export interface DragPreview {
@@ -19,6 +25,14 @@ export interface DragPreview {
   settling?: boolean;
 }
 
+/** Columns: cards can also be let go on a tag, Archive or Trash in the sidebar. */
+export interface CardDropOut {
+  picked: ReadonlySet<string>;
+  /** Every note on the board, in its order; picked ones travel in it. */
+  shownIds: readonly string[];
+  onDrop: (noteIds: string[], target: DropTarget) => void;
+}
+
 /** How long a let-go order is held if the list never takes it up. */
 const SETTLE_TIMEOUT = 2000;
 
@@ -27,6 +41,8 @@ interface Pressed {
   from: string;
   /** Each group's order when the press began. */
   startGroups: Record<string, string[]>;
+  /** It can take a new place on the board, not only leave it. */
+  canSort: boolean;
   box: HTMLElement;
   x: number;
   y: number;
@@ -47,6 +63,8 @@ interface Dragging extends Pressed {
   pointerX: number;
   pointerY: number;
   scrollFrame: number;
+  /** The sidebar row under the pointer, when it can be dropped there. */
+  overRow: Element | null;
 }
 
 const START_DISTANCE = 6;
@@ -136,13 +154,19 @@ export function useCardDrag({
   enabled,
   onDrop,
   onHold,
+  dropOut,
 }: {
+  /** Cards can be dragged to new places on the board. */
   enabled: boolean;
   /** Let go at a new place; `ids` is the new order of the group `to`. */
   onDrop: (draggedId: string, from: string, to: string, ids: string[]) => void;
   /** A finger held a card and let go without moving it. */
   onHold?: (noteId: string) => void;
+  dropOut?: CardDropOut;
 }) {
+  const active = enabled || !!dropOut;
+  const dropOutRef = React.useRef(dropOut);
+  dropOutRef.current = dropOut;
   const [preview, setPreview] = React.useState<DragPreview | null>(null);
   const pressed = React.useRef<Pressed | null>(null);
   const dragging = React.useRef<Dragging | null>(null);
@@ -190,6 +214,7 @@ export function useCardDrag({
 
   const retarget = React.useCallback(
     (drag: Dragging) => {
+      if (!drag.canSort || drag.overRow) return;
       if (performance.now() < drag.settledAt) return;
       const under = document.elementFromPoint(drag.pointerX, drag.pointerY);
       const card = under?.closest<HTMLElement>(CARD) ?? null;
@@ -241,6 +266,26 @@ export function useCardDrag({
       if (!drag) return;
       cancelAnimationFrame(drag.scrollFrame);
       swallowNextClick();
+
+      const row = drag.overRow;
+      row?.removeAttribute("data-drop-over");
+      const target = parseDropTarget(row?.getAttribute(DROP_ATTRIBUTE) ?? null);
+      const out = dropOutRef.current;
+      if (drop && target && out) {
+        // It leaves the list, so it doesn't land back in its place.
+        remember(rectsBefore);
+        setPreview(null);
+        drag.ghost.remove();
+        for (const card of document.querySelectorAll<HTMLElement>(
+          "[data-dragging]",
+        ))
+          delete card.dataset.dragging;
+        out.onDrop(
+          draggedNoteIds(drag.draggedId, out.picked, out.shownIds),
+          target,
+        );
+        return;
+      }
 
       const moved =
         drag.group !== drag.from ||
@@ -296,7 +341,7 @@ export function useCardDrag({
   );
 
   React.useEffect(() => {
-    if (!enabled) return;
+    if (!active) return;
     const start = (press: Pressed, e: PointerEvent) => {
       const card = cardOf(press.draggedId);
       if (!card) return;
@@ -327,6 +372,24 @@ export function useCardDrag({
         margin: "0",
       });
       ghost.append(copy);
+      const out = dropOutRef.current;
+      if (out) {
+        // Small enough to show the sidebar row it is about to land on,
+        // shrinking around the point it was grabbed at.
+        ghost.classList.add("nc-ghost-out");
+        ghost.style.transformOrigin = `${press.x - rect.left}px ${press.y - rect.top}px`;
+        const count = draggedNoteIds(
+          press.draggedId,
+          out.picked,
+          out.shownIds,
+        ).length;
+        if (count > 1) {
+          const badge = document.createElement("span");
+          badge.className = "drag-count";
+          badge.textContent = String(count);
+          ghost.append(badge);
+        }
+      }
       document.body.append(ghost);
       card.dataset.dragging = "";
       document.documentElement.classList.add("note-dragging");
@@ -339,6 +402,7 @@ export function useCardDrag({
         pointerX: e.clientX,
         pointerY: e.clientY,
         scrollFrame: 0,
+        overRow: null,
       };
       dragging.current = drag;
       setPreview({
@@ -395,6 +459,19 @@ export function useCardDrag({
       drag.pointerX = e.clientX;
       drag.pointerY = e.clientY;
       drag.ghost.style.transform = `translate(${e.clientX - press.x}px, ${e.clientY - press.y}px)`;
+      if (dropOutRef.current) {
+        // The sidebar is outside the board: its rows are found by position.
+        const row =
+          document
+            .elementsFromPoint(e.clientX, e.clientY)
+            .map((el) => el.closest(`[${DROP_ATTRIBUTE}]`))
+            .find(Boolean) ?? null;
+        if (row !== drag.overRow) {
+          drag.overRow?.removeAttribute("data-drop-over");
+          row?.setAttribute("data-drop-over", "");
+          drag.overRow = row;
+        }
+      }
       retarget(drag);
     };
     const onUp = (e: PointerEvent) => {
@@ -454,18 +531,21 @@ export function useCardDrag({
         pressed.current = null;
       }
     };
-  }, [enabled, end, retarget, release]);
+  }, [active, end, retarget, release]);
 
   /**
    * Put on each group's card box (marked `data-drag-group`), with every
-   * droppable group's current order.
+   * droppable group's current order. A group whose cards can only leave the
+   * board (Columns' archived ones) passes `inPlace` false.
    */
   const onPointerDown = (
     e: React.PointerEvent<HTMLElement>,
     group: string,
     groups: Record<string, string[]>,
+    inPlace = true,
   ) => {
-    if (!enabled || e.button !== 0 || pressed.current) return;
+    const canSort = inPlace && enabled;
+    if (!(canSort || dropOut) || e.button !== 0 || pressed.current) return;
     if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
     const target = e.target as HTMLElement;
     if (target.closest(OWN_CONTROLS)) return;
@@ -478,6 +558,7 @@ export function useCardDrag({
       draggedId: id,
       from: group,
       startGroups: groups,
+      canSort,
       box: e.currentTarget,
       x: e.clientX,
       y: e.clientY,
@@ -509,5 +590,5 @@ export function useCardDrag({
     );
   }, []);
 
-  return { preview, onPointerDown, enabled, settled };
+  return { preview, onPointerDown, enabled, active, settled };
 }

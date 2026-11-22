@@ -3,6 +3,7 @@ import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { TwoStepService, TWO_STEP_REQUIRED } from './two-step.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { totpCode } from './utils/totp';
+import { SecretBox } from './utils/secret-box';
 
 describe('TwoStepService', () => {
   interface Row {
@@ -26,6 +27,12 @@ describe('TwoStepService', () => {
     const prisma = {
       user: {
         findUnique: () => Promise.resolve({ ...row }),
+        findMany: () =>
+          Promise.resolve(
+            row.totpSecret && !row.totpSecret.startsWith('v1:')
+              ? [{ id: 'u1', totpSecret: row.totpSecret }]
+              : [],
+          ),
         update: ({ data }: { data: Partial<Row> }) => {
           Object.assign(row, data);
           return Promise.resolve(row);
@@ -36,20 +43,25 @@ describe('TwoStepService', () => {
         }: {
           where: {
             OR?: unknown;
+            totpSecret?: string;
             totpRecoveryCodes?: { has: string };
           };
           data: Partial<Row>;
         }) => {
-          const fits = where.totpRecoveryCodes
-            ? row.totpRecoveryCodes.includes(where.totpRecoveryCodes.has)
-            : row.totpLastStep === null ||
-              row.totpLastStep < (data.totpLastStep ?? 0);
+          const fits = where.totpSecret
+            ? row.totpSecret === where.totpSecret
+            : where.totpRecoveryCodes
+              ? row.totpRecoveryCodes.includes(where.totpRecoveryCodes.has)
+              : row.totpLastStep === null ||
+                row.totpLastStep < (data.totpLastStep ?? 0);
           if (fits) Object.assign(row, data);
           return Promise.resolve({ count: fits ? 1 : 0 });
         },
       },
     };
-    service = new TwoStepService(prisma as unknown as PrismaService);
+    service = new TwoStepService(prisma as unknown as PrismaService, {
+      jwtSecret: 'a-sufficiently-long-secret',
+    });
   });
 
   const turnOn = async () => {
@@ -72,7 +84,9 @@ describe('TwoStepService', () => {
       totpCode(secret, step()),
     );
     expect(recoveryCodes).toHaveLength(10);
-    expect(row.totpSecret).toBe(secret);
+    // Stored sealed, not as the key itself.
+    expect(row.totpSecret).toMatch(/^v1:/);
+    expect(row.totpSecret).not.toContain(secret);
     expect(row.totpRecoveryCodes).not.toContain(recoveryCodes[0]);
   });
 
@@ -103,6 +117,28 @@ describe('TwoStepService', () => {
       UnauthorizedException,
     );
     expect(row.totpRecoveryCodes).toHaveLength(9);
+  });
+
+  it('seals a key stored before sealing, which keeps working', async () => {
+    const { secret } = await turnOn();
+    row.totpSecret = secret; // as stored by an older version
+    row.totpLastStep = null;
+    await service.onModuleInit();
+    expect(row.totpSecret).toMatch(/^v1:/);
+    await expect(
+      service.checkSignIn('u1', totpCode(secret, step())),
+    ).resolves.toBeUndefined();
+  });
+
+  it('takes only recovery codes once the key can no longer be opened', async () => {
+    const { secret, recoveryCodes } = await turnOn();
+    row.totpSecret = new SecretBox('another-long-secret', 'totp').seal(secret);
+    await expect(
+      service.checkSignIn('u1', totpCode(secret, step() + 1)),
+    ).rejects.toThrow(UnauthorizedException);
+    await expect(
+      service.checkSignIn('u1', recoveryCodes[0]),
+    ).resolves.toBeUndefined();
   });
 
   it('turns off with a recovery code', async () => {

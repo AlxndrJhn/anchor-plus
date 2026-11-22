@@ -435,6 +435,11 @@ export function Sidebar({
               href={href}
               onClick={onNavigate}
               data-row={href}
+              data-note-drop={
+                href === "/archive" || href === "/trash"
+                  ? href.slice(1)
+                  : undefined
+              }
               aria-current={currentRow === href ? "page" : undefined}
               className={rowClass}
             >
@@ -536,6 +541,7 @@ export function Sidebar({
             <div
               key={tag.id}
               data-row={key}
+              data-note-drop={key}
               data-tag-row
               aria-current={isCurrent ? "page" : undefined}
               data-menu={menuTagId === tag.id || undefined}

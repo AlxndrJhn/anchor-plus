@@ -36,6 +36,8 @@ describe('AdminService.findUsers', () => {
         email: 'sam@example.com',
         name: 'Sam',
         oidcIdentities: [{ issuer: 'https://id.example.com' }],
+        totpSecret: null,
+        _count: { passkeys: 0, notes: 3, tags: 1 },
       },
     ]);
     count = vi.fn().mockResolvedValue(7);
@@ -88,6 +90,8 @@ describe('AdminService.findUsers', () => {
         name: 'Sam',
         profileImage: '/uploads/profiles/u1.jpg',
         oidcIdentities: [],
+        totpSecret: null,
+        _count: { passkeys: 0, notes: 0, tags: 0 },
       },
     ]);
 
@@ -115,6 +119,87 @@ describe('AdminService.findUsers', () => {
         },
       },
     });
+  });
+
+  it('says whether someone has an authenticator app and passkeys, never the key', async () => {
+    findMany.mockResolvedValue([
+      {
+        id: 'u1',
+        email: 'sam@example.com',
+        name: 'Sam',
+        oidcIdentities: [],
+        totpSecret: 'v1:sealed',
+        _count: { passkeys: 2, notes: 3, tags: 1 },
+      },
+    ]);
+
+    const [user] = (await service.findUsers(0, 50)).users;
+
+    expect(user).toMatchObject({
+      signInSecurity: { authenticator: true, passkeys: 2 },
+      _count: { notes: 3, tags: 1 },
+    });
+    expect(user).not.toHaveProperty('totpSecret');
+    expect(user._count).not.toHaveProperty('passkeys');
+  });
+});
+
+describe('AdminService.resetSignInSecurity', () => {
+  const make = (found: object | null) => {
+    const prisma = {
+      user: {
+        findUnique: vi.fn().mockResolvedValue(found),
+        update: vi.fn().mockReturnValue('update'),
+      },
+      passkey: { deleteMany: vi.fn().mockReturnValue('passkeys') },
+      refreshToken: { deleteMany: vi.fn().mockReturnValue('sessions') },
+      $transaction: vi.fn().mockResolvedValue([]),
+    };
+    const service = new AdminService(
+      prisma as unknown as PrismaService,
+      {} as SettingsService,
+      oidcConfig,
+      {} as SecondFactorService,
+      {} as OidcClientService,
+      noQuota,
+    );
+    return { prisma, service };
+  };
+
+  it('removes the app and passkeys, lets the password in, and signs out', async () => {
+    const { prisma, service } = make({ id: 'u1' });
+
+    await service.resetSignInSecurity('u1');
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'u1' },
+      data: {
+        totpSecret: null,
+        totpLastStep: null,
+        totpRecoveryCodes: [],
+        passwordSignIn: true,
+      },
+    });
+    expect(prisma.passkey.deleteMany).toHaveBeenCalledWith({
+      where: { userId: 'u1' },
+    });
+    expect(prisma.refreshToken.deleteMany).toHaveBeenCalledWith({
+      where: { userId: 'u1' },
+    });
+    expect(prisma.$transaction).toHaveBeenCalledWith([
+      'update',
+      'passkeys',
+      'sessions',
+    ]);
+  });
+
+  it('answers not found for someone who is not there', async () => {
+    const { prisma, service } = make(null);
+
+    await expect(service.resetSignInSecurity('nobody')).rejects.toThrow(
+      'User not found',
+    );
+    expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 });
 

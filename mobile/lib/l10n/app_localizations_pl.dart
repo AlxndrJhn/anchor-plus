@@ -4417,6 +4417,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get cameraShutter => 'Zrób zdjęcie';
 
   @override
+  String get cameraPointAtPage => 'Skieruj na stronę';
+
+  @override
+  String get cameraPageFound => 'Wykryto stronę';
+
+  @override
   String cameraTaken(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

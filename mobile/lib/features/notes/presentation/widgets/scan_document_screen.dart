@@ -54,6 +54,9 @@ class ScanRemoved extends ScanResult {
   const ScanRemoved();
 }
 
+/// A photo to add as a page, with its corners when they're already set.
+typedef _Shot = ({String path, List<Offset>? corners});
+
 /// A scan's pages: put them in order, turn, change or drop them, add more,
 /// set up its PDF, and share or save it.
 class ScanDocumentScreen extends StatefulWidget {
@@ -168,23 +171,25 @@ class _ScanDocumentScreenState extends State<ScanDocumentScreen> {
   }
 
   /// Copies [shots] to where the scan keeps its new photos, and adds a page
-  /// for each, its corners looked for in the background.
-  Future<void> _addShots(List<String> shots) async {
+  /// for each: with the corners set at the camera, or else looked for in
+  /// the background.
+  Future<void> _addShots(List<_Shot> shots) async {
     if (shots.isEmpty) return;
     final dir = Directory(
       p.join((await getTemporaryDirectory()).path, 'scan-photos'),
     );
     await dir.create(recursive: true);
     final added = <ScanPage>[];
-    for (final shot in shots) {
+    for (final (:path, :corners) in shots) {
       final copy = p.join(dir.path, '${_newKey()}.jpg');
-      await File(shot).copy(copy);
+      await File(path).copy(copy);
       added.add(
         ScanPage(
           id: '$localScanPhoto$copy',
           profile: _scan.pages.isEmpty
               ? ScanProfile.text
               : _scan.pages.last.profile,
+          corners: corners,
         ),
       );
     }
@@ -195,6 +200,7 @@ class _ScanDocumentScreenState extends State<ScanDocumentScreen> {
     );
     for (var i = 0; i < added.length; i++) {
       final page = added[i];
+      if (page.corners != null) continue;
       final corners = await findPageCornersInFile(
         page.id.substring(localScanPhoto.length),
       ).catchError((Object _) => null);
@@ -208,17 +214,19 @@ class _ScanDocumentScreenState extends State<ScanDocumentScreen> {
   }
 
   Future<void> _takePhotos() async {
-    final shots = <String>[];
+    final shots = <_Shot>[];
     await MultiShotCameraScreen.open(
       context,
-      onPicture: (shot) async => shots.add(shot.path),
+      findsPages: true,
+      onPicture: (shot, corners) async =>
+          shots.add((path: shot.path, corners: corners)),
     );
     await _addShots(shots);
   }
 
   Future<void> _choosePhotos() async {
     final picked = await ImagePicker().pickMultiImage(imageQuality: 95);
-    await _addShots([for (final x in picked) x.path]);
+    await _addShots([for (final x in picked) (path: x.path, corners: null)]);
   }
 
   void _photoMissing() => AppSnackbar.show(

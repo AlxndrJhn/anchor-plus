@@ -100,6 +100,13 @@ export class AdminController {
     return this.adminService.resetPassword(id, resetPasswordDto.newPassword);
   }
 
+  /** For someone who lost their authenticator app and recovery codes. */
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('users/:id/reset-sign-in-security')
+  resetSignInSecurity(@Param('id') id: string) {
+    return this.adminService.resetSignInSecurity(id);
+  }
+
   @Post('users/:id/approve')
   approveUser(@Param('id') id: string) {
     return this.adminService.approveUser(id);

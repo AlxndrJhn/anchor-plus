@@ -8,6 +8,7 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_pl.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -98,6 +99,8 @@ abstract class AppLocalizations {
     Locale('de'),
     Locale('en'),
     Locale('pl'),
+    Locale('zh'),
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
   ];
 
   /// The app's name in Android's recent apps, the same as its launcher name.
@@ -6268,6 +6271,18 @@ abstract class AppLocalizations {
   /// **'Take a picture'**
   String get cameraShutter;
 
+  /// Hint over the scanner camera's preview while no sheet of paper is in view.
+  ///
+  /// In en, this message translates to:
+  /// **'Point at a page'**
+  String get cameraPointAtPage;
+
+  /// Hint over the scanner camera's preview while a sheet of paper is in view and outlined.
+  ///
+  /// In en, this message translates to:
+  /// **'Page found'**
+  String get cameraPageFound;
+
   /// Screen reader label of the pile of pictures taken so far on the camera page.
   ///
   /// In en, this message translates to:
@@ -7462,13 +7477,25 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['de', 'en', 'pl'].contains(locale.languageCode);
+      <String>['de', 'en', 'pl', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+script codes are specified.
+  switch (locale.languageCode) {
+    case 'zh':
+      {
+        switch (locale.scriptCode) {
+          case 'Hant':
+            return AppLocalizationsZhHant();
+        }
+        break;
+      }
+  }
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'de':
@@ -7477,6 +7504,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'pl':
       return AppLocalizationsPl();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

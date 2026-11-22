@@ -84,6 +84,10 @@ interface NoteCardProps {
   searchTerm?: string;
   /** Alt+Arrow keys move the card one place earlier (-1) or later (1). */
   onMove?: (noteId: string, step: -1 | 1) => void;
+  /** Where the card opens its note; columns keeps the list's tag. */
+  href?: string;
+  /** Open beside the list, in columns. */
+  isOpen?: boolean;
 }
 
 const ROW_LIMIT: Record<CardLayout, number> = { list: 2, grid: 4, masonry: 6 };
@@ -144,6 +148,8 @@ export const NoteCard = React.memo(function NoteCard({
   dateLabel,
   searchTerm,
   onMove,
+  href = `/notes/${note.id}`,
+  isOpen,
 }: NoteCardProps) {
   const t = useTranslations("notes.noteCard");
   // A note locked and not opened this session shows only its title.
@@ -286,8 +292,8 @@ export const NoteCard = React.memo(function NoteCard({
       : [];
   const hiddenCount = attachmentCount - shownPictures.length;
   const noteHref = searchTerm
-    ? `/notes/${note.id}?hl=${encodeURIComponent(searchTerm)}`
-    : `/notes/${note.id}`;
+    ? `${href}${href.includes("?") ? "&" : "?"}hl=${encodeURIComponent(searchTerm)}`
+    : href;
   const [viewing, setViewing] = React.useState<string | null>(null);
   const [readingOffline, setReadingOffline] = React.useState(false);
   const tickItem = useCardChecklist();
@@ -314,11 +320,12 @@ export const NoteCard = React.memo(function NoteCard({
       data-note={note.background ?? ""}
       data-flip={note.id}
       aria-label={label}
-      className={cn("nc", picked && "picked")}
+      className={cn("nc", picked && "picked", isOpen && "open")}
     >
       <Link
         href={noteHref}
         aria-label={label}
+        aria-current={isOpen ? "page" : undefined}
         aria-keyshortcuts={
           onMove
             ? "Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight"

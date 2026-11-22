@@ -34,7 +34,14 @@ const PageCorners wholeCorners = [
 /// those keep their ratios when a side is stretched.
 PageCorners? findPageCorners(Uint8List rgba, int width, int height) {
   if (width < 8 || height < 8 || rgba.length < width * height * 4) return null;
-  final gray = _blurred(_luminance(rgba, width, height), width, height);
+  return findPageCornersInGray(_luminance(rgba, width, height), width, height);
+}
+
+/// [findPageCorners] for a picture that's already grey: one brightness byte
+/// per pixel, as a camera's preview frames come.
+PageCorners? findPageCornersInGray(Uint8List luma, int width, int height) {
+  if (width < 8 || height < 8 || luma.length < width * height) return null;
+  final gray = _blurred(luma, width, height);
   final threshold = _otsu(gray);
   PageCorners? best;
   var bestScore = 0.0;

@@ -6,6 +6,7 @@ import {
   center,
   clickElement,
   dragBetween,
+  type Play,
   pressKey,
   type Step,
   selectInEditor,
@@ -164,6 +165,62 @@ const openNote = (title: string, say?: string): Step => ({
   click: { css: `a.nc-link[aria-label="${title}"]` },
   say,
 });
+
+/**
+ * Drags the corner dot of the hovered picture in the text sideways, to
+ * `share` of its width; the pointer follows the dot as the picture resizes.
+ */
+const dragGrip = async (play: Play, share: number) => {
+  const grip = await play.find({ css: ".nit-grip" });
+  const picture = document.querySelector(".ql-editor .note-image img");
+  const width = picture?.getBoundingClientRect().width ?? 200;
+  const dx = width * (share - 1);
+  await play.moveTo(grip);
+  const start = center(grip);
+  const pointer = {
+    bubbles: true,
+    cancelable: true,
+    composed: true,
+    pointerId: 1,
+    pointerType: "mouse",
+    isPrimary: true,
+    view: window,
+  };
+  play.cursor(start.x, start.y, true);
+  grip.dispatchEvent(
+    new PointerEvent("pointerdown", {
+      ...pointer,
+      button: 0,
+      buttons: 1,
+      clientX: start.x,
+      clientY: start.y,
+    }),
+  );
+  const moves = 24;
+  let x = start.x;
+  for (let i = 1; i <= moves; i++) {
+    x = start.x + (dx * i) / moves;
+    grip.dispatchEvent(
+      new PointerEvent("pointermove", {
+        ...pointer,
+        buttons: 1,
+        clientX: x,
+        clientY: start.y,
+      }),
+    );
+    await play.pause(40);
+    // A narrower picture is shorter too: its corner moves up.
+    const at = grip.isConnected ? center(grip) : { x, y: start.y };
+    play.cursor(at.x, at.y, true);
+  }
+  grip.dispatchEvent(
+    new PointerEvent("pointerup", { ...pointer, clientX: x, clientY: start.y }),
+  );
+  // The dot hides on release; the pointer stays at the picture's corner.
+  const box = picture?.getBoundingClientRect();
+  if (box) play.cursor(box.right, box.bottom, false);
+  else play.cursor(x, start.y, false);
+};
 
 /** Hands files to the open note's attachment picker, as choosing them would. */
 const attach = (files: () => File[], say?: string): Step => ({
@@ -458,14 +515,15 @@ export const demos: Demo[] = [
   {
     slug: "paste-picture",
     title: "Paste a picture",
-    summary: "Paste a picture into a note to add it as an attachment.",
+    summary:
+      "Paste a picture into a note's text, then resize it by its corner.",
     seed: base,
     start: "/notes",
     steps: [
       openNote("Lisbon trip", "Copy a picture, open a note…"),
       { wait: 800 },
       {
-        say: "…and paste it: it is added to the note.",
+        say: "…and paste it with Ctrl+V: it goes in where the caret is.",
         run: async (play) => {
           const editor = await play.find({ css: ".ql-editor" });
           await play.moveTo(editor);
@@ -485,12 +543,20 @@ export const demos: Demo[] = [
           );
         },
       },
+      { waitFor: { css: ".ql-editor .note-image img" } },
+      { wait: 1000 },
+      {
+        hover: { css: ".ql-editor .note-image img" },
+        say: "Too big? Drag the dot at its corner…",
+      },
+      { run: (play) => dragGrip(play, 0.45) },
+      { say: "…and it keeps that size, on every device." },
       { wait: 1500 },
       { click: { label: "Back" }, say: "The card shows it, too." },
       { wait: 1500 },
     ],
     outro:
-      "Try it: copy a picture or take a screenshot, then paste it in a note.",
+      "Try it: copy a picture or take a screenshot, paste it in a note, then drag its corner.",
   },
   {
     slug: "attach-file",
@@ -664,54 +730,8 @@ export const demos: Demo[] = [
         hover: { css: ".ql-editor .note-image img" },
         say: "Hover a picture: drag the dot at its corner to resize it.",
       },
-      {
-        run: async (play) => {
-          const grip = await play.find({ css: ".nit-grip" });
-          const start = center(grip);
-          await play.moveTo(grip);
-          const pointer = {
-            bubbles: true,
-            cancelable: true,
-            composed: true,
-            pointerId: 1,
-            pointerType: "mouse",
-            isPrimary: true,
-            view: window,
-          };
-          play.cursor(start.x, start.y, true);
-          grip.dispatchEvent(
-            new PointerEvent("pointerdown", {
-              ...pointer,
-              button: 0,
-              buttons: 1,
-              clientX: start.x,
-              clientY: start.y,
-            }),
-          );
-          let x = start.x;
-          for (let i = 1; i <= 24; i++) {
-            x = start.x + i * 8;
-            play.cursor(x, start.y, true);
-            grip.dispatchEvent(
-              new PointerEvent("pointermove", {
-                ...pointer,
-                buttons: 1,
-                clientX: x,
-                clientY: start.y,
-              }),
-            );
-            await play.pause(40);
-          }
-          grip.dispatchEvent(
-            new PointerEvent("pointerup", {
-              ...pointer,
-              clientX: x,
-              clientY: start.y,
-            }),
-          );
-          play.cursor(x, start.y, false);
-        },
-      },
+      // The tomatoes, at 40%, grow to 70%.
+      { run: (play) => dragGrip(play, 0.7 / 0.4) },
       { wait: 600 },
       rightClick(
         { css: ".ql-editor .note-image img", nth: 1 },

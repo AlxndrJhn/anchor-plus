@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Patch,
   Put,
@@ -47,17 +48,23 @@ export class NoteShareLinksController {
   }
 }
 
-/** The link's side: no account, only the token in the link. */
+/**
+ * The link's side: no account, only the token in the link. Nothing here is
+ * kept by a browser or proxy, so taking the link away also takes the note
+ * off whatever device opened it.
+ */
 @Controller('api/shared')
 export class SharedNotesController {
   constructor(private readonly noteShareLinksService: NoteShareLinksService) {}
 
   @Get(':token')
+  @Header('Cache-Control', 'no-store')
   open(@Param('token') token: string) {
     return this.noteShareLinksService.openLink(token);
   }
 
   @Patch(':token')
+  @Header('Cache-Control', 'no-store')
   update(@Param('token') token: string, @Body() dto: UpdateLinkedNoteDto) {
     return this.noteShareLinksService.updateLinkedNote(token, dto);
   }

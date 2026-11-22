@@ -4208,6 +4208,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraShutter => 'Take a picture';
 
   @override
+  String get cameraPointAtPage => 'Point at a page';
+
+  @override
+  String get cameraPageFound => 'Page found';
+
+  @override
   String cameraTaken(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

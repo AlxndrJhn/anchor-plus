@@ -18,6 +18,7 @@ import {
   Search,
   ShieldAlert,
   ShieldCheck,
+  ShieldOff,
   Trash2,
   UserPlus,
   UserRound,
@@ -62,6 +63,7 @@ import {
   getUsers,
   rejectUser,
   resetPassword,
+  resetSignInSecurity,
 } from "../api";
 import { adminKeys } from "../queries";
 import type { AdminUser } from "../types";
@@ -124,9 +126,15 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
     user: AdminUser;
     password: string;
   } | null>(null);
+  const [resettingSecurity, setResettingSecurity] =
+    React.useState<AdminUser | null>(null);
   const [deleting, setDeleting] = React.useState<AdminUser | null>(null);
   const [declining, setDeclining] = React.useState<AdminUser | null>(null);
   const shownResetting = useLastShown(resetting, !!resetting);
+  const shownResettingSecurity = useLastShown(
+    resettingSecurity,
+    !!resettingSecurity,
+  );
   const shownDeleting = useLastShown(deleting, !!deleting);
   const shownDeclining = useLastShown(declining, !!declining);
 
@@ -203,6 +211,16 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
       else toast.success(t("passwordReset", { name: user.name }));
     },
     onError: (_, user) => toast.error(t("resetFailed", { name: user.name })),
+  });
+  const resetSecurity = useMutation({
+    mutationFn: (user: AdminUser) => resetSignInSecurity(user.id),
+    onSuccess: async (_, user) => {
+      await refresh();
+      setResettingSecurity(null);
+      toast.success(t("securityReset", { name: user.name }));
+    },
+    onError: (_, user) =>
+      toast.error(t("resetSecurityFailed", { name: user.name })),
   });
 
   const rows = users.data?.users ?? [];
@@ -363,6 +381,16 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
                               {t("resetPassword")}
                             </DropdownMenuItem>
                           )}
+                          {(user.signInSecurity?.authenticator ||
+                            !!user.signInSecurity?.passkeys) && (
+                            <DropdownMenuItem
+                              disabled={you}
+                              onSelect={() => setResettingSecurity(user)}
+                            >
+                              <ShieldOff />
+                              {t("resetSecurity")}
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             tone="danger"
@@ -429,6 +457,20 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
         variant="primary"
         isPending={reset.isPending}
         onConfirm={() => resetting && reset.mutate(resetting)}
+      />
+      <ConfirmationDialog
+        open={!!resettingSecurity}
+        onOpenChange={(open) => !open && setResettingSecurity(null)}
+        title={t("resetSecurityTitle", {
+          name: shownResettingSecurity?.name ?? "",
+        })}
+        description={t("resetSecurityDescription")}
+        confirmLabel={t("resetSecurity")}
+        busyLabel={t("resetting")}
+        isPending={resetSecurity.isPending}
+        onConfirm={() =>
+          resettingSecurity && resetSecurity.mutate(resettingSecurity)
+        }
       />
       <NewPasswordDialog
         value={newPassword}

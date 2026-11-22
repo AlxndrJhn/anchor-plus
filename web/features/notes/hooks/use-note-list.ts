@@ -251,7 +251,9 @@ export function useNoteList(
     searching: isSearching,
     /** Puts the search in the address now, as the field loses focus. */
     flushQueryToUrl: () => writeListParams(query, filters),
-    layout: viewMode,
+    viewMode,
+    // Columns shows its list as list cards; narrow screens fall back to it.
+    layout: viewMode === "columns" ? ("list" as const) : viewMode,
     setLayout: (layout: ViewMode) => {
       flip.prepare();
       setNotesPreference("viewMode", layout);
