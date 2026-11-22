@@ -72,6 +72,38 @@ void main() {
     expect(appLocaleFor(null, supported), const Locale('en'));
   });
 
+  test('Chinese picks its script from the phone, else its region', () {
+    const supported = AppLocalizations.supportedLocales;
+    String script(Locale phone) => appLocaleFor([phone], supported).scriptCode!;
+
+    expect(script(const Locale('zh', 'CN')), 'Hans');
+    expect(script(const Locale('zh', 'TW')), 'Hant');
+    expect(script(const Locale('zh', 'HK')), 'Hant');
+    expect(script(const Locale('zh')), 'Hans');
+    expect(
+      script(const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')),
+      'Hant',
+    );
+    expect(
+      lookupAppLocalizations(
+        appLocaleFor(const [Locale('zh', 'TW')], supported),
+      ),
+      isA<AppLocalizations>().having(
+        (l) => l.localeName,
+        'localeName',
+        'zh_Hant',
+      ),
+    );
+  });
+
+  test('a language chosen in Settings is read as a tag', () {
+    expect(
+      localeOfTag('zh-Hant'),
+      const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+    );
+    expect(localeOfTag('de'), const Locale('de'));
+  });
+
   group('translations', () {
     final translations = {
       for (final file in Directory('lib/l10n').listSync().whereType<File>())
@@ -81,11 +113,11 @@ void main() {
               jsonDecode(file.readAsStringSync()) as Map<String, dynamic>,
     };
 
-    test('German and Polish are there', () {
-      expect(translations.keys, containsAll(['de', 'pl']));
+    test('German, Polish and both Chinese scripts are there', () {
+      expect(translations.keys, containsAll(['de', 'pl', 'zh', 'zh_Hant']));
       expect(
         AppLocalizations.supportedLocales.map((l) => l.languageCode),
-        containsAll(['en', 'de', 'pl']),
+        containsAll(['en', 'de', 'pl', 'zh']),
       );
     });
 

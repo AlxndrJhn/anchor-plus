@@ -22,6 +22,18 @@
             "state": "translated",
             "value": "Nowa notatka"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建笔记"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增筆記"
+          }
         }
       }
     },
@@ -45,6 +57,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tytuł"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标题"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標題"
           }
         }
       }
@@ -70,6 +94,18 @@
             "state": "translated",
             "value": "Zacznij pisać"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始书写"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始書寫"
+          }
         }
       }
     },
@@ -93,6 +129,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Anuluj"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
           }
         }
       }
@@ -118,6 +166,18 @@
             "state": "translated",
             "value": "Zapisz"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存"
+          }
         }
       }
     },
@@ -141,6 +201,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zamknij"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉"
           }
         }
       }
@@ -166,6 +238,18 @@
             "state": "translated",
             "value": "Zaloguj się do Anchor, aby zapisać to, co udostępniasz."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 Anchor 以保存你共享的内容。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入 Anchor 以儲存你共享的內容。"
+          }
         }
       }
     },
@@ -189,6 +273,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nie ma tu nic, co Anchor mógłby zapisać."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这里没有 Anchor 可以保存的内容。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這裡沒有 Anchor 可以儲存的內容。"
           }
         }
       }
@@ -258,6 +354,30 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "Nie udało się dodać %lld pliku."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个文件无法添加。"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 個檔案無法新增。"
                 }
               }
             }
@@ -334,6 +454,30 @@
               }
             }
           }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个文件无法添加。Anchor 支持图片和音频。"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 個檔案無法新增。Anchor 支援圖片和音訊。"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -406,6 +550,30 @@
               }
             }
           }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个文件超过 50 MB，无法添加。"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 個檔案超過 50 MB，無法新增。"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -429,6 +597,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dodano tylko pierwszych 20 plików."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅添加前 20 个文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅新增前 20 個檔案。"
           }
         }
       }
@@ -454,6 +634,18 @@
             "state": "translated",
             "value": "Usuń: %@"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除 %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除 %@"
+          }
         }
       }
     },
@@ -477,6 +669,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tag %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标签 %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標籤 %@"
           }
         }
       }
