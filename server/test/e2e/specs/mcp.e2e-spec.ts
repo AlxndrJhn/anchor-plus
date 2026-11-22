@@ -103,6 +103,7 @@ describe('mcp', () => {
       'append_to_note',
       'bulk_update_notes',
       'create_note',
+      'create_public_link',
       'create_tag',
       'delete_attachment',
       'delete_tag',
@@ -110,10 +111,12 @@ describe('mcp', () => {
       'get_attachment',
       'get_note',
       'get_note_version',
+      'get_public_link',
       'list_note_versions',
       'list_notes',
       'list_shares',
       'list_tags',
+      'remove_public_link',
       'restore_note',
       'restore_note_version',
       'share_note',
@@ -624,6 +627,46 @@ describe('mcp', () => {
 
     await call('unshare_note', { noteId: note.id, shareId: shares[0].shareId });
     expect(await json('list_shares', { noteId: note.id })).toEqual([]);
+  });
+
+  it('makes a public link to a note, changes it and removes it', async () => {
+    const note = await user.notes.create({ title: 'Recipe', content: null });
+
+    expect((await call('get_public_link', { noteId: note.id })).text).toBe(
+      'This note has no public link.',
+    );
+
+    const made = await json<{ url: string; permission: string }>(
+      'create_public_link',
+      { noteId: note.id },
+    );
+    expect(made.permission).toBe('viewer');
+    const token = /\/s\/([\w-]+)$/.exec(made.url)![1];
+    const opened = await request(ctx.http)
+      .get(`/api/shared/${token}`)
+      .expect(200);
+    expect(opened.body).toMatchObject({ title: 'Recipe', canEdit: false });
+
+    const changed = await json<{ url: string; permission: string }>(
+      'create_public_link',
+      { noteId: note.id, permission: 'editor' },
+    );
+    expect(changed).toMatchObject({ url: made.url, permission: 'editor' });
+    expect(await json('get_public_link', { noteId: note.id })).toMatchObject(
+      changed,
+    );
+
+    await call('remove_public_link', { noteId: note.id });
+    await request(ctx.http).get(`/api/shared/${token}`).expect(404);
+  });
+
+  it("does not make public links to other people's notes", async () => {
+    const other = await ctx.registerUser();
+    const note = await other.notes.create({ title: 'Theirs', content: null });
+
+    const made = await call('create_public_link', { noteId: note.id });
+
+    expect(made.isError).toBe(true);
   });
 
   it("does not reach other people's notes", async () => {
