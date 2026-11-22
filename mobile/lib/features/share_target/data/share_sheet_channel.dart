@@ -104,6 +104,10 @@ class ShareSheetChannel {
   Future<void> close({required bool saved}) =>
       _channel.invokeMethod('close', {'saved': saved});
 
+  /// Whether the app is open and takes in what's saved itself.
+  Future<bool> isAppRunning() async =>
+      await _channel.invokeMethod<bool>('isAppRunning') ?? false;
+
   Future<void> openApp() => _channel.invokeMethod('openApp');
 
   Future<void> _handle(MethodCall call) async {

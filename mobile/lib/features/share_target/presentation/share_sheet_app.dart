@@ -13,6 +13,7 @@ import '../../../core/theme/style_typography.dart';
 import '../../../core/theme/system_bars.dart';
 import '../../../core/widgets/anchor_sheet.dart';
 import '../../../l10n/l10n.dart';
+import '../data/share_background_sync.dart';
 import '../data/share_inbox.dart';
 import '../data/share_sheet_channel.dart';
 import '../domain/share_context.dart';
@@ -136,6 +137,10 @@ class _SheetHostState extends State<_SheetHost> {
         onOpenApp: _app.channel.openApp,
       ),
     );
+    // An open app takes the share in and syncs it; otherwise Android does.
+    if (isSaved == true && !await _app.channel.isAppRunning()) {
+      await queueShareSync();
+    }
     await Future<void>.delayed(Spring.smooth.duration);
     await _app.channel.close(saved: isSaved ?? false);
   }

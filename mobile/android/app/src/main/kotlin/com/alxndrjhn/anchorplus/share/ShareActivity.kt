@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import dev.fluttercommunity.workmanager.WorkmanagerPlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode
 import io.flutter.embedding.engine.FlutterEngine
@@ -36,11 +37,14 @@ class ShareActivity : FlutterActivity() {
     // Only the plugins the sheet uses.
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         flutterEngine.plugins.add(ShareFolderPlugin(listens = false))
+        // Queues the upload when the app isn't open to take the share in.
+        flutterEngine.plugins.add(WorkmanagerPlugin())
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).apply {
             setMethodCallHandler { call, result ->
                 val intake = intake ?: return@setMethodCallHandler result.error("no_share", null, null)
                 when (call.method) {
                     "load" -> result.success(intake.load())
+                    "isAppRunning" -> result.success(ShareFolderPlugin.isAppListening)
                     "close" -> {
                         close(isSaved = call.argument<Boolean>("saved") == true)
                         result.success(null)

@@ -38,6 +38,9 @@ class ShareFolderPlugin(private val listens: Boolean) : FlutterPlugin, MethodCha
 
         fun staging(context: Context) = File(root(context), "staging")
 
+        /** Whether the app's engine is up to import the inbox itself. */
+        val isAppListening get() = listeners.isNotEmpty()
+
         fun inboxChanged() = listeners.forEach { it.invokeMethod("inboxChanged", null) }
     }
 }

@@ -315,7 +315,7 @@ void main() {
         ),
       );
 
-      await importer.importAll(inbox, 'u1');
+      expect(await importer.importAll(inbox, 'u1'), 1);
 
       final note =
           verify(() => notes.createNote(captureAny())).captured.single as Note;
@@ -338,7 +338,7 @@ void main() {
         ShareEntry(id: 'n2', userId: 'other', savedAt: DateTime.utc(2026)),
       );
 
-      await importer.importAll(inbox, 'u1');
+      expect(await importer.importAll(inbox, 'u1'), 0);
 
       verifyNever(() => notes.createNote(any()));
       expect(folder.existsSync(), isFalse);
@@ -365,13 +365,13 @@ void main() {
         return 'a';
       });
 
-      await importer.importAll(inbox, 'u1');
+      expect(await importer.importAll(inbox, 'u1'), 0);
       expect(folder.existsSync(), isTrue);
 
       when(
         () => notes.getNote('n3'),
       ).thenAnswer((_) async => const Note(id: 'n3', title: ''));
-      await importer.importAll(inbox, 'u1');
+      expect(await importer.importAll(inbox, 'u1'), 1);
 
       verify(() => notes.createNote(any())).called(1);
       final names = verify(

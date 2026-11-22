@@ -22,8 +22,10 @@ class ShareImporter {
   final TagsRepository tags;
 
   /// Drops shares saved for another account. A failed share stays for the
-  /// next try, without making its note or added files twice.
-  Future<void> importAll(ShareInbox inbox, String userId) async {
+  /// next try, without making its note or added files twice. Returns how
+  /// many shares it took in.
+  Future<int> importAll(ShareInbox inbox, String userId) async {
+    var imported = 0;
     for (final (:entry, :folder) in await inbox.entries()) {
       if (entry.userId != userId) {
         await inbox.remove(folder);
@@ -64,6 +66,7 @@ class ShareImporter {
           await file.delete();
         }
         await inbox.remove(folder);
+        imported++;
         AppLogger.instance.info(
           LogTags.shareTarget,
           'imported id=${entry.id} files=${entry.files.length}',
@@ -77,5 +80,6 @@ class ShareImporter {
         );
       }
     }
+    return imported;
   }
 }
