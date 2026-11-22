@@ -183,7 +183,10 @@ export async function startTwoStep(): Promise<TwoStepSetup> {
 
 export async function enableTwoStep(code: string): Promise<RecoveryCodes> {
   return api
-    .post("api/auth/two-step/enable", { json: { code } })
+    .post("api/auth/two-step/enable", {
+      // This device stays signed in; the server signs out every other one.
+      json: { code, refreshToken: getRefreshToken() ?? undefined },
+    })
     .json<RecoveryCodes>();
 }
 

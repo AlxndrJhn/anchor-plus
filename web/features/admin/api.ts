@@ -63,6 +63,11 @@ export async function resetPassword(
     .json<ResetPasswordResponse>();
 }
 
+/** Removes someone's authenticator app and passkeys, and signs them out. */
+export async function resetSignInSecurity(id: string): Promise<void> {
+  await api.post(`api/admin/users/${id}/reset-sign-in-security`);
+}
+
 export async function getRegistrationSettings(): Promise<RegistrationSettings> {
   return api
     .get("api/admin/settings/registration")

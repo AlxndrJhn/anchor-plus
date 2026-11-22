@@ -293,7 +293,7 @@ The [desktop app](#desktop-app) installs with winget too.
    | Variable | Required | Default | Description |
    |----------|----------|---------|-------------|
    | `APP_URL` | No | `http://localhost:3001` | Base URL where Anchor is served |
-   | `JWT_SECRET` | No | (auto-generated) | Auth token secret. Min 16 characters when set |
+   | `JWT_SECRET` | No | (auto-generated) | Auth token secret. Min 16 characters when set. Authenticator app keys are stored encrypted with a key made from it: changing it signs everyone out, and people with an authenticator app then sign in with a recovery code and set the app up again |
    | `DATA_DIR` | No | `/data` | Root directory for persisted uploads |
    | `STORAGE_QUOTA_FREE_MB` | No | (no limit) | How much each account on the Free plan may upload (pictures, recordings and files), in MB. For a server many people sign up to; admins change an account's plan or limit under Admin › People |
    | `STORAGE_QUOTA_PLUS_MB` | No | (no limit) | The same for accounts on the Plus plan |

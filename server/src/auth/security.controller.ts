@@ -21,6 +21,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { AllowBeforeSecondFactor } from './decorators/allow-before-second-factor.decorator';
 import {
   AddPasskeyDto,
+  EnableTwoStepDto,
   PasskeySignInDto,
   PasswordSignInDto,
   TwoStepCodeDto,
@@ -63,8 +64,14 @@ export class SecurityController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('two-step/enable')
-  enableTwoStep(@CurrentUser() user: User, @Body() { code }: TwoStepCodeDto) {
-    return this.twoStepService.enable(user.id, code);
+  async enableTwoStep(
+    @CurrentUser() user: User,
+    @Body() { code, refreshToken }: EnableTwoStepDto,
+  ) {
+    const result = await this.twoStepService.enable(user.id, code);
+    // Whoever signed in with the password alone is signed out.
+    await this.authService.revokeOtherRefreshTokens(user.id, refreshToken);
+    return result;
   }
 
   @UseGuards(JwtAuthGuard)
