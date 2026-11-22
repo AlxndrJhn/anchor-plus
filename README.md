@@ -766,6 +766,10 @@ destructive, so your client can ask before running them. Notes others share with
 can hold text aimed at Claude, so treat them as untrusted. Revoking the API
 token cuts Claude off.
 
+Claude sends attachments as base64 inside the request, which makes a 50 MB
+file about 67 MB on the wire, so a reverse proxy in front of Anchor has to let
+`/api/mcp` requests up to 70 MB through (nginx: `client_max_body_size 70m;`).
+
 ## Browser Extension
 
 [Save to Anchor](https://github.com/korderos/anchor_webextension), a

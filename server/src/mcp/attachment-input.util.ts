@@ -14,11 +14,15 @@ export type DecodedAttachment = Pick<
   'originalname' | 'mimetype' | 'buffer' | 'size'
 >;
 
+/** All files sent in one call together: enough for one of the biggest. */
+export const ATTACHMENTS_MAX_SENT_BYTES = ATTACHMENT_MAX_FILE_SIZE;
+
 /**
- * Requests are capped at 30 MB of JSON (app.setup.ts), and base64 grows
- * bytes by a third: this is about what fits in one call, all files together.
+ * The JSON an MCP request may carry (app.setup.ts): the attachments above,
+ * which base64 grows by a third, and room for the rest of the call.
  */
-export const ATTACHMENTS_MAX_SENT_BYTES = 20 * 1024 * 1024;
+export const MCP_REQUEST_MAX_BYTES =
+  Math.ceil((ATTACHMENTS_MAX_SENT_BYTES * 4) / 3) + 2 * 1024 * 1024;
 
 const DATA_URL = /^data:([^;,]*)(?:;[^,]*)?;base64,/i;
 const BASE64 = /^[A-Za-z0-9+/_-]*={0,2}$/;
