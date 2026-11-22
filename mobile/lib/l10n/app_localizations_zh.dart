@@ -4054,6 +4054,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cameraShutter => '拍照';
 
   @override
+  String get cameraPointAtPage => '对准一页纸';
+
+  @override
+  String get cameraPageFound => '已识别页面';
+
+  @override
   String cameraTaken(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -8801,6 +8807,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get cameraShutter => '拍照';
+
+  @override
+  String get cameraPointAtPage => '對準一頁紙';
+
+  @override
+  String get cameraPageFound => '已識別頁面';
 
   @override
   String cameraTaken(int count) {

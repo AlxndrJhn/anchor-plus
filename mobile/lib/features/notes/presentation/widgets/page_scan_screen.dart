@@ -39,17 +39,22 @@ class PageScanScreen extends StatefulWidget {
   /// null.
   final PageCorners? corners;
 
-  /// Looks for the page; the phone's own way when null. For tests.
+  /// Looks for the page; [findPageCornersInFile] when null.
   final Future<PageCorners?> Function(String path)? findCorners;
 
   static Future<PageCorners?> open(
     BuildContext context,
     String path, {
     PageCorners? corners,
+    Future<PageCorners?> Function(String path)? findCorners,
   }) => Navigator.of(context, rootNavigator: true).push<PageCorners>(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (_) => PageScanScreen(path: path, corners: corners),
+      builder: (_) => PageScanScreen(
+        path: path,
+        corners: corners,
+        findCorners: findCorners,
+      ),
     ),
   );
 

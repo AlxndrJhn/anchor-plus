@@ -4284,6 +4284,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get cameraShutter => 'Bild aufnehmen';
 
   @override
+  String get cameraPointAtPage => 'Auf eine Seite richten';
+
+  @override
+  String get cameraPageFound => 'Seite erkannt';
+
+  @override
   String cameraTaken(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

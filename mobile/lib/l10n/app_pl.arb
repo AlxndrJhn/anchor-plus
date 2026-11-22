@@ -1028,6 +1028,8 @@
   "cameraFailed": "Nie udało się uruchomić aparatu",
   "cameraSwitch": "Przełącz aparat",
   "cameraShutter": "Zrób zdjęcie",
+  "cameraPointAtPage": "Skieruj na stronę",
+  "cameraPageFound": "Wykryto stronę",
   "cameraTaken": "{count, plural, =1{Zrobiono 1 zdjęcie} few{Zrobiono {count} zdjęcia} many{Zrobiono {count} zdjęć} other{Zrobiono {count} zdjęcia}}",
   "cameraPicturesAdded": "{count, plural, =1{Dodano 1 zdjęcie} few{Dodano {count} zdjęcia} many{Dodano {count} zdjęć} other{Dodano {count} zdjęcia}}",
   "inlinePicture": "Obraz",

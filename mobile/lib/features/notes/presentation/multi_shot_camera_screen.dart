@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/files/live_page_finder.dart';
+import '../../../core/files/page_scan.dart';
 import '../../../core/logging/app_logger.dart';
 import '../../../core/logging/log_tags.dart';
 import '../../../core/motion/haptics.dart';
@@ -17,27 +20,52 @@ import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/page_bar.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../l10n/l10n.dart';
+import 'widgets/page_scan_screen.dart';
 
 /// Takes pictures one after another without going back to the note: each
 /// shot flies into the pile in the corner, and goes to [onPicture] at once,
 /// so none is lost if the app is closed. Done (or Back) returns how many
 /// were taken, once the last has been handed over.
+///
+/// With [findsPages], it's a scanner: the page in view is outlined live,
+/// and each shot opens the page's corners to fine-tune before it's kept.
+/// Cancelling there throws the shot away, to take it again.
 class MultiShotCameraScreen extends StatefulWidget {
   static const routeName = 'multi-shot camera';
 
-  final Future<void> Function(XFile picture) onPicture;
+  /// Gets each picture kept, with its page's corners when [findsPages].
+  final Future<void> Function(XFile picture, PageCorners? corners) onPicture;
 
-  const MultiShotCameraScreen({super.key, required this.onPicture});
+  final bool findsPages;
+
+  /// Opens a shot's corners to fine-tune; [PageScanScreen] when null. For
+  /// tests.
+  final Future<PageCorners?> Function(
+    BuildContext context,
+    String path,
+    PageCorners? seen,
+  )?
+  reviewPage;
+
+  const MultiShotCameraScreen({
+    super.key,
+    required this.onPicture,
+    this.findsPages = false,
+    this.reviewPage,
+  });
 
   static Future<int> open(
     BuildContext context, {
-    required Future<void> Function(XFile picture) onPicture,
+    required Future<void> Function(XFile picture, PageCorners? corners)
+    onPicture,
+    bool findsPages = false,
   }) async {
     final count = await Navigator.of(context, rootNavigator: true).push<int>(
       MaterialPageRoute(
         fullscreenDialog: true,
         settings: const RouteSettings(name: routeName),
-        builder: (_) => MultiShotCameraScreen(onPicture: onPicture),
+        builder: (_) =>
+            MultiShotCameraScreen(onPicture: onPicture, findsPages: findsPages),
       ),
     );
     return count ?? 0;
@@ -91,6 +119,20 @@ class _MultiShotCameraScreenState extends State<MultiShotCameraScreen>
   /// not as an empty frame.
   bool _isFlightReady = false;
 
+  /// The page in view, as shares of the preview; null when none is seen.
+  PageCorners? _page;
+  final _smoother = CornerSmoother();
+
+  /// Whether a frame is being looked at, and when the last one started.
+  bool _isFinding = false;
+  DateTime _lastFind = DateTime(0);
+
+  /// Whether a shot's corners are being fine-tuned on top of the camera.
+  bool _isReviewing = false;
+
+  /// Whether the screen stands upright, which the live outline needs.
+  bool _isUpright = true;
+
   @override
   void initState() {
     super.initState();
@@ -125,6 +167,7 @@ class _MultiShotCameraScreenState extends State<MultiShotCameraScreen>
     );
     if (state == AppLifecycleState.inactive) {
       _camera = null;
+      _loseThePage();
       camera?.dispose();
       if (mounted) setState(() {});
     } else if (state == AppLifecycleState.resumed && camera == null) {
@@ -228,11 +271,84 @@ class _MultiShotCameraScreenState extends State<MultiShotCameraScreen>
       _camera = camera;
       _problem = null;
     });
+    await _startFinding(camera);
+  }
+
+  bool get _isScanning {
+    final camera = _camera;
+    return widget.findsPages &&
+        camera != null &&
+        camera.description.lensDirection == CameraLensDirection.back;
+  }
+
+  /// Looks for the page in the preview's frames, when scanning with the
+  /// back camera.
+  Future<void> _startFinding(CameraController camera) async {
+    if (!_isScanning) return;
+    try {
+      await camera.startImageStream((frame) => _onFrame(camera, frame));
+      AppLogger.instance.info(_tag, 'Looking for pages live');
+    } catch (e) {
+      // The outline is a help; the camera works on without it.
+      AppLogger.instance.warn(_tag, 'Can’t look for pages live: $e');
+    }
+  }
+
+  /// Looks for the page in a preview [frame], a few times a second.
+  void _onFrame(CameraController camera, CameraImage frame) {
+    final now = DateTime.now();
+    if (_isFinding ||
+        _isReviewing ||
+        !_isUpright ||
+        now.difference(_lastFind) < _findEvery ||
+        frame.planes.isEmpty) {
+      return;
+    }
+    final layout = switch (frame.format.group) {
+      ImageFormatGroup.yuv420 || ImageFormatGroup.nv21 => FrameLayout.luma,
+      ImageFormatGroup.bgra8888 => FrameLayout.bgra,
+      _ => null,
+    };
+    if (layout == null) return;
+    _isFinding = true;
+    _lastFind = now;
+    final plane = frame.planes.first;
+    // Android sends frames as the sensor sees them: lying under a standing
+    // preview, they're turned the sensor's way round. iOS turns its own.
+    final turns = frame.width > frame.height
+        ? camera.description.sensorOrientation ~/ 90
+        : 0;
+    final small = smallFrame(
+      bytes: plane.bytes,
+      width: frame.width,
+      height: frame.height,
+      rowStride: plane.bytesPerRow,
+      layout: layout,
+      quarterTurns: turns,
+    );
+    unawaited(
+      _findInBackground(small)
+          .then((found) {
+            if (!mounted || camera != _camera || _isReviewing) return;
+            final page = _smoother.add(found);
+            if (page != _page) setState(() => _page = page);
+          })
+          .catchError((Object e) {
+            AppLogger.instance.warn(_tag, 'Looking for a page failed: $e');
+          })
+          .whenComplete(() => _isFinding = false),
+    );
+  }
+
+  void _loseThePage() {
+    _smoother.clear();
+    if (_page != null && mounted) setState(() => _page = null);
   }
 
   Future<void> _switchCamera() async {
     if (_cameras.length < 2) return;
     final old = _camera;
+    _loseThePage();
     setState(() {
       _camera = null;
       _cameraIndex = (_cameraIndex + 1) % _cameras.length;
@@ -255,11 +371,23 @@ class _MultiShotCameraScreenState extends State<MultiShotCameraScreen>
     setState(() => _isShooting = true);
     Haptics.medium();
     try {
+      final seen = _page;
       final shot = await camera.takePicture();
       if (!mounted) return;
       _flashFade.forward(from: 0);
+      PageCorners? corners;
+      if (widget.findsPages) {
+        corners = await _review(shot, seen: seen);
+        if (!mounted) return;
+        if (corners == null) {
+          // Cancelled: to be taken again.
+          AppLogger.instance.info(_tag, 'Shot thrown away to take again');
+          unawaited(_throwAway(shot));
+          return;
+        }
+      }
       _flyIntoPile(shot.path);
-      _handing = _handing.then((_) => _hand(shot));
+      _handing = _handing.then((_) => _hand(shot, corners));
     } on CameraException catch (e) {
       AppLogger.instance.warn(_tag, 'Couldn’t take a picture: $e');
     } finally {
@@ -267,9 +395,36 @@ class _MultiShotCameraScreenState extends State<MultiShotCameraScreen>
     }
   }
 
-  Future<void> _hand(XFile shot) async {
+  /// Opens [shot]'s corners to fine-tune: the page as found in the photo,
+  /// or as [seen] in the preview when the photo shows none. Null when
+  /// cancelled.
+  Future<PageCorners?> _review(XFile shot, {PageCorners? seen}) async {
+    setState(() => _isReviewing = true);
     try {
-      await widget.onPicture(shot);
+      final review = widget.reviewPage;
+      if (review != null) return await review(context, shot.path, seen);
+      return await PageScanScreen.open(
+        context,
+        shot.path,
+        findCorners: (path) async =>
+            await findPageCornersInFile(path).catchError((Object _) => null) ??
+            seen,
+      );
+    } finally {
+      _loseThePage();
+      if (mounted) setState(() => _isReviewing = false);
+    }
+  }
+
+  Future<void> _throwAway(XFile shot) async {
+    try {
+      await File(shot.path).delete();
+    } catch (_) {}
+  }
+
+  Future<void> _hand(XFile shot, PageCorners? corners) async {
+    try {
+      await widget.onPicture(shot, corners);
     } catch (e) {
       AppLogger.instance.warn(_tag, 'Couldn’t keep a picture: $e');
     }
@@ -459,9 +614,31 @@ class _MultiShotCameraScreenState extends State<MultiShotCameraScreen>
         color: AnchorTokens.colorMediaMuted,
       );
     }
-    return ClipRRect(
+    final preview = ClipRRect(
       borderRadius: context.appStyle.corners(AnchorTokens.radiusLg),
       child: CameraPreview(camera),
+    );
+    if (!_isScanning) return preview;
+    // Frames are only turned right while the phone stands upright.
+    _isUpright = MediaQuery.orientationOf(context) == Orientation.portrait;
+    if (!_isUpright) return preview;
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        preview,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: LivePageOutline(
+              corners: _page,
+              color: context.anchor.accentStrong,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: _PageHint(isFound: _page != null),
+        ),
+      ],
     );
   }
 
@@ -507,6 +684,139 @@ class _MultiShotCameraScreenState extends State<MultiShotCameraScreen>
               : null,
         ),
       ],
+    );
+  }
+}
+
+/// How often the preview is looked at for a page.
+const _findEvery = Duration(milliseconds: 150);
+
+/// Looks for the page in [frame] on another isolate. Top level, so the
+/// closure sent there holds the frame and nothing of the screen's.
+Future<PageCorners?> _findInBackground(SmallFrame frame) =>
+    Isolate.run(() => findPageInFrame(frame));
+
+/// The page seen in a camera preview: its outline, gliding from find to
+/// find, and fading out when the page is lost. [corners] are shares of the
+/// box it fills.
+@visibleForTesting
+class LivePageOutline extends StatefulWidget {
+  const LivePageOutline({
+    super.key,
+    required this.corners,
+    required this.color,
+  });
+
+  final PageCorners? corners;
+  final Color color;
+
+  @override
+  State<LivePageOutline> createState() => _LivePageOutlineState();
+}
+
+class _LivePageOutlineState extends State<LivePageOutline> {
+  /// The last page seen, kept while the outline fades out.
+  PageCorners? _shown;
+
+  @override
+  Widget build(BuildContext context) {
+    final corners = widget.corners;
+    if (corners != null) _shown = corners;
+    final shown = _shown;
+    if (shown == null) return const SizedBox.shrink();
+    return AnimatedOpacity(
+      opacity: corners == null ? 0 : 1,
+      duration: context.motion(AnchorTokens.motionDurationPress),
+      child: TweenAnimationBuilder<PageCorners>(
+        tween: _CornersTween(end: shown),
+        duration: context.motion(_findEvery),
+        builder: (context, value, _) => CustomPaint(
+          key: const ValueKey('live-page-outline'),
+          painter: _LivePagePainter(corners: value, color: widget.color),
+          size: Size.infinite,
+        ),
+      ),
+    );
+  }
+}
+
+class _CornersTween extends Tween<PageCorners> {
+  _CornersTween({required PageCorners end}) : super(end: end);
+
+  @override
+  PageCorners lerp(double t) {
+    final a = begin ?? end!, b = end!;
+    return [for (var i = 0; i < 4; i++) Offset.lerp(a[i], b[i], t)!];
+  }
+}
+
+/// The outline of a page whose corners are shares of the canvas.
+class _LivePagePainter extends CustomPainter {
+  const _LivePagePainter({required this.corners, required this.color});
+
+  final PageCorners corners;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final points = [
+      for (final c in corners) Offset(c.dx * size.width, c.dy * size.height),
+    ];
+    final page = Path()..addPolygon(points, true);
+    canvas.drawPath(page, Paint()..color = color.withValues(alpha: 0.18));
+    canvas.drawPath(
+      page,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeJoin = StrokeJoin.round,
+    );
+    for (final p in points) {
+      canvas.drawCircle(p, 7, Paint()..color = AnchorTokens.colorMediaText);
+      canvas.drawCircle(p, 5, Paint()..color = color);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_LivePagePainter old) =>
+      old.color != color || !_sameCorners(old.corners, corners);
+
+  static bool _sameCorners(PageCorners a, PageCorners b) {
+    for (var i = 0; i < 4; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+}
+
+/// Says over the preview whether a page is seen.
+class _PageHint extends StatelessWidget {
+  const _PageHint({required this.isFound});
+
+  final bool isFound;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Semantics(
+      liveRegion: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AnchorTokens.colorMediaShadeStrong,
+          borderRadius: BorderRadius.circular(AnchorTokens.radiusPill),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          child: Text(
+            isFound ? l10n.cameraPageFound : l10n.cameraPointAtPage,
+            key: const ValueKey('live-page-hint'),
+            style: AppTypography.footnote.copyWith(
+              color: AnchorTokens.colorMediaText,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
