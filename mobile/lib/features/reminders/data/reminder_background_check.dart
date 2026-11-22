@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
@@ -9,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../../../app/background_tasks.dart';
 import '../../../app/bootstrap.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/logging/app_logger.dart';
@@ -47,7 +47,10 @@ void reminderBackgroundCheck(Ref ref) {
   if (!Platform.isAndroid) return;
   unawaited(
     // Only an account's reminders change elsewhere.
-    _register(userId != null && userId != localUserId).catchError((Object error, StackTrace stack) {
+    _register(userId != null && userId != localUserId).catchError((
+      Object error,
+      StackTrace stack,
+    ) {
       AppLogger.instance.error(
         LogTags.reminders,
         'Setting up the background reminder check failed',
@@ -60,7 +63,7 @@ void reminderBackgroundCheck(Ref ref) {
 
 Future<void> _register(bool signedIn) async {
   final workmanager = Workmanager();
-  await workmanager.initialize(reminderCheckDispatcher);
+  await workmanager.initialize(backgroundTaskDispatcher);
   if (!signedIn) {
     await workmanager.cancelByUniqueName(reminderCheckTask);
     return;
@@ -74,26 +77,6 @@ Future<void> _register(bool signedIn) async {
   );
 }
 
-@pragma('vm:entry-point')
-void reminderCheckDispatcher() {
-  Workmanager().executeTask((task, _) async {
-    if (task != reminderCheckTask) return true;
-    try {
-      await runReminderCheck();
-    } catch (error, stack) {
-      AppLogger.instance.error(
-        LogTags.reminders,
-        'Background reminder check failed',
-        error: error,
-        stackTrace: stack,
-      );
-    }
-    await AppLogger.instance.flush();
-    // A failed check waits for the next one rather than retrying sooner.
-    return true;
-  });
-}
-
 /// Reads what changed on the server since the app last synced, without
 /// keeping it (the app's own sync still takes it in), and sets this phone's
 /// reminder alarms from the notes as they now stand.
@@ -105,7 +88,7 @@ Future<void> runReminderCheck() async {
   const storage = FlutterSecureStorage();
   final saved = await readAllStorage(storage);
   final addresses = ServerAddressList.fromStorage(saved);
-  final userId = _userIdOf(saved[StorageKeys.userData]);
+  final userId = savedUserIdOf(saved[StorageKeys.userData]);
   if (addresses == null ||
       userId == null ||
       saved[StorageKeys.accessToken] == null) {
@@ -180,15 +163,6 @@ Future<void> runReminderCheck() async {
   } finally {
     await db.close();
     container.dispose();
-  }
-}
-
-String? _userIdOf(String? userData) {
-  if (userData == null) return null;
-  try {
-    return (jsonDecode(userData) as Map<String, dynamic>)['id'] as String?;
-  } catch (_) {
-    return null;
   }
 }
 

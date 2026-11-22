@@ -246,6 +246,17 @@ Future<Map<String, String>> readAllStorage(FlutterSecureStorage storage) async {
   }
 }
 
+/// The signed-in user's id from the stored user data, for work that runs
+/// with the app closed; null when there is none or it can't be read.
+String? savedUserIdOf(String? userData) {
+  if (userData == null) return null;
+  try {
+    return (jsonDecode(userData) as Map<String, dynamic>)['id'] as String?;
+  } catch (_) {
+    return null;
+  }
+}
+
 Future<String?> _notificationLaunchRoute() async {
   try {
     return await initializeNotifications();

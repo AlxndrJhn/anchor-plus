@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/logging/app_logger.dart';
 import '../../../core/logging/log_tags.dart';
+import '../../../core/network/sync_requester.dart';
 import '../../../core/session/active_user_id_provider.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../notes/data/repository/note_attachments_repository.dart';
@@ -62,7 +63,11 @@ class ShareImport extends _$ShareImport {
         _again = false;
         final inbox = await ShareInbox.find();
         if (inbox == null) return;
-        await importer.importAll(inbox, userId);
+        // Sent right away: the app may be in the background behind the
+        // app that shared.
+        if (await importer.importAll(inbox, userId) > 0) {
+          scheduleAppSync(trigger: 'ShareImport');
+        }
       } while (_again);
     }().whenComplete(() => _running = null);
   }
