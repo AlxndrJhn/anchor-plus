@@ -1258,7 +1258,7 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
     if (_isReadOnly) return;
     final count = await MultiShotCameraScreen.open(
       context,
-      onPicture: (shot) async {
+      onPicture: (shot, _) async {
         await _attach((
           path: shot.path,
           mime: 'image/jpeg',

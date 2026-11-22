@@ -1028,6 +1028,8 @@
   "cameraFailed": "Kamera konnte nicht gestartet werden",
   "cameraSwitch": "Kamera wechseln",
   "cameraShutter": "Bild aufnehmen",
+  "cameraPointAtPage": "Auf eine Seite richten",
+  "cameraPageFound": "Seite erkannt",
   "cameraTaken": "{count, plural, =1{1 Bild aufgenommen} other{{count} Bilder aufgenommen}}",
   "cameraPicturesAdded": "{count, plural, =1{1 Bild hinzugefügt} other{{count} Bilder hinzugefügt}}",
   "inlinePicture": "Bild",

@@ -6271,6 +6271,18 @@ abstract class AppLocalizations {
   /// **'Take a picture'**
   String get cameraShutter;
 
+  /// Hint over the scanner camera's preview while no sheet of paper is in view.
+  ///
+  /// In en, this message translates to:
+  /// **'Point at a page'**
+  String get cameraPointAtPage;
+
+  /// Hint over the scanner camera's preview while a sheet of paper is in view and outlined.
+  ///
+  /// In en, this message translates to:
+  /// **'Page found'**
+  String get cameraPageFound;
+
   /// Screen reader label of the pile of pictures taken so far on the camera page.
   ///
   /// In en, this message translates to:

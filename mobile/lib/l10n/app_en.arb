@@ -5546,6 +5546,14 @@
   "@cameraShutter": {
     "description": "Screen reader name of the round shutter button on the camera page."
   },
+  "cameraPointAtPage": "Point at a page",
+  "@cameraPointAtPage": {
+    "description": "Hint over the scanner camera's preview while no sheet of paper is in view."
+  },
+  "cameraPageFound": "Page found",
+  "@cameraPageFound": {
+    "description": "Hint over the scanner camera's preview while a sheet of paper is in view and outlined."
+  },
   "cameraTaken": "{count, plural, =1{1 picture taken} other{{count} pictures taken}}",
   "@cameraTaken": {
     "description": "Screen reader label of the pile of pictures taken so far on the camera page.",
