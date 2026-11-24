@@ -56,7 +56,8 @@ class ShareIntake(context: Context, shared: SharedIntent, private val onChange: 
             val name = nameOf(uri)
             val kind = kindOf(uri, name, shared.type)
             when {
-                kind == null -> skip(Skip.unsupported)
+                // Any kind is taken, so a refused file is one Anchor can't read.
+                kind == null -> skip(Skip.unreadable)
                 items.size >= MAX_FILES -> skip(Skip.overLimit)
                 else -> items.add(Item("${items.size}", uri, kind.first, name, kind.second))
             }
@@ -111,10 +112,15 @@ class ShareIntake(context: Context, shared: SharedIntent, private val onChange: 
         return "file" to type
     }
 
-    /** False for Anchor's own files, which a share must not read. */
+    /**
+     * False for Anchor's own files, which a share must not read, except what
+     * Anchor itself handed out to share: share_plus's provider serves only its
+     * own cache folder, so a scan's PDF shared back into Anchor+ is fine.
+     */
     private fun isForeign(uri: Uri): Boolean {
         if (uri.scheme != ContentResolver.SCHEME_CONTENT) return false
         val authority = uri.authority ?: return false
+        if (authority == "$ownPackage$SHARE_PLUS_AUTHORITY") return true
         return packages.resolveContentProvider(authority, 0)?.packageName != ownPackage
     }
 
@@ -269,6 +275,9 @@ class ShareIntake(context: Context, shared: SharedIntent, private val onChange: 
     private companion object {
         const val MAX_FILES = 20
         const val MAX_NAME = 120
+
+        /** share_plus's FileProvider, which serves only cache/share_plus/. */
+        const val SHARE_PLUS_AUTHORITY = ".flutter.share_provider"
 
         /** Must match the server's limit. */
         const val MAX_BYTES = 50L * 1024 * 1024
