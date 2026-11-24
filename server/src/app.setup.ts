@@ -13,6 +13,7 @@ import { AppValidationPipe } from './common/pipes/app-validation.pipe';
 import { requestContextMiddleware } from './common/utils/request-context';
 import { PROFILE_IMAGE_EXTENSIONS } from './auth/utils/profile-image.util';
 import { serveWebApp } from './web-app';
+import { NoteShareLinksService } from './notes/services/note-share-links.service';
 import { MCP_REQUEST_MAX_BYTES } from './mcp/attachment-input.util';
 
 export function setupApp(app: NestExpressApplication): void {
@@ -26,7 +27,9 @@ export function setupApp(app: NestExpressApplication): void {
   app.use('/api/mcp', json({ limit: MCP_REQUEST_MAX_BYTES }));
   app.useBodyParser('json', { limit: '30mb' });
 
-  serveWebApp(app, appConfig.webDir);
+  serveWebApp(app, appConfig.webDir, (token) =>
+    app.get(NoteShareLinksService, { strict: false }).previewLink(token),
+  );
 
   app.use(helmet());
   app.use(requestContextMiddleware);
