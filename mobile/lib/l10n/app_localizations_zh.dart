@@ -3538,7 +3538,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count 个文件无法添加。Anchor 支持图片和音频。',
+      other: '$count 个文件无法添加。',
     );
     return '$_temp0';
   }
@@ -8293,7 +8293,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count 個檔案無法新增。Anchor 支援圖片和音訊。',
+      other: '$count 個檔案無法新增。',
     );
     return '$_temp0';
   }
