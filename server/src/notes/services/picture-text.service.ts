@@ -142,8 +142,9 @@ export class PictureTextService
   }
 
   private async read(file: string): Promise<string> {
+    const picture = await readablePicture(file);
     const worker = await this.getWorker();
-    const { data } = await worker.recognize(fs.readFileSync(file));
+    const { data } = await worker.recognize(picture);
     this.scheduleClose();
     return data.text;
   }
@@ -197,6 +198,19 @@ function languageDir(): string {
   }
   languages = dir;
   return dir;
+}
+
+/**
+ * The picture as a PNG the reader takes, upright. The reader's own JPEG
+ * decoder rejects pictures with small flaws that every viewer shows fine
+ * (some scanner and phone apps write them), so sharp decodes it, leniently.
+ */
+async function readablePicture(file: string): Promise<Buffer> {
+  const sharp = (await import('sharp')).default;
+  return sharp(file, { animated: false, failOn: 'truncated' })
+    .rotate()
+    .png()
+    .toBuffer();
 }
 
 /** Tidies OCR output: trimmed lines, at most one empty line in a row. */

@@ -53,7 +53,9 @@ async function picture(
   data: Buffer,
 ): Promise<{ mimeType: string; data: string }> {
   const sharp = (await import('sharp')).default;
-  const image = sharp(data, { animated: false });
+  // Leniently: pictures with small flaws (from some scanner apps) show fine
+  // everywhere, but sharp's default refuses them.
+  const image = sharp(data, { animated: false, failOn: 'truncated' });
   const {
     width = 0,
     height = 0,
