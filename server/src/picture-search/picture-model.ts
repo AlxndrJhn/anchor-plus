@@ -234,7 +234,8 @@ export class PictureModel {
  */
 export async function imagePixels(file: string): Promise<Float32Array> {
   const sharp = (await import('sharp')).default;
-  const data = await sharp(file, { animated: false })
+  // Leniently, as viewers show them: some scanner apps write small flaws.
+  const data = await sharp(file, { animated: false, failOn: 'truncated' })
     .rotate() // Upright, as the picture is shown.
     .removeAlpha()
     .resize(IMAGE_SIZE, IMAGE_SIZE, { fit: 'fill', kernel: 'linear' })

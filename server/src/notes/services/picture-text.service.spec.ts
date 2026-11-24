@@ -1,5 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as fs from 'fs';
+import sharp from 'sharp';
+import { flawedJpeg } from '../../../test/flawed-jpeg';
 import * as os from 'os';
 import * as path from 'path';
 import { createWorker } from 'tesseract.js';
@@ -64,9 +66,13 @@ describe('PictureTextService', () => {
     }),
   } as unknown as SyncEmitterService;
 
-  function picture(id: string, type: Row['type'] = 'image'): Row {
+  function picture(
+    id: string,
+    type: Row['type'] = 'image',
+    data: Buffer = png,
+  ): Row {
     fs.mkdirSync(path.join(dir, 'note-1'), { recursive: true });
-    fs.writeFileSync(path.join(dir, 'note-1', `${id}.png`), 'png');
+    fs.writeFileSync(path.join(dir, 'note-1', `${id}.png`), data);
     return {
       id,
       noteId: 'note-1',
@@ -91,6 +97,15 @@ describe('PictureTextService', () => {
     s.kick();
     await (s as unknown as { running: Promise<void> | null }).running;
   }
+
+  let png: Buffer;
+  beforeAll(async () => {
+    png = await sharp({
+      create: { width: 8, height: 8, channels: 3, background: 'white' },
+    })
+      .png()
+      .toBuffer();
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -130,6 +145,28 @@ describe('PictureTextService', () => {
     expect(rows[0].textReadAt).toBeInstanceOf(Date);
     expect(rows[0].text).toBeNull();
     expect(emitted).toHaveLength(0);
+  });
+
+  it('reads a JPEG with a small flaw, as viewers show it', async () => {
+    rows = [picture('scan', 'image', await flawedJpeg())];
+    recognize.mockResolvedValueOnce({ data: { text: 'Karte' } });
+
+    await settle(service);
+
+    expect(rows[0].text).toBe('Karte');
+    // Handed over decoded, so the reader's own strict decoder isn't involved.
+    const given = recognize.mock.calls[0][0] as Buffer;
+    expect((await sharp(given).metadata()).format).toBe('png');
+  });
+
+  it('marks a file that is no picture as read', async () => {
+    rows = [picture('junk', 'image', Buffer.from('not a picture'))];
+
+    await settle(service);
+
+    expect(rows[0].textReadAt).toBeInstanceOf(Date);
+    expect(rows[0].text).toBeNull();
+    expect(recognize).not.toHaveBeenCalled();
   });
 
   it('tells nobody about a picture deleted while it was read', async () => {

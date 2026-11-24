@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import sharp from 'sharp';
 import { AttachmentType } from 'src/generated/prisma/enums';
 import { attachmentContent } from './attachment-content.util';
+import { flawedJpeg } from '../../test/flawed-jpeg';
 
 const URI = 'anchor://notes/n/attachments/a';
 
@@ -24,6 +25,17 @@ describe('attachmentContent', () => {
     const data = Buffer.from((content as { data: string }).data, 'base64');
     const { width, height } = await sharp(data).metadata();
     expect([width, height]).toEqual([1568, 1176]);
+  });
+
+  it('sends a JPEG with a small flaw, as viewers show it', async () => {
+    const content = await attachmentContent(
+      AttachmentType.image,
+      'image/jpeg',
+      await flawedJpeg(2000), // Too big to send as it is.
+      URI,
+    );
+
+    expect(content).toMatchObject({ type: 'image', mimeType: 'image/jpeg' });
   });
 
   it('keeps see-through parts of a picture it scales', async () => {
