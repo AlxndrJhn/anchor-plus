@@ -56,7 +56,8 @@ class ShareIntake(context: Context, shared: SharedIntent, private val onChange: 
             val name = nameOf(uri)
             val kind = kindOf(uri, name, shared.type)
             when {
-                kind == null -> skip(Skip.unsupported)
+                // Any kind is taken, so a refused file is one Anchor can't read.
+                kind == null -> skip(Skip.unreadable)
                 items.size >= MAX_FILES -> skip(Skip.overLimit)
                 else -> items.add(Item("${items.size}", uri, kind.first, name, kind.second))
             }

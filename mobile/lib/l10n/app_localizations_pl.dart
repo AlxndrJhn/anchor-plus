@@ -3855,10 +3855,10 @@ class AppLocalizationsPl extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Nie można dodać $count pliku.',
-      many: 'Nie można dodać $count plików.',
-      few: 'Nie można dodać $count plików.',
-      one: 'Nie można dodać 1 pliku.',
+      other: 'Nie można dodać $count pliku. Anchor dodaje obrazy i dźwięk.',
+      many: 'Nie można dodać $count plików. Anchor dodaje obrazy i dźwięk.',
+      few: 'Nie można dodać $count plików. Anchor dodaje obrazy i dźwięk.',
+      one: 'Nie można dodać 1 pliku. Anchor dodaje obrazy i dźwięk.',
     );
     return '$_temp0';
   }

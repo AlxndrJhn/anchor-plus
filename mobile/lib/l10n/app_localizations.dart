@@ -5677,10 +5677,10 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 file couldn’t be added.} other{{count} files couldn’t be added.}}'**
   String shareNotAdded(int count);
 
-  /// Shown below the new note in the share sheet when Anchor can’t read some shared files, such as plain file paths or its own private files.
+  /// Shown below the new note in the share sheet when shared files are of a kind Anchor doesn’t keep, such as a video or a PDF.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 file can’t be added.} other{{count} files can’t be added.}}'**
+  /// **'{count, plural, =1{1 file can’t be added. Anchor adds pictures and audio.} other{{count} files can’t be added. Anchor adds pictures and audio.}}'**
   String shareUnsupported(int count);
 
   /// Shown below the new note in the share sheet when shared files are larger than a note’s file limit.

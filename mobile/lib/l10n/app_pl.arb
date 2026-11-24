@@ -929,7 +929,7 @@
   "shareOpenApp": "Otwórz Anchor",
   "shareNothing": "Nie ma tu nic, co Anchor mógłby zapisać.",
   "shareNotAdded": "{count, plural, =1{Nie udało się dodać 1 pliku.} few{Nie udało się dodać {count} plików.} many{Nie udało się dodać {count} plików.} other{Nie udało się dodać {count} pliku.}}",
-  "shareUnsupported": "{count, plural, =1{Nie można dodać 1 pliku.} few{Nie można dodać {count} plików.} many{Nie można dodać {count} plików.} other{Nie można dodać {count} pliku.}}",
+  "shareUnsupported": "{count, plural, =1{Nie można dodać 1 pliku. Anchor dodaje obrazy i dźwięk.} few{Nie można dodać {count} plików. Anchor dodaje obrazy i dźwięk.} many{Nie można dodać {count} plików. Anchor dodaje obrazy i dźwięk.} other{Nie można dodać {count} pliku. Anchor dodaje obrazy i dźwięk.}}",
   "shareTooBig": "{count, plural, =1{1 plik ma ponad 50 MB, więc nie można go dodać.} few{{count} pliki mają ponad 50 MB, więc nie można ich dodać.} many{{count} plików ma ponad 50 MB, więc nie można ich dodać.} other{{count} pliku ma ponad 50 MB, więc nie można ich dodać.}}",
   "shareOverLimit": "Dodano tylko pierwszych 20 plików.",
   "shareRemoveItem": "Usuń: {name}",

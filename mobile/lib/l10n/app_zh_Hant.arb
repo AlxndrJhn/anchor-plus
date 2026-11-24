@@ -929,7 +929,7 @@
   "shareOpenApp": "開啟 Anchor",
   "shareNothing": "這裡沒有 Anchor 可以儲存的內容。",
   "shareNotAdded": "{count, plural, other{{count} 個檔案無法新增。}}",
-  "shareUnsupported": "{count, plural, other{{count} 個檔案無法新增。}}",
+  "shareUnsupported": "{count, plural, other{{count} 個檔案無法新增。Anchor 支援圖片和音訊。}}",
   "shareTooBig": "{count, plural, other{{count} 個檔案超過 50 MB，無法新增。}}",
   "shareOverLimit": "僅新增前 20 個檔案。",
   "shareRemoveItem": "移除 {name}",

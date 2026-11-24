@@ -3676,8 +3676,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count files can’t be added.',
-      one: '1 file can’t be added.',
+      other: '$count files can’t be added. Anchor adds pictures and audio.',
+      one: '1 file can’t be added. Anchor adds pictures and audio.',
     );
     return '$_temp0';
   }
