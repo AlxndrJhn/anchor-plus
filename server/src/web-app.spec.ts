@@ -6,7 +6,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { resolveWebFile, serveWebApp } from './web-app';
+import { type SharePreviewer, resolveWebFile, serveWebApp } from './web-app';
 
 @Controller('api')
 class HealthController {
@@ -29,14 +29,14 @@ const BUILD: Record<string, string> = {
   '_next/static/chunks/app.js': 'code',
 };
 
-async function appWith(webDir: string | undefined) {
+async function appWith(webDir: string | undefined, previewer?: SharePreviewer) {
   const moduleRef = await Test.createTestingModule({
     controllers: [HealthController],
   }).compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({
     logger: false,
   });
-  serveWebApp(app, webDir);
+  serveWebApp(app, webDir, previewer);
   await app.init();
   return app;
 }
@@ -152,5 +152,72 @@ describe('serveWebApp without a build', () => {
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'anchor-web-'));
     await expect(appWith(empty)).rejects.toThrow(/no index.html/);
     fs.rmSync(empty, { recursive: true, force: true });
+  });
+});
+
+describe('serveWebApp with share link previews', () => {
+  let root: string;
+  let app: NestExpressApplication;
+  const asked: string[] = [];
+
+  beforeAll(async () => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'anchor-web-'));
+    fs.writeFileSync(path.join(root, 'index.html'), 'home');
+    fs.mkdirSync(path.join(root, 's'));
+    fs.writeFileSync(
+      path.join(root, 's', 'none.html'),
+      '<html><head><title>Anchor+</title><meta name="description" content="Your thoughts, secured"/></head><body></body></html>',
+    );
+    fs.writeFileSync(path.join(root, 's', 'none.txt'), 'payload');
+    app = await appWith(root, (token) => {
+      asked.push(token);
+      if (token === 'broken') {
+        return Promise.reject(new Error('database down'));
+      }
+      return Promise.resolve(
+        token === 'good'
+          ? { title: 'Anki <3', description: 'Cards & decks' }
+          : null,
+      );
+    });
+  });
+
+  afterAll(async () => {
+    await app.close();
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it("writes the note's title and description into its page", async () => {
+    const res = await request(app.getHttpServer()).get('/s/good').expect(200);
+    expect(res.headers['content-type']).toMatch(/html/);
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect(res.headers['x-robots-tag']).toBe('noindex, nofollow');
+    expect(res.text).toContain('<title>Anki &lt;3</title>');
+    expect(res.text).toContain(
+      '<meta name="description" content="Cards &amp; decks"/>',
+    );
+    expect(res.text).toContain(
+      '<meta property="og:title" content="Anki &lt;3"/>',
+    );
+    expect(res.text).not.toContain('Your thoughts, secured');
+  });
+
+  it("keeps the app's own page for a link with no preview", async () => {
+    for (const token of ['gone', 'broken']) {
+      const res = await request(app.getHttpServer())
+        .get(`/s/${token}`)
+        .expect(200);
+      expect(res.text).toContain('<title>Anchor+</title>');
+      expect(res.text).not.toContain('og:title');
+    }
+  });
+
+  it("leaves the page's other files alone", async () => {
+    asked.length = 0;
+    const res = await request(app.getHttpServer())
+      .get('/s/good.txt')
+      .expect(200);
+    expect(res.text).toBe('payload');
+    expect(asked).toEqual([]);
   });
 });

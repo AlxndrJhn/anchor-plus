@@ -19,6 +19,10 @@ import { SharedNoteEventsService } from '../../sync/shared-note-events.service';
 import { noteContentChanged } from '../utils/note-versioning.util';
 import { ERROR_MESSAGES } from '../constants/notes.constants';
 import { UpdateLinkedNoteDto } from '../dto/note-share-link.dto';
+import {
+  type ShareLinkPreview,
+  buildShareLinkPreview,
+} from '../utils/share-link-preview.util';
 
 // 256 bits: a link can't be guessed, only passed on.
 const TOKEN_BYTES = 32;
@@ -99,6 +103,32 @@ export class NoteShareLinksService {
   async openLink(token: string) {
     const { link, note } = await this.findLinkedNote(token);
     return this.toLinkedNote(link, note);
+  }
+
+  /**
+   * What a chat app shows for the link, or null for the app's own: no such
+   * link, the note in the trash, or locked by someone (a lock means they
+   * don't want its words on a screen unasked).
+   */
+  async previewLink(token: string): Promise<ShareLinkPreview | null> {
+    const link = await this.prisma.noteShareLink.findUnique({
+      where: { token },
+      include: {
+        note: { include: { _count: { select: { locks: true } } } },
+      },
+    });
+    if (!link || link.note.state !== NoteState.active) return null;
+    if (link.note._count.locks > 0) return null;
+    const attachments = await this.noteAttachmentsService.listForLink(
+      link.noteId,
+    );
+    return buildShareLinkPreview({
+      title: link.note.title,
+      content: link.note.content,
+      attachmentNames: attachments
+        .map((attachment) => attachment.originalFilename)
+        .filter((name): name is string => Boolean(name)),
+    });
   }
 
   async updateLinkedNote(token: string, dto: UpdateLinkedNoteDto) {

@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { NoteShareLinksService } from 'src/notes/services/note-share-links.service';
 import { Actor, createE2EApp, E2EApp, entryFor } from '../support';
 
 interface LinkOnWire {
@@ -180,6 +181,31 @@ describe('share links', () => {
     // A new link is a new token.
     const again = await makeLink(note.id, 'viewer');
     expect(again.token).not.toBe(link.token);
+  });
+
+  it('gives chat apps the note to preview, unless it is locked or gone', async () => {
+    const preview = (token: string) =>
+      ctx.app.get(NoteShareLinksService).previewLink(token);
+    const note = await owner.notes.create({
+      title: 'Anki',
+      content: JSON.stringify({ ops: [{ insert: 'Spaced repetition\n' }] }),
+    });
+    const link = await makeLink(note.id, 'viewer');
+
+    expect(await preview(link.token)).toEqual({
+      title: 'Anki',
+      description: 'Spaced repetition',
+    });
+    expect(await preview('no-such-token')).toBeNull();
+
+    await ctx.prisma.noteLock.create({
+      data: { userId: other.id, noteId: note.id, kind: 'pin' },
+    });
+    expect(await preview(link.token)).toBeNull();
+    await ctx.prisma.noteLock.deleteMany({ where: { noteId: note.id } });
+
+    await owner.notes.trash(note.id);
+    expect(await preview(link.token)).toBeNull();
   });
 
   it('changes what a link allows without changing the link', async () => {

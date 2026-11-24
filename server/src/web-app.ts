@@ -2,6 +2,10 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import type { NextFunction, Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  type ShareLinkPreview,
+  injectShareLinkPreview,
+} from './notes/utils/share-link-preview.util';
 
 /**
  * Serves the web app's static build (`next build` writes it to web/out) from
@@ -34,6 +38,14 @@ const SHARE_LINK_HEADERS = {
   'X-Robots-Tag': 'noindex, nofollow',
   'Referrer-Policy': 'no-referrer',
 };
+
+/** The page every share link gets, which its preview is written into. */
+const SHARE_PAGE = '/s/none.html';
+
+/** A share link's preview by its token, or null for the app's own. */
+export type SharePreviewer = (
+  token: string,
+) => Promise<ShareLinkPreview | null>;
 
 /** File names carry a hash of their content, so they never change. */
 const IMMUTABLE_PREFIX = '/_next/static/';
@@ -83,6 +95,7 @@ function wantsPage(req: Request): boolean {
 export function serveWebApp(
   app: NestExpressApplication,
   webDir: string | undefined,
+  previewShareLink?: SharePreviewer,
 ): void {
   if (!webDir) return;
   const root = path.resolve(webDir);
@@ -92,6 +105,9 @@ export function serveWebApp(
     );
   }
   const files = new Set(listFiles(root));
+  const sharePage = files.has(SHARE_PAGE)
+    ? fs.readFileSync(path.join(root, SHARE_PAGE.slice(1)), 'utf8')
+    : null;
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') return next();
@@ -113,6 +129,21 @@ export function serveWebApp(
       res.status(404);
       res.setHeader('Cache-Control', 'no-cache');
       return res.sendFile(MISSING_PAGE.slice(1), { root, dotfiles: 'allow' });
+    }
+
+    // Chat apps read a link's title and description from the page itself,
+    // so a share link's page carries its note's, written in here.
+    if (file === SHARE_PAGE && sharePage !== null && previewShareLink) {
+      const token = address.slice(SHARE_LINK_PREFIX.length).split('/')[0];
+      res.setHeader('Cache-Control', 'no-store');
+      res.type('html');
+      return previewShareLink(token)
+        .catch(() => null)
+        .then((preview) =>
+          res.send(
+            preview ? injectShareLinkPreview(sharePage, preview) : sharePage,
+          ),
+        );
     }
 
     res.setHeader(
