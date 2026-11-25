@@ -3,6 +3,10 @@
   "intro": "Jeder Befehl, seine Tasten und wann sie wirken. Klicke auf eine Taste, um sie zu ändern, oder bearbeite alle als JSON. Nur auf diesem Gerät.",
   "search": "Befehle, Tasten oder Wann-Klauseln suchen",
   "onlyChanged": "Nur geänderte",
+  "recordKeys": {
+    "toggle": "Tasten aufnehmen",
+    "waiting": "Tasten drücken, um ihre Befehle zu sehen"
+  },
   "showJson": "Als JSON bearbeiten",
   "showTable": "Zurück zur Liste",
   "resetAll": "Alle zurücksetzen",

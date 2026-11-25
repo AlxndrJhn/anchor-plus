@@ -293,3 +293,24 @@ export function strokeForJson(s: Stroke, mac: boolean): string {
   const text = strokeToString(s);
   return mac ? text.replace(/(^|\+)meta\+/, "$1cmd+") : text;
 }
+
+/**
+ * A search for keys, as VS Code's: the chord in quotes, such as `"ctrl+k"`.
+ * Gives the chord in the rules' own form, or null if the text isn't one.
+ */
+export function keysInQuery(query: string, mac: boolean): string | null {
+  const quoted = /^"([^"]+)"$/.exec(query.trim());
+  if (!quoted) return null;
+  try {
+    return normalizeChord(quoted[1], mac);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether a rule's chord answers a search for `wanted`: the same keys, or a
+ * chord that starts with them (pressing them waits for its second stroke).
+ */
+export const chordMatches = (key: string, wanted: string) =>
+  key === wanted || key.startsWith(`${wanted} `);

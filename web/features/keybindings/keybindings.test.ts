@@ -3,7 +3,9 @@ import { COMMAND_IDS, COMMANDS, CONTEXT_KEYS } from "./commands";
 import { addRule, removeRule, replaceRule, resetCommand } from "./edit";
 import {
   chordAria,
+  chordMatches,
   chordText,
+  keysInQuery,
   normalizeChord,
   strokeFromEvent,
   strokeToString,
@@ -35,6 +37,22 @@ const stroke = (...args: Parameters<typeof press>) => {
 };
 
 describe("keys", () => {
+  it("reads a quoted search as keys", () => {
+    expect(keysInQuery('"Ctrl+K"', false)).toBe("ctrl+k");
+    expect(keysInQuery(' "cmd+k cmd+s" ', true)).toBe("meta+k meta+s");
+    expect(keysInQuery("ctrl+k", false)).toBeNull();
+    expect(keysInQuery('"hyper+k"', false)).toBeNull();
+    expect(keysInQuery('""', false)).toBeNull();
+  });
+
+  it("matches a chord by its keys or its first stroke", () => {
+    expect(chordMatches("ctrl+k", "ctrl+k")).toBe(true);
+    expect(chordMatches("ctrl+k ctrl+s", "ctrl+k")).toBe(true);
+    expect(chordMatches("ctrl+k ctrl+s", "ctrl+k ctrl+s")).toBe(true);
+    expect(chordMatches("ctrl+shift+k", "ctrl+k")).toBe(false);
+    expect(chordMatches("g n", "n")).toBe(false);
+  });
+
   it("writes a press as VS Code does", () => {
     expect(stroke("KeyK", "k", { ctrlKey: true })).toBe("ctrl+k");
     expect(stroke("KeyG", "G", { shiftKey: true })).toBe("shift+g");
