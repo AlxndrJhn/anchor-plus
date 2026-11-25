@@ -3,6 +3,7 @@
 import {
   Braces,
   CircleAlert,
+  Keyboard,
   List,
   MoreHorizontal,
   Pencil,
@@ -22,7 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import { Input, InputButton } from "@/components/ui/input";
 import { Tip } from "@/components/ui/tooltip";
 import { usePreferencesStore } from "@/features/preferences";
 import { isMac } from "@/lib/platform";
@@ -35,7 +36,15 @@ import {
   replaceRule,
   resetCommand,
 } from "../edit";
-import { chordText, isSingleCharacter, parseStroke } from "../keys";
+import {
+  chordMatches,
+  chordText,
+  isSingleCharacter,
+  keysInQuery,
+  parseStroke,
+  strokeForJson,
+  strokeFromEvent,
+} from "../keys";
 import { type ActiveRule, activeRules, conflictsOf } from "../rules";
 import { useKeybindingsStore } from "../store";
 import { parseWhen } from "../when";
@@ -64,21 +73,63 @@ export function KeybindingsEditor() {
   const [recording, setRecording] = React.useState<RecordTarget | null>(null);
   const [editingWhen, setEditingWhen] = React.useState<ActiveRule | null>(null);
   const [confirmReset, setConfirmReset] = React.useState(false);
+  const [recordingKeys, setRecordingKeys] = React.useState(false);
+  const searchField = React.useRef<HTMLInputElement>(null);
 
   const title = (command: string) => t(`commands.${command as CommandId}`);
+
+  const toggleRecordingKeys = () => {
+    if (!recordingKeys) setQuery("");
+    setRecordingKeys(!recordingKeys);
+    searchField.current?.focus();
+  };
+
+  /** While recording, a press goes into the search as keys, as in VS Code. */
+  const onSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const plain = !e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey;
+    const altK =
+      e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.code === "KeyK";
+    if (altK) {
+      e.preventDefault();
+      toggleRecordingKeys();
+      return;
+    }
+    if (!recordingKeys) return;
+    if (plain && e.key === "Tab") return;
+    if (plain && e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      setRecordingKeys(false);
+      return;
+    }
+    const stroke = strokeFromEvent(e.nativeEvent);
+    if (!stroke) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const text = strokeForJson(stroke, mac);
+    setQuery((was) => {
+      const held = /^"([^"]+)"$/.exec(was.trim())?.[1].split(" ") ?? [];
+      // A chord has two strokes; a third starts again.
+      return `"${held.length === 1 ? `${held[0]} ${text}` : text}"`;
+    });
+  };
 
   // A few dozen rows: worked out at each draw.
   const rows = (() => {
     const needle = query.trim().toLowerCase();
+    const wantedKeys = keysInQuery(query, mac);
     const out: Row[] = [];
     for (const command of COMMANDS) {
       if (onlyChanged && !isChanged(user, command.id)) continue;
       const own = rules.filter((r) => r.command === command.id);
-      const list: Row[] = own.length
-        ? own.map((rule) => ({ command: command.id, rule }))
-        : [{ command: command.id }];
+      const list: Row[] =
+        own.length || wantedKeys
+          ? own.map((rule) => ({ command: command.id, rule }))
+          : [{ command: command.id }];
       for (const row of list) {
-        if (needle) {
+        if (wantedKeys) {
+          if (!row.rule || !chordMatches(row.rule.key, wantedKeys)) continue;
+        } else if (needle) {
           const haystack = [
             title(row.command),
             row.command,
@@ -108,13 +159,37 @@ export function KeybindingsEditor() {
       <div className="flex flex-wrap items-center gap-2">
         {!json && (
           <Input
+            ref={searchField}
             type="search"
             boxClassName="w-90 max-w-full"
             icon={<Search aria-hidden />}
-            placeholder={t("search")}
+            placeholder={recordingKeys ? t("recordKeys.waiting") : t("search")}
             aria-label={t("search")}
+            data-records-keys={recordingKeys || undefined}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={onSearchKeyDown}
+            onBlur={() => setRecordingKeys(false)}
+            end={
+              <Tip
+                label={`${t("recordKeys.toggle")} (${chordText("alt+k", mac)})`}
+              >
+                <InputButton
+                  aria-label={t("recordKeys.toggle")}
+                  aria-pressed={recordingKeys}
+                  // Keeps the field focused, so recording goes on.
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={toggleRecordingKeys}
+                  className={cn(
+                    "grid place-items-center px-1.5 [&>svg]:size-4",
+                    recordingKeys &&
+                      "bg-accent-ink/14 text-accent-ink hover:bg-accent-ink/20",
+                  )}
+                >
+                  <Keyboard aria-hidden />
+                </InputButton>
+              </Tip>
+            }
           />
         )}
         {!json && (

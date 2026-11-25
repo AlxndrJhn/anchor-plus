@@ -3,6 +3,10 @@
   "intro": "Każde polecenie, jego klawisze i kiedy działają. Kliknij klawisz, aby go zmienić, albo edytuj wszystkie jako JSON. Tylko na tym urządzeniu.",
   "search": "Szukaj poleceń, klawiszy lub warunków",
   "onlyChanged": "Tylko zmienione",
+  "recordKeys": {
+    "toggle": "Nagraj klawisze",
+    "waiting": "Naciśnij klawisze, aby zobaczyć ich polecenia"
+  },
   "showJson": "Edytuj jako JSON",
   "showTable": "Wróć do listy",
   "resetAll": "Resetuj wszystkie",

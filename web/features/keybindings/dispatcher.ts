@@ -187,6 +187,12 @@ function run(e: KeyboardEvent, first: boolean) {
 }
 
 function onCapture(e: KeyboardEvent) {
+  // A field that records keys (the shortcuts search) takes every press.
+  if (e.target instanceof Element && e.target.closest("[data-records-keys]")) {
+    press = null;
+    pending = null;
+    return;
+  }
   const stroke = strokeFromEvent(e);
   if (!stroke) return;
   const text = strokeToString(stroke);
