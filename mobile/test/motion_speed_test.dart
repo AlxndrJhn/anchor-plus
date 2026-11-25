@@ -19,20 +19,20 @@ void main() {
   tearDown(() => motionSpeed = MotionSpeed.normal);
 
   test('normal keeps the designed durations', () {
-    expect(Spring.smooth.duration, const Duration(milliseconds: 500));
+    expect(Spring.smooth.duration, const Duration(milliseconds: 380));
     expect(
       const AnchorPageTransitionsBuilder().reverseTransitionDuration,
-      const Duration(milliseconds: 420),
+      const Duration(milliseconds: 380),
     );
   });
 
   test('fast halves opening and closing a page', () {
     motionSpeed = MotionSpeed.fast;
     const builder = AnchorPageTransitionsBuilder();
-    expect(builder.transitionDuration, const Duration(milliseconds: 250));
+    expect(builder.transitionDuration, const Duration(milliseconds: 190));
     expect(
       builder.reverseTransitionDuration,
-      const Duration(milliseconds: 210),
+      const Duration(milliseconds: 190),
     );
   });
 

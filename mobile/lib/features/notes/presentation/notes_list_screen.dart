@@ -534,12 +534,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
     context.go(route);
   }
 
-  void _openSettings() {
-    _drawerKey.currentState?.close();
-    Future.delayed(const Duration(milliseconds: 120), () {
-      if (mounted) context.push(AppRoutes.settings);
-    });
-  }
+  void _openSettings() => context.push(AppRoutes.settings);
 
   @override
   Widget build(BuildContext context) {

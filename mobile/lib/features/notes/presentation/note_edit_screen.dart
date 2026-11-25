@@ -336,18 +336,15 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
           unawaited(_picturesIntoText(fromCamera: true));
           return;
         }
-        Future.delayed(const Duration(milliseconds: 280), () {
-          // Unless the title was tapped meanwhile.
-          if (!mounted || _writing) return;
-          // The caret starts in the text, as on the web: typing starts the
-          // note, and a title is optional.
-          final editor = _editorKey.currentState;
-          if (editor != null) {
-            editor.focusEnd();
-          } else {
-            _titleFocus.requestFocus();
-          }
-        });
+        if (!mounted || _writing) return;
+        // The caret starts in the text, as on the web: typing starts the
+        // note, and a title is optional.
+        final editor = _editorKey.currentState;
+        if (editor != null) {
+          editor.focusEnd();
+        } else {
+          _titleFocus.requestFocus();
+        }
       });
     }
     _titleFocus.addListener(_focusChanged);

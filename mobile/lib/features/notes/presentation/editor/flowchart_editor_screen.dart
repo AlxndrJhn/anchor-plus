@@ -855,7 +855,7 @@ class _TextSheetState extends State<_TextSheet> {
     } else {
       _text.selection = TextSelection.collapsed(offset: widget.initial.length);
     }
-    Future.delayed(const Duration(milliseconds: 320), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _focus.requestFocus();
     });
   }
