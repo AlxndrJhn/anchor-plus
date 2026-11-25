@@ -66,6 +66,7 @@ class NoteEditorController extends ChangeNotifier {
       _isNew = false;
       unawaited(_load(noteId));
     } else {
+      _newTagIds = [?newNoteTagId()];
       _isLoaded = true;
     }
   }
@@ -106,8 +107,8 @@ class NoteEditorController extends ChangeNotifier {
   // Pinned or archived before the new note was written: it's created so.
   bool _newPinned = false;
   bool _newArchived = false;
-  // The filter's tag taken off the new note before it was written.
-  bool _newTagRemoved = false;
+  // The tags the new note gets when written: the filter's tag when opened.
+  List<String> _newTagIds = const [];
   bool _isLoaded = false;
   bool _isDeleted = false;
   bool _isDisposed = false;
@@ -148,15 +149,18 @@ class NoteEditorController extends ChangeNotifier {
   bool get newPinned => _newPinned;
   bool get newArchived => _newArchived;
 
-  /// The tags the new note, not created yet, will get: the tag the list is
-  /// filtered by, unless taken off. Empty once the note is created.
-  List<String> get newTagIds =>
-      _isNew && !_newTagRemoved ? [?newNoteTagId()] : const [];
+  /// The tags the new note, not created yet, will get: the tag the list was
+  /// filtered by when it opened, unless taken off. Empty once the note is
+  /// created.
+  List<String> get newTagIds => _isNew ? _newTagIds : const [];
 
   /// Takes [tagId] off the new note before it is created.
   void removeNewTag(String tagId) {
-    if (!_isNew || !newTagIds.contains(tagId)) return;
-    _newTagRemoved = true;
+    if (!_isNew || !_newTagIds.contains(tagId)) return;
+    _newTagIds = [
+      for (final id in _newTagIds)
+        if (id != tagId) id,
+    ];
     _notify();
   }
 
@@ -410,7 +414,7 @@ class NoteEditorController extends ChangeNotifier {
     final stored = await _notes.getNote(note.id);
     final isBlank =
         stored != null &&
-        stored.tagIds.isEmpty &&
+        stored.tagIds.every(_newTagIds.contains) &&
         !stored.isPinned &&
         !stored.isArchived &&
         storedTitleOf(title.text).isEmpty &&
@@ -420,6 +424,8 @@ class NoteEditorController extends ChangeNotifier {
     await _noteWatch?.cancel();
     _noteWatch = null;
     await _notes.deleteForever([note.id]);
+    // A tag taken off in the picker stays off when it's written again.
+    _newTagIds = [...stored.tagIds];
     _note = null;
     _isNew = true;
     _notify();

@@ -165,6 +165,68 @@ void main() {
     draft.dispose();
   });
 
+  testWidgets('a new note keeps the tag it opened with', (tester) async {
+    var filter = 't1';
+    final draft = NoteEditorController(
+      notes: repo,
+      sharesOf: (_) async => const [],
+      editor: FakeEditor(''),
+      newNoteTagId: () => filter,
+      onNoteDeleted: () {},
+    );
+    filter = 't2';
+    expect(draft.newTagIds, ['t1']);
+    draft.dispose();
+  });
+
+  group('a new note written only to pick its tags', () {
+    setUp(() {
+      when(() => repo.deleteForever(any())).thenAnswer((_) async {});
+    });
+
+    Future<NoteEditorController> pickTags(
+      WidgetTester tester,
+      List<String> picked,
+    ) async {
+      final draft = open(FakeEditor(''), tagId: 't1');
+      final id = await draft.createNote();
+      final created =
+          verify(() => repo.createNote(captureAny())).captured.single as Note;
+      expect(created.tagIds, ['t1']);
+      when(
+        () => repo.getNote(id),
+      ).thenAnswer((_) async => created.copyWith(tagIds: picked));
+      await tester.runAsync(draft.discardIfBlank);
+      return draft;
+    }
+
+    testWidgets('is thrown away again when it holds only the filter tag', (
+      tester,
+    ) async {
+      final draft = await pickTags(tester, ['t1']);
+      verify(() => repo.deleteForever(any())).called(1);
+      expect(draft.isNew, isTrue);
+      expect(draft.newTagIds, ['t1']);
+      draft.dispose();
+    });
+
+    testWidgets('keeps the filter tag off once taken off in the picker', (
+      tester,
+    ) async {
+      final draft = await pickTags(tester, []);
+      verify(() => repo.deleteForever(any())).called(1);
+      expect(draft.newTagIds, isEmpty);
+      draft.dispose();
+    });
+
+    testWidgets('is kept once another tag is picked', (tester) async {
+      final draft = await pickTags(tester, ['t1', 't2']);
+      verifyNever(() => repo.deleteForever(any()));
+      expect(draft.isNew, isFalse);
+      draft.dispose();
+    });
+  });
+
   testWidgets('a change from elsewhere replaces the draft unless edited', (
     tester,
   ) async {
