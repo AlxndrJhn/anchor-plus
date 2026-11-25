@@ -113,7 +113,10 @@ export const COMMANDS = [
   {
     id: "list.open",
     category: "list",
-    keys: [{ key: "o", when: "cardFocus" }],
+    keys: [
+      { key: "enter", when: "cardFocus" },
+      { key: "o", when: "cardFocus" },
+    ],
   },
   {
     id: "list.toggleSelect",
