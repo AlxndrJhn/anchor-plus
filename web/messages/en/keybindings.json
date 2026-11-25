@@ -90,7 +90,8 @@
       "goToTag": "Go to a tag: type a few letters of it",
       "toggleSidebar": "Show or hide the sidebar",
       "showShortcuts": "Show keyboard shortcuts",
-      "openKeybindings": "Change keyboard shortcuts"
+      "openKeybindings": "Change keyboard shortcuts",
+      "recordBug": "Record a bug, or stop recording"
     },
     "list": {
       "newNote": "New note here",

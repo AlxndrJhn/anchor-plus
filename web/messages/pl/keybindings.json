@@ -90,7 +90,8 @@
       "goToTag": "Przejdź do etykiety: wpisz kilka jej liter",
       "toggleSidebar": "Pokaż lub ukryj pasek boczny",
       "showShortcuts": "Pokaż skróty klawiszowe",
-      "openKeybindings": "Zmień skróty klawiszowe"
+      "openKeybindings": "Zmień skróty klawiszowe",
+      "recordBug": "Nagraj błąd lub zatrzymaj nagrywanie"
     },
     "list": {
       "newNote": "Nowa notatka tutaj",

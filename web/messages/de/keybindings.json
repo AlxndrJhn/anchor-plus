@@ -90,7 +90,8 @@
       "goToTag": "Zu einem Label: ein paar Buchstaben davon tippen",
       "toggleSidebar": "Seitenleiste ein- oder ausblenden",
       "showShortcuts": "Tastenkürzel zeigen",
-      "openKeybindings": "Tastenkürzel ändern"
+      "openKeybindings": "Tastenkürzel ändern",
+      "recordBug": "Fehler aufnehmen oder Aufnahme beenden"
     },
     "list": {
       "newNote": "Neue Notiz hier",
