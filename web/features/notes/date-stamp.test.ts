@@ -1,24 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  DEFAULT_DATE_SHORTCUT,
-  DEFAULT_DATE_TIME_SHORTCUT,
-  formatDate,
-  formatDateTime,
-  matchesShortcut,
-  ordinal,
-  shortcutFromEvent,
-} from "./date-stamp";
-
-const press = (code: string, key: string, mods: Partial<KeyboardEvent> = {}) =>
-  ({
-    code,
-    key,
-    ctrlKey: false,
-    altKey: false,
-    shiftKey: false,
-    metaKey: false,
-    ...mods,
-  }) as KeyboardEvent;
+import { formatDate, formatDateTime, ordinal, stampFor } from "./date-stamp";
 
 describe("date stamps", () => {
   it("writes the date and the time with its offset", () => {
@@ -51,26 +32,14 @@ describe("date stamps", () => {
     expect(formatDate(new Date(2026, 0, 1))).toBe("Jan 1st 2026");
   });
 
-  it("matches Ctrl+; and Ctrl+Shift+; by the key, not the character", () => {
-    const plain = press("Semicolon", ";", { ctrlKey: true });
-    // Shift turns ";" into ":" on a US keyboard; it's still the same key.
-    const shifted = press("Semicolon", ":", { ctrlKey: true, shiftKey: true });
-    expect(matchesShortcut(plain, DEFAULT_DATE_SHORTCUT)).toBe(true);
-    expect(matchesShortcut(shifted, DEFAULT_DATE_SHORTCUT)).toBe(false);
-    expect(matchesShortcut(shifted, DEFAULT_DATE_TIME_SHORTCUT)).toBe(true);
-  });
-
-  it("records a pressed shortcut with a readable name", () => {
-    expect(
-      shortcutFromEvent(press("KeyD", "d", { altKey: true, shiftKey: true })),
-    ).toMatchObject({ code: "KeyD", label: "Alt+Shift+D" });
-    expect(
-      shortcutFromEvent(
-        press("Semicolon", ":", { ctrlKey: true, shiftKey: true }),
-      )?.label,
-    ).toBe("Ctrl+Shift+;");
-    // A lone modifier, or a key that would just type, isn't a shortcut.
-    expect(shortcutFromEvent(press("ShiftLeft", "Shift"))).toBeNull();
-    expect(shortcutFromEvent(press("KeyD", "d"))).toBeNull();
+  it("types the date or the date and time for each insert command", () => {
+    const date = new Date(2026, 9, 27, 11, 23, 49);
+    expect(stampFor("editor.insertDate", undefined, date)).toBe(
+      "Oct 27th 2026",
+    );
+    expect(stampFor("editor.insertDate", "iso", date)).toBe("2026-10-27");
+    expect(stampFor("editor.insertDateTime", "long", date)).toBe(
+      formatDateTime(date),
+    );
   });
 });

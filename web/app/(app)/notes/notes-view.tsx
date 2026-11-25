@@ -33,6 +33,7 @@ import {
 import { SelectionBar } from "@/components/ui/selection-bar";
 import { toast } from "@/components/ui/toast";
 import { Tip } from "@/components/ui/tooltip";
+import { useCommands, useContextKey } from "@/features/keybindings";
 import {
   bulkAddTagsToNotes,
   bulkArchiveNotes,
@@ -52,6 +53,7 @@ import {
   NoteListActions,
 } from "@/features/notes/components/note-list-actions";
 import {
+  type CardCommand,
   NotesBoard,
   NotesBoardSkeleton,
 } from "@/features/notes/components/notes-board";
@@ -74,7 +76,6 @@ import { tagColorStyle, useTagMap } from "@/features/tags";
 import { burnNoteCards } from "@/lib/destroy";
 import { eachLimited } from "@/lib/each";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
-import { useShortcuts } from "@/lib/hooks/use-shortcuts";
 import { rememberNewNoteButton } from "@/lib/morph";
 import { isMac } from "@/lib/platform";
 
@@ -414,14 +415,14 @@ export function NotesView({
   };
 
   // The selection bar's keys, for the focused card when nothing is selected.
-  const onCardKey = (note: Note, key: string) => {
-    if (key === "Delete") deleteNotes([note]);
-    else if (key === "e")
+  const onCardKey = (note: Note, command: CardCommand) => {
+    if (command === "list.trash") deleteNotes([note]);
+    else if (command === "list.toggleArchive")
       noteAction.mutate({
         kind: note.isArchived ? "unarchive" : "archive",
         ids: [note.id],
       });
-    else if (key === "f") togglePin(note);
+    else if (command === "list.togglePin") togglePin(note);
     else return false;
     return true;
   };
@@ -456,19 +457,23 @@ export function NotesView({
   };
 
   const newNote = newNoteHref("/notes", tagId);
-  useShortcuts({
-    c: () => router.push(newNote),
-    l: () => router.push(newNoteHref("/notes", tagId, { list: true })),
+  useCommands({
+    "list.newNote": () => router.push(newNote),
+    "list.newList": () =>
+      router.push(newNoteHref("/notes", tagId, { list: true })),
   });
   // Esc drops the search, then leaves a tag for all notes, once there's no
   // selection to drop.
   const leaveTag = () => router.push("/notes");
   const clearSearch = () => list.setQuery("");
-  useShortcuts(
-    { Escape: list.query ? clearSearch : leaveTag },
-    // A note open beside the list (columns) has Esc for itself.
-    (!!list.query || (!!tagId && !openId)) && !list.picking,
-  );
+  useCommands({
+    "list.clearSearch": clearSearch,
+    "list.leaveTag": leaveTag,
+  });
+  useContextKey("searching", !!list.query);
+  useContextKey("inTag", !!tagId);
+  // A note open beside the list (columns) has Esc for itself.
+  useContextKey("notePane", !!openId);
   const noNotes =
     !isLoading &&
     !loadFailed &&
@@ -706,7 +711,7 @@ export function NotesView({
               key: "unpin",
               label: t("unpin"),
               icon: <PinOff aria-hidden />,
-              keys: ["f"],
+              command: "list.togglePin",
               onClick: () =>
                 noteAction.mutate({
                   kind: "unpin",
@@ -717,7 +722,7 @@ export function NotesView({
               key: "pin",
               label: t("pin"),
               icon: <Pin aria-hidden />,
-              keys: ["f"],
+              command: "list.togglePin",
               onClick: () =>
                 noteAction.mutate({
                   kind: "pin",
@@ -751,7 +756,7 @@ export function NotesView({
               key: "unarchive",
               label: t("unarchive"),
               icon: <ArchiveRestore aria-hidden />,
-              keys: ["e"],
+              command: "list.toggleArchive",
               onClick: () =>
                 noteAction.mutate({
                   kind: "unarchive",
@@ -762,7 +767,7 @@ export function NotesView({
               key: "archive",
               label: t("archive"),
               icon: <Archive aria-hidden />,
-              keys: ["e"],
+              command: "list.toggleArchive",
               onClick: () =>
                 noteAction.mutate({
                   kind: "archive",
@@ -774,7 +779,7 @@ export function NotesView({
           label: tc("delete"),
           icon: <Trash2 aria-hidden />,
           onClick: () => deleteNotes(chosen),
-          keys: ["Delete"],
+          command: "list.trash",
         },
       ]}
     />

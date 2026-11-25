@@ -15,16 +15,20 @@ import {
 } from "react";
 import { StatusRing } from "@/components/ui/status-ring";
 import { toast } from "@/components/ui/toast";
+import { commandForKey } from "@/features/keybindings";
 import { usePreferencesStore } from "@/features/preferences";
 import { copyText } from "@/lib/clipboard";
 import { DURATION } from "@/lib/design/tokens";
 import { watchHighlights } from "@/lib/highlight-paint";
-import { hasShortcutKey, isMac } from "@/lib/platform";
+import { isMac } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { fetchAttachmentBlob } from "../../api";
 import type { CollabSession } from "../../collab/session";
 import { useCollabEditor } from "../../collab/use-collab-editor";
 import { stampFor } from "../../date-stamp";
+
+const DATE_COMMANDS = ["editor.insertDate", "editor.insertDateTime"] as const;
+
 import { useLiveImages } from "../../hooks/use-live-images";
 import { showInlineImages } from "../../inline-images";
 import type { LinkRange } from "../../link-utils";
@@ -550,14 +554,18 @@ export const RichTextEditor = forwardRef<
     }, [editorContainerEl, readOnly]);
 
     // Today's date, or the date and time, at the caret (Ctrl+; and
-    // Ctrl+Shift+; unless changed in Settings).
+    // Ctrl+Shift+; unless changed in Keyboard shortcuts).
     useEffect(() => {
       const el = editorContainerEl;
       if (!el || readOnly) return;
       const onKey = (e: KeyboardEvent) => {
         if (e.isComposing) return;
-        const stamp = stampFor(e, usePreferencesStore.getState().editor);
-        if (!stamp) return;
+        const command = commandForKey(e, DATE_COMMANDS, { editorFocus: true });
+        if (!command) return;
+        const stamp = stampFor(
+          command,
+          usePreferencesStore.getState().editor.dateFormat,
+        );
         const quill = getQuill();
         const range = quill?.getSelection();
         if (!quill || !range || !quill.root.contains(e.target as Node)) return;
@@ -739,10 +747,8 @@ export const RichTextEditor = forwardRef<
       if (!el || readOnly) return;
       const onKey = (e: KeyboardEvent) => {
         if (
-          !hasShortcutKey(e) ||
-          e.altKey ||
-          e.shiftKey ||
-          e.key.toLowerCase() !== "k"
+          commandForKey(e, ["editor.insertLink"], { editorFocus: true }) !==
+          "editor.insertLink"
         )
           return;
         const quill = getQuill();

@@ -15,6 +15,7 @@
     "dateTime": "Datum und Uhrzeit",
     "editor": "Editor",
     "quickActions": "Schnellaktionen",
+    "keyboard": "Tastatur",
     "search": "Suche",
     "token": "API-Token",
     "storage": "Speicher",
@@ -159,18 +160,16 @@
     "burnDeletedText": "Eine gelöschte Notiz verbrennt an ihrer Stelle. Aus, verschwindet sie einfach. Nur auf diesem Gerät.",
     "strikeSparks": "Funken, wenn Karten aufschlagen",
     "strikeSparksText": "Nach dem Löschen sprühen Funken, wo die Karten an ihren neuen Platz schlagen. Nur auf diesem Gerät.",
-    "insertDate": "Heutiges Datum einfügen",
-    "insertDateText": "Schreibt in einer Notiz das Datum, z. B. {example}. Mit /date geht dasselbe.",
     "dateFormat": "Format des eingefügten Datums",
-    "dateFormatText": "Wie ein in eine Notiz geschriebenes Datum aussieht.",
-    "insertDateTime": "Datum und Uhrzeit einfügen",
-    "insertDateTimeText": "Schreibt in einer Notiz die Uhrzeit mit Abstand zu UTC, z. B. 2026-10-27T11:23:49+01:00.",
+    "dateFormatText": "Wie ein in eine Notiz geschriebenes Datum aussieht, per Tastenkürzel oder /date."
+  },
+  "keyboard": {
+    "title": "Tastatur",
     "singleKey": "Einzeltasten-Kürzel",
     "singleKeyText": "Tasten wie C für eine neue Notiz, / zum Suchen oder F zum Anheften, wie in Google Keep. Aus, funktionieren nur Kürzel mit Strg oder einer anderen Zusatztaste. Nur auf diesem Gerät.",
-    "pressNewShortcut": "Neues Kürzel drücken",
-    "changeShortcut": "Kürzel {shortcut}, ändern",
-    "pressKeys": "Tasten drücken …",
-    "reset": "Zurücksetzen"
+    "shortcuts": "Tastenkürzel",
+    "shortcutsText": "Jedes Kürzel ändern, eigene hinzufügen oder alle als JSON bearbeiten, wie in VS Code.",
+    "open": "Kürzel ändern"
   },
   "quickActions": {
     "title": "Schnellaktionen",

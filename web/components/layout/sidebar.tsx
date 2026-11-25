@@ -51,6 +51,7 @@ import { toast } from "@/components/ui/toast";
 import { Tip } from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth";
 import { listSessions } from "@/features/auth/api";
+import { useKeyHint } from "@/features/keybindings";
 import {
   orderSaveOptions,
   pullAfterLastOrderSave,
@@ -81,7 +82,6 @@ import { useLastShown } from "@/lib/hooks/use-last-shown";
 import { isDemo, isServerless } from "@/lib/local-backend/mode";
 import { rememberNewNoteButton } from "@/lib/morph";
 import { glidePill, prefersReducedMotion } from "@/lib/motion";
-import { isMac } from "@/lib/platform";
 import { switchTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Brand } from "./brand";
@@ -276,9 +276,8 @@ export function Sidebar({
     folded && !drawer,
   );
   const isNarrow = folded && !isPeeking;
-  const singleKeys = usePreferencesStore(
-    (s) => s.editor.singleKeyShortcuts !== false,
-  );
+  const newNoteKey = useKeyHint("app.newNote");
+  const sidebarKey = useKeyHint("app.toggleSidebar");
   React.useEffect(() => {
     if (tagDialog || tagToDelete) stopPeeking();
   }, [tagDialog, tagToDelete, stopPeeking]);
@@ -392,7 +391,9 @@ export function Sidebar({
       </div>
 
       <Tip
-        label={singleKeys ? t("newNoteKey") : t("newNote")}
+        label={
+          newNoteKey ? t("newNoteKey", { keys: newNoteKey.text }) : t("newNote")
+        }
         side="right"
         isDisabled={!isNarrow}
         isFocusOnly
@@ -404,19 +405,19 @@ export function Sidebar({
             stopPeeking();
             onNavigate?.();
           }}
-          aria-keyshortcuts={singleKeys ? "N" : undefined}
+          aria-keyshortcuts={newNoteKey?.aria}
           data-slot="new-note"
           data-new-note="sidebar"
           className="mb-3 flex h-9.5 items-center gap-2 overflow-hidden whitespace-nowrap rounded-md bg-foreground pr-2.5 pl-[11.5px] font-semibold text-card text-ui no-underline shadow-control transition-[background-color,transform] duration-(--duration-hover) hover:bg-[color-mix(in_srgb,var(--foreground)_88%,var(--card))] active:scale-[.98] [&>svg]:size-4.25 [&>svg]:shrink-0"
         >
           <Plus aria-hidden />
           <span className={labelClass}>{t("newNote")}</span>
-          {!drawer && singleKeys && (
+          {!drawer && newNoteKey && (
             <kbd
               aria-hidden
               className={cn("ml-auto bg-card/16 text-inherit", hideClass)}
             >
-              N
+              {newNoteKey.text}
             </kbd>
           )}
         </Link>
@@ -686,7 +687,11 @@ export function Sidebar({
         )}
         {onToggleFold && (
           <Tip
-            label={t("expandKey", { keys: isMac() ? "⌘\\" : "Ctrl+\\" })}
+            label={
+              sidebarKey
+                ? t("expandKey", { keys: sidebarKey.text })
+                : t("expandSidebar")
+            }
             side="right"
             isDisabled={!isNarrow}
             isFocusOnly
@@ -700,7 +705,7 @@ export function Sidebar({
                     ? t("keepSidebarOpen")
                     : t("expandSidebar")
               }
-              aria-keyshortcuts={isMac() ? "Meta+\\" : "Control+\\"}
+              aria-keyshortcuts={sidebarKey?.aria}
               onClick={onToggleFold}
               className={cn(
                 rowClass,
@@ -726,12 +731,14 @@ export function Sidebar({
                   {t("keepOpen")}
                 </span>
               </span>
-              <kbd
-                aria-hidden
-                className="ml-auto opacity-0 transition-opacity duration-(--duration-hover) group-hover/fold:opacity-100 group-focus-visible/fold:opacity-100 group-data-narrow/sb:invisible"
-              >
-                {isMac() ? "⌘\\" : "Ctrl \\"}
-              </kbd>
+              {sidebarKey && (
+                <kbd
+                  aria-hidden
+                  className="ml-auto opacity-0 transition-opacity duration-(--duration-hover) group-hover/fold:opacity-100 group-focus-visible/fold:opacity-100 group-data-narrow/sb:invisible"
+                >
+                  {sidebarKey.text}
+                </kbd>
+              )}
             </button>
           </Tip>
         )}
@@ -915,6 +922,7 @@ function AccountMenu({
   const tc = useTranslations("common");
   const router = useRouter();
   const { theme = "system", setTheme } = useTheme();
+  const shortcutsKey = useKeyHint("app.showShortcuts");
   const [isOpen, setIsOpen] = React.useState(false);
   // Kept while the menu closes: the sidebar can narrow under it.
   const opensRight = useLastShown(isNarrow, isOpen);
@@ -983,9 +991,11 @@ function AccountMenu({
         >
           <Keyboard />
           {t("keyboardShortcuts")}
-          <kbd aria-hidden className="ml-auto">
-            ?
-          </kbd>
+          {shortcutsKey && (
+            <kbd aria-hidden className="ml-auto">
+              {shortcutsKey.text}
+            </kbd>
+          )}
         </DropdownMenuItem>
         {user.isAdmin && (
           <DropdownMenuItem onSelect={() => goTo("/admin")}>

@@ -94,18 +94,7 @@ export function focusEdgeCard(edge: "first" | "last") {
   return true;
 }
 
-type Direction = "up" | "down" | "left" | "right";
-
-export const CARD_KEYS: Record<string, Direction> = {
-  ArrowUp: "up",
-  ArrowDown: "down",
-  ArrowLeft: "left",
-  ArrowRight: "right",
-  k: "up",
-  j: "down",
-  h: "left",
-  l: "right",
-};
+export type Direction = "up" | "down" | "left" | "right";
 
 /**
  * Moves to the nearest card that way. Cards stand in masonry columns, so

@@ -205,9 +205,9 @@ export default function ArchivePage() {
             onPick={list.onPick}
             onShare={setSharingNote}
             renderActions={renderActions}
-            onCardKey={(note, key) => {
-              if (key === "Delete") deleteNotes([note]);
-              else if (key === "e")
+            onCardKey={(note, command) => {
+              if (command === "list.trash") deleteNotes([note]);
+              else if (command === "list.toggleArchive")
                 noteAction.mutate({ kind: "unarchive", ids: [note.id] });
               else return false;
               return true;
@@ -228,7 +228,7 @@ export default function ArchivePage() {
             key: "unarchive",
             label: t("unarchive"),
             icon: <ArchiveRestore aria-hidden />,
-            keys: ["e"],
+            command: "list.toggleArchive",
             onClick: () =>
               noteAction.mutate({
                 kind: "unarchive",
@@ -252,7 +252,7 @@ export default function ArchivePage() {
             label: tc("delete"),
             icon: <Trash2 aria-hidden />,
             onClick: () => deleteNotes(list.chosen),
-            keys: ["Delete"],
+            command: "list.trash",
           },
         ]}
       />

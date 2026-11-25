@@ -15,6 +15,7 @@
     "dateTime": "Data i godzina",
     "editor": "Edytor",
     "quickActions": "Szybkie akcje",
+    "keyboard": "Klawiatura",
     "search": "Wyszukiwanie",
     "token": "Token API",
     "storage": "Miejsce",
@@ -159,18 +160,16 @@
     "burnDeletedText": "Usunięta notatka spala się w miejscu, w którym stała. Wyłączone: po prostu znika. Tylko na tym urządzeniu.",
     "strikeSparks": "Iskry przy zderzeniu kart",
     "strikeSparksText": "Po usunięciu lecą iskry tam, gdzie karty uderzają w swoje nowe miejsca. Tylko na tym urządzeniu.",
-    "insertDate": "Wstaw dzisiejszą datę",
-    "insertDateText": "W notatce wpisuje datę, np. {example}. Wpisanie /date robi to samo.",
     "dateFormat": "Format wstawianej daty",
-    "dateFormatText": "Jak wygląda data wpisana w notatce.",
-    "insertDateTime": "Wstaw datę i godzinę",
-    "insertDateTimeText": "W notatce wpisuje godzinę z przesunięciem względem UTC, np. 2026-10-27T11:23:49+01:00.",
+    "dateFormatText": "Jak wygląda data wpisana w notatce skrótem klawiszowym lub /date."
+  },
+  "keyboard": {
+    "title": "Klawiatura",
     "singleKey": "Skróty jednoklawiszowe",
     "singleKeyText": "Klawisze takie jak C dla nowej notatki, / do wyszukiwania czy F do przypinania, jak w Google Keep. Po wyłączeniu działają tylko skróty z Ctrl lub innym modyfikatorem. Tylko na tym urządzeniu.",
-    "pressNewShortcut": "Naciśnij nowy skrót",
-    "changeShortcut": "Skrót {shortcut}, zmień",
-    "pressKeys": "Naciśnij klawisze…",
-    "reset": "Resetuj"
+    "shortcuts": "Skróty klawiszowe",
+    "shortcutsText": "Zmień dowolny skrót, dodaj własne albo edytuj wszystkie jako JSON, jak w VS Code.",
+    "open": "Zmień skróty"
   },
   "quickActions": {
     "title": "Szybkie akcje",

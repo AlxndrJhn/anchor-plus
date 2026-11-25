@@ -92,7 +92,7 @@
   "sidebar": {
     "sidebar": "Sidebar",
     "newNote": "New note",
-    "newNoteKey": "New note (N)",
+    "newNoteKey": "New note ({keys})",
     "pages": "Pages",
     "tags": "Tags",
     "newTag": "New tag",
@@ -175,35 +175,7 @@
   "shortcuts": {
     "title": "Keyboard shortcuts",
     "or": "or",
-    "sections": {
-      "anywhere": "Anywhere",
-      "notes": "Notes",
-      "focused": "Focused or selected notes",
-      "inNote": "In a note"
-    },
-    "rows": {
-      "newNote": "New note",
-      "search": "Search, or go to a page or tag by name",
-      "goToPage": "Go to Notes, Archive, Trash or Settings",
-      "goToTag": "Go to a tag: type a few letters of it",
-      "toggleSidebar": "Show or hide the sidebar",
-      "thisDialog": "These shortcuts",
-      "moveBetween": "Move between notes",
-      "firstOrLast": "First or last note",
-      "open": "Open the note",
-      "select": "Select the note",
-      "selectUpTo": "Select up to it",
-      "newNoteOrList": "New note, or new list, with no note focused",
-      "leaveTag": "Leave a tag for all notes",
-      "pin": "Pin or unpin",
-      "archive": "Archive or unarchive",
-      "trash": "Move to trash; in Trash, delete permanently",
-      "leaveText": "Leave the text; again to close",
-      "backIntoText": "Back into the text",
-      "closeOrTick": "Close, or tick a checklist item",
-      "archiveOne": "Archive",
-      "trashOne": "Move to trash"
-    }
+    "customize": "Change shortcuts"
   },
   "tagJump": {
     "title": "Go to tag",

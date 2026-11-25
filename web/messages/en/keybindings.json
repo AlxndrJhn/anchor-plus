@@ -1,0 +1,128 @@
+{
+  "title": "Keyboard shortcuts",
+  "intro": "Every command, its keys and when they work. Click a key to change it, or edit them all as JSON. On this device only.",
+  "search": "Search commands, keys or when clauses",
+  "onlyChanged": "Changed only",
+  "showJson": "Edit as JSON",
+  "showTable": "Back to the list",
+  "resetAll": "Reset all",
+  "resetAllConfirm": "Reset all keyboard shortcuts?",
+  "resetAllText": "Every key you changed or added goes back to the default.",
+  "count": "{count, plural, one {# command} other {# commands}}",
+  "noMatch": "No command matches",
+  "columns": {
+    "command": "Command",
+    "key": "Keybinding",
+    "when": "When",
+    "source": "Source"
+  },
+  "source": {
+    "default": "Default",
+    "user": "User"
+  },
+  "unbound": "Not set",
+  "categories": {
+    "app": "Anywhere",
+    "list": "Notes",
+    "note": "In a note",
+    "editor": "Typing in a note"
+  },
+  "row": {
+    "change": "Change keybinding",
+    "add": "Add keybinding",
+    "editWhen": "Change when expression",
+    "remove": "Remove keybinding",
+    "reset": "Reset to default",
+    "actions": "More for {command}",
+    "changeKey": "{command}: {key}, change",
+    "addKey": "{command}: not set, add a key",
+    "whenPlaceholder": "Always",
+    "whenHelp": "Enter to save, Esc to cancel",
+    "conflicts": "{count, plural, one {Another command has this key} other {# other commands have this key}}",
+    "singleKeysOff": "Single-key shortcuts are off, so this key doesn’t work"
+  },
+  "record": {
+    "title": "Press the keys",
+    "text": "Press a key combination, then Enter. For a chord such as G N, press the keys one after the other.",
+    "waiting": "Waiting for keys…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "clear": "Start again",
+    "conflicts": "Also on {count, plural, one {# command} other {# commands}}:",
+    "noModifier": "Without Ctrl, Alt or ⌘ a key doesn’t act while you type in a field.",
+    "whenLabel": "When"
+  },
+  "json": {
+    "title": "keybindings.json",
+    "intro": "Your changes over the defaults, as in VS Code: each line has a key, a command and, if you like, a when clause. A command starting with - takes a default key away. Later lines win.",
+    "save": "Save",
+    "saved": "Saved",
+    "revert": "Undo edits",
+    "invalidJson": "This isn’t valid JSON: {error}",
+    "line": "Rule {index}: {problem}",
+    "defaults": "Default keybindings",
+    "contextKeys": "Context keys for when",
+    "copy": "Copy"
+  },
+  "context": {
+    "view": "The page: notes, archive, trash, settings or note",
+    "inputFocus": "Typing in a text field",
+    "editorFocus": "Typing in a note’s title or text",
+    "cardFocus": "A note card has focus",
+    "notesList": "A list of notes is on screen",
+    "selecting": "Notes are selected",
+    "searching": "Notes are being searched",
+    "inTag": "Notes of one tag are shown",
+    "notePane": "A note is open beside the list",
+    "noteOpen": "A note is open",
+    "checklistItem": "On a checklist item",
+    "searchField": "The page has a search field",
+    "isMac": "On a Mac"
+  },
+  "commands": {
+    "app": {
+      "newNote": "New note",
+      "search": "Search, or go to a page or tag by name",
+      "goToNotes": "Go to Notes",
+      "goToArchive": "Go to Archive",
+      "goToTrash": "Go to Trash",
+      "goToSettings": "Go to Settings",
+      "goToTag": "Go to a tag: type a few letters of it",
+      "toggleSidebar": "Show or hide the sidebar",
+      "showShortcuts": "Show keyboard shortcuts",
+      "openKeybindings": "Change keyboard shortcuts"
+    },
+    "list": {
+      "newNote": "New note here",
+      "newList": "New list here",
+      "focusFirst": "First note",
+      "focusLast": "Last note",
+      "focusUp": "Note above",
+      "focusDown": "Note below",
+      "focusLeft": "Note to the left",
+      "focusRight": "Note to the right",
+      "open": "Open the note",
+      "toggleSelect": "Select the note",
+      "selectRange": "Select up to the note",
+      "moveEarlier": "Move the note earlier",
+      "moveLater": "Move the note later",
+      "togglePin": "Pin or unpin",
+      "toggleArchive": "Archive or unarchive",
+      "trash": "Move to trash; in Trash, delete permanently",
+      "clearSearch": "Clear the search",
+      "leaveTag": "Leave a tag for all notes"
+    },
+    "note": {
+      "close": "Close the note",
+      "editText": "Back into the text",
+      "togglePin": "Pin or unpin",
+      "toggleArchive": "Archive or unarchive",
+      "trash": "Move to trash"
+    },
+    "editor": {
+      "insertDate": "Insert today’s date",
+      "insertDateTime": "Insert the date and time",
+      "insertLink": "Add a link to the selected text"
+    }
+  }
+}

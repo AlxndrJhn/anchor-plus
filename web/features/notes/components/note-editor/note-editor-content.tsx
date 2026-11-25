@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "@/components/ui/toast";
 import { Tip } from "@/components/ui/tooltip";
+import { commandForKey } from "@/features/keybindings";
 import {
   formatFullDate,
   formatShortDate,
@@ -128,6 +129,8 @@ export interface PictureActions {
 type ContentT = ReturnType<typeof useTranslations<"noteEditor.content">>;
 
 /** “Sam”, “Sam and Maya”, “Sam, Maya and 2 others”. */
+const DATE_COMMANDS = ["editor.insertDate", "editor.insertDateTime"] as const;
+
 function sharedLine(people: Person[], t: ContentT) {
   const firstNames = shortNames(people.map((person) => person.name));
   return t("people", {
@@ -276,11 +279,14 @@ export function NoteEditorContent(props: NoteEditorContentProps) {
   );
 
   const onTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const stamp = stampFor(
-      e.nativeEvent,
-      usePreferencesStore.getState().editor,
-    );
-    if (stamp) {
+    const command = commandForKey(e.nativeEvent, DATE_COMMANDS, {
+      editorFocus: true,
+    });
+    if (command) {
+      const stamp = stampFor(
+        command,
+        usePreferencesStore.getState().editor.dateFormat,
+      );
       e.preventDefault();
       const input = e.currentTarget;
       input.setRangeText(

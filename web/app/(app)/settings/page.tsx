@@ -11,6 +11,7 @@ import {
   DevicesSection,
   EditorSection,
   ImportExportSection,
+  KeyboardSection,
   LanguageSection,
   NoteLocksSection,
   PasswordSection,
@@ -44,6 +45,7 @@ export default function SettingsPage() {
           <DateTimeSection />
           <EditorSection />
           <QuickActionsSection />
+          <KeyboardSection />
           {!isServerless && <SearchSection />}
           {!isServerless && <ApiTokenSection />}
           {!isServerless && <StorageSection />}

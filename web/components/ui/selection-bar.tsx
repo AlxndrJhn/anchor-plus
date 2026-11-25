@@ -5,9 +5,17 @@ import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useShellStore } from "@/components/layout/shell-store";
 import { Tip } from "@/components/ui/tooltip";
+import {
+  type CommandId,
+  chordAria,
+  chordText,
+  useCommands,
+  useContextKey,
+  useKeysFor,
+} from "@/features/keybindings";
 import { usePresence } from "@/lib/hooks/use-presence";
 import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
-import { useShortcuts } from "@/lib/hooks/use-shortcuts";
+import { isMac } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 
 interface SelectionBarAction {
@@ -15,17 +23,9 @@ interface SelectionBarAction {
   label: string;
   icon: React.ReactNode;
   onClick: (button: HTMLButtonElement) => void;
-  /** `e.key` values that run it while notes are selected; the first is shown. */
-  keys?: string[];
+  /** The command whose keys run it while notes are selected. */
+  command?: CommandId;
 }
-
-/** How a key is written in a tooltip, and for aria-keyshortcuts. */
-const KEY_NAMES: Record<string, [shown: string, aria: string]> = {
-  Delete: ["Del", "Delete"],
-  "#": ["#", "Shift+3"],
-};
-const keyName = (key: string) => KEY_NAMES[key]?.[0] ?? key.toUpperCase();
-const ariaKey = (key: string) => KEY_NAMES[key]?.[1] ?? key.toUpperCase();
 
 interface SelectionBarProps {
   open: boolean;
@@ -51,20 +51,29 @@ export function SelectionBar({
   const setBarShown = useShellStore((s) => s.setBarShown);
   const roving = useRovingFocus<HTMLDivElement>();
   const buttons = React.useRef(new Map<string, HTMLButtonElement>());
-  useShortcuts(
+  const active = open && count > 0;
+  useCommands(
     Object.fromEntries(
       actions.flatMap((action) =>
-        (action.keys ?? []).map((key) => [
-          key,
-          () => {
-            const button = buttons.current.get(action.key);
-            if (button) action.onClick(button);
-          },
-        ]),
+        action.command
+          ? [
+              [
+                action.command,
+                () => {
+                  const button = buttons.current.get(action.key);
+                  if (!button) return false;
+                  action.onClick(button);
+                },
+              ],
+            ]
+          : [],
       ),
     ),
-    open && count > 0,
+    active,
   );
+  useContextKey("selecting", active);
+  const keysFor = useKeysFor();
+  const mac = isMac();
   React.useEffect(() => {
     setBarShown(open);
     return () => setBarShown(false);
@@ -124,8 +133,8 @@ export function SelectionBar({
         <Tip
           key={action.key}
           label={
-            action.keys?.length
-              ? `${action.label} (${keyName(action.keys[0])})`
+            action.command && keysFor(action.command)[0]
+              ? `${action.label} (${chordText(keysFor(action.command)[0], mac)})`
               : action.label
           }
           side="top"
@@ -139,7 +148,13 @@ export function SelectionBar({
             className={barButtonClass}
             aria-disabled={!count || undefined}
             aria-label={action.label}
-            aria-keyshortcuts={action.keys?.map(ariaKey).join(" ") || undefined}
+            aria-keyshortcuts={
+              action.command
+                ? keysFor(action.command)
+                    .map((key) => chordAria(key, mac))
+                    .join(" ") || undefined
+                : undefined
+            }
             onClick={(e) => {
               if (count) action.onClick(e.currentTarget);
             }}

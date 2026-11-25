@@ -1,17 +1,15 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { Toaster } from "@/components/ui/toast";
 import { SecondFactorReminder } from "@/features/auth/components/second-factor-reminder";
-import { focusEdgeCard } from "@/features/notes/card-focus";
+import { useCommands, useContextKey } from "@/features/keybindings";
 import { usePreferencesStore } from "@/features/preferences";
 import { useOnlineStatus, useSync, useWarnWhenUnsaved } from "@/features/sync";
 import { useTrackPageChanges } from "@/lib/app-history";
-import { singleKeyAllowed } from "@/lib/hooks/use-shortcuts";
 import { findNewNoteButton, rememberNewNoteButton } from "@/lib/morph";
-import { hasShortcutKey } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { PageTransition } from "./page-transition";
 import { useShellStore } from "./shell-store";
@@ -20,12 +18,11 @@ import { newNoteHref, Sidebar } from "./sidebar";
 import { MAIN_ID, SkipLink } from "./skip-link";
 import { TagJump } from "./tag-jump";
 
-const GO_TO: Record<string, string> = {
-  n: "/notes",
-  a: "/archive",
-  t: "/trash",
-  s: "/settings",
-};
+/** The page, for when clauses: notes, archive, trash, settings, note… */
+function viewOf(pathname: string) {
+  if (/^\/notes\/[^/]+/.test(pathname)) return "note";
+  return pathname.split("/")[1] || "notes";
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   useSync();
@@ -46,106 +43,46 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   } = useShellStore();
   const drawerRef = React.useRef<HTMLDivElement>(null);
   const drawerOpener = React.useRef<HTMLElement | null>(null);
-  const goPressedAt = React.useRef(0);
+  const pathname = usePathname() ?? "";
+  useContextKey("view", viewOf(pathname));
 
+  const startNote = React.useCallback(() => {
+    rememberNewNoteButton(findNewNoteButton());
+    const { pathname, search } = window.location;
+    router.push(
+      newNoteHref(pathname, new URLSearchParams(search).get("tagId")),
+    );
+  }, [router]);
+  useCommands({
+    "app.newNote": startNote,
+    // Where there is no search field; SearchField takes the key itself.
+    "app.search": () => {
+      const field = document.querySelector<HTMLInputElement>(
+        "main input[type=search]",
+      );
+      if (field) {
+        field.focus();
+        field.select();
+      } else router.push("/notes?search");
+    },
+    "app.goToNotes": () => router.push("/notes"),
+    "app.goToArchive": () => router.push("/archive"),
+    "app.goToTrash": () => router.push("/trash"),
+    "app.goToSettings": () => router.push("/settings"),
+    "app.goToTag": () => setTagJump(true),
+    "app.showShortcuts": () => setShortcuts(true),
+    "app.openKeybindings": () => router.push("/settings/shortcuts"),
+    "app.toggleSidebar": () =>
+      setUI(
+        "sidebarCollapsed",
+        !usePreferencesStore.getState().ui.sidebarCollapsed,
+      ),
+  });
+  // The desktop app's shortcut from anywhere on the computer.
   React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.defaultPrevented) return;
-      // Read-only note text (.ql-editor) takes focus too.
-      const typing = (e.target as HTMLElement)?.closest?.(
-        "input, textarea, select, [contenteditable='true'], .ql-editor",
-      );
-      const mod = e.metaKey || e.ctrlKey;
-      const inDialog = !!document.querySelector(
-        ":is([role=dialog], [role=alertdialog], [role=menu]):not([data-state=closed])",
-      );
-      const isPlain =
-        !typing && !mod && !e.altKey && !inDialog && singleKeyAllowed(e.key);
-      // G and a letter goes to a page, as in Gmail; G G to the first note.
-      const after = goPressedAt.current;
-      goPressedAt.current = 0;
-      if (isPlain && performance.now() - after < 1500) {
-        const page = GO_TO[e.key];
-        if (page || e.key === "g") {
-          e.preventDefault();
-          if (page) router.push(page);
-          else focusEdgeCard("first");
-          return;
-        }
-      }
-      if (isPlain && e.key === "g") {
-        e.preventDefault();
-        goPressedAt.current = performance.now();
-        return;
-      }
-      // # and a tag's name; in a note, # moves the note to the trash.
-      if (
-        isPlain &&
-        e.key === "#" &&
-        !/^\/notes\/[^/]+$/.test(window.location.pathname)
-      ) {
-        e.preventDefault();
-        setTagJump(true);
-        return;
-      }
-      if (isPlain && e.key === "?") {
-        e.preventDefault();
-        setShortcuts(true);
-        return;
-      }
-      if (mod && e.key === "\\") {
-        e.preventDefault();
-        setUI(
-          "sidebarCollapsed",
-          !usePreferencesStore.getState().ui.sidebarCollapsed,
-        );
-        return;
-      }
-      if (
-        hasShortcutKey(e) &&
-        !e.altKey &&
-        e.key.toLowerCase() === "k" &&
-        !inDialog
-      ) {
-        // SearchField handles Ctrl K itself.
-        const field = document.querySelector<HTMLInputElement>(
-          "main input[type=search]",
-        );
-        if (field?.closest("[data-search-field]")) return;
-        e.preventDefault();
-        if (field) {
-          field.focus();
-          field.select();
-        } else router.push("/notes?search");
-        return;
-      }
-      if (
-        !typing &&
-        !mod &&
-        !e.altKey &&
-        e.key.toLowerCase() === "n" &&
-        !inDialog &&
-        singleKeyAllowed(e.key)
-      ) {
-        e.preventDefault();
-        startNote();
-      }
-    };
-    const startNote = () => {
-      rememberNewNoteButton(findNewNoteButton());
-      const { pathname, search } = window.location;
-      router.push(
-        newNoteHref(pathname, new URLSearchParams(search).get("tagId")),
-      );
-    };
-    document.addEventListener("keydown", onKey);
-    // The desktop app's shortcut from anywhere on the computer.
     window.addEventListener("anchor:new-note", startNote);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      window.removeEventListener("anchor:new-note", startNote);
-    };
-  }, [router, setUI, setShortcuts, setTagJump]);
+    return () => window.removeEventListener("anchor:new-note", startNote);
+  }, [startNote]);
 
   return (
     <div

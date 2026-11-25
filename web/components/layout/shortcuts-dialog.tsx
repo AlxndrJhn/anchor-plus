@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogBody,
@@ -8,70 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { Messages } from "@/lib/i18n";
+import { CATEGORIES, COMMANDS, useKeysFor } from "@/features/keybindings";
+import { Keys } from "@/features/keybindings/components/keys-view";
 import { isMac } from "@/lib/platform";
 
-// A row: what it does (a message key), then its keys; a key list is one way of doing it.
-type Shortcuts = Messages["layout"]["shortcuts"];
-type Row = [keyof Shortcuts["rows"], string[][]];
-
-const sections = (mod: string): [keyof Shortcuts["sections"], Row[]][] => [
-  [
-    "anywhere",
-    [
-      ["newNote", [["N"]]],
-      ["search", [["/"], [mod, "K"]]],
-      ["goToPage", [["G", "N / A / T / S"]]],
-      ["goToTag", [["#"]]],
-      ["toggleSidebar", [[mod, "\\"]]],
-      ["thisDialog", [["?"]]],
-    ],
-  ],
-  [
-    "notes",
-    [
-      [
-        "moveBetween",
-        [
-          ["↑", "↓", "←", "→"],
-          ["H", "J", "K", "L"],
-        ],
-      ],
-      [
-        "firstOrLast",
-        [
-          ["G", "G"],
-          ["Shift", "G"],
-        ],
-      ],
-      ["open", [["Enter"], ["O"]]],
-      ["select", [["X"], ["Space"]]],
-      ["selectUpTo", [["Shift", "X"]]],
-      ["newNoteOrList", [["C"], ["L"]]],
-      ["leaveTag", [["Esc"]]],
-    ],
-  ],
-  [
-    "focused",
-    [
-      ["pin", [["F"]]],
-      ["archive", [["E"]]],
-      ["trash", [["Del"]]],
-    ],
-  ],
-  [
-    "inNote",
-    [
-      ["leaveText", [["Esc"]]],
-      ["backIntoText", [["I"]]],
-      ["closeOrTick", [[mod, "Enter"]]],
-      ["pin", [["F"]]],
-      ["archiveOne", [["E"]]],
-      ["trashOne", [["Del"], ["#"]]],
-    ],
-  ],
-];
-
+/** Every command that has a key now, as the user set them. */
 export function ShortcutsDialog({
   open,
   onOpenChange,
@@ -80,7 +23,9 @@ export function ShortcutsDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("layout.shortcuts");
-  const mod = isMac() ? "⌘" : "Ctrl";
+  const tk = useTranslations("keybindings");
+  const keysFor = useKeysFor();
+  const mac = isMac();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="lg" aria-describedby={undefined}>
@@ -88,36 +33,49 @@ export function ShortcutsDialog({
           <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
         <DialogBody className="gap-5">
-          {sections(mod).map(([section, rows]) => (
-            <section key={section} className="grid gap-1.5">
-              <h3 className="m-0 text-label text-muted-foreground uppercase">
-                {t(`sections.${section}`)}
-              </h3>
-              <dl className="m-0 grid">
-                {rows.map(([what, ways]) => (
-                  <div
-                    key={what}
-                    className="flex items-center justify-between gap-4 border-border/50 border-b py-1.5 last:border-b-0"
-                  >
-                    <dt className="text-ui">{t(`rows.${what}`)}</dt>
-                    <dd className="m-0 flex shrink-0 items-center gap-1.5 text-muted-foreground text-small">
-                      {ways.map((keys, i) => (
-                        <span
-                          key={keys.join()}
-                          className="flex items-center gap-1"
-                        >
-                          {i > 0 && <span>{t("or")}</span>}
-                          {keys.map((key, j) => (
-                            <kbd key={j}>{key}</kbd>
-                          ))}
-                        </span>
-                      ))}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          ))}
+          {CATEGORIES.map((category) => {
+            const rows = COMMANDS.filter(
+              (c) => c.category === category && keysFor(c.id).length,
+            );
+            if (!rows.length) return null;
+            return (
+              <section key={category} className="grid gap-1.5">
+                <h3 className="m-0 text-label text-muted-foreground uppercase">
+                  {tk(`categories.${category}`)}
+                </h3>
+                <dl className="m-0 grid">
+                  {rows.map((command) => (
+                    <div
+                      key={command.id}
+                      className="flex items-center justify-between gap-4 border-border/50 border-b py-1.5 last:border-b-0"
+                    >
+                      <dt className="text-ui">
+                        {tk(`commands.${command.id}`)}
+                      </dt>
+                      <dd className="m-0 flex shrink-0 flex-wrap items-center justify-end gap-1.5 text-muted-foreground text-small">
+                        {keysFor(command.id).map((key, i) => (
+                          <span key={key} className="flex items-center gap-1">
+                            {i > 0 && <span>{t("or")}</span>}
+                            <Keys chord={key} mac={mac} />
+                          </span>
+                        ))}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            );
+          })}
+          <div>
+            <Button asChild variant="secondary" size="sm">
+              <Link
+                href="/settings/shortcuts"
+                onClick={() => onOpenChange(false)}
+              >
+                {t("customize")}
+              </Link>
+            </Button>
+          </div>
         </DialogBody>
       </DialogContent>
     </Dialog>

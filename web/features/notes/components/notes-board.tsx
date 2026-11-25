@@ -4,17 +4,18 @@ import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  commandForKey,
+  useCommands,
+  useContextKey,
+} from "@/features/keybindings";
 import { useTagMap } from "@/features/tags/hooks";
 import { moveItem } from "@/features/tags/utils";
 import { useDelayedFlag } from "@/lib/hooks/use-delayed-flag";
-import {
-  hasOverlay,
-  singleKeyAllowed,
-  useShortcuts,
-} from "@/lib/hooks/use-shortcuts";
+import { hasOverlay } from "@/lib/hooks/use-shortcuts";
 import { cn } from "@/lib/utils";
 import {
-  CARD_KEYS,
+  type Direction,
   focusEdgeCard,
   moveCardFocus,
   reachFollowedCard,
@@ -26,7 +27,31 @@ import { type DragPreview, useCardDrag } from "../hooks/use-card-drag";
 import type { Note } from "../types";
 import { type CardLayout, NoteCard } from "./note-card";
 
-const focusLastCard = () => focusEdgeCard("last");
+/** Commands a focused card runs through onCardKey. */
+export type CardCommand =
+  | "list.togglePin"
+  | "list.toggleArchive"
+  | "list.trash";
+
+const MOVES = {
+  "list.focusUp": "up",
+  "list.focusDown": "down",
+  "list.focusLeft": "left",
+  "list.focusRight": "right",
+} as const satisfies Record<string, Direction>;
+const MOVE_COMMANDS = [
+  "list.focusUp",
+  "list.focusDown",
+  "list.focusLeft",
+  "list.focusRight",
+  "list.open",
+] as const;
+const CARD_COMMANDS = [
+  ...MOVE_COMMANDS,
+  "list.togglePin",
+  "list.toggleArchive",
+  "list.trash",
+] as const;
 
 interface NotesBoardGroup {
   key: string;
@@ -77,10 +102,10 @@ interface NotesBoardProps {
   /** A finger held a card and let go without moving it. */
   onHold?: (noteId: string) => void;
   /**
-   * A key pressed on a focused card while nothing is selected, such as
-   * Delete; returns whether it acted.
+   * A command run by a key on a focused card while nothing is selected,
+   * such as list.trash; returns whether it acted.
    */
-  onCardKey?: (note: Note, key: string) => boolean;
+  onCardKey?: (note: Note, command: CardCommand) => boolean;
   /** Columns: where a card opens, and which note is open beside the list. */
   noteHref?: (noteId: string) => string;
   openId?: string | null;
@@ -219,11 +244,11 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
     // With no card focused, J and K start at the first card, as do the
     // arrows with nothing focused at all (L is the notes page's new list);
     // G goes to the last. The first of two boards takes the key.
-    useShortcuts({
-      j: () => focusEdgeCard("first"),
-      k: () => focusEdgeCard("first"),
-      G: focusLastCard,
+    useCommands({
+      "list.focusFirst": () => focusEdgeCard("first"),
+      "list.focusLast": () => focusEdgeCard("last"),
     });
+    useContextKey("notesList", true);
     React.useEffect(() => {
       const onKey = (e: KeyboardEvent) => {
         if (e.defaultPrevented || e.target !== document.body) return;
@@ -236,13 +261,28 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
     }, []);
     const onKeyDown = (e: React.KeyboardEvent) => {
       const link = e.target as HTMLElement;
-      if (!link.classList.contains("nc-link")) return;
-      if (e.ctrlKey || e.metaKey || e.altKey || !singleKeyAllowed(e.key))
+      if (!link.classList.contains("nc-link") || e.defaultPrevented) return;
+      // While picking, the selection bar takes pin, archive and delete.
+      const command = commandForKey(
+        e.nativeEvent,
+        picking ? MOVE_COMMANDS : CARD_COMMANDS,
+        { cardFocus: true, selecting: !!picking },
+      );
+      if (!command) return;
+      if (command in MOVES) {
+        e.preventDefault();
+        moveCardFocus(link, MOVES[command as keyof typeof MOVES]);
         return;
-      if (onCardKey && !picking) {
+      }
+      if (command === "list.open") {
+        e.preventDefault();
+        link.click();
+        return;
+      }
+      if (onCardKey) {
         const id = link.closest<HTMLElement>(".nc")?.dataset.flip;
         const note = groups.flatMap((g) => g.notes).find((n) => n.id === id);
-        if (note && onCardKey(note, e.key)) {
+        if (note && onCardKey(note, command as CardCommand)) {
           e.preventDefault();
           const links = [
             ...(boardRef.current?.querySelectorAll<HTMLElement>(".nc-link") ??
@@ -255,19 +295,7 @@ export const NotesBoard = React.forwardRef<HTMLDivElement, NotesBoardProps>(
             next: next?.closest<HTMLElement>(".nc")?.dataset.flip,
             at: performance.now(),
           };
-          return;
         }
-      }
-      const direction = CARD_KEYS[e.key];
-      if (direction) {
-        e.preventDefault();
-        moveCardFocus(link, direction);
-      } else if (e.key === "Home" || e.key === "End") {
-        e.preventDefault();
-        focusEdgeCard(e.key === "Home" ? "first" : "last");
-      } else if (e.key === "o") {
-        e.preventDefault();
-        link.click();
       }
     };
     return (
