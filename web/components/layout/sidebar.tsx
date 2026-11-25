@@ -6,6 +6,7 @@ import {
   Archive,
   ArrowDownAZ,
   ArrowUpDown,
+  Bug,
   ChevronsUpDown,
   CloudOff,
   Download,
@@ -51,6 +52,7 @@ import { toast } from "@/components/ui/toast";
 import { Tip } from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth";
 import { listSessions } from "@/features/auth/api";
+import { startDebugRecording } from "@/features/debug-recorder";
 import { useKeyHint } from "@/features/keybindings";
 import {
   orderSaveOptions,
@@ -923,6 +925,8 @@ function AccountMenu({
   const router = useRouter();
   const { theme = "system", setTheme } = useTheme();
   const shortcutsKey = useKeyHint("app.showShortcuts");
+  const recordBugKey = useKeyHint("app.recordBug");
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = React.useState(false);
   // Kept while the menu closes: the sidebar can narrow under it.
   const opensRight = useLastShown(isNarrow, isOpen);
@@ -994,6 +998,20 @@ function AccountMenu({
           {shortcutsKey && (
             <kbd aria-hidden className="ml-auto">
               {shortcutsKey.text}
+            </kbd>
+          )}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => {
+            onNavigate?.();
+            void startDebugRecording(queryClient);
+          }}
+        >
+          <Bug />
+          {t("recordBug")}
+          {recordBugKey && (
+            <kbd aria-hidden className="ml-auto">
+              {recordBugKey.text}
             </kbd>
           )}
         </DropdownMenuItem>

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { Toaster } from "@/components/ui/toast";
 import { SecondFactorReminder } from "@/features/auth/components/second-factor-reminder";
+import { DebugRecorderHost } from "@/features/debug-recorder";
 import { useCommands, useContextKey } from "@/features/keybindings";
 import { usePreferencesStore } from "@/features/preferences";
 import { useOnlineStatus, useSync, useWarnWhenUnsaved } from "@/features/sync";
@@ -137,6 +138,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
       <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcuts} />
       <TagJump open={tagJumpOpen} onOpenChange={setTagJump} />
+      <DebugRecorderHost />
     </div>
   );
 }

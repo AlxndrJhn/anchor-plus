@@ -2,6 +2,7 @@
 import admin from "./admin.json";
 import auth from "./auth.json";
 import common from "./common.json";
+import debugRecorder from "./debugRecorder.json";
 import editor from "./editor.json";
 import editorMedia from "./editorMedia.json";
 import keybindings from "./keybindings.json";
@@ -15,6 +16,7 @@ const messages = {
   admin,
   auth,
   common,
+  debugRecorder,
   editor,
   editorMedia,
   keybindings,

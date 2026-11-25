@@ -48,6 +48,12 @@ export const COMMANDS = [
     category: "app",
     keys: [{ key: "mod+k mod+s" }],
   },
+  {
+    id: "app.recordBug",
+    category: "app",
+    first: true,
+    keys: [{ key: "ctrl+shift+alt+b" }],
+  },
 
   // A list of notes.
   {
