@@ -51,10 +51,12 @@ describe('SyncApplyService', () => {
     },
   );
   let createdNote: { state: NoteState; version: number };
-  const noteCreate = vi.fn((args: { data: { title: string } }) => {
-    void args;
-    return Promise.resolve(createdNote);
-  });
+  const noteCreate = vi.fn(
+    (args: { data: { title: string; createdAt: Date } }) => {
+      void args;
+      return Promise.resolve(createdNote);
+    },
+  );
   const noteUpdateMany = vi.fn(
     (args: { where: unknown; data: Record<string, unknown> }) => {
       void args;
@@ -249,6 +251,29 @@ describe('SyncApplyService', () => {
           op: 'upsert',
         }),
       ]);
+    });
+
+    it('a new note keeps the time the device made it', async () => {
+      createdNote = { state: NoteState.active, version: 1 };
+
+      await service.apply(USER, [
+        noteChange({ createdAt: '2026-11-20T08:15:00.000Z' }),
+      ]);
+
+      expect(noteCreate.mock.calls[0][0].data.createdAt).toEqual(
+        new Date('2026-11-20T08:15:00.000Z'),
+      );
+    });
+
+    it('a new note from a device that sends no time is made now', async () => {
+      createdNote = { state: NoteState.active, version: 1 };
+      const before = Date.now();
+
+      await service.apply(USER, [noteChange()]);
+
+      const createdAt = noteCreate.mock.calls[0][0].data.createdAt.getTime();
+      expect(createdAt).toBeGreaterThanOrEqual(before);
+      expect(createdAt).toBeLessThanOrEqual(Date.now());
     });
 
     it('a created tombstone emits a remove instead of an upsert', async () => {

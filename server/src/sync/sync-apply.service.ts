@@ -35,6 +35,7 @@ import {
   reminderEmission,
   tagEmission,
 } from './sync-emitter.service';
+import { deviceTime } from './device-time.util';
 import { NoteRevisionsService, revisionsCover } from './note-revisions.service';
 import type {
   SyncChange,
@@ -328,6 +329,8 @@ export class SyncApplyService {
           content: change.content,
           background: change.background,
           state: (change.state as NoteState | undefined) ?? NoteState.active,
+          // When the device made it, which may have been offline.
+          createdAt: deviceTime(change.createdAt),
           isFrozen:
             !!change.isFrozen &&
             (change.state === undefined ||

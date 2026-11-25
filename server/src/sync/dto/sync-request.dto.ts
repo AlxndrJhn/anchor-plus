@@ -126,6 +126,11 @@ export class SyncNoteChangeDto extends SyncChangeBaseDto {
   @IsOptional()
   state?: SyncNoteState;
 
+  // Read only when the note is new: when the device made it.
+  @IsDateString()
+  @IsOptional()
+  createdAt?: string;
+
   @IsArray()
   @IsString({ each: true })
   @IsOptional()

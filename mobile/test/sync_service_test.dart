@@ -710,6 +710,21 @@ void main() {
     expect((await note('n1'))!.version, 1);
   });
 
+  test('a note made offline says when, so it keeps that date', () async {
+    await insertNote(id: 'new');
+    await insertNote(id: 'known', version: 2);
+    final made = DateTime.utc(2026, 11, 20, 8, 15);
+    await db.update(db.notes).write(NotesCompanion(createdAt: Value(made)));
+    stub([response()]);
+
+    await service.run();
+
+    final changes = {for (final c in changesOf(0)) c['id']: c};
+    expect(changes['new']!['createdAt'], '2026-11-20T08:15:00.000Z');
+    // The server already has the other one, with its own date.
+    expect(changes['known']!.containsKey('createdAt'), isFalse);
+  });
+
   test(
     'a note placed after its edit says so, so the server keeps its place',
     () async {
@@ -1305,6 +1320,29 @@ void main() {
     expect(row.version, 3);
     expect(row.isSynced, isFalse);
     expect(row.shareIds, '["user-2"]');
+  });
+
+  test('a note with unsent edits still takes when it was made', () async {
+    await insertNote(id: 'n1', title: 'Mine', version: 3);
+    stub([
+      response(
+        results: [
+          {'type': 'note', 'id': 'n1', 'status': 'failed'},
+        ],
+        entries: [noteEntry(serverNoteJson('n1', version: 9))],
+        nextCursor: 'cursor-1',
+      ),
+    ]);
+
+    await service.run();
+
+    final row = await note('n1');
+    expect(row!.title, 'Mine');
+    expect(row.isSynced, isFalse);
+    expect(
+      row.createdAt?.isAtSameMomentAs(DateTime.utc(2026, 8, 15, 9)),
+      isTrue,
+    );
   });
 
   test('a public link lands, and goes, even with unsent edits', () async {

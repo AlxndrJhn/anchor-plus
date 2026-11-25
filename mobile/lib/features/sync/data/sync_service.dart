@@ -248,6 +248,7 @@ class SyncService {
           ? note.state
           : null,
       tagIds: tagIds,
+      createdAt: note.createdAt,
       revisions: revisions,
       isRevisionsOnly: isRevisionsOnly,
     );
@@ -607,7 +608,7 @@ class SyncService {
     if (!force && row != null && !row.isSynced) {
       await _db.writeNote(
         note.id,
-        _sharingOf(note).copyWith(
+        _alwaysAppliedOf(note).copyWith(
           reminderAt: serverReminder.reminderAt,
           reminderRecurrence: serverReminder.reminderRecurrence,
           reminderVersion: serverReminder.reminderVersion,
@@ -624,7 +625,7 @@ class SyncService {
     await _db
         .into(_db.notes)
         .insertOnConflictUpdate(
-          _sharingOf(note).copyWith(
+          _alwaysAppliedOf(note).copyWith(
             id: Value(note.id),
             title: Value(note.title),
             content: Value(note.content),
@@ -676,7 +677,7 @@ class SyncService {
     final keepState = isChangedLocally(row.state, row.syncedState);
     final keepsAny = keepTitle || keepContent || keepBackground || keepState;
 
-    return _sharingOf(server).copyWith(
+    return _alwaysAppliedOf(server).copyWith(
       title: keepTitle ? const Value.absent() : Value(server.title),
       content: keepContent ? const Value.absent() : Value(server.content),
       background: keepBackground
@@ -703,7 +704,11 @@ class SyncService {
       ? Value(server.lock)
       : const Value.absent();
 
-  NotesCompanion _sharingOf(SyncServerNote note) => NotesCompanion(
+  /// What the server says is taken even while this device has a change
+  /// waiting to go up: who the note is shared with, and when it was made
+  /// (so notes already here get their date once the feed resends them).
+  NotesCompanion _alwaysAppliedOf(SyncServerNote note) => NotesCompanion(
+    createdAt: Value.absentIfNull(note.createdAt),
     permission: Value(note.permission),
     isFrozen: note.hasFrozenField ? Value(note.isFrozen) : const Value.absent(),
     shareIds: Value(encodeShareIds(note.shareIds)),
