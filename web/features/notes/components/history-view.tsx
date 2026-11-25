@@ -57,7 +57,7 @@ import {
   type VersionLine,
   type WordPart,
 } from "../version-diff";
-import { TextRuns } from "./note-body";
+import { CodeLines, type CodePart, TextRuns } from "./note-body";
 
 interface HistoryViewProps {
   noteId: string;
@@ -936,7 +936,10 @@ function VersionBody({
               data-line={segment.i}
               className={cn("code-wrap", markClass)}
             >
-              <pre className="code">{text}</pre>
+              <pre className="code">
+                <MarkLabel kind={line.kind} />
+                <CodeLines parts={codeParts(line)} />
+              </pre>
             </div>
           );
         return (
@@ -957,9 +960,7 @@ function MarkLabel({ kind }: { kind: VersionLine["kind"] }) {
 
 function LineText({ line }: { line: VersionLine }) {
   if (!line.words) return <TextRuns runs={line.block.runs} card={false} />;
-  // An edited line's old half shows what went, its new half what came.
-  const skip =
-    line.kind === "removed" ? "ins" : line.kind === "added" ? "del" : null;
+  const skip = skippedWords(line);
   return line.words.map((word: WordPart, i) =>
     word.kind === skip ? null : word.kind === "same" ? (
       <React.Fragment key={i}>{word.text}</React.Fragment>
@@ -969,4 +970,18 @@ function LineText({ line }: { line: VersionLine }) {
       <ins key={i}>{word.text}</ins>
     ),
   );
+}
+
+/** An edited line's old half shows what went, its new half what came. */
+function skippedWords(line: VersionLine): WordPart["kind"] | null {
+  return line.kind === "removed" ? "ins" : line.kind === "added" ? "del" : null;
+}
+
+function codeParts(line: VersionLine): CodePart[] {
+  if (!line.words)
+    return [
+      { kind: "same", text: line.block.runs.map((run) => run.text).join("") },
+    ];
+  const skip = skippedWords(line);
+  return line.words.filter((word) => word.kind !== skip);
 }

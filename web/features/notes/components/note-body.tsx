@@ -2,6 +2,7 @@ import { CircleCheck } from "lucide-react";
 import * as React from "react";
 import { translate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { codeIndentColumns, splitCodeLines } from "../code-lines";
 import {
   cardCodeLines,
   type DoneRow,
@@ -183,7 +184,11 @@ function Block({ row, card }: { row: Row; card: boolean }) {
     return (
       <div className="code-wrap">
         <pre className={cn("code", preview?.isCut && "cut")}>
-          {preview ? preview.lines.join("\n") : code}
+          {preview ? (
+            preview.lines.join("\n")
+          ) : (
+            <CodeLines parts={[{ kind: "same", text: code }]} />
+          )}
         </pre>
       </div>
     );
@@ -193,6 +198,46 @@ function Block({ row, card }: { row: Row; card: boolean }) {
       {text}
     </p>
   );
+}
+
+export interface CodePart {
+  kind: "same" | "del" | "ins";
+  text: string;
+}
+
+/**
+ * One block per line of code, so a long line can wrap under its own
+ * indentation (see `.code-line` in the note body styles).
+ */
+export function CodeLines({ parts }: { parts: CodePart[] }) {
+  return splitCodeLines(parts).map((line, i) => {
+    const columns = codeIndentColumns(line.map((part) => part.text).join(""));
+    return (
+      <span
+        key={i}
+        className="code-line"
+        style={
+          columns
+            ? ({ "--code-indent": columns } as React.CSSProperties)
+            : undefined
+        }
+      >
+        {line.length ? (
+          line.map((part, j) =>
+            part.kind === "del" ? (
+              <del key={j}>{part.text}</del>
+            ) : part.kind === "ins" ? (
+              <ins key={j}>{part.text}</ins>
+            ) : (
+              <React.Fragment key={j}>{part.text}</React.Fragment>
+            ),
+          )
+        ) : (
+          <br />
+        )}
+      </span>
+    );
+  });
 }
 
 export function TextRuns({ runs, card }: { runs: InlineRun[]; card: boolean }) {
