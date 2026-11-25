@@ -15,6 +15,11 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "@/components/ui/toast";
 import { useAuth } from "@/features/auth";
 import {
+  defineContextKey,
+  useCommands,
+  useContextKey,
+} from "@/features/keybindings";
+import {
   deletionDate,
   EditorSkeleton,
   getNoteShares,
@@ -66,15 +71,13 @@ import type { NoteAttachment } from "@/features/notes/types";
 import { createTag, nextTagColor, type Tag, useTags } from "@/features/tags";
 import { useDelayedFlag } from "@/lib/hooks/use-delayed-flag";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
-import {
-  hasOverlay,
-  isTypingTarget,
-  useShortcuts,
-} from "@/lib/hooks/use-shortcuts";
+import { hasOverlay, isTypingTarget } from "@/lib/hooks/use-shortcuts";
 import { swapView } from "@/lib/morph";
-import { hasShortcutKey } from "@/lib/platform";
 import { useSearchHits } from "@/lib/search-hits";
 import { cn } from "@/lib/utils";
+
+// Ctrl+Enter on a checklist item ticks it rather than closing the note.
+defineContextKey("checklistItem", isOnChecklistItem);
 
 export default function NoteEditorPage() {
   const params = useParams();
@@ -289,50 +292,49 @@ function NoteEditor({
       contentEditorRef.current?.setSelection(caret.index, caret.length);
     else document.querySelector<HTMLElement>(".ed .ql-editor")?.focus();
   };
-  const trash = () => canTrash && actions.trash();
   const paneHidden = useContext(NotePaneHidden);
-  // Google Keep's keys while no text field has focus.
-  useShortcuts(
+  // Google Keep's keys while no text field has focus, and Ctrl+Enter
+  // (before Quill, which takes every Enter) from anywhere.
+  const keysOn = !editor.historyOpen && !paneHidden;
+  useContextKey("noteOpen", keysOn);
+  useCommands(
     lockedOut
       ? {
-          Escape: leave,
-          e: () => canEditNote && !editor.isArchived && actions.archive(),
-          f: () => canEditNote && !editor.isArchived && togglePinLocked(),
+          "note.close": () => leaveRef.current(),
+          "note.toggleArchive": () => {
+            if (!canEditNote || editor.isArchived) return false;
+            actions.archive();
+          },
+          "note.togglePin": () => {
+            if (!canEditNote || editor.isArchived) return false;
+            togglePinLocked();
+          },
         }
       : {
-          Escape: leave,
-          e: () =>
-            editor.isArchived
-              ? actions.unarchive()
-              : canEditNote && actions.archive(),
-          "#": trash,
-          Delete: trash,
-          f: () => canEditNote && editor.setIsPinned((was) => !was),
-          i: resumeTyping,
+          "note.close": () => leaveRef.current(),
+          "note.toggleArchive": () => {
+            if (editor.isArchived) actions.unarchive();
+            else if (canEditNote) actions.archive();
+            else return false;
+          },
+          "note.trash": () => {
+            if (!canTrash) return false;
+            actions.trash();
+          },
+          "note.togglePin": () => {
+            if (!canEditNote) return false;
+            editor.setIsPinned((was) => !was);
+          },
+          "note.editText": resumeTyping,
         },
-    !editor.historyOpen && !paneHidden,
+    keysOn,
   );
-  // Ctrl+Enter finishes from anywhere but a checklist item, which it ticks;
   // Esc first leaves the text field.
   useEffect(() => {
     if (editor.historyOpen || paneHidden) return;
     let overlayAtPress = false;
-    // Caught before Quill, which takes every Enter.
-    const capture = (e: KeyboardEvent) => {
+    const capture = () => {
       overlayAtPress = hasOverlay();
-      if (
-        e.key === "Enter" &&
-        hasShortcutKey(e) &&
-        !e.altKey &&
-        !e.shiftKey &&
-        !e.isComposing &&
-        !overlayAtPress &&
-        !isOnChecklistItem(e.target)
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        leaveRef.current();
-      }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.isComposing) return;

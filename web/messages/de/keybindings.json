@@ -1,0 +1,128 @@
+{
+  "title": "Tastenkürzel",
+  "intro": "Jeder Befehl, seine Tasten und wann sie wirken. Klicke auf eine Taste, um sie zu ändern, oder bearbeite alle als JSON. Nur auf diesem Gerät.",
+  "search": "Befehle, Tasten oder Wann-Klauseln suchen",
+  "onlyChanged": "Nur geänderte",
+  "showJson": "Als JSON bearbeiten",
+  "showTable": "Zurück zur Liste",
+  "resetAll": "Alle zurücksetzen",
+  "resetAllConfirm": "Alle Tastenkürzel zurücksetzen?",
+  "resetAllText": "Jede geänderte oder hinzugefügte Taste kehrt zum Standard zurück.",
+  "count": "{count, plural, one {# Befehl} other {# Befehle}}",
+  "noMatch": "Kein Befehl passt",
+  "columns": {
+    "command": "Befehl",
+    "key": "Tastenkombination",
+    "when": "Wann",
+    "source": "Quelle"
+  },
+  "source": {
+    "default": "Standard",
+    "user": "Eigene"
+  },
+  "unbound": "Nicht gesetzt",
+  "categories": {
+    "app": "Überall",
+    "list": "Notizen",
+    "note": "In einer Notiz",
+    "editor": "Beim Schreiben in einer Notiz"
+  },
+  "row": {
+    "change": "Tastenkombination ändern",
+    "add": "Tastenkombination hinzufügen",
+    "editWhen": "Wann-Ausdruck ändern",
+    "remove": "Tastenkombination entfernen",
+    "reset": "Auf Standard zurücksetzen",
+    "actions": "Mehr zu {command}",
+    "changeKey": "{command}: {key}, ändern",
+    "addKey": "{command}: nicht gesetzt, Taste hinzufügen",
+    "whenPlaceholder": "Immer",
+    "whenHelp": "Eingabe zum Speichern, Esc zum Abbrechen",
+    "conflicts": "{count, plural, one {Ein anderer Befehl hat diese Taste} other {# andere Befehle haben diese Taste}}",
+    "singleKeysOff": "Einzeltasten-Kürzel sind aus, daher wirkt diese Taste nicht"
+  },
+  "record": {
+    "title": "Tasten drücken",
+    "text": "Drücke eine Tastenkombination, dann Eingabe. Für eine Folge wie G N drücke die Tasten nacheinander.",
+    "waiting": "Warte auf Tasten …",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "clear": "Neu beginnen",
+    "conflicts": "Auch bei {count, plural, one {# Befehl} other {# Befehlen}}:",
+    "noModifier": "Ohne Strg, Alt oder ⌘ wirkt eine Taste nicht, während du in einem Feld schreibst.",
+    "whenLabel": "Wann"
+  },
+  "json": {
+    "title": "keybindings.json",
+    "intro": "Deine Änderungen an den Standards, wie in VS Code: Jede Zeile hat eine Taste, einen Befehl und, wenn du willst, eine Wann-Klausel. Ein Befehl mit - davor nimmt eine Standardtaste weg. Spätere Zeilen gewinnen.",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "revert": "Änderungen verwerfen",
+    "invalidJson": "Das ist kein gültiges JSON: {error}",
+    "line": "Regel {index}: {problem}",
+    "defaults": "Standard-Tastenkürzel",
+    "contextKeys": "Kontextschlüssel für Wann",
+    "copy": "Kopieren"
+  },
+  "context": {
+    "view": "Die Seite: notes, archive, trash, settings oder note",
+    "inputFocus": "Schreiben in einem Textfeld",
+    "editorFocus": "Schreiben im Titel oder Text einer Notiz",
+    "cardFocus": "Eine Notizkarte hat den Fokus",
+    "notesList": "Eine Liste von Notizen ist zu sehen",
+    "selecting": "Notizen sind ausgewählt",
+    "searching": "Notizen werden durchsucht",
+    "inTag": "Notizen eines Labels werden gezeigt",
+    "notePane": "Eine Notiz ist neben der Liste offen",
+    "noteOpen": "Eine Notiz ist offen",
+    "checklistItem": "Auf einem Checklistenpunkt",
+    "searchField": "Die Seite hat ein Suchfeld",
+    "isMac": "Auf einem Mac"
+  },
+  "commands": {
+    "app": {
+      "newNote": "Neue Notiz",
+      "search": "Suchen, oder per Name zu einer Seite oder einem Label",
+      "goToNotes": "Zu Notizen",
+      "goToArchive": "Zum Archiv",
+      "goToTrash": "Zum Papierkorb",
+      "goToSettings": "Zu den Einstellungen",
+      "goToTag": "Zu einem Label: ein paar Buchstaben davon tippen",
+      "toggleSidebar": "Seitenleiste ein- oder ausblenden",
+      "showShortcuts": "Tastenkürzel zeigen",
+      "openKeybindings": "Tastenkürzel ändern"
+    },
+    "list": {
+      "newNote": "Neue Notiz hier",
+      "newList": "Neue Liste hier",
+      "focusFirst": "Erste Notiz",
+      "focusLast": "Letzte Notiz",
+      "focusUp": "Notiz darüber",
+      "focusDown": "Notiz darunter",
+      "focusLeft": "Notiz links",
+      "focusRight": "Notiz rechts",
+      "open": "Notiz öffnen",
+      "toggleSelect": "Notiz auswählen",
+      "selectRange": "Bis zur Notiz auswählen",
+      "moveEarlier": "Notiz nach vorn verschieben",
+      "moveLater": "Notiz nach hinten verschieben",
+      "togglePin": "Anheften oder lösen",
+      "toggleArchive": "Archivieren oder zurückholen",
+      "trash": "In den Papierkorb; im Papierkorb endgültig löschen",
+      "clearSearch": "Suche leeren",
+      "leaveTag": "Ein Label für alle Notizen verlassen"
+    },
+    "note": {
+      "close": "Notiz schließen",
+      "editText": "Zurück in den Text",
+      "togglePin": "Anheften oder lösen",
+      "toggleArchive": "Archivieren oder zurückholen",
+      "trash": "In den Papierkorb"
+    },
+    "editor": {
+      "insertDate": "Heutiges Datum einfügen",
+      "insertDateTime": "Datum und Uhrzeit einfügen",
+      "insertLink": "Markierten Text verlinken"
+    }
+  }
+}

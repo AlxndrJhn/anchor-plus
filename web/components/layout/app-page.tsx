@@ -18,9 +18,14 @@ import * as React from "react";
 import { IconButton } from "@/components/ui/button";
 import { menuSurface } from "@/components/ui/dropdown-menu";
 import { Tip } from "@/components/ui/tooltip";
+import {
+  chordText,
+  useCommand,
+  useContextKey,
+  useKeysFor,
+} from "@/features/keybindings";
 import { tagColorStyle } from "@/features/tags";
-import { useShortcuts } from "@/lib/hooks/use-shortcuts";
-import { hasShortcutKey, isMac } from "@/lib/platform";
+import { isMac } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { DesktopUpdateButton } from "./desktop-update";
 import { type GoToTarget, matchTargets, useGoToTargets } from "./go-to";
@@ -236,27 +241,10 @@ export const SearchField = React.forwardRef<
       else requestAnimationFrame(select);
     }, []);
 
-    React.useEffect(() => {
-      const onKey = (e: KeyboardEvent) => {
-        if (e.defaultPrevented) return;
-        if (hasShortcutKey(e) && e.key.toLowerCase() === "k") {
-          if (
-            document.querySelector(
-              ":is([role=dialog], [role=alertdialog], [role=menu]):not([data-state=closed])",
-            )
-          )
-            return;
-          e.preventDefault();
-          openField();
-        }
-      };
-      document.addEventListener("keydown", onKey);
-      return () => document.removeEventListener("keydown", onKey);
-    }, [openField]);
-
-    useShortcuts({
-      "/": openField,
-    });
+    useCommand("app.search", openField);
+    // The hint shows a key with a modifier, which works from any field.
+    const searchKey = useKeysFor()("app.search").find((k) => k.includes("+"));
+    useContextKey("searchField", true);
 
     React.useEffect(() => {
       if (!autoFocus) return;
@@ -333,11 +321,11 @@ export const SearchField = React.forwardRef<
                 <X />
               </button>
             </Tip>
-          ) : (
+          ) : searchKey ? (
             <kbd aria-hidden className="group-focus-within/search:hidden">
-              {isMac() ? "⌘K" : "Ctrl K"}
+              {chordText(searchKey, isMac())}
             </kbd>
-          )}
+          ) : null}
           {places.length > 0 && (
             <div
               id={listId}

@@ -15,6 +15,7 @@
     "dateTime": "Date and time",
     "editor": "Editor",
     "quickActions": "Quick actions",
+    "keyboard": "Keyboard",
     "search": "Search",
     "token": "API token",
     "storage": "Storage",
@@ -159,18 +160,16 @@
     "burnDeletedText": "A deleted note burns away where it stood. Off, it just goes. On this device only.",
     "strikeSparks": "Sparks when cards collide",
     "strikeSparksText": "After a delete, sparks fly where the cards strike into their new places. On this device only.",
-    "insertDate": "Insert today’s date",
-    "insertDateText": "In a note, types the date, e.g. {example}. Typing /date does the same.",
     "dateFormat": "Inserted date format",
-    "dateFormatText": "How a date typed into a note reads.",
-    "insertDateTime": "Insert the date and time",
-    "insertDateTimeText": "In a note, types the time with its offset from UTC, e.g. 2026-10-27T11:23:49+01:00.",
+    "dateFormatText": "How a date typed into a note reads, by its keyboard shortcut or /date."
+  },
+  "keyboard": {
+    "title": "Keyboard",
     "singleKey": "Single-key shortcuts",
     "singleKeyText": "Keys like C for a new note, / to search, or F to pin, as in Google Keep. Off, only shortcuts with Ctrl or another modifier work. On this device only.",
-    "pressNewShortcut": "Press the new shortcut",
-    "changeShortcut": "Shortcut {shortcut}, change",
-    "pressKeys": "Press keys…",
-    "reset": "Reset"
+    "shortcuts": "Keyboard shortcuts",
+    "shortcutsText": "Change any shortcut, add your own, or edit them as JSON, as in VS Code.",
+    "open": "Change shortcuts"
   },
   "quickActions": {
     "title": "Quick actions",

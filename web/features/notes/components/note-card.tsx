@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tip } from "@/components/ui/tooltip";
+import { commandForKey } from "@/features/keybindings";
 import {
   formatFullDate,
   formatShortDate,
@@ -37,7 +38,6 @@ import { useTagOrder } from "@/features/tags/hooks";
 import type { TagLabel } from "@/features/tags/types";
 import { useHighlightPaint } from "@/lib/highlight-paint";
 import { useNearScreen } from "@/lib/hooks/use-near-screen";
-import { singleKeyAllowed } from "@/lib/hooks/use-shortcuts";
 import { translate } from "@/lib/i18n";
 import { rememberCard } from "@/lib/morph";
 import { cn } from "@/lib/utils";
@@ -65,6 +65,15 @@ import { Viewer } from "./attachments/attachment-viewer";
 import { UnlockForm } from "./lock/unlock-form";
 import { NoteBody } from "./note-body";
 import { ReminderChip } from "./reminder-chip";
+
+/** Commands a focused card runs itself; the board runs the rest. */
+const CARD_KEY_COMMANDS = [
+  "list.open",
+  "list.toggleSelect",
+  "list.selectRange",
+  "list.moveEarlier",
+  "list.moveLater",
+] as const;
 
 export type CardLayout = "masonry" | "grid" | "list";
 
@@ -350,30 +359,28 @@ export const NoteCard = React.memo(function NoteCard({
           if (cardRef.current) rememberCard(note.id, cardRef.current);
         }}
         onKeyDown={(e) => {
-          // Space and Enter always; X and O unless single keys are off.
-          const isPlain =
-            !e.ctrlKey && !e.metaKey && !e.altKey && singleKeyAllowed(e.key);
-          if (isPlain && (e.key === " " || e.key.toLowerCase() === "x")) {
-            if (!onPick) return;
-            e.preventDefault();
-            onPick(note.id, e.shiftKey);
-            return;
-          }
-          if (isPlain && (e.key === "Enter" || e.key === "o")) {
+          // Enter opens the link itself; the board clicks it for list.open.
+          const plainEnter =
+            e.key === "Enter" && !e.ctrlKey && !e.metaKey && !e.altKey;
+          const command = commandForKey(e.nativeEvent, CARD_KEY_COMMANDS, {
+            cardFocus: true,
+          });
+          if (plainEnter || command === "list.open") {
             if (!picking) noteOpenedByKey(note.id);
             return;
           }
-          if (!onMove || !e.altKey || e.ctrlKey || e.metaKey || e.shiftKey)
+          if (
+            command === "list.toggleSelect" ||
+            command === "list.selectRange"
+          ) {
+            if (!onPick) return;
+            e.preventDefault();
+            onPick(note.id, command === "list.selectRange");
             return;
-          const step =
-            e.key === "ArrowUp" || e.key === "ArrowLeft"
-              ? -1
-              : e.key === "ArrowDown" || e.key === "ArrowRight"
-                ? 1
-                : 0;
-          if (!step) return;
+          }
+          if (!onMove || !command) return;
           e.preventDefault();
-          onMove(note.id, step);
+          onMove(note.id, command === "list.moveEarlier" ? -1 : 1);
         }}
       />
       {/* A list row is dragged by its grip; a finger needn't hold it first. */}

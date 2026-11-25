@@ -92,7 +92,7 @@
   "sidebar": {
     "sidebar": "Pasek boczny",
     "newNote": "Nowa notatka",
-    "newNoteKey": "Nowa notatka (N)",
+    "newNoteKey": "Nowa notatka ({keys})",
     "pages": "Strony",
     "tags": "Tagi",
     "newTag": "Nowy tag",
@@ -175,35 +175,7 @@
   "shortcuts": {
     "title": "Skróty klawiszowe",
     "or": "lub",
-    "sections": {
-      "anywhere": "Wszędzie",
-      "notes": "Notatki",
-      "focused": "Wskazane lub zaznaczone notatki",
-      "inNote": "W notatce"
-    },
-    "rows": {
-      "newNote": "Nowa notatka",
-      "search": "Szukaj lub przejdź do strony albo tagu po nazwie",
-      "goToPage": "Przejdź do Notatek, Archiwum, Kosza lub Ustawień",
-      "goToTag": "Przejdź do tagu: wpisz kilka jego liter",
-      "toggleSidebar": "Pokaż lub ukryj pasek boczny",
-      "thisDialog": "Te skróty",
-      "moveBetween": "Przechodź między notatkami",
-      "firstOrLast": "Pierwsza lub ostatnia notatka",
-      "open": "Otwórz notatkę",
-      "select": "Zaznacz notatkę",
-      "selectUpTo": "Zaznacz do niej",
-      "newNoteOrList": "Nowa notatka lub lista, gdy żadna notatka nie jest wskazana",
-      "leaveTag": "Opuść tag i wróć do wszystkich notatek",
-      "pin": "Przypnij lub odepnij",
-      "archive": "Archiwizuj lub przywróć z archiwum",
-      "trash": "Przenieś do kosza; w koszu usuń na zawsze",
-      "leaveText": "Opuść tekst; ponownie, aby zamknąć",
-      "backIntoText": "Wróć do tekstu",
-      "closeOrTick": "Zamknij lub zaznacz pozycję listy kontrolnej",
-      "archiveOne": "Archiwizuj",
-      "trashOne": "Przenieś do kosza"
-    }
+    "customize": "Zmień skróty"
   },
   "tagJump": {
     "title": "Przejdź do tagu",

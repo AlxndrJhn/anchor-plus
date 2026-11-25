@@ -1,0 +1,128 @@
+{
+  "title": "Skróty klawiszowe",
+  "intro": "Każde polecenie, jego klawisze i kiedy działają. Kliknij klawisz, aby go zmienić, albo edytuj wszystkie jako JSON. Tylko na tym urządzeniu.",
+  "search": "Szukaj poleceń, klawiszy lub warunków",
+  "onlyChanged": "Tylko zmienione",
+  "showJson": "Edytuj jako JSON",
+  "showTable": "Wróć do listy",
+  "resetAll": "Resetuj wszystkie",
+  "resetAllConfirm": "Zresetować wszystkie skróty klawiszowe?",
+  "resetAllText": "Każdy zmieniony lub dodany klawisz wróci do domyślnego.",
+  "count": "{count, plural, one {# polecenie} few {# polecenia} many {# poleceń} other {# polecenia}}",
+  "noMatch": "Żadne polecenie nie pasuje",
+  "columns": {
+    "command": "Polecenie",
+    "key": "Skrót",
+    "when": "Kiedy",
+    "source": "Źródło"
+  },
+  "source": {
+    "default": "Domyślny",
+    "user": "Własny"
+  },
+  "unbound": "Nie ustawiono",
+  "categories": {
+    "app": "Wszędzie",
+    "list": "Notatki",
+    "note": "W notatce",
+    "editor": "Pisanie w notatce"
+  },
+  "row": {
+    "change": "Zmień skrót",
+    "add": "Dodaj skrót",
+    "editWhen": "Zmień warunek",
+    "remove": "Usuń skrót",
+    "reset": "Przywróć domyślny",
+    "actions": "Więcej dla {command}",
+    "changeKey": "{command}: {key}, zmień",
+    "addKey": "{command}: nie ustawiono, dodaj klawisz",
+    "whenPlaceholder": "Zawsze",
+    "whenHelp": "Enter, aby zapisać, Esc, aby anulować",
+    "conflicts": "{count, plural, one {Inne polecenie ma ten klawisz} few {# inne polecenia mają ten klawisz} many {# innych poleceń ma ten klawisz} other {# innych poleceń ma ten klawisz}}",
+    "singleKeysOff": "Skróty jednoklawiszowe są wyłączone, więc ten klawisz nie działa"
+  },
+  "record": {
+    "title": "Naciśnij klawisze",
+    "text": "Naciśnij kombinację klawiszy, potem Enter. Dla sekwencji takiej jak G N naciśnij klawisze jeden po drugim.",
+    "waiting": "Czekam na klawisze…",
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "clear": "Zacznij od nowa",
+    "conflicts": "Także przy {count, plural, one {# poleceniu} few {# poleceniach} many {# poleceniach} other {# poleceniach}}:",
+    "noModifier": "Bez Ctrl, Alt lub ⌘ klawisz nie działa podczas pisania w polu.",
+    "whenLabel": "Kiedy"
+  },
+  "json": {
+    "title": "keybindings.json",
+    "intro": "Twoje zmiany względem domyślnych, jak w VS Code: każdy wiersz ma klawisz, polecenie i, jeśli chcesz, warunek when. Polecenie zaczynające się od - zabiera domyślny klawisz. Późniejsze wiersze wygrywają.",
+    "save": "Zapisz",
+    "saved": "Zapisano",
+    "revert": "Cofnij zmiany",
+    "invalidJson": "To nie jest poprawny JSON: {error}",
+    "line": "Reguła {index}: {problem}",
+    "defaults": "Domyślne skróty",
+    "contextKeys": "Klucze kontekstu dla when",
+    "copy": "Kopiuj"
+  },
+  "context": {
+    "view": "Strona: notes, archive, trash, settings lub note",
+    "inputFocus": "Pisanie w polu tekstowym",
+    "editorFocus": "Pisanie w tytule lub tekście notatki",
+    "cardFocus": "Karta notatki ma fokus",
+    "notesList": "Lista notatek jest na ekranie",
+    "selecting": "Notatki są zaznaczone",
+    "searching": "Notatki są przeszukiwane",
+    "inTag": "Pokazane są notatki jednej etykiety",
+    "notePane": "Notatka jest otwarta obok listy",
+    "noteOpen": "Notatka jest otwarta",
+    "checklistItem": "Na elemencie listy kontrolnej",
+    "searchField": "Strona ma pole wyszukiwania",
+    "isMac": "Na Macu"
+  },
+  "commands": {
+    "app": {
+      "newNote": "Nowa notatka",
+      "search": "Szukaj albo przejdź do strony lub etykiety po nazwie",
+      "goToNotes": "Przejdź do notatek",
+      "goToArchive": "Przejdź do archiwum",
+      "goToTrash": "Przejdź do kosza",
+      "goToSettings": "Przejdź do ustawień",
+      "goToTag": "Przejdź do etykiety: wpisz kilka jej liter",
+      "toggleSidebar": "Pokaż lub ukryj pasek boczny",
+      "showShortcuts": "Pokaż skróty klawiszowe",
+      "openKeybindings": "Zmień skróty klawiszowe"
+    },
+    "list": {
+      "newNote": "Nowa notatka tutaj",
+      "newList": "Nowa lista tutaj",
+      "focusFirst": "Pierwsza notatka",
+      "focusLast": "Ostatnia notatka",
+      "focusUp": "Notatka powyżej",
+      "focusDown": "Notatka poniżej",
+      "focusLeft": "Notatka po lewej",
+      "focusRight": "Notatka po prawej",
+      "open": "Otwórz notatkę",
+      "toggleSelect": "Zaznacz notatkę",
+      "selectRange": "Zaznacz do notatki",
+      "moveEarlier": "Przesuń notatkę wcześniej",
+      "moveLater": "Przesuń notatkę później",
+      "togglePin": "Przypnij lub odepnij",
+      "toggleArchive": "Archiwizuj lub przywróć z archiwum",
+      "trash": "Przenieś do kosza; w koszu usuń na zawsze",
+      "clearSearch": "Wyczyść wyszukiwanie",
+      "leaveTag": "Opuść etykietę i pokaż wszystkie notatki"
+    },
+    "note": {
+      "close": "Zamknij notatkę",
+      "editText": "Wróć do tekstu",
+      "togglePin": "Przypnij lub odepnij",
+      "toggleArchive": "Archiwizuj lub przywróć z archiwum",
+      "trash": "Przenieś do kosza"
+    },
+    "editor": {
+      "insertDate": "Wstaw dzisiejszą datę",
+      "insertDateTime": "Wstaw datę i godzinę",
+      "insertLink": "Dodaj link do zaznaczonego tekstu"
+    }
+  }
+}

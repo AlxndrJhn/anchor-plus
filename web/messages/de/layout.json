@@ -92,7 +92,7 @@
   "sidebar": {
     "sidebar": "Seitenleiste",
     "newNote": "Neue Notiz",
-    "newNoteKey": "Neue Notiz (N)",
+    "newNoteKey": "Neue Notiz ({keys})",
     "pages": "Seiten",
     "tags": "Tags",
     "newTag": "Neuer Tag",
@@ -175,35 +175,7 @@
   "shortcuts": {
     "title": "Tastenkürzel",
     "or": "oder",
-    "sections": {
-      "anywhere": "Überall",
-      "notes": "Notizen",
-      "focused": "Fokussierte oder ausgewählte Notizen",
-      "inNote": "In einer Notiz"
-    },
-    "rows": {
-      "newNote": "Neue Notiz",
-      "search": "Suchen oder per Name zu einer Seite oder einem Tag springen",
-      "goToPage": "Zu Notizen, Archiv, Papierkorb oder Einstellungen",
-      "goToTag": "Zu einem Tag: ein paar Buchstaben eingeben",
-      "toggleSidebar": "Seitenleiste ein- oder ausblenden",
-      "thisDialog": "Diese Tastenkürzel",
-      "moveBetween": "Zwischen Notizen wechseln",
-      "firstOrLast": "Erste oder letzte Notiz",
-      "open": "Notiz öffnen",
-      "select": "Notiz auswählen",
-      "selectUpTo": "Bis zu ihr auswählen",
-      "newNoteOrList": "Neue Notiz oder neue Liste, wenn keine Notiz fokussiert ist",
-      "leaveTag": "Tag verlassen, zu allen Notizen",
-      "pin": "Anheften oder loslösen",
-      "archive": "Archivieren oder aus dem Archiv holen",
-      "trash": "In den Papierkorb; im Papierkorb endgültig löschen",
-      "leaveText": "Text verlassen; nochmal zum Schließen",
-      "backIntoText": "Zurück in den Text",
-      "closeOrTick": "Schließen oder Eintrag einer Checkliste abhaken",
-      "archiveOne": "Archivieren",
-      "trashOne": "In den Papierkorb"
-    }
+    "customize": "Kürzel ändern"
   },
   "tagJump": {
     "title": "Zu Tag springen",
