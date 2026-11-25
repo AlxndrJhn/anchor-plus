@@ -24,10 +24,7 @@ AuthErrorMessage authErrorMessageOf(
     field: AuthField.code,
   ),
   PasskeyOnlyFailure() => (text: l10n.authPasskeyOnly, field: null),
-  SecondFactorSetupFailure() => (
-    text: l10n.authSecondFactorSetup,
-    field: null,
-  ),
+  SecondFactorSetupFailure() => (text: l10n.authSecondFactorSetup, field: null),
   MagicCodeUsedFailure() => (text: l10n.authMagicCodeUsed, field: null),
   PasswordlessAccountFailure() => (text: l10n.authPasswordless, field: null),
   PendingApprovalFailure() => (text: l10n.authPendingApproval, field: null),
@@ -45,6 +42,7 @@ AuthErrorMessage authErrorMessageOf(
     field: null,
   ),
   EmailTakenFailure() => (text: l10n.authEmailTaken, field: AuthField.email),
+  LastAdminFailure() => (text: l10n.authLastAdmin, field: null),
   WrongCurrentPasswordFailure() => (
     text: l10n.authWrongCurrentPassword,
     field: AuthField.currentPassword,

@@ -1246,5 +1246,18 @@
   "nativeLocalNetworkUse": "Anchor łączy się z serwerem, gdy jest on w sieci lokalnej.",
   "nativeMicrophoneUse": "Anchor używa mikrofonu do nagrywania notatek głosowych.",
   "nativePhotoLibraryAddUse": "Anchor zapisuje obrazy z notatek w bibliotece zdjęć.",
-  "nativePhotoLibraryUse": "Anchor używa biblioteki zdjęć, aby dodawać obrazy do notatek i wybierać zdjęcie profilowe."
+  "nativePhotoLibraryUse": "Anchor używa biblioteki zdjęć, aby dodawać obrazy do notatek i wybierać zdjęcie profilowe.",
+  "authLastAdmin": "Jesteś jedynym administratorem na tym serwerze. Najpierw nadaj komuś innemu uprawnienia administratora.",
+  "deleteAccountTitle": "Usuń konto",
+  "deleteAccountWarning": "Tego nie można cofnąć.",
+  "deleteAccountMessage": "Twoje konto, notatki, tagi, załączniki i przypomnienia zostaną trwale usunięte z tego serwera, a na wszystkich urządzeniach nastąpi wylogowanie. Udostępnione przez Ciebie notatki i ich publiczne linki przestaną działać dla wszystkich. Zdjęcia i pliki dodane przez Ciebie do notatek innych osób zostaną przy tych notatkach.",
+  "deleteAccountExport": "Jeśli chcesz zachować kopię notatek, najpierw wyeksportuj je w Ustawieniach w wersji webowej.",
+  "deleteAccountPasswordHelp": "Wpisz hasło, aby potwierdzić.",
+  "deleteAccountConfirm": "Usuń konto",
+  "deleteAccountDeleting": "Usuwanie…",
+  "deleteAccountDone": "Konto zostało usunięte",
+  "deleteAccountOffline": "Jesteś offline. Połącz się z internetem, aby usunąć konto.",
+  "deleteAccountDialogTitle": "Usunąć konto?",
+  "deleteAccountDialogMessage": "Twoje konto i notatki zostaną trwale usunięte z tego serwera.",
+  "settingsDeleteAccount": "Usuń konto"
 }

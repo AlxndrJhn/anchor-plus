@@ -17,6 +17,7 @@ import { SecondFactorInterceptor } from './second-factor.interceptor';
 import { SecurityController } from './security.controller';
 import { SettingsModule } from '../settings/settings.module';
 import { PrismaModule } from '../prisma/prisma.module';
+import { UserDeletionModule } from '../users/user-deletion.module';
 import { OidcService } from './oidc/oidc.service';
 import { OidcController } from './oidc/oidc.controller';
 import { OidcConfigService } from './oidc/oidc-config.service';
@@ -37,6 +38,7 @@ import { OidcUserService } from './oidc/oidc-user.service';
     }),
     SettingsModule,
     PrismaModule,
+    UserDeletionModule,
   ],
   controllers: [AuthController, SecurityController, OidcController],
   providers: [

@@ -58,6 +58,8 @@ sealed class AuthFailure implements Exception {
       (400, 'New password must be different from current password') =>
         const SamePasswordFailure(),
       (409, 'User already exists') => const EmailTakenFailure(),
+      (409, final text?) when text.startsWith('Make someone else an admin') =>
+        const LastAdminFailure(),
       _ => ServerFailure(error),
     };
   }
@@ -83,6 +85,7 @@ AuthFailure? _fromCode(String? code, Map<String, Object?> params) {
     'CURRENT_PASSWORD_INCORRECT' => const WrongCurrentPasswordFailure(),
     'PASSWORD_UNCHANGED' => const SamePasswordFailure(),
     'USER_EXISTS' => const EmailTakenFailure(),
+    'LAST_ADMIN' => const LastAdminFailure(),
     _ => null,
   };
 }
@@ -140,6 +143,11 @@ final class RegistrationClosedFailure extends AuthFailure {
 
 final class EmailTakenFailure extends AuthFailure {
   const EmailTakenFailure();
+}
+
+/// The only admin can't delete their account while others use the server.
+final class LastAdminFailure extends AuthFailure {
+  const LastAdminFailure();
 }
 
 final class WrongCurrentPasswordFailure extends AuthFailure {

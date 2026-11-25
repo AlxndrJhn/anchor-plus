@@ -4816,6 +4816,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get nativePhotoLibraryUse => 'Anchor 使用你的照片图库为笔记添加图片并选择头像。';
+
+  @override
+  String get authLastAdmin => '你是此服务器上唯一的管理员。请先将其他人设为管理员。';
+
+  @override
+  String get deleteAccountTitle => '删除账户';
+
+  @override
+  String get deleteAccountWarning => '此操作无法撤销。';
+
+  @override
+  String get deleteAccountMessage =>
+      '你的账户、笔记、标签、附件和提醒将从此服务器上永久删除，你将在所有设备上退出登录。你共享的笔记及其公开链接将对所有人失效。你添加到他人笔记中的图片和文件会保留在那些笔记中。';
+
+  @override
+  String get deleteAccountExport => '如需保留笔记副本，请先在网页版的设置中导出。';
+
+  @override
+  String get deleteAccountPasswordHelp => '输入密码以确认。';
+
+  @override
+  String get deleteAccountConfirm => '删除账户';
+
+  @override
+  String get deleteAccountDeleting => '正在删除…';
+
+  @override
+  String get deleteAccountDone => '账户已删除';
+
+  @override
+  String get deleteAccountOffline => '你已离线。请连接网络后再删除账户。';
+
+  @override
+  String get deleteAccountDialogTitle => '删除你的账户？';
+
+  @override
+  String get deleteAccountDialogMessage => '你的账户和笔记将从此服务器上永久删除。';
+
+  @override
+  String get settingsDeleteAccount => '删除账户';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -9632,4 +9672,44 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get nativePhotoLibraryUse => 'Anchor 使用你的照片圖庫為筆記加入圖片並選擇大頭貼。';
+
+  @override
+  String get authLastAdmin => '你是此伺服器上唯一的管理員。請先將其他人設為管理員。';
+
+  @override
+  String get deleteAccountTitle => '刪除帳號';
+
+  @override
+  String get deleteAccountWarning => '此操作無法復原。';
+
+  @override
+  String get deleteAccountMessage =>
+      '你的帳號、筆記、標籤、附件和提醒將從此伺服器上永久刪除，你將在所有裝置上登出。你共享的筆記及其公開連結將對所有人失效。你加入他人筆記中的圖片和檔案會保留在那些筆記中。';
+
+  @override
+  String get deleteAccountExport => '如需保留筆記副本，請先在網頁版的設定中匯出。';
+
+  @override
+  String get deleteAccountPasswordHelp => '輸入密碼以確認。';
+
+  @override
+  String get deleteAccountConfirm => '刪除帳號';
+
+  @override
+  String get deleteAccountDeleting => '正在刪除…';
+
+  @override
+  String get deleteAccountDone => '帳號已刪除';
+
+  @override
+  String get deleteAccountOffline => '你已離線。請連上網路後再刪除帳號。';
+
+  @override
+  String get deleteAccountDialogTitle => '刪除你的帳號？';
+
+  @override
+  String get deleteAccountDialogMessage => '你的帳號和筆記將從此伺服器上永久刪除。';
+
+  @override
+  String get settingsDeleteAccount => '刪除帳號';
 }

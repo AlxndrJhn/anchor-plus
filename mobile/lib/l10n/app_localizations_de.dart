@@ -5087,4 +5087,49 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get nativePhotoLibraryUse =>
       'Anchor nutzt deine Fotomediathek, um Bilder zu Notizen hinzuzufügen und dein Profilfoto auszuwählen.';
+
+  @override
+  String get authLastAdmin =>
+      'Du bist der einzige Admin auf diesem Server. Mache zuerst jemand anderen zum Admin.';
+
+  @override
+  String get deleteAccountTitle => 'Konto löschen';
+
+  @override
+  String get deleteAccountWarning => 'Das lässt sich nicht rückgängig machen.';
+
+  @override
+  String get deleteAccountMessage =>
+      'Dein Konto, deine Notizen, Tags, Anhänge und Erinnerungen werden endgültig von diesem Server gelöscht, und du wirst auf allen Geräten abgemeldet. Notizen, die du geteilt hast, und ihre öffentlichen Links funktionieren für niemanden mehr. Bilder und Dateien, die du zu Notizen anderer hinzugefügt hast, bleiben bei diesen Notizen.';
+
+  @override
+  String get deleteAccountExport =>
+      'Wenn du eine Kopie deiner Notizen behalten möchtest, exportiere sie vorher in den Einstellungen im Web.';
+
+  @override
+  String get deleteAccountPasswordHelp =>
+      'Gib zur Bestätigung dein Passwort ein.';
+
+  @override
+  String get deleteAccountConfirm => 'Konto löschen';
+
+  @override
+  String get deleteAccountDeleting => 'Wird gelöscht…';
+
+  @override
+  String get deleteAccountDone => 'Konto gelöscht';
+
+  @override
+  String get deleteAccountOffline =>
+      'Du bist offline. Verbinde dich mit dem Internet, um dein Konto zu löschen.';
+
+  @override
+  String get deleteAccountDialogTitle => 'Dein Konto löschen?';
+
+  @override
+  String get deleteAccountDialogMessage =>
+      'Dein Konto und deine Notizen werden endgültig von diesem Server gelöscht.';
+
+  @override
+  String get settingsDeleteAccount => 'Konto löschen';
 }

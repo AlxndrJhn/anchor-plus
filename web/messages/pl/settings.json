@@ -25,6 +25,7 @@
     "password": "Hasło",
     "phone": "Połącz telefon",
     "devices": "Urządzenia",
+    "deleteAccount": "Usuń konto",
     "about": "O aplikacji"
   },
   "blocks": {
@@ -328,6 +329,22 @@
     "signOutOthersButton": "Wyloguj inne",
     "confirmTitle": "Wylogować inne urządzenia?",
     "confirmText": "W ciągu 15 minut zostaną poproszone o ponowne zalogowanie. To urządzenie pozostanie zalogowane."
+  },
+  "deleteAccount": {
+    "title": "Usuń konto",
+    "rowTitle": "Tego nie można cofnąć",
+    "rowText": "Trwale usuń swoje konto i wszystko, co się w nim znajduje, z tego serwera. Jeśli chcesz zachować kopię notatek, najpierw je wyeksportuj.",
+    "button": "Usuń konto",
+    "dialogTitle": "Usunąć konto?",
+    "dialogText": "Tego nie można cofnąć. Twoje konto, notatki, tagi, załączniki i przypomnienia zostaną trwale usunięte z tego serwera, a na wszystkich urządzeniach nastąpi wylogowanie. Udostępnione przez Ciebie notatki i ich publiczne linki przestaną działać dla wszystkich. Zdjęcia i pliki dodane przez Ciebie do notatek innych osób zostaną przy tych notatkach.",
+    "password": "Hasło",
+    "passwordHelp": "Wpisz hasło, aby potwierdzić.",
+    "wrongPassword": "To nie jest Twoje hasło.",
+    "onlyAdmin": "Jesteś jedynym administratorem na tym serwerze. Najpierw nadaj komuś innemu uprawnienia administratora.",
+    "failed": "Nie udało się usunąć konta. Spróbuj ponownie za chwilę.",
+    "offline": "Nie można połączyć się z serwerem. Sprawdź połączenie i spróbuj ponownie.",
+    "deleting": "Usuwanie…",
+    "deleted": "Konto zostało usunięte"
   },
   "magicLogin": {
     "qrFailed": "Nie udało się utworzyć kodu QR",

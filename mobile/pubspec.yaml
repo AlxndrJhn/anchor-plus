@@ -112,6 +112,8 @@ dev_dependencies:
     sdk: flutter
   # A stand-in camera for the camera screen's tests.
   camera_platform_interface: ^2.15.0
+  # A stand-in photo cache for the account deletion tests.
+  flutter_cache_manager: ^3.4.6
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

@@ -25,6 +25,7 @@
     "password": "Password",
     "phone": "Connect phone",
     "devices": "Devices",
+    "deleteAccount": "Delete account",
     "about": "About"
   },
   "blocks": {
@@ -328,6 +329,22 @@
     "signOutOthersButton": "Sign out others",
     "confirmTitle": "Sign out your other devices?",
     "confirmText": "Within 15 minutes they’ll be asked to sign in again. This device stays signed in."
+  },
+  "deleteAccount": {
+    "title": "Delete account",
+    "rowTitle": "This can’t be undone",
+    "rowText": "Permanently delete your account and everything in it from this server. To keep a copy of your notes, export them first.",
+    "button": "Delete account",
+    "dialogTitle": "Delete your account?",
+    "dialogText": "This can’t be undone. Your account, notes, tags, attachments and reminders will be permanently deleted from this server, and you’ll be signed out on every device. Notes you shared and their public links stop working for everyone. Pictures and files you added to other people’s notes stay with those notes.",
+    "password": "Password",
+    "passwordHelp": "Enter your password to confirm.",
+    "wrongPassword": "That isn’t your password.",
+    "onlyAdmin": "You’re the only admin on this server. Make someone else an admin first.",
+    "failed": "Couldn’t delete your account. Try again in a moment.",
+    "offline": "Couldn’t reach the server. Check your connection and try again.",
+    "deleting": "Deleting…",
+    "deleted": "Account deleted"
   },
   "magicLogin": {
     "qrFailed": "Couldn’t make a QR code",

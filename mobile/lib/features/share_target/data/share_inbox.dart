@@ -82,6 +82,13 @@ class ShareInbox {
     await staging.rename('${_inbox.path}/${entry.id}');
   }
 
+  /// Drops the shares waiting for [userId], an account deleted on this phone.
+  Future<void> removeEntriesOf(String userId) async {
+    for (final (:entry, :folder) in await entries()) {
+      if (entry.userId == userId) await remove(folder);
+    }
+  }
+
   Future<void> remove(Directory folder) async {
     try {
       await folder.delete(recursive: true);

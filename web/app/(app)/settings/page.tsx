@@ -8,6 +8,7 @@ import {
   ApiTokenSection,
   AppearanceSection,
   DateTimeSection,
+  DeleteAccountSection,
   DevicesSection,
   EditorSection,
   ImportExportSection,
@@ -56,6 +57,7 @@ export default function SettingsPage() {
           {/* Just above Devices, where a phone that scans the code shows up. */}
           {!isServerless && <PhoneSection />}
           {!isServerless && <DevicesSection />}
+          {!isServerless && <DeleteAccountSection />}
           <Section id="about" title={t("about")}>
             <Row>
               <div className="flex items-center gap-3">

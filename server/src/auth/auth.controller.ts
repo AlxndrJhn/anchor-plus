@@ -27,6 +27,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { LogoutDto } from './dto/logout.dto';
 import { LogoutOthersDto } from './dto/logout-others.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { AllowBeforeSecondFactor } from './decorators/allow-before-second-factor.decorator';
@@ -102,6 +103,17 @@ export class AuthController {
     @Param('id', ParseUUIDPipe) sessionId: string,
   ): Promise<void> {
     return this.authService.revokeSession(user.id, sessionId);
+  }
+
+  /** Deletes the person's own account, with all their notes and files. */
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('delete-account')
+  deleteAccount(
+    @CurrentUser() user: User,
+    @Body() deleteAccountDto: DeleteAccountDto,
+  ) {
+    return this.authService.deleteAccount(user.id, deleteAccountDto.password);
   }
 
   /** A one-time code that signs another device in as this person. */

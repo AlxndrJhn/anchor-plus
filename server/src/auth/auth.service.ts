@@ -46,6 +46,7 @@ import {
 import { currentUserAgent } from '../common/utils/request-context';
 import { describeDevice, trimUserAgent } from './utils/device-label.util';
 import { coded, ErrorCode } from '../common/errors/coded';
+import { UserDeletionService } from '../users/user-deletion.service';
 
 @Injectable()
 export class AuthService {
@@ -64,6 +65,7 @@ export class AuthService {
     private secondFactorService: SecondFactorService,
     @Inject(StorageConfig.KEY)
     private storageConfig: ConfigType<typeof StorageConfig>,
+    private userDeletion: UserDeletionService,
   ) {}
 
   /** Sign-up is open to the very first account, which becomes the admin. */
@@ -614,6 +616,58 @@ export class AuthService {
     ]);
 
     return { message: 'Password changed successfully' };
+  }
+
+  /**
+   * Deletes the person's own account and everything in it. An account with a
+   * password asks for it; one from a sign-in provider has none to ask for. The only admin can't leave while
+   * other people still use the server, or no one could run it.
+   */
+  async deleteAccount(userId: string, password?: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { password: true, isAdmin: true },
+    });
+
+    if (!user) {
+      throw coded(
+        new ForbiddenException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
+    }
+
+    if (user.password) {
+      this.failedLogins.check(`user:${userId}`);
+      const isPasswordValid =
+        !!password && (await bcrypt.compare(password, user.password));
+      if (!isPasswordValid) {
+        this.failedLogins.fail(`user:${userId}`);
+        throw coded(
+          new ForbiddenException('Current password is incorrect'),
+          ErrorCode.CURRENT_PASSWORD_INCORRECT,
+        );
+      }
+      this.failedLogins.succeed(`user:${userId}`);
+    }
+
+    if (user.isAdmin) {
+      const [adminCount, userCount] = await Promise.all([
+        this.prisma.user.count({ where: { isAdmin: true } }),
+        this.prisma.user.count(),
+      ]);
+      if (adminCount === 1 && userCount > 1) {
+        throw coded(
+          new ConflictException(
+            'Make someone else an admin before deleting this account',
+          ),
+          ErrorCode.LAST_ADMIN,
+        );
+      }
+    }
+
+    await this.userDeletion.deleteUser(userId);
+
+    return { message: 'Account deleted' };
   }
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {

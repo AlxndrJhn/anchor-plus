@@ -31,6 +31,7 @@ import { BCRYPT_SALT_ROUNDS } from '../auth/constants/auth.constants';
 import { normalizeEmail, sameEmail } from '../common/utils/email.util';
 import { StorageQuotaService } from '../storage-quota/storage-quota.service';
 import { coded, ErrorCode } from '../common/errors/coded';
+import { UserDeletionService } from '../users/user-deletion.service';
 
 @Injectable()
 export class AdminService {
@@ -41,6 +42,7 @@ export class AdminService {
     private secondFactorService: SecondFactorService,
     private oidcClientService: OidcClientService,
     private storageQuota: StorageQuotaService,
+    private userDeletion: UserDeletionService,
   ) {}
 
   async getStats() {
@@ -357,10 +359,7 @@ export class AdminService {
       }
     }
 
-    // Delete user - notes and tags will be cascade deleted by database constraint
-    await this.prisma.user.delete({
-      where: { id },
-    });
+    await this.userDeletion.deleteUser(id);
 
     return { message: 'User deleted successfully' };
   }

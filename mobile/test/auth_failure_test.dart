@@ -326,6 +326,31 @@ void main() {
     });
   });
 
+  test('deleting the only admin reads as its own failure', () {
+    final failure = AuthFailure.fromResponse(
+      409,
+      'Make someone else an admin before deleting this account',
+      error: const ServerApiError(),
+    );
+
+    expect(failure, isA<LastAdminFailure>());
+    expect(
+      authErrorMessageOf(failure, _english).text,
+      startsWith('You’re the only admin'),
+    );
+  });
+
+  test('the only admin is told by code, whatever the message says', () {
+    final failure = AuthFailure.fromResponse(
+      409,
+      'Someone has to stay an admin',
+      code: 'LAST_ADMIN',
+      error: const ServerApiError(),
+    );
+
+    expect(failure, isA<LastAdminFailure>());
+  });
+
   test('no connection reads as an unreachable server', () {
     final failure = authFailureOf(
       DioException(

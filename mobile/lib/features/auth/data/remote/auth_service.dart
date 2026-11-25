@@ -48,6 +48,14 @@ class AuthService {
     ),
   );
 
+  /// Deletes the signed-in account, with everything in it.
+  Future<void> deleteAccount(String? password) async {
+    await _send<Object?>(
+      () =>
+          _dio.post('/api/auth/delete-account', data: {'password': ?password}),
+    );
+  }
+
   Future<void> changePassword(
     String currentPassword,
     String newPassword, {
