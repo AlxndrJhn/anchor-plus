@@ -5,6 +5,7 @@ import common from "./common.json";
 import debugRecorder from "./debugRecorder.json";
 import editor from "./editor.json";
 import editorMedia from "./editorMedia.json";
+import errors from "./errors.json";
 import keybindings from "./keybindings.json";
 import layout from "./layout.json";
 import noteEditor from "./noteEditor.json";
@@ -19,6 +20,7 @@ const messages = {
   debugRecorder,
   editor,
   editorMedia,
+  errors,
   keybindings,
   layout,
   noteEditor,

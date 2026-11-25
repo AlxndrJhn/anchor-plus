@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { NoteSharePermission, NoteState } from 'src/generated/prisma/enums';
 import { ERROR_MESSAGES } from '../constants/notes.constants';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 export interface NoteAccessResult {
   hasAccess: boolean;
@@ -92,11 +93,17 @@ export class NoteAccessService {
     });
 
     if (!note) {
-      throw new NotFoundException('Note not found');
+      throw coded(
+        new NotFoundException('Note not found'),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
 
     if (note.userId !== userId) {
-      throw new ForbiddenException('Only note owner can perform this action');
+      throw coded(
+        new ForbiddenException('Only note owner can perform this action'),
+        ErrorCode.NOT_NOTE_OWNER,
+      );
     }
   }
 
@@ -115,9 +122,15 @@ export class NoteAccessService {
         access.permission === NoteSharePermission.viewer &&
         requiredPermission === NoteSharePermission.editor
       ) {
-        throw new ForbiddenException('Viewers cannot edit notes');
+        throw coded(
+          new ForbiddenException('Viewers cannot edit notes'),
+          ErrorCode.VIEWER_CANNOT_EDIT,
+        );
       }
-      throw new NotFoundException('Note not found');
+      throw coded(
+        new NotFoundException('Note not found'),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
 
     return access;
@@ -133,12 +146,18 @@ export class NoteAccessService {
       select: { state: true, isFrozen: true },
     });
     if (!note || note.state !== NoteState.active) {
-      throw new BadRequestException(
-        'Cannot modify this note. Only active notes can be edited.',
+      throw coded(
+        new BadRequestException(
+          'Cannot modify this note. Only active notes can be edited.',
+        ),
+        ErrorCode.NOTE_NOT_ACTIVE,
       );
     }
     if (note.isFrozen) {
-      throw new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN);
+      throw coded(
+        new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN),
+        ErrorCode.NOTE_FROZEN,
+      );
     }
   }
 }

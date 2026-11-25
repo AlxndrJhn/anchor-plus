@@ -20,6 +20,7 @@ import { OidcService } from './oidc.service';
 import { OidcConfigService } from './oidc-config.service';
 import { getErrorMessage } from './oidc.utils';
 import { PRIMARY_OIDC_PROVIDER_ID } from './oidc-providers';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 /** The provider a request names; the first one when it names none. */
 function providerIdOf(value: unknown): string {
@@ -27,9 +28,23 @@ function providerIdOf(value: unknown): string {
     return PRIMARY_OIDC_PROVIDER_ID;
   }
   if (typeof value !== 'string') {
-    throw new BadRequestException('Invalid provider');
+    throw coded(
+      new BadRequestException('Invalid provider'),
+      ErrorCode.OIDC_PROVIDER_INVALID,
+    );
   }
   return value;
+}
+
+/** The stable code an exception carries, from coded(). */
+function codeOf(error: unknown): string | undefined {
+  if (!(error instanceof HttpException)) return undefined;
+  const body = error.getResponse();
+  const code =
+    typeof body === 'object' && body !== null
+      ? (body as { code?: unknown }).code
+      : undefined;
+  return typeof code === 'string' ? code : undefined;
 }
 
 @Controller('api/auth/oidc')
@@ -60,7 +75,10 @@ export class OidcController {
     try {
       const isEnabled = await this.oidcConfigService.isEnabled();
       if (!isEnabled) {
-        throw new BadRequestException('OIDC is not enabled');
+        throw coded(
+          new BadRequestException('OIDC is not enabled'),
+          ErrorCode.OIDC_DISABLED,
+        );
       }
 
       const authUrl = await this.oidcService.getAuthorizationUrl(
@@ -73,7 +91,10 @@ export class OidcController {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new InternalServerErrorException('Failed to initiate OIDC login');
+      throw coded(
+        new InternalServerErrorException('Failed to initiate OIDC login'),
+        ErrorCode.OIDC_SIGN_IN_FAILED,
+      );
     }
   }
 
@@ -87,7 +108,10 @@ export class OidcController {
   async link(@CurrentUser() user: User, @Body('provider') provider: unknown) {
     const isEnabled = await this.oidcConfigService.isEnabled();
     if (!isEnabled) {
-      throw new BadRequestException('OIDC is not enabled');
+      throw coded(
+        new BadRequestException('OIDC is not enabled'),
+        ErrorCode.OIDC_DISABLED,
+      );
     }
     return {
       url: await this.oidcService.getAuthorizationUrl(
@@ -162,10 +186,15 @@ export class OidcController {
 
     // Connecting a signed-in account goes back to Settings, where it began.
     const isLink = !!state && this.oidcService.isLinkState(state);
-    const failTo = (message: string, status?: number) =>
-      isLink
-        ? `${frontendUrl}/settings?provider_error=${encodeURIComponent(message)}`
-        : `${frontendUrl}/login?error=${encodeURIComponent(message)}${status ? `&status=${status}` : ''}`;
+    // The code, when there is one, lets the app say it in its own language.
+    const failTo = (message: string, status?: number, errorCode?: string) => {
+      const codePart = errorCode
+        ? `&error_code=${encodeURIComponent(errorCode)}`
+        : '';
+      return isLink
+        ? `${frontendUrl}/settings?provider_error=${encodeURIComponent(message)}${codePart}`
+        : `${frontendUrl}/login?error=${encodeURIComponent(message)}${status ? `&status=${status}` : ''}${codePart}`;
+    };
 
     if (error) {
       return res.redirect(failTo(errorDescription || error));
@@ -198,7 +227,7 @@ export class OidcController {
         'Failed to process OIDC callback',
       );
       const status = error instanceof HttpException ? error.getStatus() : 500;
-      return res.redirect(failTo(errorMsg, status));
+      return res.redirect(failTo(errorMsg, status, codeOf(error)));
     }
   }
 
@@ -208,7 +237,10 @@ export class OidcController {
   @Post('exchange')
   exchange(@Body('code') code: string | undefined) {
     if (!code || typeof code !== 'string') {
-      throw new BadRequestException('Missing or invalid code');
+      throw coded(
+        new BadRequestException('Missing or invalid code'),
+        ErrorCode.OIDC_CALLBACK_INVALID,
+      );
     }
     return this.oidcService.exchangeCode(code);
   }
@@ -223,7 +255,10 @@ export class OidcController {
     @Body('provider') provider: unknown,
   ) {
     if (!accessToken || typeof accessToken !== 'string') {
-      throw new BadRequestException('Missing or invalid access_token');
+      throw coded(
+        new BadRequestException('Missing or invalid access_token'),
+        ErrorCode.OIDC_CALLBACK_INVALID,
+      );
     }
     return this.oidcService.exchangeMobileToken(
       accessToken,

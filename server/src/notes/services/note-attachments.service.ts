@@ -44,6 +44,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { createReadStream, existsSync } from 'fs';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 @Injectable()
 export class NoteAttachmentsService {
@@ -153,7 +154,10 @@ export class NoteAttachmentsService {
       if (stored) {
         await deleteFileIfExists(stored.filePath, this.logger);
       }
-      throw new BadRequestException('Failed to upload attachment');
+      throw coded(
+        new BadRequestException('Failed to upload attachment'),
+        ErrorCode.ATTACHMENT_UPLOAD_FAILED,
+      );
     }
   }
 
@@ -225,7 +229,10 @@ export class NoteAttachmentsService {
   async findAll(userId: string, noteId: string) {
     const access = await this.noteAccessService.hasNoteAccess(userId, noteId);
     if (!access.hasAccess) {
-      throw new NotFoundException('Note not found');
+      throw coded(
+        new NotFoundException('Note not found'),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
 
     const attachments = await findAttachmentRows(this.prisma, noteId);
@@ -271,7 +278,10 @@ export class NoteAttachmentsService {
   private async findFile(userId: string, noteId: string, attachmentId: string) {
     const access = await this.noteAccessService.hasNoteAccess(userId, noteId);
     if (!access.hasAccess) {
-      throw new NotFoundException('Note not found');
+      throw coded(
+        new NotFoundException('Note not found'),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
     return this.findNoteFile(noteId, attachmentId);
   }
@@ -284,12 +294,18 @@ export class NoteAttachmentsService {
     );
 
     if (!attachment) {
-      throw new NotFoundException('Attachment not found');
+      throw coded(
+        new NotFoundException('Attachment not found'),
+        ErrorCode.ATTACHMENT_NOT_FOUND,
+      );
     }
 
     const filePath = this.attachmentPath(noteId, attachment.storedFilename);
     if (!existsSync(filePath)) {
-      throw new NotFoundException('Attachment file not found');
+      throw coded(
+        new NotFoundException('Attachment file not found'),
+        ErrorCode.ATTACHMENT_FILE_MISSING,
+      );
     }
 
     return { attachment, filePath };
@@ -305,7 +321,10 @@ export class NoteAttachmentsService {
     );
 
     if (!attachment) {
-      throw new NotFoundException('Attachment not found');
+      throw coded(
+        new NotFoundException('Attachment not found'),
+        ErrorCode.ATTACHMENT_NOT_FOUND,
+      );
     }
 
     // Owner can delete any attachment; editors can delete their own uploads
@@ -315,11 +334,15 @@ export class NoteAttachmentsService {
       NoteSharePermission.editor,
     );
     if (!access.hasAccess) {
-      throw new NotFoundException('Note not found');
+      throw coded(
+        new NotFoundException('Note not found'),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
     if (!access.isOwner && attachment.uploadedByUserId !== userId) {
-      throw new BadRequestException(
-        'You can only delete attachments you uploaded',
+      throw coded(
+        new BadRequestException('You can only delete attachments you uploaded'),
+        ErrorCode.ATTACHMENT_NOT_YOURS,
       );
     }
 
@@ -347,13 +370,19 @@ export class NoteAttachmentsService {
 
     const byId = new Map(attachments.map((a) => [a.id, a]));
     if (orderedIds.length !== attachments.length) {
-      throw new BadRequestException(
-        'Reorder must include exactly all attachment IDs for the note',
+      throw coded(
+        new BadRequestException(
+          'Reorder must include exactly all attachment IDs for the note',
+        ),
+        ErrorCode.ATTACHMENT_ORDER_INVALID,
       );
     }
     for (const id of orderedIds) {
       if (!byId.has(id)) {
-        throw new BadRequestException(`Attachment ${id} not found in note`);
+        throw coded(
+          new BadRequestException(`Attachment ${id} not found in note`),
+          ErrorCode.ATTACHMENT_ORDER_INVALID,
+        );
       }
     }
 

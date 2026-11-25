@@ -23,6 +23,7 @@ import {
   PROFILE_IMAGE_EXTENSIONS,
   storedProfileImageFile,
 } from '../utils/profile-image.util';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 const PICTURE_DOWNLOAD_TIMEOUT_MS = 5000;
 
@@ -117,15 +118,21 @@ export class OidcUserService {
                 this.isSameProvider(link.issuer, key),
               )
             ) {
-              throw new ConflictException(
-                'This email is already linked to a different sign-in account.',
+              throw coded(
+                new ConflictException(
+                  'This email is already linked to a different sign-in account.',
+                ),
+                ErrorCode.EMAIL_LINKED_ELSEWHERE,
               );
             }
             // Otherwise anyone who can put this email on an account at the
             // provider would sign in as its owner here.
             if (!claims.emailVerified) {
-              throw new ConflictException(
-                'An account with this email already exists. Your sign-in provider has not verified this email, so it can’t be linked.',
+              throw coded(
+                new ConflictException(
+                  'An account with this email already exists. Your sign-in provider has not verified this email, so it can’t be linked.',
+                ),
+                ErrorCode.OIDC_EMAIL_UNVERIFIED,
               );
             }
             await tx.oidcIdentity.create({
@@ -200,8 +207,11 @@ export class OidcUserService {
     await this.prisma.$transaction(async (tx) => {
       const holder = await this.findIdentity(tx, claims.subject, key);
       if (holder && holder.userId !== userId) {
-        throw new ConflictException(
-          'That sign-in account is already connected to someone else here.',
+        throw coded(
+          new ConflictException(
+            'That sign-in account is already connected to someone else here.',
+          ),
+          ErrorCode.OIDC_IDENTITY_TAKEN,
         );
       }
       if (holder) return;
@@ -210,15 +220,21 @@ export class OidcUserService {
         select: { oidcIdentities: { select: { issuer: true } } },
       });
       if (!user) {
-        throw new ForbiddenException('User not found');
+        throw coded(
+          new ForbiddenException('User not found'),
+          ErrorCode.USER_NOT_FOUND,
+        );
       }
       if (
         user.oidcIdentities.some((link) =>
           this.isSameProvider(link.issuer, key),
         )
       ) {
-        throw new ConflictException(
-          'Your account is already connected to a different sign-in account.',
+        throw coded(
+          new ConflictException(
+            'Your account is already connected to a different sign-in account.',
+          ),
+          ErrorCode.OIDC_ALREADY_LINKED,
         );
       }
       await tx.oidcIdentity.create({
@@ -245,8 +261,9 @@ export class OidcUserService {
     const isFirstUser = (await tx.user.count()) === 0;
     const mode = await this.settingsService.getRegistrationMode();
     if (mode === 'disabled' && !isFirstUser) {
-      throw new ForbiddenException(
-        'Sign-up is closed. Ask an admin to add you.',
+      throw coded(
+        new ForbiddenException('Sign-up is closed. Ask an admin to add you.'),
+        ErrorCode.REGISTRATION_DISABLED,
       );
     }
     const status =

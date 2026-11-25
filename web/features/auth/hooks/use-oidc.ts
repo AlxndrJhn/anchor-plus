@@ -5,6 +5,7 @@ import { HTTPError } from "ky";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/toast";
+import { errorCodeOf } from "@/lib/api/error-code";
 import { translate } from "@/lib/i18n";
 import { firstName } from "@/lib/utils";
 import { exchangeOidcCode, getOidcConfig } from "../api";
@@ -61,7 +62,7 @@ export function useOidcLogin() {
 /** status is 0 when the server couldn't be reached. */
 export type ProviderSignInFailure =
   | { by: "provider"; message: string }
-  | { by: "server"; status: number; message: string };
+  | { by: "server"; status: number; message: string; code?: string };
 
 /** Handles the OIDC callback: ?code=...&redirect=... (no JWT in the URL). */
 export function useOidcCallback() {
@@ -84,7 +85,12 @@ export function useOidcCallback() {
         processedRef.current = true;
         setFailure(
           status
-            ? { by: "server", status: Number(status), message: error }
+            ? {
+                by: "server",
+                status: Number(status),
+                message: error,
+                code: searchParams.get("error_code") ?? undefined,
+              }
             : { by: "provider", message: error },
         );
         router.replace("/login");
@@ -110,6 +116,7 @@ export function useOidcCallback() {
             by: "server",
             status: err instanceof HTTPError ? err.response.status : 0,
             message: err instanceof Error ? err.message : "",
+            code: errorCodeOf(err),
           });
           router.replace("/login");
         })

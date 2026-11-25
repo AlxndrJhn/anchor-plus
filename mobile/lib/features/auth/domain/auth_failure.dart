@@ -4,12 +4,23 @@ sealed class AuthFailure implements Exception {
   const AuthFailure();
 
   /// [message] is a sentence, or a list for fields the server turned down.
+  /// [code] is the server's stable name for the error, with the values its
+  /// message names in [params] and the refused [fields]. Servers from before
+  /// codes send none of them, so their English [message] is matched instead.
   /// [error] stands for any answer not matched here.
   factory AuthFailure.fromResponse(
     int? status,
     Object? message, {
     required ApiError error,
+    String? code,
+    Map<String, Object?> params = const {},
+    List<String> fields = const [],
   }) {
+    if (code == 'VALIDATION_FAILED' && fields.isNotEmpty) {
+      return InvalidInputFailure(fields);
+    }
+    final byCode = _fromCode(code, params);
+    if (byCode != null) return byCode;
     if (status == 400 && message is List) {
       return InvalidInputFailure([
         for (final item in message) '$item'.split(' ').first,
@@ -50,6 +61,30 @@ sealed class AuthFailure implements Exception {
       _ => ServerFailure(error),
     };
   }
+}
+
+AuthFailure? _fromCode(String? code, Map<String, Object?> params) {
+  final provider = params['provider'];
+  return switch (code) {
+    'INVALID_CREDENTIALS' => const InvalidCredentialsFailure(),
+    'TWO_STEP_REQUIRED' => const TwoStepRequiredFailure(),
+    'TWO_STEP_CODE_WRONG' => const TwoStepRequiredFailure(wasWrong: true),
+    'PASSKEY_ONLY' || 'SIGN_IN_WITH_PASSKEY' => const PasskeyOnlyFailure(),
+    'SIGN_IN_WITH_PROVIDER' ||
+    'OIDC_ACCOUNT' => const PasswordlessAccountFailure(),
+    'MAGIC_CODE_INVALID' => const MagicCodeUsedFailure(),
+    'ACCOUNT_PENDING' => const PendingApprovalFailure(),
+    'PASSWORD_SIGN_IN_DISABLED' ||
+    'PASSWORD_SIGN_UP_DISABLED' => PasswordSignInDisabledFailure(
+      provider: provider is String ? provider : null,
+      isSignUp: code == 'PASSWORD_SIGN_UP_DISABLED',
+    ),
+    'REGISTRATION_DISABLED' => const RegistrationClosedFailure(),
+    'CURRENT_PASSWORD_INCORRECT' => const WrongCurrentPasswordFailure(),
+    'PASSWORD_UNCHANGED' => const SamePasswordFailure(),
+    'USER_EXISTS' => const EmailTakenFailure(),
+    _ => null,
+  };
 }
 
 /// The server ends with "Sign in with Pocket ID." or "Sign up with …".

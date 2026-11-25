@@ -38,6 +38,7 @@ import {
   ImportNotesDto,
   ImportNotesResponse,
 } from './dto/import-notes.dto';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 /**
  * Truncate to whole seconds: mobile sync clients store timestamps with
@@ -357,10 +358,16 @@ export class ImportService {
       select: { state: true, isFrozen: true },
     });
     if (note.state === NoteState.deleted) {
-      throw new BadRequestException('This note was deleted');
+      throw coded(
+        new BadRequestException('This note was deleted'),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
     if (note.isFrozen) {
-      throw new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN);
+      throw coded(
+        new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN),
+        ErrorCode.NOTE_FROZEN,
+      );
     }
 
     assertValidAttachmentFile(file);
@@ -404,7 +411,10 @@ export class ImportService {
       if (stored) {
         await deleteFileIfExists(stored.filePath, this.logger);
       }
-      throw new BadRequestException('Failed to import attachment');
+      throw coded(
+        new BadRequestException('Failed to import attachment'),
+        ErrorCode.IMPORT_ATTACHMENT_FAILED,
+      );
     }
   }
 }

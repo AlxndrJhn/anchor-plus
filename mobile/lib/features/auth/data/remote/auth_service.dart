@@ -1,6 +1,8 @@
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../../core/network/api_error.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../domain/auth_failure.dart';
@@ -179,9 +181,21 @@ AuthFailure authFailureOf(DioException exception) {
     return const UnreachableFailure();
   }
   final data = exception.response?.data;
+  final body = data is Map ? data : const <Object?, Object?>{};
+  final code = body['code'];
+  final params = body['params'];
+  final fields = body['fields'];
   return AuthFailure.fromResponse(
     exception.response?.statusCode,
-    data is Map ? data['message'] : null,
+    body['message'],
     error: apiError,
+    code: code is String ? code : null,
+    params: params is Map ? params.cast<String, Object?>() : const {},
+    fields: [
+      if (fields is List)
+        for (final entry in fields)
+          if (entry is Map && entry['field'] is String)
+            entry['field'] as String,
+    ],
   );
 }

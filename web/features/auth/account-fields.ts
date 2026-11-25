@@ -1,4 +1,5 @@
 import { HTTPError } from "ky";
+import { refusedFieldsOf } from "@/lib/api/error-code";
 import { translate } from "@/lib/i18n";
 
 export const NAME_MAX_LENGTH = 100;
@@ -13,7 +14,8 @@ export function accountFieldHelp(field: AccountField): string {
 
 export function refusedField(error: Error): AccountField | undefined {
   if (!(error instanceof HTTPError) || error.response.status !== 400) return;
+  const refused = refusedFieldsOf(error);
   return (["name", "email", "password"] as const).find((field) =>
-    new RegExp(`\\b${field}\\b`, "i").test(error.message),
+    refused.includes(field),
   );
 }

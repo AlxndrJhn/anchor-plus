@@ -1,20 +1,60 @@
 import {
+  HttpException,
   Injectable,
   PipeTransform,
   ValidationPipe,
   type ArgumentMetadata,
 } from '@nestjs/common';
+import type { ValidationError } from 'class-validator';
+import { coded, ErrorCode } from '../errors/coded';
 import { rejectsUnknownFields } from '../decorators/reject-unknown-fields.decorator';
+
+/** A field the server turned down, and the rules (like `isEmail`) it broke. */
+export interface FieldError {
+  field: string;
+  rules: string[];
+}
+
+/** Nested fields read as `parent.child`. */
+export function fieldErrorsOf(
+  errors: readonly ValidationError[],
+  parent = '',
+): FieldError[] {
+  return errors.flatMap((error) => {
+    const field = parent ? `${parent}.${error.property}` : error.property;
+    const own = error.constraints
+      ? [{ field, rules: Object.keys(error.constraints) }]
+      : [];
+    return [...own, ...fieldErrorsOf(error.children ?? [], field)];
+  });
+}
+
+/** Adds VALIDATION_FAILED and the refused fields to the usual 400. */
+class CodedValidationPipe extends ValidationPipe {
+  createExceptionFactory() {
+    const toException = super.createExceptionFactory();
+    return (errors: ValidationError[] = []) => {
+      const exception = coded(
+        toException(errors) as HttpException,
+        ErrorCode.VALIDATION_FAILED,
+      );
+      Object.assign(exception.getResponse() as object, {
+        fields: fieldErrorsOf(errors),
+      });
+      return exception;
+    };
+  }
+}
 
 /** Strips unknown fields, except on DTOs marked `@RejectUnknownFields`. */
 @Injectable()
 export class AppValidationPipe implements PipeTransform {
-  private readonly tolerant = new ValidationPipe({
+  private readonly tolerant = new CodedValidationPipe({
     whitelist: true,
     transform: true,
   });
 
-  private readonly strict = new ValidationPipe({
+  private readonly strict = new CodedValidationPipe({
     whitelist: true,
     transform: true,
     forbidNonWhitelisted: true,

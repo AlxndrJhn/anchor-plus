@@ -67,3 +67,23 @@ describe('AppValidationPipe', () => {
     ).resolves.toEqual({ name: 'a', note: 'b' });
   });
 });
+
+describe('AppValidationPipe codes', () => {
+  const pipe = new AppValidationPipe();
+
+  it('names the error and the fields it turned down', async () => {
+    try {
+      await pipe.transform({ name: 3, note: 4 }, bodyOf(TolerantDto));
+    } catch (error) {
+      expect((error as BadRequestException).getResponse()).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        fields: [
+          { field: 'name', rules: ['isString'] },
+          { field: 'note', rules: ['isString'] },
+        ],
+      });
+      return;
+    }
+    throw new Error('expected the pipe to reject');
+  });
+});

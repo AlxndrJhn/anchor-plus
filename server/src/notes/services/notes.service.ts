@@ -51,6 +51,7 @@ import {
 import { trashDate } from '../utils/trash-date.util';
 import { NoteReminderDto } from '../dto/note-reminder.dto';
 import { RETENTION_CHUNK_SIZE } from '../../common/retention.constants';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 @Injectable()
 export class NotesService {
@@ -137,7 +138,10 @@ export class NotesService {
     });
     if (!existing) return null;
     if (existing.userId !== userId) {
-      throw new ConflictException('A note with this id already exists');
+      throw coded(
+        new ConflictException('A note with this id already exists'),
+        ErrorCode.NOTE_ID_EXISTS,
+      );
     }
     return this.findOne(userId, id);
   }
@@ -146,7 +150,10 @@ export class NotesService {
   async setPosition(userId: string, id: string, position: number | null) {
     const access = await this.noteAccessService.hasNoteAccess(userId, id);
     if (!access.hasAccess) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
     await this.prisma.$transaction(async (tx) => {
       if (await setNotePosition(tx, userId, id, position)) {
@@ -279,7 +286,10 @@ export class NotesService {
     const access = await this.noteAccessService.hasNoteAccess(userId, id);
 
     if (!access.hasAccess) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
 
     const note = await this.prisma.note.findUnique({
@@ -297,11 +307,17 @@ export class NotesService {
     });
 
     if (!note) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
 
     if (!includeAllStates && note.state === NoteState.deleted) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
 
     return transformNote(note, userId);
@@ -403,10 +419,16 @@ export class NotesService {
     });
 
     if ('gone' in outcome) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
     if ('frozen' in outcome) {
-      throw new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN);
+      throw coded(
+        new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN),
+        ErrorCode.NOTE_FROZEN,
+      );
     }
     if (outcome.conflict) {
       throw await this.noteVersionConflict(userId, id, updateNoteDto);
@@ -453,6 +475,7 @@ export class NotesService {
     }
 
     return new ConflictException({
+      code: ErrorCode.NOTE_CHANGED,
       message: 'Note was changed by someone else',
       serverNote: transformNote(server, userId),
     });
@@ -462,7 +485,10 @@ export class NotesService {
   async remove(userId: string, id: string, trashedAt?: string) {
     const access = await this.noteAccessService.hasNoteAccess(userId, id);
     if (!access.hasAccess || access.state === NoteState.deleted) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
     if (!access.isOwner) {
       await this.noteSharesService.leaveShare(userId, id);
@@ -472,10 +498,16 @@ export class NotesService {
     const note = await this.prisma.$transaction(async (tx) => {
       const prior = await tx.note.findUniqueOrThrow({ where: { id } });
       if (prior.state === NoteState.deleted) {
-        throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+        throw coded(
+          new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+          ErrorCode.NOTE_NOT_FOUND,
+        );
       }
       if (prior.isFrozen) {
-        throw new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN);
+        throw coded(
+          new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN),
+          ErrorCode.NOTE_FROZEN,
+        );
       }
       const updated = await tx.note.update({
         where: { id },
@@ -514,7 +546,10 @@ export class NotesService {
     });
 
     if (!note || note.state !== NoteState.trashed) {
-      throw new NotFoundException('Note is not in trash');
+      throw coded(
+        new NotFoundException('Note is not in trash'),
+        ErrorCode.NOTE_NOT_IN_TRASH,
+      );
     }
 
     const restoredNote = await this.prisma.$transaction(async (tx) => {
@@ -549,7 +584,10 @@ export class NotesService {
     const note = await this.prisma.$transaction(async (tx) => {
       const prior = await tx.note.findUniqueOrThrow({ where: { id } });
       if (prior.isFrozen) {
-        throw new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN);
+        throw coded(
+          new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN),
+          ErrorCode.NOTE_FROZEN,
+        );
       }
       // Resolve recipients before anything changes; they all get the remove.
       const recipients = await this.syncEmitter.noteRecipients(tx, id);
@@ -798,13 +836,22 @@ export class NotesService {
   async setFrozen(userId: string, id: string, isFrozen: boolean) {
     const access = await this.noteAccessService.hasNoteAccess(userId, id);
     if (!access.hasAccess || access.state === NoteState.deleted) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
     if (!access.isOwner) {
-      throw new ForbiddenException(ERROR_MESSAGES.ONLY_OWNER_CAN_FREEZE);
+      throw coded(
+        new ForbiddenException(ERROR_MESSAGES.ONLY_OWNER_CAN_FREEZE),
+        ErrorCode.NOT_NOTE_OWNER,
+      );
     }
     if (isFrozen && access.state !== NoteState.active) {
-      throw new BadRequestException('Only active notes can be frozen');
+      throw coded(
+        new BadRequestException('Only active notes can be frozen'),
+        ErrorCode.NOTE_NOT_ACTIVE,
+      );
     }
     await this.prisma.$transaction(async (tx) => {
       const { count } = await tx.note.updateMany({
@@ -859,7 +906,10 @@ export class NotesService {
   async setLock(userId: string, id: string, lock: NoteLockKind | null) {
     const access = await this.noteAccessService.hasNoteAccess(userId, id);
     if (!access.hasAccess) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
     await this.prisma.$transaction(async (tx) => {
       if (await setNoteLock(tx, userId, id, lock)) {

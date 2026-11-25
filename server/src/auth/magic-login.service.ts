@@ -11,6 +11,7 @@ import {
   MAGIC_LOGIN_CODE_BYTES,
   MAGIC_LOGIN_VALIDITY_MS,
 } from './constants/auth.constants';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 /**
  * One-time codes that sign another device in as someone already signed in
@@ -52,8 +53,11 @@ export class MagicLoginService implements OnModuleDestroy {
     const entry = this.codes.get(code);
     this.codes.delete(code);
     if (!entry || Date.now() > entry.expiresAt) {
-      throw new UnauthorizedException(
-        'This sign-in code has expired or was already used',
+      throw coded(
+        new UnauthorizedException(
+          'This sign-in code has expired or was already used',
+        ),
+        ErrorCode.MAGIC_CODE_INVALID,
       );
     }
 
@@ -72,8 +76,11 @@ export class MagicLoginService implements OnModuleDestroy {
       },
     });
     if (!user || user.status !== UserStatus.active) {
-      throw new UnauthorizedException(
-        'This sign-in code has expired or was already used',
+      throw coded(
+        new UnauthorizedException(
+          'This sign-in code has expired or was already used',
+        ),
+        ErrorCode.MAGIC_CODE_INVALID,
       );
     }
 

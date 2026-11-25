@@ -51,6 +51,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import { useAuth } from "@/features/auth";
 import { formatFullDate, formatShortDate } from "@/features/preferences";
+import { errorCodeOf } from "@/lib/api/error-code";
 import { useLastShown } from "@/lib/hooks/use-last-shown";
 import { useRetry } from "@/lib/hooks/use-retry";
 import { dateLocale, translate } from "@/lib/i18n";
@@ -198,7 +199,7 @@ export function PeopleTab({ hidden }: { hidden?: boolean }) {
     },
     onError: (e: Error, user) =>
       toast.error(
-        e instanceof HTTPError && /last admin/i.test(e.message)
+        errorCodeOf(e) === "LAST_ADMIN"
           ? t("deleteFailedOnlyAdmin", { name: user.name })
           : t("deleteFailed", { name: user.name }),
       ),

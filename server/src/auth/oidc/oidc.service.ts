@@ -22,6 +22,7 @@ import type {
 } from './oidc.types';
 import { getErrorMessage } from './oidc.utils';
 import { PRIMARY_OIDC_PROVIDER_ID, normalizeIssuer } from './oidc-providers';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 export type { OidcAuthResult } from './oidc.types';
 
@@ -75,11 +76,15 @@ export class OidcService {
   private async requireProvider(providerId: string) {
     const provider = await this.oidcConfigService.getProvider(providerId);
     if (!provider?.issuerUrl) {
-      throw new BadRequestException(
-        (await this.oidcConfigService.isEnabled())
-          ? 'Unknown sign-in provider'
-          : 'OIDC is not enabled',
-      );
+      throw (await this.oidcConfigService.isEnabled())
+        ? coded(
+            new BadRequestException('Unknown sign-in provider'),
+            ErrorCode.OIDC_PROVIDER_NOT_FOUND,
+          )
+        : coded(
+            new BadRequestException('OIDC is not enabled'),
+            ErrorCode.OIDC_DISABLED,
+          );
     }
     return { ...provider, issuerUrl: provider.issuerUrl };
   }
@@ -112,13 +117,19 @@ export class OidcService {
     // provider it was sent to, so one provider can't answer for another.
     const storedState = this.oidcStateService.getState(stateFromProvider);
     if (!storedState) {
-      throw new BadRequestException('Invalid or expired state');
+      throw coded(
+        new BadRequestException('Invalid or expired state'),
+        ErrorCode.OIDC_STATE_INVALID,
+      );
     }
 
     // Clean up state immediately after validation
     this.oidcStateService.deleteState(stateFromProvider);
     if (storedState.providerId !== providerId) {
-      throw new BadRequestException('Invalid or expired state');
+      throw coded(
+        new BadRequestException('Invalid or expired state'),
+        ErrorCode.OIDC_STATE_INVALID,
+      );
     }
 
     try {
@@ -169,8 +180,11 @@ export class OidcService {
 
       // Check if user is pending approval
       if (user.status === UserStatus.pending) {
-        throw new UnauthorizedException(
-          'Account pending approval. Please wait for an administrator to approve your account.',
+        throw coded(
+          new UnauthorizedException(
+            'Account pending approval. Please wait for an administrator to approve your account.',
+          ),
+          ErrorCode.ACCOUNT_PENDING,
         );
       }
 
@@ -212,8 +226,13 @@ export class OidcService {
       );
       const isProviderError =
         !(error instanceof Error) || (error as { cause?: unknown }).cause;
-      throw new InternalServerErrorException(
-        isProviderError ? `OIDC provider error: ${msg}` : msg,
+      throw coded(
+        new InternalServerErrorException(
+          isProviderError ? `OIDC provider error: ${msg}` : msg,
+        ),
+        isProviderError
+          ? ErrorCode.OIDC_PROVIDER_ERROR
+          : ErrorCode.OIDC_SIGN_IN_FAILED,
       );
     }
   }
@@ -239,8 +258,11 @@ export class OidcService {
   exchangeCode(code: string): OidcAuthResult {
     const result = this.oidcStateService.consumeExchangeCode(code);
     if (!result) {
-      throw new BadRequestException(
-        'Invalid or expired login code. Please sign in again from the login page.',
+      throw coded(
+        new BadRequestException(
+          'Invalid or expired login code. Please sign in again from the login page.',
+        ),
+        ErrorCode.OIDC_LOGIN_CODE_INVALID,
       );
     }
     return result;
@@ -260,8 +282,11 @@ export class OidcService {
       providerId,
     );
     if (!userinfo) {
-      throw new UnauthorizedException(
-        'Invalid or expired OIDC token. Please sign in again.',
+      throw coded(
+        new UnauthorizedException(
+          'Invalid or expired OIDC token. Please sign in again.',
+        ),
+        ErrorCode.OIDC_TOKEN_INVALID,
       );
     }
 
@@ -276,8 +301,11 @@ export class OidcService {
     );
 
     if (user.status === UserStatus.pending) {
-      throw new UnauthorizedException(
-        'Account pending approval. Please wait for an administrator to approve your account.',
+      throw coded(
+        new UnauthorizedException(
+          'Account pending approval. Please wait for an administrator to approve your account.',
+        ),
+        ErrorCode.ACCOUNT_PENDING,
       );
     }
 
@@ -325,14 +353,20 @@ export class OidcService {
     const emailVerified = verified === true || verified === 'true';
 
     if (!email || !subject) {
-      throw new BadRequestException(
-        'OIDC provider did not return required claims (email, sub)',
+      throw coded(
+        new BadRequestException(
+          'OIDC provider did not return required claims (email, sub)',
+        ),
+        ErrorCode.OIDC_CLAIMS_MISSING,
       );
     }
 
     if (!this.isValidEmail(email)) {
-      throw new BadRequestException(
-        'OIDC provider returned an invalid email claim',
+      throw coded(
+        new BadRequestException(
+          'OIDC provider returned an invalid email claim',
+        ),
+        ErrorCode.OIDC_EMAIL_INVALID,
       );
     }
 
@@ -363,7 +397,10 @@ export class OidcService {
     }
     this.logger.warn(`Invalid redirect URL: ${trimmed}`);
     if (fallback !== undefined) return fallback;
-    throw new BadRequestException('Invalid redirect URL');
+    throw coded(
+      new BadRequestException('Invalid redirect URL'),
+      ErrorCode.OIDC_REDIRECT_INVALID,
+    );
   }
 
   private isValidEmail(value: string): boolean {

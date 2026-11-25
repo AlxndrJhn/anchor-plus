@@ -8,14 +8,21 @@ import {
   ATTACHMENT_IMAGE_MIME_TYPES,
   ATTACHMENT_MAX_FILE_SIZE,
 } from '../constants/notes.constants';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 export function assertValidAttachmentFile(file?: Express.Multer.File): void {
   if (!file) {
-    throw new BadRequestException('No file provided');
+    throw coded(
+      new BadRequestException('No file provided'),
+      ErrorCode.FILE_MISSING,
+    );
   }
   if (file.size > ATTACHMENT_MAX_FILE_SIZE) {
-    throw new BadRequestException(
-      `File size exceeds ${ATTACHMENT_MAX_FILE_SIZE / 1024 / 1024}MB limit`,
+    const maxMb = ATTACHMENT_MAX_FILE_SIZE / 1024 / 1024;
+    throw coded(
+      new BadRequestException(`File size exceeds ${maxMb}MB limit`),
+      ErrorCode.FILE_TOO_LARGE,
+      { maxMb },
     );
   }
 }
@@ -51,7 +58,10 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  */
 export function noteAttachmentDir(attachmentsDir: string, noteId: string) {
   if (!isStorableNoteId(noteId)) {
-    throw new BadRequestException('Invalid note id');
+    throw coded(
+      new BadRequestException('Invalid note id'),
+      ErrorCode.NOTE_ID_INVALID,
+    );
   }
   return path.join(attachmentsDir, noteId);
 }

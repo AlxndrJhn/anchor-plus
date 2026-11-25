@@ -11,6 +11,7 @@ import {
 import type { RefreshTokenResponse } from "@/features/auth/types";
 import { isServerless } from "@/lib/local-backend/mode";
 import { fitsKeepalive, isPageClosing } from "@/lib/page-close";
+import { translatedError } from "./error-code";
 
 let refreshPromise: Promise<boolean> | null = null;
 
@@ -174,12 +175,15 @@ export const api = ky.create({
     ],
     beforeError: [
       ({ error }) => {
-        // Show the server's own message when it sends one.
+        // Show the server's own message when it sends one, translated when
+        // its code is one this app knows.
         if (error instanceof HTTPError) {
           const { message } = (error.data ?? {}) as {
             message?: string | string[];
           };
-          if (message) {
+          const translated = translatedError(error);
+          if (translated) error.message = translated;
+          else if (message) {
             error.message = Array.isArray(message)
               ? message.join(", ")
               : message;

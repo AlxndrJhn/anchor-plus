@@ -334,11 +334,14 @@ describe('AuthService', () => {
 
     it('is forbidden when only provider sign-in is allowed', async () => {
       isProviderOnly = true;
-      await expect(service.register(dto)).rejects.toThrow(
-        new ForbiddenException(
-          'Email and password sign-up is turned off. Sign up with Pocket ID.',
-        ),
-      );
+      await expect(service.register(dto)).rejects.toMatchObject({
+        response: {
+          code: 'PASSWORD_SIGN_UP_DISABLED',
+          params: { provider: 'Pocket ID' },
+          message:
+            'Email and password sign-up is turned off. Sign up with Pocket ID.',
+        },
+      });
       expect(users.size).toBe(0);
     });
 
@@ -458,11 +461,14 @@ describe('AuthService', () => {
       isProviderOnly = true;
       await expect(
         service.login({ email: 'u1@example.com', password: 'correct horse' }),
-      ).rejects.toThrow(
-        new ForbiddenException(
-          'Email and password sign-in is turned off. Sign in with Pocket ID.',
-        ),
-      );
+      ).rejects.toMatchObject({
+        response: {
+          code: 'PASSWORD_SIGN_IN_DISABLED',
+          params: { provider: 'Pocket ID' },
+          message:
+            'Email and password sign-in is turned off. Sign in with Pocket ID.',
+        },
+      });
     });
 
     it('matches the email in any case', async () => {

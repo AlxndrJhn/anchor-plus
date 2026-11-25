@@ -26,6 +26,7 @@ import {
   noteOrderInclude,
   notePinInclude,
 } from '../constants/notes.constants';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 const REVISION_ORDER = [
   { createdAt: 'desc' as const },
@@ -81,7 +82,10 @@ export class NoteHistoryService {
     });
 
     if (!revision) {
-      throw new NotFoundException(ERROR_MESSAGES.REVISION_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.REVISION_NOT_FOUND),
+        ErrorCode.REVISION_NOT_FOUND,
+      );
     }
 
     return toRevision(revision);
@@ -107,7 +111,10 @@ export class NoteHistoryService {
         where: { id: revisionId, noteId },
       });
       if (!revision) {
-        throw new NotFoundException(ERROR_MESSAGES.REVISION_NOT_FOUND);
+        throw coded(
+          new NotFoundException(ERROR_MESSAGES.REVISION_NOT_FOUND),
+          ErrorCode.REVISION_NOT_FOUND,
+        );
       }
 
       const prior = await tx.note.findUniqueOrThrow({ where: { id: noteId } });
@@ -143,7 +150,10 @@ export class NoteHistoryService {
       NoteSharePermission.editor,
     );
     if (access.state === NoteState.deleted) {
-      throw new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.NOTE_NOT_FOUND),
+        ErrorCode.NOTE_NOT_FOUND,
+      );
     }
   }
 }

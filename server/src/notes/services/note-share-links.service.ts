@@ -23,6 +23,7 @@ import {
   type ShareLinkPreview,
   buildShareLinkPreview,
 } from '../utils/share-link-preview.util';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 // 256 bits: a link can't be guessed, only passed on.
 const TOKEN_BYTES = 32;
@@ -134,7 +135,10 @@ export class NoteShareLinksService {
   async updateLinkedNote(token: string, dto: UpdateLinkedNoteDto) {
     const { link } = await this.findLinkedNote(token);
     if (link.permission !== NoteSharePermission.editor) {
-      throw new ForbiddenException(ERROR_MESSAGES.SHARE_LINK_VIEW_ONLY);
+      throw coded(
+        new ForbiddenException(ERROR_MESSAGES.SHARE_LINK_VIEW_ONLY),
+        ErrorCode.SHARE_LINK_VIEW_ONLY,
+      );
     }
     const { baseVersion, ...noteData } = dto;
     const noteId = link.noteId;
@@ -173,14 +177,21 @@ export class NoteShareLinksService {
     });
 
     if ('gone' in outcome) {
-      throw new NotFoundException(ERROR_MESSAGES.SHARE_LINK_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.SHARE_LINK_NOT_FOUND),
+        ErrorCode.SHARE_LINK_NOT_FOUND,
+      );
     }
     if ('frozen' in outcome) {
-      throw new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN);
+      throw coded(
+        new ForbiddenException(ERROR_MESSAGES.NOTE_FROZEN),
+        ErrorCode.NOTE_FROZEN,
+      );
     }
     if ('conflict' in outcome) {
       const current = await this.findLinkedNote(token);
       throw new ConflictException({
+        code: ErrorCode.NOTE_CHANGED,
         message: 'Note was changed by someone else',
         serverNote: await this.toLinkedNote(current.link, current.note),
       });
@@ -204,7 +215,10 @@ export class NoteShareLinksService {
       include: { note: true },
     });
     if (!link || link.note.state !== NoteState.active) {
-      throw new NotFoundException(ERROR_MESSAGES.SHARE_LINK_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.SHARE_LINK_NOT_FOUND),
+        ErrorCode.SHARE_LINK_NOT_FOUND,
+      );
     }
     const { note, ...rest } = link;
     return { link: rest, note };
