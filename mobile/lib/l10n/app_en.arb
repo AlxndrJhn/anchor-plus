@@ -6522,5 +6522,85 @@
         "example": "notes.example.com"
       }
     }
+  },
+  "nativeWidgetLabel": "Notes",
+  "@nativeWidgetLabel": {
+    "description": "Name of the Android home screen widget in the phone’s widget list."
+  },
+  "nativeWidgetDescription": "See your notes and start a new one from the home screen.",
+  "@nativeWidgetDescription": {
+    "description": "Description of the Android home screen widget in the phone’s widget list."
+  },
+  "nativeNewNote": "New note",
+  "@nativeNewNote": {
+    "description": "Android home screen widget button and app shortcut (long-press the app icon) that start a new note."
+  },
+  "nativeNewChecklist": "New checklist",
+  "@nativeNewChecklist": {
+    "description": "Android app shortcut (long-press the app icon) that starts a new checklist."
+  },
+  "nativeWidgetEmpty": "No notes yet.\nTap + to write your first one.",
+  "@nativeWidgetEmpty": {
+    "description": "Android home screen widget when there are no notes yet. The line break is kept."
+  },
+  "nativeWidgetSignedOut": "Sign in to Anchor\nto see your notes here.",
+  "@nativeWidgetSignedOut": {
+    "description": "Android home screen widget when no one is signed in. The line break is kept."
+  },
+  "nativeLiveChannel": "Live images",
+  "@nativeLiveChannel": {
+    "description": "Android notification category, in the phone’s settings, for the notice shown while the camera shows live in a note."
+  },
+  "nativeLiveTransmitting": "Transmitting",
+  "@nativeLiveTransmitting": {
+    "description": "Title of the Android notification shown while the camera shows live in a note."
+  },
+  "nativeLiveTransmittingText": "A note shows your camera live.",
+  "@nativeLiveTransmittingText": {
+    "description": "Text of the Android notification shown while the camera shows live in a note."
+  },
+  "nativeLiveStop": "Stop transmission",
+  "@nativeLiveStop": {
+    "description": "Button in the Android notification shown while the camera shows live in a note."
+  },
+  "nativeRecordingChannel": "Voice recordings",
+  "@nativeRecordingChannel": {
+    "description": "Android notification category, in the phone’s settings, for the notice shown while a voice note records."
+  },
+  "nativeRecordingTitle": "Recording audio",
+  "@nativeRecordingTitle": {
+    "description": "Title of the Android notification shown while a voice note records."
+  },
+  "nativeRecordingText": "Open Anchor to stop the recording.",
+  "@nativeRecordingText": {
+    "description": "Text of the Android notification shown while a voice note records."
+  },
+  "nativeMusicUse": "Anchor uses your music library to add audio files to notes.",
+  "@nativeMusicUse": {
+    "description": "iPhone permission prompt, shown the first time Anchor asks for the music library."
+  },
+  "nativeCameraUse": "Anchor uses the camera to take pictures for your notes and your profile photo.",
+  "@nativeCameraUse": {
+    "description": "iPhone permission prompt, shown the first time Anchor asks for the camera."
+  },
+  "nativeFaceIdUse": "Anchor uses Face ID to open the notes you lock with it.",
+  "@nativeFaceIdUse": {
+    "description": "iPhone permission prompt, shown the first time Anchor asks to use Face ID."
+  },
+  "nativeLocalNetworkUse": "Anchor connects to your server when it is on your local network.",
+  "@nativeLocalNetworkUse": {
+    "description": "iPhone permission prompt, shown the first time Anchor asks for the local network."
+  },
+  "nativeMicrophoneUse": "Anchor uses the microphone to record voice notes.",
+  "@nativeMicrophoneUse": {
+    "description": "iPhone permission prompt, shown the first time Anchor asks for the microphone."
+  },
+  "nativePhotoLibraryAddUse": "Anchor saves pictures from your notes to your photo library.",
+  "@nativePhotoLibraryAddUse": {
+    "description": "iPhone permission prompt, shown the first time Anchor asks to save to the photo library."
+  },
+  "nativePhotoLibraryUse": "Anchor uses your photo library to add pictures to notes and to choose your profile photo.",
+  "@nativePhotoLibraryUse": {
+    "description": "iPhone permission prompt, shown the first time Anchor asks for the photo library."
   }
 }

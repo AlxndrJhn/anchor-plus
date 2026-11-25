@@ -7464,6 +7464,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{host} is a regular Anchor server, which can’t sign in with a code. Sign in with your password instead.'**
   String magicLoginNeedsPlus(String host);
+
+  /// Name of the Android home screen widget in the phone’s widget list.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get nativeWidgetLabel;
+
+  /// Description of the Android home screen widget in the phone’s widget list.
+  ///
+  /// In en, this message translates to:
+  /// **'See your notes and start a new one from the home screen.'**
+  String get nativeWidgetDescription;
+
+  /// Android home screen widget button and app shortcut (long-press the app icon) that start a new note.
+  ///
+  /// In en, this message translates to:
+  /// **'New note'**
+  String get nativeNewNote;
+
+  /// Android app shortcut (long-press the app icon) that starts a new checklist.
+  ///
+  /// In en, this message translates to:
+  /// **'New checklist'**
+  String get nativeNewChecklist;
+
+  /// Android home screen widget when there are no notes yet. The line break is kept.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes yet.\nTap + to write your first one.'**
+  String get nativeWidgetEmpty;
+
+  /// Android home screen widget when no one is signed in. The line break is kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Anchor\nto see your notes here.'**
+  String get nativeWidgetSignedOut;
+
+  /// Android notification category, in the phone’s settings, for the notice shown while the camera shows live in a note.
+  ///
+  /// In en, this message translates to:
+  /// **'Live images'**
+  String get nativeLiveChannel;
+
+  /// Title of the Android notification shown while the camera shows live in a note.
+  ///
+  /// In en, this message translates to:
+  /// **'Transmitting'**
+  String get nativeLiveTransmitting;
+
+  /// Text of the Android notification shown while the camera shows live in a note.
+  ///
+  /// In en, this message translates to:
+  /// **'A note shows your camera live.'**
+  String get nativeLiveTransmittingText;
+
+  /// Button in the Android notification shown while the camera shows live in a note.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop transmission'**
+  String get nativeLiveStop;
+
+  /// Android notification category, in the phone’s settings, for the notice shown while a voice note records.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice recordings'**
+  String get nativeRecordingChannel;
+
+  /// Title of the Android notification shown while a voice note records.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording audio'**
+  String get nativeRecordingTitle;
+
+  /// Text of the Android notification shown while a voice note records.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Anchor to stop the recording.'**
+  String get nativeRecordingText;
+
+  /// iPhone permission prompt, shown the first time Anchor asks for the music library.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor uses your music library to add audio files to notes.'**
+  String get nativeMusicUse;
+
+  /// iPhone permission prompt, shown the first time Anchor asks for the camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor uses the camera to take pictures for your notes and your profile photo.'**
+  String get nativeCameraUse;
+
+  /// iPhone permission prompt, shown the first time Anchor asks to use Face ID.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor uses Face ID to open the notes you lock with it.'**
+  String get nativeFaceIdUse;
+
+  /// iPhone permission prompt, shown the first time Anchor asks for the local network.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor connects to your server when it is on your local network.'**
+  String get nativeLocalNetworkUse;
+
+  /// iPhone permission prompt, shown the first time Anchor asks for the microphone.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor uses the microphone to record voice notes.'**
+  String get nativeMicrophoneUse;
+
+  /// iPhone permission prompt, shown the first time Anchor asks to save to the photo library.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor saves pictures from your notes to your photo library.'**
+  String get nativePhotoLibraryAddUse;
+
+  /// iPhone permission prompt, shown the first time Anchor asks for the photo library.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor uses your photo library to add pictures to notes and to choose your profile photo.'**
+  String get nativePhotoLibraryUse;
 }
 
 class _AppLocalizationsDelegate

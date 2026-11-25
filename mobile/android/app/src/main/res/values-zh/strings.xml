@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Written by tool/native_strings.dart from lib/l10n. -->
+<resources>
+    <string name="widget_label">笔记</string>
+    <string name="widget_description">在主屏幕查看笔记并新建笔记。</string>
+    <string name="widget_new_note">新建笔记</string>
+    <string name="shortcut_new_note">新建笔记</string>
+    <string name="shortcut_new_checklist">新建清单</string>
+    <string name="widget_empty">还没有笔记。\n点按 + 写下第一条。</string>
+    <string name="widget_logged_out">登录 Anchor\n即可在此查看笔记。</string>
+    <string name="live_channel_name">实时图像</string>
+    <string name="live_transmitting">正在传输</string>
+    <string name="live_transmitting_text">一条笔记正在实时显示你的相机画面。</string>
+    <string name="live_stop_transmission">停止传输</string>
+    <string name="recording_channel_name">语音录音</string>
+    <string name="recording_title">正在录音</string>
+    <string name="recording_text">打开 Anchor 以停止录音。</string>
+</resources>

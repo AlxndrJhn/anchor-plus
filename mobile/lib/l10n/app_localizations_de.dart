@@ -5016,4 +5016,75 @@ class AppLocalizationsDe extends AppLocalizations {
   String magicLoginNeedsPlus(String host) {
     return '$host ist ein normaler Anchor-Server, der keine Anmeldung per Code kennt. Melde dich stattdessen mit deinem Passwort an.';
   }
+
+  @override
+  String get nativeWidgetLabel => 'Notizen';
+
+  @override
+  String get nativeWidgetDescription =>
+      'Sieh deine Notizen und beginne eine neue vom Startbildschirm aus.';
+
+  @override
+  String get nativeNewNote => 'Neue Notiz';
+
+  @override
+  String get nativeNewChecklist => 'Neue Checkliste';
+
+  @override
+  String get nativeWidgetEmpty =>
+      'Noch keine Notizen.\nTippe auf +, um deine erste zu schreiben.';
+
+  @override
+  String get nativeWidgetSignedOut =>
+      'Melde dich bei Anchor an,\num deine Notizen hier zu sehen.';
+
+  @override
+  String get nativeLiveChannel => 'Live-Bilder';
+
+  @override
+  String get nativeLiveTransmitting => 'Übertragung läuft';
+
+  @override
+  String get nativeLiveTransmittingText =>
+      'Eine Notiz zeigt deine Kamera live.';
+
+  @override
+  String get nativeLiveStop => 'Übertragung beenden';
+
+  @override
+  String get nativeRecordingChannel => 'Sprachaufnahmen';
+
+  @override
+  String get nativeRecordingTitle => 'Audio wird aufgenommen';
+
+  @override
+  String get nativeRecordingText => 'Öffne Anchor, um die Aufnahme zu beenden.';
+
+  @override
+  String get nativeMusicUse =>
+      'Anchor nutzt deine Musikmediathek, um Audiodateien zu Notizen hinzuzufügen.';
+
+  @override
+  String get nativeCameraUse =>
+      'Anchor nutzt die Kamera, um Bilder für deine Notizen und dein Profilfoto aufzunehmen.';
+
+  @override
+  String get nativeFaceIdUse =>
+      'Anchor nutzt Face ID, um die Notizen zu öffnen, die du damit sperrst.';
+
+  @override
+  String get nativeLocalNetworkUse =>
+      'Anchor verbindet sich mit deinem Server, wenn er in deinem lokalen Netzwerk ist.';
+
+  @override
+  String get nativeMicrophoneUse =>
+      'Anchor nutzt das Mikrofon, um Sprachnotizen aufzunehmen.';
+
+  @override
+  String get nativePhotoLibraryAddUse =>
+      'Anchor speichert Bilder aus deinen Notizen in deiner Fotomediathek.';
+
+  @override
+  String get nativePhotoLibraryUse =>
+      'Anchor nutzt deine Fotomediathek, um Bilder zu Notizen hinzuzufügen und dein Profilfoto auszuwählen.';
 }

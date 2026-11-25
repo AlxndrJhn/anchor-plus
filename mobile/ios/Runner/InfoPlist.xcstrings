@@ -1,0 +1,258 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSAppleMusicUsageDescription": {
+      "comment": "iPhone permission prompt, shown the first time Anchor asks for the music library.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor nutzt deine Musikmediathek, um Audiodateien zu Notizen hinzuzufügen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor uses your music library to add audio files to notes."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor używa biblioteki muzyki, aby dodawać pliki audio do notatek."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用你的音乐资料库将音频文件添加到笔记中。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用你的音樂資料庫將音訊檔案加入筆記。"
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription": {
+      "comment": "iPhone permission prompt, shown the first time Anchor asks for the camera.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor nutzt die Kamera, um Bilder für deine Notizen und dein Profilfoto aufzunehmen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor uses the camera to take pictures for your notes and your profile photo."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor używa aparatu do robienia zdjęć do notatek i zdjęcia profilowego."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用相机为你的笔记和头像拍摄照片。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用相機為你的筆記和大頭貼拍攝照片。"
+          }
+        }
+      }
+    },
+    "NSFaceIDUsageDescription": {
+      "comment": "iPhone permission prompt, shown the first time Anchor asks to use Face ID.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor nutzt Face ID, um die Notizen zu öffnen, die du damit sperrst."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor uses Face ID to open the notes you lock with it."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor używa Face ID do otwierania notatek, które nim blokujesz."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用面容 ID 打开你用它锁定的笔记。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用 Face ID 打開你用它鎖定的筆記。"
+          }
+        }
+      }
+    },
+    "NSLocalNetworkUsageDescription": {
+      "comment": "iPhone permission prompt, shown the first time Anchor asks for the local network.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor verbindet sich mit deinem Server, wenn er in deinem lokalen Netzwerk ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor connects to your server when it is on your local network."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor łączy się z serwerem, gdy jest on w sieci lokalnej."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当你的服务器在本地网络中时，Anchor 会连接到它。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "當你的伺服器在區域網路中時，Anchor 會連線到它。"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription": {
+      "comment": "iPhone permission prompt, shown the first time Anchor asks for the microphone.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor nutzt das Mikrofon, um Sprachnotizen aufzunehmen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor uses the microphone to record voice notes."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor używa mikrofonu do nagrywania notatek głosowych."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用麦克风录制语音笔记。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用麥克風錄製語音筆記。"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription": {
+      "comment": "iPhone permission prompt, shown the first time Anchor asks to save to the photo library.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor speichert Bilder aus deinen Notizen in deiner Fotomediathek."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor saves pictures from your notes to your photo library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor zapisuje obrazy z notatek w bibliotece zdjęć."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 将笔记中的图片存储到你的照片图库。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 將筆記中的圖片儲存到你的照片圖庫。"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription": {
+      "comment": "iPhone permission prompt, shown the first time Anchor asks for the photo library.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor nutzt deine Fotomediathek, um Bilder zu Notizen hinzuzufügen und dein Profilfoto auszuwählen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor uses your photo library to add pictures to notes and to choose your profile photo."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor używa biblioteki zdjęć, aby dodawać obrazy do notatek i wybierać zdjęcie profilowe."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用你的照片图库为笔记添加图片并选择头像。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anchor 使用你的照片圖庫為筆記加入圖片並選擇大頭貼。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -4756,6 +4756,66 @@ class AppLocalizationsZh extends AppLocalizations {
   String magicLoginNeedsPlus(String host) {
     return '$host 是普通 Anchor 服务器，无法使用登录码登录。请改用密码登录。';
   }
+
+  @override
+  String get nativeWidgetLabel => '笔记';
+
+  @override
+  String get nativeWidgetDescription => '在主屏幕查看笔记并新建笔记。';
+
+  @override
+  String get nativeNewNote => '新建笔记';
+
+  @override
+  String get nativeNewChecklist => '新建清单';
+
+  @override
+  String get nativeWidgetEmpty => '还没有笔记。\n点按 + 写下第一条。';
+
+  @override
+  String get nativeWidgetSignedOut => '登录 Anchor\n即可在此查看笔记。';
+
+  @override
+  String get nativeLiveChannel => '实时图像';
+
+  @override
+  String get nativeLiveTransmitting => '正在传输';
+
+  @override
+  String get nativeLiveTransmittingText => '一条笔记正在实时显示你的相机画面。';
+
+  @override
+  String get nativeLiveStop => '停止传输';
+
+  @override
+  String get nativeRecordingChannel => '语音录音';
+
+  @override
+  String get nativeRecordingTitle => '正在录音';
+
+  @override
+  String get nativeRecordingText => '打开 Anchor 以停止录音。';
+
+  @override
+  String get nativeMusicUse => 'Anchor 使用你的音乐资料库将音频文件添加到笔记中。';
+
+  @override
+  String get nativeCameraUse => 'Anchor 使用相机为你的笔记和头像拍摄照片。';
+
+  @override
+  String get nativeFaceIdUse => 'Anchor 使用面容 ID 打开你用它锁定的笔记。';
+
+  @override
+  String get nativeLocalNetworkUse => '当你的服务器在本地网络中时，Anchor 会连接到它。';
+
+  @override
+  String get nativeMicrophoneUse => 'Anchor 使用麦克风录制语音笔记。';
+
+  @override
+  String get nativePhotoLibraryAddUse => 'Anchor 将笔记中的图片存储到你的照片图库。';
+
+  @override
+  String get nativePhotoLibraryUse => 'Anchor 使用你的照片图库为笔记添加图片并选择头像。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -9512,4 +9572,64 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String magicLoginNeedsPlus(String host) {
     return '$host 是一般 Anchor 伺服器，無法使用登入碼登入。請改用密碼登入。';
   }
+
+  @override
+  String get nativeWidgetLabel => '筆記';
+
+  @override
+  String get nativeWidgetDescription => '在主畫面查看筆記並新增筆記。';
+
+  @override
+  String get nativeNewNote => '新增筆記';
+
+  @override
+  String get nativeNewChecklist => '新增清單';
+
+  @override
+  String get nativeWidgetEmpty => '還沒有筆記。\n點按 + 寫下第一則。';
+
+  @override
+  String get nativeWidgetSignedOut => '登入 Anchor\n即可在此查看筆記。';
+
+  @override
+  String get nativeLiveChannel => '即時影像';
+
+  @override
+  String get nativeLiveTransmitting => '正在傳輸';
+
+  @override
+  String get nativeLiveTransmittingText => '一則筆記正在即時顯示你的相機畫面。';
+
+  @override
+  String get nativeLiveStop => '停止傳輸';
+
+  @override
+  String get nativeRecordingChannel => '語音錄音';
+
+  @override
+  String get nativeRecordingTitle => '正在錄音';
+
+  @override
+  String get nativeRecordingText => '打開 Anchor 以停止錄音。';
+
+  @override
+  String get nativeMusicUse => 'Anchor 使用你的音樂資料庫將音訊檔案加入筆記。';
+
+  @override
+  String get nativeCameraUse => 'Anchor 使用相機為你的筆記和大頭貼拍攝照片。';
+
+  @override
+  String get nativeFaceIdUse => 'Anchor 使用 Face ID 打開你用它鎖定的筆記。';
+
+  @override
+  String get nativeLocalNetworkUse => '當你的伺服器在區域網路中時，Anchor 會連線到它。';
+
+  @override
+  String get nativeMicrophoneUse => 'Anchor 使用麥克風錄製語音筆記。';
+
+  @override
+  String get nativePhotoLibraryAddUse => 'Anchor 將筆記中的圖片儲存到你的照片圖庫。';
+
+  @override
+  String get nativePhotoLibraryUse => 'Anchor 使用你的照片圖庫為筆記加入圖片並選擇大頭貼。';
 }
