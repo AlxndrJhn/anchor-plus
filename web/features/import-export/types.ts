@@ -59,7 +59,15 @@ export type ImportTag = {
 };
 
 export type ParsedImport = {
-  formatId: "anchor" | "google-keep" | "markdown";
+  formatId:
+    | "anchor"
+    | "google-keep"
+    | "evernote"
+    | "simplenote"
+    | "standard-notes"
+    | "joplin"
+    | "notion"
+    | "markdown";
   formatLabel: string;
   notes: CanonicalNote[];
   /** Unique tags referenced across all notes, carrying colors for restore */

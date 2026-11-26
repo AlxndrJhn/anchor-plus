@@ -100,7 +100,12 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                 error={importer.pickError}
                 onFiles={pick}
               />
-              {!importer.isDetecting && <KeepHint />}
+              {!importer.isDetecting && (
+                <>
+                  <KeepHint />
+                  <ExportHelp />
+                </>
+              )}
             </>
           )}
 
@@ -159,7 +164,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                   hint={t("skipExistingHint")}
                 />
               )}
-              {parsed.formatId === "markdown" && parsed.hasFolders && (
+              {parsed.formatId !== "anchor" && parsed.hasFolders && (
                 <CheckRow
                   checked={importer.options.folderTags}
                   onChange={(v) => importer.setOption("folderTags", v)}
@@ -335,9 +340,11 @@ function DropArea({
               {t("orClick")}
             </span>
             <span className="mt-1 flex flex-wrap justify-center gap-1.5">
-              <Badge className="bg-foreground/5">{t("formats.anchor")}</Badge>
-              <Badge className="bg-foreground/5">Google Keep</Badge>
-              <Badge className="bg-foreground/5">Markdown</Badge>
+              {SOURCE_BADGES.map((label) => (
+                <Badge key={label} className="bg-foreground/5">
+                  {label === "anchor" ? t("formats.anchor") : label}
+                </Badge>
+              ))}
             </span>
           </>
         )}
@@ -346,7 +353,7 @@ function DropArea({
           type="file"
           multiple
           hidden
-          accept=".zip,application/zip,.md,.markdown,text/markdown,.txt,text/plain,image/*,audio/*"
+          accept=".zip,application/zip,.enex,.jex,.json,.txt,text/plain,.md,.markdown,text/markdown,image/*,audio/*"
           onChange={(e) => {
             const files = fromFileList(e.target.files);
             e.target.value = "";
@@ -356,6 +363,56 @@ function DropArea({
       </div>
       {error && <FieldError id={errorId}>{error}</FieldError>}
     </>
+  );
+}
+
+/** The apps an export can come from, as named on the drop area. */
+const SOURCE_BADGES = [
+  "anchor",
+  "Google Keep",
+  "Evernote",
+  "Notion",
+  "Obsidian",
+  "Joplin",
+  "Simplenote",
+  "Standard Notes",
+  "Markdown",
+] as const;
+
+const HOW_TO = [
+  "evernote",
+  "notion",
+  "markdown",
+  "joplin",
+  "simplenote",
+  "standardNotes",
+  "other",
+] as const;
+
+/** One line per app on where its export is found. */
+function ExportHelp() {
+  const t = useTranslations("settings.importExport.dialog");
+  return (
+    <details className="group text-meta text-muted-foreground">
+      <summary className="flex cursor-pointer list-none items-center gap-1.5 font-medium text-foreground [&::-webkit-details-marker]:hidden [&>svg]:size-3.75">
+        {t("exportHelp")}
+        <ChevronDown
+          aria-hidden
+          className="transition-transform duration-(--duration-fade) group-open:rotate-180"
+        />
+      </summary>
+      <ul className="m-0 mt-2 grid gap-1.5 pl-4">
+        {HOW_TO.map((app) => (
+          <li key={app} className="list-disc">
+            {t.rich(`howTo.${app}`, {
+              b: (chunks) => (
+                <b className="font-semibold text-foreground">{chunks}</b>
+              ),
+            })}
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 

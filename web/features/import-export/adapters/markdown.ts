@@ -8,6 +8,7 @@ import {
   type ImportSkippedItem,
   type ParsedImport,
 } from "../types";
+import { splitFrontMatter } from "./front-matter";
 import {
   type AttachmentRef,
   findAttachmentRefs,
@@ -18,6 +19,7 @@ import type { ImportAdapter } from "./types";
 import type { ZipArchive } from "./zip";
 
 /** Nextcloud Notes saved notes as .txt before it switched to .md. */
+const MARKDOWN_EXT = /.(md|markdown)$/i;
 const NOTE_EXT = /\.(md|markdown|txt)$/i;
 
 const MIME_BY_EXTENSION: Record<string, string> = {
@@ -95,11 +97,25 @@ function commonRootSegments(paths: string[]): string[] {
   return common;
 }
 
-function markdownEntries(zip: ZipArchive): string[] {
+/** Markdown files, and .txt notes as older Nextcloud Notes saved them. */
+function noteEntries(zip: ZipArchive): string[] {
   return zip.names
     .filter((path) => NOTE_EXT.test(path) && !isIgnored(path))
     .sort();
 }
+
+// Notion ends every page and folder name with the page's id
+const NOTION_ID = /[ _-]+[0-9a-f]{32}$/i;
+
+/** True when most Markdown files carry Notion's page ids in their names. */
+export function looksLikeNotion(zip: ZipArchive): boolean {
+  const pages = noteEntries(zip).filter((path) => MARKDOWN_EXT.test(path));
+  if (!pages.length) return false;
+  const withIds = pages.filter((path) => NOTION_ID.test(stemOf(path)));
+  return withIds.length * 2 >= pages.length;
+}
+
+const withoutNotionId = (name: string) => name.replace(NOTION_ID, "").trim();
 
 /** An Obsidian embed names a file, not a path, so match on the basename. */
 function resolveByBasename(zip: ZipArchive, name: string): string | undefined {
@@ -213,94 +229,135 @@ function extractAttachments(
   return { body: kept.join("\n"), attachments, skipped };
 }
 
+type MarkdownFlavor = {
+  formatId: "markdown" | "notion";
+  label: string;
+  /** Tidies a file or folder name before it becomes a title or tag */
+  cleanName: (name: string) => string;
+};
+
+function parseNotes(zip: ZipArchive, flavor: MarkdownFlavor): ParsedImport {
+  const entries = noteEntries(zip);
+  if (!entries.length) {
+    throw new Error("No Markdown files found");
+  }
+
+  const root = commonRootSegments(entries);
+  const notes: CanonicalNote[] = [];
+  const skipped: ImportSkippedItem[] = [];
+
+  for (const path of entries) {
+    const raw = zip.text(path).replace(/^﻿/, "");
+    const stem = flavor.cleanName(stemOf(path));
+    const displayName = stem || basename(path);
+
+    if (!raw.trim()) {
+      skipped.push({
+        item: displayName,
+        reason: translate("settings.importExport.adapters")("emptyFile"),
+      });
+      continue;
+    }
+
+    const { frontMatter, body } = splitFrontMatter(raw);
+    const title = frontMatter?.title?.trim() || stem;
+
+    const extracted = extractAttachments(
+      stripTitleHeading(body, title),
+      dirOf(path),
+      zip,
+    );
+    skipped.push(...extracted.skipped);
+    const contentDelta = markdownToDelta(extracted.body);
+    if (stringifyDelta(contentDelta).length > IMPORT_MAX_CONTENT_LENGTH) {
+      skipped.push({
+        item: displayName,
+        reason: translate("settings.importExport.adapters")("noteTooLarge"),
+      });
+      continue;
+    }
+
+    const segments = dirOf(path)
+      .split("/")
+      .filter(Boolean)
+      .slice(root.length)
+      .map(flavor.cleanName)
+      .filter(Boolean);
+    const isArchived = segments[0] === "Archived";
+    if (isArchived || segments[0] === "Shared") segments.shift();
+
+    // A file knows only when it was last changed; that is the best guess
+    // for its creation too, and keeps it from showing up as new today.
+    const modifiedAt = zip.modifiedAt?.(path);
+
+    notes.push({
+      ref: `${flavor.formatId}:${path}`,
+      title: /^untitled$/i.test(title) ? "" : title,
+      contentDelta,
+      isPinned: frontMatter?.isPinned ?? false,
+      isArchived: isArchived || (frontMatter?.isArchived ?? false),
+      isTrashed: false,
+      background: null,
+      tagNames: frontMatter?.tags ?? [],
+      folderTags: segments,
+      createdAt: frontMatter?.createdAt ?? modifiedAt,
+      updatedAt: frontMatter?.updatedAt ?? modifiedAt ?? frontMatter?.createdAt,
+      attachments: extracted.attachments,
+    });
+  }
+
+  const tagNames = [
+    ...new Set(
+      notes.flatMap((note) => [...note.tagNames, ...(note.folderTags ?? [])]),
+    ),
+  ];
+
+  return {
+    formatId: flavor.formatId,
+    formatLabel: flavor.label,
+    notes,
+    tags: tagNames.map((name) => ({ name, color: null })),
+    attachmentCount: notes.reduce(
+      (sum, note) => sum + note.attachments.length,
+      0,
+    ),
+    skipped,
+    hasFolders: notes.some((note) => note.folderTags?.length),
+  } satisfies ParsedImport;
+}
+
+const keepName = (name: string) => name;
+
+export const notionAdapter: ImportAdapter = {
+  id: "notion",
+  label: "Notion",
+
+  async detect(zip) {
+    return looksLikeNotion(zip);
+  },
+
+  async parse(zip) {
+    return parseNotes(zip, {
+      formatId: "notion",
+      label: this.label,
+      cleanName: withoutNotionId,
+    });
+  },
+};
+
 export const markdownAdapter: ImportAdapter = {
   id: "markdown",
   label: "Markdown files",
 
   async detect(zip) {
-    return markdownEntries(zip).length > 0;
+    return noteEntries(zip).length > 0;
   },
 
   async parse(zip) {
-    const entries = markdownEntries(zip);
-    if (!entries.length) {
-      throw new Error("No Markdown files found");
-    }
-
-    const root = commonRootSegments(entries);
-    const notes: CanonicalNote[] = [];
-    const skipped: ImportSkippedItem[] = [];
-
-    for (const path of entries) {
-      const raw = zip.text(path).replace(/^﻿/, "");
-      const stem = stemOf(path);
-      const displayName = stem || basename(path);
-
-      if (!raw.trim()) {
-        skipped.push({
-          item: displayName,
-          reason: translate("settings.importExport.adapters")("emptyFile"),
-        });
-        continue;
-      }
-
-      const extracted = extractAttachments(
-        stripTitleHeading(raw, stem),
-        dirOf(path),
-        zip,
-      );
-      skipped.push(...extracted.skipped);
-
-      const contentDelta = markdownToDelta(extracted.body);
-      if (stringifyDelta(contentDelta).length > IMPORT_MAX_CONTENT_LENGTH) {
-        skipped.push({
-          item: displayName,
-          reason: translate("settings.importExport.adapters")("noteTooLarge"),
-        });
-        continue;
-      }
-
-      const segments = dirOf(path)
-        .split("/")
-        .filter(Boolean)
-        .slice(root.length);
-      const isArchived = segments[0] === "Archived";
-      if (isArchived || segments[0] === "Shared") segments.shift();
-
-      // A file knows only when it was last changed; that is the best guess
-      // for its creation too, and keeps it from showing up as new today.
-      const modifiedAt = zip.modifiedAt?.(path);
-
-      notes.push({
-        ref: `markdown:${path}`,
-        title: /^untitled$/i.test(stem) ? "" : stem,
-        contentDelta,
-        isPinned: false,
-        isArchived,
-        isTrashed: false,
-        background: null,
-        tagNames: [],
-        folderTags: segments,
-        ...(modifiedAt ? { createdAt: modifiedAt, updatedAt: modifiedAt } : {}),
-        attachments: extracted.attachments,
-      });
-    }
-
-    const tagNames = [
-      ...new Set(notes.flatMap((note) => note.folderTags ?? [])),
-    ];
-
-    return {
+    return parseNotes(zip, {
       formatId: "markdown",
-      formatLabel: this.label,
-      notes,
-      tags: tagNames.map((name) => ({ name, color: null })),
-      attachmentCount: notes.reduce(
-        (sum, note) => sum + note.attachments.length,
-        0,
-      ),
-      skipped,
-      hasFolders: tagNames.length > 0,
-    } satisfies ParsedImport;
+      label: this.label,
+      cleanName: keepName,
+    });
   },
 };

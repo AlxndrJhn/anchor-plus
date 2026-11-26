@@ -6,7 +6,7 @@ import { ImportFileError } from "./types";
 export type ZipArchive = {
   names: string[];
   has(path: string): boolean;
-  /** Notes and manifests (.json, .md, .markdown, .txt), read when the archive opens. */
+  /** Notes and manifests (.json, .md, .markdown, .txt, .enex), read when the archive opens. */
   text(path: string): string;
   /** Any entry, read only when asked for. */
   blob(path: string): Blob | Promise<Blob>;
@@ -14,7 +14,7 @@ export type ZipArchive = {
   modifiedAt?(path: string): string | undefined;
 };
 
-const TEXT_ENTRY = /\.(json|md|markdown|txt)$/i;
+export const TEXT_ENTRY = /\.(json|md|markdown|txt|enex)$/i;
 /** A note or manifest larger than this is not one; it stays unread. */
 const MAX_TEXT_ENTRY = 256 * 1024 * 1024;
 /** Text entries read at the same time while the archive opens. */
