@@ -2,11 +2,14 @@ import 'dart:convert';
 
 import 'anchor_protocol.dart';
 
-/// Characters a header name may have (RFC 9110 tokens).
-final RegExp _headerName = RegExp(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$");
+/// One character a header name may have (RFC 9110 tokens).
+final RegExp headerNameCharacter = RegExp(r"[!#$%&'*+\-.^_`|~0-9A-Za-z]");
 
-/// Characters a header value may have on the wire.
-final RegExp _headerValue = RegExp(r'^[\t\x20-\x7E\x80-\xFF]+$');
+/// One character a header value may have on the wire.
+final RegExp headerValueCharacter = RegExp(r'[\t\x20-\x7E\x80-\xFF]');
+
+final RegExp _headerName = RegExp('^${headerNameCharacter.pattern}+\$');
+final RegExp _headerValue = RegExp('^${headerValueCharacter.pattern}+\$');
 
 /// Headers the app sets itself: one typed here would replace it.
 const Set<String> _reservedNames = {
@@ -21,7 +24,10 @@ const Set<String> _reservedNames = {
 };
 
 enum ServerHeaderProblem {
+  /// A line of text with no colon, or nothing on one side of it.
   notNameValue,
+  missingName,
+  missingValue,
   badName,
   badValue,
   reservedName,
@@ -99,3 +105,54 @@ parseServerHeaders(String text) {
   }
   return (headers: headers, errors: errors);
 }
+
+/// Most extra headers one server can have.
+const int maxServerHeaders = 10;
+
+/// One extra header as typed in its row; both may still be blank.
+typedef ServerHeaderRow = ({String name, String value});
+
+/// What's wrong with the header [name]: [value], if anything, coming after
+/// headers named [earlierNames]. A row left blank is no header at all.
+ServerHeaderProblem? serverHeaderProblemOf(
+  String name,
+  String value, {
+  Iterable<String> earlierNames = const [],
+}) {
+  name = name.trim();
+  value = value.trim();
+  if (name.isEmpty && value.isEmpty) return null;
+  if (name.isEmpty) return ServerHeaderProblem.missingName;
+  if (!_headerName.hasMatch(name)) return ServerHeaderProblem.badName;
+  final lowered = name.toLowerCase();
+  if (_reservedNames.contains(lowered) ||
+      lowered == anchorProtocolHeader.toLowerCase()) {
+    return ServerHeaderProblem.reservedName;
+  }
+  if (earlierNames.any((earlier) => earlier.trim().toLowerCase() == lowered)) {
+    return ServerHeaderProblem.repeatedName;
+  }
+  if (value.isEmpty) return ServerHeaderProblem.missingValue;
+  if (!_headerValue.hasMatch(value)) return ServerHeaderProblem.badValue;
+  return null;
+}
+
+/// The rows the saved [text] shows as: one per `Name: value` line.
+List<ServerHeaderRow> serverHeaderRowsOf(String text) => [
+  for (final raw in const LineSplitter().convert(text))
+    if (raw.trim() case final line
+        when line.isNotEmpty && !line.startsWith('#'))
+      line.contains(':')
+          ? (
+              name: line.substring(0, line.indexOf(':')).trim(),
+              value: line.substring(line.indexOf(':') + 1).trim(),
+            )
+          : (name: line, value: ''),
+];
+
+/// The [rows] as saved: one `Name: value` per line, blank rows left out.
+String serverHeaderTextOf(Iterable<ServerHeaderRow> rows) => [
+  for (final row in rows)
+    if (row.name.trim().isNotEmpty || row.value.trim().isNotEmpty)
+      '${row.name.trim()}: ${row.value.trim()}',
+].join('\n');

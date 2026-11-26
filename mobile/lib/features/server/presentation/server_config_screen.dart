@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -15,6 +16,7 @@ import '../../../core/theme/tokens/anchor_tokens.dart';
 import '../../../core/widgets/anchor_dialog.dart';
 import '../../../core/widgets/anchor_plus_mark.dart';
 import '../../../core/widgets/app_buttons.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/form_page.dart';
 import '../../../core/widgets/form_submit.dart';
@@ -50,27 +52,139 @@ class ServerConfigScreen extends ConsumerStatefulWidget {
 class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
     with FormSubmit {
   static const _addressField = #address;
-  static const _headersField = #headers;
 
   final _address = TextEditingController();
   final _focus = FocusNode();
-  final _headers = TextEditingController();
-  final _headersFocus = FocusNode();
+
+  /// Removed rows stay, hidden, until their Undo is gone.
+  final List<_HeaderRow> _headerRows = [];
   bool _isAdvancedOpen = false;
   late final AppLifecycleListener _lifecycle;
   String? _unreachableAddress;
 
-  /// The saved headers fill their field before anything connects.
+  /// The saved headers fill their rows before anything connects.
   late final Future<void> _headersRead = _readHeaders();
 
   Future<void> _readHeaders() async {
     final saved = await ref.read(savedServerHeadersProvider.future);
-    if (saved == null || !mounted || _headers.text.isNotEmpty) return;
+    if (saved == null || !mounted || _headerRows.isNotEmpty) return;
+    final rows = serverHeaderRowsOf(saved.text);
+    if (rows.isEmpty) return;
     setState(() {
-      _headers.text = saved.text;
+      for (final row in rows) {
+        _headerRows.add(_HeaderRow(name: row.name, value: row.value));
+      }
       // Shown, so they never go to another server unseen.
       _isAdvancedOpen = true;
     });
+  }
+
+  Iterable<_HeaderRow> get _liveRows =>
+      _headerRows.where((row) => !row.isRemoved);
+
+  bool get _isHeadersFull => _liveRows.length >= maxServerHeaders;
+
+  /// The headers as saved: one `Name: value` per line.
+  String get _headersText =>
+      serverHeaderTextOf([for (final row in _liveRows) row.typed]);
+
+  void _addHeaderRow() {
+    if (_isHeadersFull) return;
+    Haptics.selection();
+    final row = _HeaderRow(isShown: false);
+    setState(() => _headerRows.add(row));
+    // Shown a frame later, so it opens rather than appears.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => row.isShown = true);
+      row.nameFocus.requestFocus();
+    });
+  }
+
+  void _removeHeaderRow(_HeaderRow row) {
+    if (row.nameFocus.hasFocus || row.valueFocus.hasFocus) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+    Haptics.selection();
+    clearError(row.nameKey);
+    clearError(row.valueKey);
+    setState(() => row.isRemoved = true);
+    AppSnackbar.show(
+      context,
+      context.l10n.serverHeaderRemoved,
+      actionLabel: context.l10n.commonUndo,
+      onAction: () {
+        if (!mounted || _isHeadersFull) return;
+        setState(() => row.isRemoved = false);
+      },
+      onClosed: (isUndone) {
+        if (isUndone || !mounted || !row.isRemoved) return;
+        setState(() => _headerRows.remove(row));
+        // Disposed once its fields are gone.
+        WidgetsBinding.instance.addPostFrameCallback((_) => row.dispose());
+      },
+    );
+  }
+
+  /// Lines pasted, or a colon typed, into [row]'s name: the first line fills
+  /// [row], the others become rows of their own.
+  void _pasteHeaders(_HeaderRow row, List<ServerHeaderRow> pasted) {
+    final first = pasted.first;
+    row.nameField.value = TextEditingValue(
+      text: first.name,
+      selection: TextSelection.collapsed(offset: first.name.length),
+    );
+    if (first.value.isNotEmpty || pasted.length > 1) {
+      row.valueField.text = first.value;
+    }
+    clearError(row.nameKey);
+    clearError(row.valueKey);
+    setState(() {
+      final at = _headerRows.indexOf(row) + 1;
+      final added = [
+        for (final next
+            in pasted.skip(1).take(maxServerHeaders - _liveRows.length))
+          _HeaderRow(name: next.name, value: next.value),
+      ];
+      _headerRows.insertAll(at, added);
+    });
+    row.valueFocus.requestFocus();
+  }
+
+  /// One check per header field, with the problem worded for it.
+  List<(Object, FocusNode, String?)> _headerChecks() {
+    final l10n = context.l10n;
+    final rows = _liveRows.toList();
+    return [
+      for (var i = 0; i < rows.length; i++)
+        ...() {
+          final row = rows[i];
+          final problem = serverHeaderProblemOf(
+            row.typed.name,
+            row.typed.value,
+            earlierNames: [
+              for (final earlier in rows.take(i)) earlier.typed.name,
+            ],
+          );
+          final nameError = switch (problem) {
+            ServerHeaderProblem.missingName => l10n.serverHeaderNeedsName,
+            ServerHeaderProblem.badName => l10n.serverHeaderBadName,
+            ServerHeaderProblem.reservedName => l10n.serverHeaderReserved,
+            ServerHeaderProblem.repeatedName => l10n.serverHeaderRepeated,
+            _ => null,
+          };
+          final valueError = switch (problem) {
+            ServerHeaderProblem.missingValue ||
+            ServerHeaderProblem.notNameValue => l10n.serverHeaderNeedsValue,
+            ServerHeaderProblem.badValue => l10n.serverHeaderBadValue,
+            _ => null,
+          };
+          return [
+            (row.nameKey, row.nameFocus, nameError),
+            (row.valueKey, row.valueFocus, valueError),
+          ];
+        }(),
+    ];
   }
 
   @override
@@ -101,8 +215,9 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
     _lifecycle.dispose();
     _address.dispose();
     _focus.dispose();
-    _headers.dispose();
-    _headersFocus.dispose();
+    for (final row in _headerRows) {
+      row.dispose();
+    }
     super.dispose();
   }
 
@@ -121,12 +236,11 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
         : url == null
         ? context.l10n.serverEnterValidAddress
         : null;
-    final headersError = _headersError();
-    if (headersError != null) setState(() => _isAdvancedOpen = true);
-    if (!checkFields([
-      (_addressField, _focus, error),
-      (_headersField, _headersFocus, headersError),
-    ])) {
+    final headerChecks = _headerChecks();
+    if (headerChecks.any((check) => check.$3 != null)) {
+      setState(() => _isAdvancedOpen = true);
+    }
+    if (!checkFields([(_addressField, _focus, error), ...headerChecks])) {
       return;
     }
     await submit(
@@ -144,21 +258,6 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
     if (link != null && mounted) await _signInWith(link);
   }
 
-  /// The first problem in the headers, worded for their field.
-  String? _headersError() {
-    final error = parseServerHeaders(_headers.text).errors.firstOrNull;
-    if (error == null) return null;
-    final l10n = context.l10n;
-    final line = error.line;
-    return switch (error.problem) {
-      ServerHeaderProblem.notNameValue => l10n.serverHeaderNotNameValue(line),
-      ServerHeaderProblem.badName => l10n.serverHeaderBadName(line),
-      ServerHeaderProblem.badValue => l10n.serverHeaderBadValue(line),
-      ServerHeaderProblem.reservedName => l10n.serverHeaderReserved(line),
-      ServerHeaderProblem.repeatedName => l10n.serverHeaderRepeated(line),
-    };
-  }
-
   /// Saves the headers with the address, so the new server gets them from
   /// the first request. Read now: the switch may outlive this screen.
   /// What the last server checked is: a regular Anchor server, or Anchor+.
@@ -169,7 +268,7 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
     final addresses = ref.read(serverAddressesProvider.notifier);
     final edition = ref.read(serverIsRegularProvider.notifier);
     final isRegular = _isRegular;
-    final text = _headers.text;
+    final text = _headersText;
     return () async {
       await headers.save(url, text);
       // One of the server's own addresses keeps the others.
@@ -183,10 +282,10 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
   Future<void> _signInWith(MagicLink link) async {
     await _headersRead;
     if (!mounted) return;
-    final headersError = _headersError();
-    if (headersError != null) {
+    final headerChecks = _headerChecks();
+    if (headerChecks.any((check) => check.$3 != null)) {
       setState(() => _isAdvancedOpen = true);
-      checkFields([(_headersField, _headersFocus, headersError)]);
+      checkFields(headerChecks);
       return;
     }
     final url = link.serverUrl;
@@ -249,7 +348,7 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
         ref.read(allowSelfSignedCertProvider).value ?? false;
     final check = await ServerConnector(
       allowSelfSigned: allowSelfSigned,
-      headers: parseServerHeaders(_headers.text).headers,
+      headers: parseServerHeaders(_headersText).headers,
     ).check(url);
     final List<int> protocols;
     final bool isRegular;
@@ -397,17 +496,48 @@ class _ServerConfigScreenState extends ConsumerState<ServerConfigScreen>
           visible: _isAdvancedOpen,
           child: Padding(
             padding: EdgeInsets.only(top: density.space16),
-            child: AppTextField(
-              controller: _headers,
-              focusNode: _headersFocus,
-              label: l10n.serverHeaders,
-              hint: l10n.serverHeadersHint,
-              help: l10n.serverHeadersHelp,
-              lines: 2,
-              keyboardType: TextInputType.multiline,
-              autocorrect: false,
-              error: errorOf(_headersField),
-              onChanged: (_) => clearError(_headersField),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, density.space8),
+                  child: Text(
+                    l10n.serverHeaders,
+                    style: AppTypography.secondary.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.appText,
+                    ),
+                  ),
+                ),
+                for (final row in _headerRows)
+                  Reveal(
+                    key: ObjectKey(row),
+                    visible: row.isShown && !row.isRemoved,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: density.space16),
+                      child: _HeaderFields(
+                        row: row,
+                        nameError: errorOf(row.nameKey),
+                        valueError: errorOf(row.valueKey),
+                        onNameChanged: () => clearError(row.nameKey),
+                        onValueChanged: () => clearError(row.valueKey),
+                        onPaste: (pasted) => _pasteHeaders(row, pasted),
+                        onRemove: () => _removeHeaderRow(row),
+                      ),
+                    ),
+                  ),
+                _AddHeader(isFull: _isHeadersFull, onAdd: _addHeaderRow),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, density.space8, 16, 0),
+                  child: Text(
+                    l10n.serverHeadersHelp,
+                    style: AppTypography.secondary.copyWith(
+                      color: colors.appMuted,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -482,6 +612,182 @@ class _AdvancedToggle extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// One extra header being typed: its fields, and whether it shows.
+class _HeaderRow {
+  _HeaderRow({String name = '', String value = '', this.isShown = true})
+    : nameField = TextEditingController(text: name),
+      valueField = TextEditingController(text: value);
+
+  final TextEditingController nameField;
+  final TextEditingController valueField;
+  final FocusNode nameFocus = FocusNode();
+  final FocusNode valueFocus = FocusNode();
+
+  /// False for its first frame, so it opens rather than appears.
+  bool isShown;
+  bool isRemoved = false;
+
+  /// What its errors are kept under.
+  late final Object nameKey = (this, #name);
+  late final Object valueKey = (this, #value);
+
+  ServerHeaderRow get typed =>
+      (name: nameField.text.trim(), value: valueField.text.trim());
+
+  void dispose() {
+    nameField.dispose();
+    valueField.dispose();
+    nameFocus.dispose();
+    valueFocus.dispose();
+  }
+}
+
+/// Hands over text with a colon or a line break, which a name can't have:
+/// a header pasted whole, or a colon typed after the name.
+class _HeaderPaste extends TextInputFormatter {
+  _HeaderPaste(this.onPaste);
+
+  final ValueChanged<List<ServerHeaderRow>> onPaste;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+    if (!text.contains(':') && !text.contains('\n')) return newValue;
+    final pasted = serverHeaderRowsOf(text);
+    if (pasted.isEmpty) return oldValue;
+    // Fields can't change while this one formats.
+    WidgetsBinding.instance.addPostFrameCallback((_) => onPaste(pasted));
+    return oldValue;
+  }
+}
+
+class _HeaderFields extends StatelessWidget {
+  const _HeaderFields({
+    required this.row,
+    required this.nameError,
+    required this.valueError,
+    required this.onNameChanged,
+    required this.onValueChanged,
+    required this.onPaste,
+    required this.onRemove,
+  });
+
+  final _HeaderRow row;
+  final String? nameError;
+  final String? valueError;
+  final VoidCallback onNameChanged;
+  final VoidCallback onValueChanged;
+  final ValueChanged<List<ServerHeaderRow>> onPaste;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final density = context.density;
+    final name = row.typed.name;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 4,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            spacing: density.space8,
+            children: [
+              AppTextField(
+                controller: row.nameField,
+                focusNode: row.nameFocus,
+                semanticLabel: l10n.serverHeaderNameLabel,
+                hint: l10n.serverHeaderNameHint,
+                error: nameError,
+                autocorrect: false,
+                enableSuggestions: false,
+                keyboardType: TextInputType.visiblePassword,
+                isPasteMultiline: true,
+                textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  _HeaderPaste(onPaste),
+                  FilteringTextInputFormatter.allow(headerNameCharacter),
+                ],
+                onChanged: (_) => onNameChanged(),
+                onSubmitted: (_) => row.valueFocus.requestFocus(),
+              ),
+              AppTextField(
+                controller: row.valueField,
+                focusNode: row.valueFocus,
+                semanticLabel: l10n.serverHeaderValueLabel,
+                hint: l10n.serverHeaderValueHint,
+                error: valueError,
+                isPassword: true,
+                showLabel: l10n.serverShowHeaderValue,
+                hideLabel: l10n.serverHideHeaderValue,
+                enableSuggestions: false,
+                textInputAction: TextInputAction.done,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(headerValueCharacter),
+                ],
+                onChanged: (_) => onValueChanged(),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: density.control,
+          child: Center(
+            child: BarButton(
+              icon: LucideIcons.trash2,
+              label: name.isEmpty
+                  ? l10n.serverRemoveHeader
+                  : l10n.serverRemoveNamedHeader(name),
+              size: BarButtonSize.medium,
+              color: context.anchor.appMuted,
+              onPressed: onRemove,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AddHeader extends StatelessWidget {
+  const _AddHeader({required this.isFull, required this.onAdd});
+
+  final bool isFull;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Row(
+      spacing: 12,
+      children: [
+        AppButton(
+          label: l10n.serverAddHeader,
+          icon: LucideIcons.plus,
+          kind: AppButtonKind.secondary,
+          size: AppButtonSize.medium,
+          isExpanded: false,
+          onPressed: isFull ? null : onAdd,
+        ),
+        if (isFull)
+          Flexible(
+            child: Text(
+              l10n.serverHeaderLimit(maxServerHeaders),
+              style: AppTypography.secondary.copyWith(
+                color: context.anchor.appMuted,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

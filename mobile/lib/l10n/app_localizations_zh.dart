@@ -449,36 +449,63 @@ class AppLocalizationsZh extends AppLocalizations {
   String get serverHeaders => '额外请求头';
 
   @override
-  String get serverHeadersHint => 'CF-Access-Client-Id: …';
-
-  @override
   String get serverHeadersHelp =>
-      '用于服务器前置的代理，例如 Cloudflare Access。每行一个，格式为 Name: value。仅发送到此服务器。';
+      '用于服务器前置的代理，例如 Cloudflare Access。仅发送到此服务器。将 Name: value 格式的多行粘贴到名称中，可一次填写多个。';
 
   @override
-  String serverHeaderNotNameValue(int line) {
-    return '第 $line 行需要名称和值，格式为 Name: value。';
+  String get serverHeaderNameHint => '名称';
+
+  @override
+  String get serverHeaderValueHint => '值';
+
+  @override
+  String get serverHeaderNameLabel => '请求头名称';
+
+  @override
+  String get serverHeaderValueLabel => '请求头值';
+
+  @override
+  String get serverShowHeaderValue => '显示值';
+
+  @override
+  String get serverHideHeaderValue => '隐藏值';
+
+  @override
+  String get serverAddHeader => '添加请求头';
+
+  @override
+  String get serverRemoveHeader => '移除请求头';
+
+  @override
+  String serverRemoveNamedHeader(String name) {
+    return '移除 $name';
   }
 
   @override
-  String serverHeaderBadName(int line) {
-    return '第 $line 行：名称只能包含字母、数字和 - _ .';
+  String get serverHeaderRemoved => '已移除请求头';
+
+  @override
+  String serverHeaderLimit(int max) {
+    return '最多 $max 个请求头。';
   }
 
   @override
-  String serverHeaderBadValue(int line) {
-    return '第 $line 行：值包含请求头无法携带的字符。';
-  }
+  String get serverHeaderNeedsName => '请输入名称。';
 
   @override
-  String serverHeaderReserved(int line) {
-    return '第 $line 行：此请求头由 Anchor 自行设置。';
-  }
+  String get serverHeaderNeedsValue => '请输入值。';
 
   @override
-  String serverHeaderRepeated(int line) {
-    return '第 $line 行与上方的名称重复。';
-  }
+  String get serverHeaderBadName => '只能包含字母、数字和 - _ .';
+
+  @override
+  String get serverHeaderBadValue => '包含请求头无法携带的字符。';
+
+  @override
+  String get serverHeaderReserved => '此请求头由 Anchor 自行设置。';
+
+  @override
+  String get serverHeaderRepeated => '上方已添加。';
 
   @override
   String get serverSelfHosted => '这台手机上的笔记会移入你的账户。';
@@ -5303,36 +5330,63 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get serverHeaders => '額外標頭';
 
   @override
-  String get serverHeadersHint => 'CF-Access-Client-Id: …';
-
-  @override
   String get serverHeadersHelp =>
-      '用於伺服器前置的代理，例如 Cloudflare Access。每行一個，格式為 Name: value。只會傳送到此伺服器。';
+      '用於伺服器前置的代理，例如 Cloudflare Access。只會傳送到此伺服器。將 Name: value 格式的多行貼到名稱中，可一次填寫多個。';
 
   @override
-  String serverHeaderNotNameValue(int line) {
-    return '第 $line 行需要名稱和值，格式為 Name: value。';
+  String get serverHeaderNameHint => '名稱';
+
+  @override
+  String get serverHeaderValueHint => '值';
+
+  @override
+  String get serverHeaderNameLabel => '標頭名稱';
+
+  @override
+  String get serverHeaderValueLabel => '標頭值';
+
+  @override
+  String get serverShowHeaderValue => '顯示值';
+
+  @override
+  String get serverHideHeaderValue => '隱藏值';
+
+  @override
+  String get serverAddHeader => '新增標頭';
+
+  @override
+  String get serverRemoveHeader => '移除標頭';
+
+  @override
+  String serverRemoveNamedHeader(String name) {
+    return '移除 $name';
   }
 
   @override
-  String serverHeaderBadName(int line) {
-    return '第 $line 行：名稱只能包含字母、數字和 - _ .';
+  String get serverHeaderRemoved => '已移除標頭';
+
+  @override
+  String serverHeaderLimit(int max) {
+    return '最多 $max 個標頭。';
   }
 
   @override
-  String serverHeaderBadValue(int line) {
-    return '第 $line 行：值包含標頭無法攜帶的字元。';
-  }
+  String get serverHeaderNeedsName => '請輸入名稱。';
 
   @override
-  String serverHeaderReserved(int line) {
-    return '第 $line 行：此標頭由 Anchor 自行設定。';
-  }
+  String get serverHeaderNeedsValue => '請輸入值。';
 
   @override
-  String serverHeaderRepeated(int line) {
-    return '第 $line 行與上方的名稱重複。';
-  }
+  String get serverHeaderBadName => '只能包含字母、數字和 - _ .';
+
+  @override
+  String get serverHeaderBadValue => '包含標頭無法攜帶的字元。';
+
+  @override
+  String get serverHeaderReserved => '此標頭由 Anchor 自行設定。';
+
+  @override
+  String get serverHeaderRepeated => '上方已新增。';
 
   @override
   String get serverSelfHosted => '這支手機上的筆記會移入你的帳號。';

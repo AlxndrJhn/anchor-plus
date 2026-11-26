@@ -901,47 +901,113 @@ abstract class AppLocalizations {
   /// **'Extra headers'**
   String get serverHeaders;
 
-  /// Placeholder in the extra headers field: an example header name, as a proxy shows it. Leave the header name as is.
+  /// Under the extra headers, under Advanced on the server page. Keep “Name: value” in this form; Cloudflare Access is a product name.
   ///
   /// In en, this message translates to:
-  /// **'CF-Access-Client-Id: …'**
-  String get serverHeadersHint;
-
-  /// Under the extra headers field. Keep “Name: value” in this form.
-  ///
-  /// In en, this message translates to:
-  /// **'For a proxy in front of your server, like Cloudflare Access. One per line, as Name: value. Sent only to this server.'**
+  /// **'For a proxy in front of your server, like Cloudflare Access. Sent only to this server. Paste Name: value lines into a name to fill in several.'**
   String get serverHeadersHelp;
 
-  /// A line of the extra headers has no colon, or nothing after it.
+  /// Placeholder in the field for an extra header’s name.
   ///
   /// In en, this message translates to:
-  /// **'Line {line} needs a name and a value, as Name: value.'**
-  String serverHeaderNotNameValue(int line);
+  /// **'Name'**
+  String get serverHeaderNameHint;
 
-  /// A header name with spaces or other characters headers can’t have.
+  /// Placeholder in the field for an extra header’s value, which is hidden like a password.
   ///
   /// In en, this message translates to:
-  /// **'Line {line}: the name can have only letters, digits and - _ .'**
-  String serverHeaderBadName(int line);
+  /// **'Value'**
+  String get serverHeaderValueHint;
 
-  /// A header value with characters outside what headers can carry, like emoji.
+  /// Screen reader name of the field for an extra header’s name.
   ///
   /// In en, this message translates to:
-  /// **'Line {line}: the value has characters a header can’t carry.'**
-  String serverHeaderBadValue(int line);
+  /// **'Header name'**
+  String get serverHeaderNameLabel;
 
-  /// A header the app already sends, like Authorization or Content-Type.
+  /// Screen reader name of the field for an extra header’s value.
   ///
   /// In en, this message translates to:
-  /// **'Line {line}: Anchor sets this header itself.'**
-  String serverHeaderReserved(int line);
+  /// **'Header value'**
+  String get serverHeaderValueLabel;
 
-  /// The same header name twice in the extra headers.
+  /// Screen reader label of the eye button that shows an extra header’s hidden value.
   ///
   /// In en, this message translates to:
-  /// **'Line {line} repeats a name from above.'**
-  String serverHeaderRepeated(int line);
+  /// **'Show value'**
+  String get serverShowHeaderValue;
+
+  /// Screen reader label of the eye button that hides an extra header’s value again.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide value'**
+  String get serverHideHeaderValue;
+
+  /// Button under the extra headers that adds another empty name and value.
+  ///
+  /// In en, this message translates to:
+  /// **'Add header'**
+  String get serverAddHeader;
+
+  /// Screen reader label of the trash button beside an extra header that has no name yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove header'**
+  String get serverRemoveHeader;
+
+  /// Screen reader label of the trash button beside an extra header, naming it. Keep the header name as it is.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String serverRemoveNamedHeader(String name);
+
+  /// Snackbar after removing an extra header, with Undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Header removed'**
+  String get serverHeaderRemoved;
+
+  /// Note beside the disabled Add header button once the most extra headers are there.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} headers.'**
+  String serverHeaderLimit(int max);
+
+  /// Error under an extra header’s name field when it has a value but no name. Keep it short: it sits under a narrow field.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name.'**
+  String get serverHeaderNeedsName;
+
+  /// Error under an extra header’s value field when it has a name but no value. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a value.'**
+  String get serverHeaderNeedsValue;
+
+  /// Error under an extra header’s name field when the name has characters a header name can’t have. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Only letters, digits and - _ .'**
+  String get serverHeaderBadName;
+
+  /// Error under an extra header’s value field when it has characters a header can’t carry, like emoji. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Has characters a header can’t carry.'**
+  String get serverHeaderBadValue;
+
+  /// Error under an extra header’s name field when the app already sends that header, like Authorization. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor sets this header itself.'**
+  String get serverHeaderReserved;
+
+  /// Error under an extra header’s name field when an earlier one has the same name. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Already added above.'**
+  String get serverHeaderRepeated;
 
   /// Note at the bottom of the server page: the notes kept on this phone without a server go into the account signed in to.
   ///

@@ -23,6 +23,10 @@ class AppTextField extends StatefulWidget {
     this.icon,
     this.trailing,
     this.isPassword = false,
+    this.showLabel,
+    this.hideLabel,
+    this.semanticLabel,
+    this.enableSuggestions = true,
     this.enabled = true,
     this.readOnlyText,
     this.keyboardType,
@@ -35,6 +39,7 @@ class AppTextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.lines = 1,
+    this.isPasteMultiline = false,
   });
 
   final TextEditingController? controller;
@@ -50,6 +55,18 @@ class AppTextField extends StatefulWidget {
   final IconData? icon;
   final Widget? trailing;
   final bool isPassword;
+
+  /// What the eye button of a [isPassword] field says, when not a password.
+  final String? showLabel;
+  final String? hideLabel;
+
+  /// The field's name for screen readers when it shows no [label].
+  final String? semanticLabel;
+
+  /// False also turns off smart quotes and dashes, for text that must stay
+  /// as typed.
+  final bool enableSuggestions;
+
   final bool enabled;
 
   /// Non-null shows this text in place of an input.
@@ -67,6 +84,10 @@ class AppTextField extends StatefulWidget {
 
   /// Rows shown; above 1 the field takes several lines and grows to fit.
   final int lines;
+
+  /// Lets the line breaks of a paste reach [inputFormatters], which must take
+  /// them out, rather than dropping them first. The field stays one line.
+  final bool isPasteMultiline;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -158,10 +179,19 @@ class _AppTextFieldState extends State<AppTextField> {
                     autofillHints: widget.autofillHints,
                     textCapitalization: widget.textCapitalization,
                     autocorrect: widget.isPassword ? false : widget.autocorrect,
-                    enableSuggestions: !widget.isPassword,
+                    enableSuggestions:
+                        !widget.isPassword && widget.enableSuggestions,
+                    smartDashesType: widget.enableSuggestions
+                        ? null
+                        : SmartDashesType.disabled,
+                    smartQuotesType: widget.enableSuggestions
+                        ? null
+                        : SmartQuotesType.disabled,
                     inputFormatters: widget.inputFormatters,
                     minLines: widget.lines,
-                    maxLines: widget.lines == 1 ? 1 : null,
+                    maxLines: widget.lines == 1 && !widget.isPasteMultiline
+                        ? 1
+                        : null,
                     onChanged: widget.onChanged,
                     onSubmitted: widget.onSubmitted,
                     style: textStyle,
@@ -189,8 +219,8 @@ class _AppTextFieldState extends State<AppTextField> {
             BarButton(
               icon: _shown ? LucideIcons.eyeOff : LucideIcons.eye,
               label: _shown
-                  ? context.l10n.commonHidePassword
-                  : context.l10n.commonShowPassword,
+                  ? widget.hideLabel ?? context.l10n.commonHidePassword
+                  : widget.showLabel ?? context.l10n.commonShowPassword,
               size: BarButtonSize.medium,
               color: colors.appMuted,
               onPressed: widget.enabled
@@ -206,7 +236,7 @@ class _AppTextFieldState extends State<AppTextField> {
     final note = AppTypography.secondary;
     return Semantics(
       textField: true,
-      label: widget.label,
+      label: widget.label ?? widget.semanticLabel,
       hint: widget.help,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -481,36 +481,64 @@ class AppLocalizationsDe extends AppLocalizations {
   String get serverHeaders => 'Zusätzliche Header';
 
   @override
-  String get serverHeadersHint => 'CF-Access-Client-Id: …';
-
-  @override
   String get serverHeadersHelp =>
-      'Für einen Proxy vor deinem Server, etwa Cloudflare Access. Einer pro Zeile, als Name: Wert. Wird nur an diesen Server gesendet.';
+      'Für einen Proxy vor deinem Server, etwa Cloudflare Access. Wird nur an diesen Server gesendet. Zeilen als Name: Wert in einen Namen eingefügt füllen mehrere aus.';
 
   @override
-  String serverHeaderNotNameValue(int line) {
-    return 'Zeile $line braucht einen Namen und einen Wert, als Name: Wert.';
+  String get serverHeaderNameHint => 'Name';
+
+  @override
+  String get serverHeaderValueHint => 'Wert';
+
+  @override
+  String get serverHeaderNameLabel => 'Header-Name';
+
+  @override
+  String get serverHeaderValueLabel => 'Header-Wert';
+
+  @override
+  String get serverShowHeaderValue => 'Wert zeigen';
+
+  @override
+  String get serverHideHeaderValue => 'Wert verbergen';
+
+  @override
+  String get serverAddHeader => 'Header hinzufügen';
+
+  @override
+  String get serverRemoveHeader => 'Header entfernen';
+
+  @override
+  String serverRemoveNamedHeader(String name) {
+    return '$name entfernen';
   }
 
   @override
-  String serverHeaderBadName(int line) {
-    return 'Zeile $line: Der Name darf nur Buchstaben, Ziffern und - _ . enthalten.';
+  String get serverHeaderRemoved => 'Header entfernt';
+
+  @override
+  String serverHeaderLimit(int max) {
+    return 'Bis zu $max Header.';
   }
 
   @override
-  String serverHeaderBadValue(int line) {
-    return 'Zeile $line: Der Wert enthält Zeichen, die ein Header nicht übertragen kann.';
-  }
+  String get serverHeaderNeedsName => 'Gib einen Namen ein.';
 
   @override
-  String serverHeaderReserved(int line) {
-    return 'Zeile $line: Diesen Header setzt Anchor selbst.';
-  }
+  String get serverHeaderNeedsValue => 'Gib einen Wert ein.';
 
   @override
-  String serverHeaderRepeated(int line) {
-    return 'Zeile $line wiederholt einen Namen von weiter oben.';
-  }
+  String get serverHeaderBadName => 'Nur Buchstaben, Ziffern und - _ .';
+
+  @override
+  String get serverHeaderBadValue =>
+      'Enthält Zeichen, die ein Header nicht übertragen kann.';
+
+  @override
+  String get serverHeaderReserved => 'Diesen Header setzt Anchor selbst.';
+
+  @override
+  String get serverHeaderRepeated => 'Steht schon weiter oben.';
 
   @override
   String get serverSelfHosted =>

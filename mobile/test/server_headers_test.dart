@@ -128,4 +128,69 @@ void main() {
     expect(sent['CF-Access-Client-Id'], 'abc');
     expect(sent['Accept'], 'application/json');
   });
+
+  group('serverHeaderProblemOf', () {
+    test('a row left blank is no header and no problem', () {
+      expect(serverHeaderProblemOf('', ''), isNull);
+      expect(serverHeaderProblemOf('  ', ' '), isNull);
+    });
+
+    test('names what is wrong with one row', () {
+      expect(serverHeaderProblemOf('', 'abc'), ServerHeaderProblem.missingName);
+      expect(
+        serverHeaderProblemOf('X-Token', ''),
+        ServerHeaderProblem.missingValue,
+      );
+      expect(
+        serverHeaderProblemOf('X Token', 'abc'),
+        ServerHeaderProblem.badName,
+      );
+      expect(
+        serverHeaderProblemOf('X-Token', 'caf\u{1F600}'),
+        ServerHeaderProblem.badValue,
+      );
+      expect(
+        serverHeaderProblemOf('authorization', 'Bearer x'),
+        ServerHeaderProblem.reservedName,
+      );
+      expect(
+        serverHeaderProblemOf('X-Anchor-Protocol', '9'),
+        ServerHeaderProblem.reservedName,
+      );
+      expect(
+        serverHeaderProblemOf('x-token', 'b', earlierNames: ['X-Token']),
+        ServerHeaderProblem.repeatedName,
+      );
+      expect(serverHeaderProblemOf('X-Token', 'abc'), isNull);
+    });
+  });
+
+  group('header rows', () {
+    test('come from the saved lines, skipping blanks and # notes', () {
+      expect(
+        serverHeaderRowsOf(
+          'CF-Access-Client-Id: abc\n\n# note\r\nX-Secret:  a:b  \nOdd',
+        ),
+        [
+          (name: 'CF-Access-Client-Id', value: 'abc'),
+          (name: 'X-Secret', value: 'a:b'),
+          (name: 'Odd', value: ''),
+        ],
+      );
+    });
+
+    test('are saved one per line, leaving out blank rows', () {
+      final text = serverHeaderTextOf([
+        (name: ' CF-Access-Client-Id ', value: 'abc '),
+        (name: '', value: ''),
+        (name: 'X-Secret', value: 'a:b'),
+      ]);
+
+      expect(text, 'CF-Access-Client-Id: abc\nX-Secret: a:b');
+      expect(parseServerHeaders(text).headers, {
+        'CF-Access-Client-Id': 'abc',
+        'X-Secret': 'a:b',
+      });
+    });
+  });
 }
