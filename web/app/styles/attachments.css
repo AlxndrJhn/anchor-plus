@@ -560,6 +560,9 @@
   align-self: stretch;
   min-width: 0;
   display: grid;
+  /* One cell the size of the stage, so a tall picture's percentage max-height
+     fits it before use-picture-zoom knows the picture's size. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   place-items: center;
   position: relative;
   overflow: hidden;
