@@ -7,7 +7,10 @@ name: Home Assistant integration
 # contract is also pinned in server/test/e2e/specs/ha-anchor-integration.e2e-spec.ts,
 # which runs with the other e2e specs in CI.
 #
-# Weekly as well, so a change on the integration's side shows up here.
+# The integration is third-party code, so it is pinned to a reviewed commit
+# (INTEGRATION_SHA) and runs only inside a throwaway container, with no access
+# to this runner's token, cache or toolchain. To test a newer version, read
+# its changes and bump the SHA.
 
 on:
   push:
@@ -24,13 +27,7 @@ on:
       - "Dockerfile"
       - "docker/**"
       - ".github/workflows/ha-integration.yml"
-  schedule:
-    - cron: "17 4 * * 1"
   workflow_dispatch:
-    inputs:
-      ref:
-        description: "Branch, tag or commit of the integration to test"
-        default: main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,6 +35,10 @@ concurrency:
 
 permissions:
   contents: read
+
+env:
+  # felixschndr/ha-anchor-integration main on 2026-11-19.
+  INTEGRATION_SHA: ebc8abc4dea801bb46a058eee71f630918ea1241
 
 jobs:
   e2e:
@@ -48,50 +49,43 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: anchor-plus
-
-      - name: Checkout the integration
-        uses: actions/checkout@v7
-        with:
-          repository: felixschndr/ha-anchor-integration
-          ref: ${{ inputs.ref || 'main' }}
-          path: integration
+          persist-credentials: false
 
       - name: Build and start Anchor+
         working-directory: anchor-plus
         run: |
           docker build -t anchor-plus:ha-e2e .
-          docker run -d --name anchor -p 127.0.0.1:3999:3000 \
+          docker run -d --name anchor \
             -e PG_USER=anchor -e PG_PASSWORD=password -e PG_DATABASE=anchor \
             anchor-plus:ha-e2e
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.14"
-
-      - name: Install Poetry
-        run: pipx install poetry
-
-      - name: Install the integration's dependencies
-        working-directory: integration
-        run: poetry install --no-interaction --no-root
-
-      - name: Wait for Anchor+
-        run: timeout 180 bash -c 'until curl -sf http://127.0.0.1:3999/api/health; do sleep 2; done'
-
-      - name: Run the integration's end-to-end tests
-        working-directory: integration
-        # The suite skips (and passes) when it can't tell where the server is,
-        # so a run that passed nothing or skipped anything counts as a failure.
+      - name: Fetch the integration at the pinned commit
         run: |
-          poetry run pytest tests/e2e -rs | tee pytest.log
-          grep -qE "[0-9]+ passed" pytest.log \
-            || { echo "::error::No end-to-end test ran; update this workflow."; exit 1; }
-          if grep -qE "[0-9]+ skipped" pytest.log; then
-            echo "::error::End-to-end tests were skipped."; exit 1
-          fi
-        env:
-          ANCHOR_E2E_URL: http://127.0.0.1:3999
+          mkdir integration
+          curl -sfL "https://codeload.github.com/felixschndr/ha-anchor-integration/tar.gz/$INTEGRATION_SHA" \
+            | tar -xz --strip-components=1 -C integration
+
+      # Shares the server's network, so the suite reaches it on 127.0.0.1, the
+      # only address Home Assistant's test harness lets it connect to.
+      # The suite skips (and passes) when it can't tell where the server is,
+      # so a run that passed nothing or skipped anything counts as a failure.
+      - name: Run the integration's end-to-end tests
+        run: |
+          docker run --rm --network container:anchor \
+            -v "$PWD/integration:/src:ro" \
+            -e ANCHOR_E2E_URL=http://127.0.0.1:3000 \
+            python:3.14 bash -c '
+              set -euo pipefail
+              cp -r /src /w && cd /w
+              pip install -q poetry
+              poetry install --no-interaction --no-root
+              timeout 180 bash -c "until curl -sf \$ANCHOR_E2E_URL/api/health >/dev/null; do sleep 2; done"
+              poetry run pytest tests/e2e -rs | tee pytest.log
+              grep -qE "[0-9]+ passed" pytest.log \
+                || { echo "::error::No end-to-end test ran; update this workflow."; exit 1; }
+              if grep -qE "[0-9]+ skipped" pytest.log; then
+                echo "::error::End-to-end tests were skipped."; exit 1
+              fi'
 
       - name: Anchor+ logs
         if: failure()
