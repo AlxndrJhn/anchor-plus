@@ -21,6 +21,7 @@ import {
   toStoredOidcProvider,
   validProviderId,
 } from './oidc-providers';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 /** A provider as the admin UI shows it: its secret only as whether it has one. */
 export interface OidcProviderSettings {
@@ -297,13 +298,21 @@ export class OidcConfigService {
   ): Promise<OidcProviderSettings> {
     const slug = id.trim().toLowerCase();
     if (!validProviderId(slug)) {
-      throw new BadRequestException(
-        `Use lowercase letters, numbers and dashes for the ID, up to 32 of them, and not "${PRIMARY_OIDC_PROVIDER_ID}".`,
+      throw coded(
+        new BadRequestException(
+          `Use lowercase letters, numbers and dashes for the ID, up to 32 of them, and not "${PRIMARY_OIDC_PROVIDER_ID}".`,
+        ),
+        ErrorCode.OIDC_PROVIDER_ID_INVALID,
+        { reserved: PRIMARY_OIDC_PROVIDER_ID },
       );
     }
     if ((await this.getProviders()).some((p) => p.id === slug)) {
-      throw new ConflictException(
-        `There's already a provider with the ID "${slug}".`,
+      throw coded(
+        new ConflictException(
+          `There's already a provider with the ID "${slug}".`,
+        ),
+        ErrorCode.OIDC_PROVIDER_EXISTS,
+        { id: slug },
       );
     }
     const provider = this.checked({
@@ -368,26 +377,41 @@ export class OidcConfigService {
     const index = saved.findIndex((p) => p.id === id);
     if (index !== -1) return index;
     if (id === PRIMARY_OIDC_PROVIDER_ID) {
-      throw new ForbiddenException(
-        'The first provider is changed in the single sign-on settings.',
+      throw coded(
+        new ForbiddenException(
+          'The first provider is changed in the single sign-on settings.',
+        ),
+        ErrorCode.OIDC_PROVIDER_PRIMARY,
       );
     }
     if (this.getEnvProviders().some((p) => p.id === id)) {
-      throw new ForbiddenException(
-        'This provider is set on the server. Change it there.',
+      throw coded(
+        new ForbiddenException(
+          'This provider is set on the server. Change it there.',
+        ),
+        ErrorCode.OIDC_PROVIDER_LOCKED,
       );
     }
-    throw new NotFoundException('No such sign-in provider');
+    throw coded(
+      new NotFoundException('No such sign-in provider'),
+      ErrorCode.OIDC_PROVIDER_NOT_FOUND,
+    );
   }
 
   private checked(provider: OidcProvider): OidcProvider {
     if (!provider.issuerUrl || !/^https?:\/\/\S+$/i.test(provider.issuerUrl)) {
-      throw new BadRequestException(
-        'Enter a full issuer URL, like https://id.example.com.',
+      throw coded(
+        new BadRequestException(
+          'Enter a full issuer URL, like https://id.example.com.',
+        ),
+        ErrorCode.OIDC_ISSUER_INVALID,
       );
     }
     if (!provider.clientId) {
-      throw new BadRequestException('Enter the client ID.');
+      throw coded(
+        new BadRequestException('Enter the client ID.'),
+        ErrorCode.OIDC_CLIENT_ID_MISSING,
+      );
     }
     return provider;
   }
@@ -488,8 +512,11 @@ export class OidcConfigService {
     disableInternalAuth?: boolean;
   }): Promise<void> {
     if (this.isLockedByEnv()) {
-      throw new ForbiddenException(
-        'OIDC settings are locked by environment variables. Remove OIDC_ENABLED, OIDC_ISSUER_URL and OIDC_CLIENT_ID to manage from UI.',
+      throw coded(
+        new ForbiddenException(
+          'OIDC settings are locked by environment variables. Remove OIDC_ENABLED, OIDC_ISSUER_URL and OIDC_CLIENT_ID to manage from UI.',
+        ),
+        ErrorCode.OIDC_SETTINGS_LOCKED,
       );
     }
 

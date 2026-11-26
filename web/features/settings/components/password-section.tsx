@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/toast";
 import { changePassword } from "@/features/auth/api";
 import { useOidcConfig } from "@/features/auth/hooks/use-oidc";
 import { useAuthStore } from "@/features/auth/store";
+import { errorCodeOf } from "@/lib/api/error-code";
 import { Row, RowText, Section } from "./settings-blocks";
 
 export function PasswordSection() {
@@ -37,7 +38,7 @@ export function PasswordSection() {
     onError: (e: Error) => {
       const status = e instanceof HTTPError ? e.response.status : 0;
       if (status === 403) setCurrentPasswordError(t("wrongCurrent"));
-      else if (status === 400 && /different/i.test(e.message))
+      else if (errorCodeOf(e) === "PASSWORD_UNCHANGED")
         setNewPasswordError(t("mustDiffer"));
       else setFormError(t(status ? "changeFailed" : "offline"));
     },

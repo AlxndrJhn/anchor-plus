@@ -16,6 +16,7 @@ import { ExportFormat } from './dto/export-query.dto';
 import { planMarkdownExport } from './markdown/markdown-export.util';
 import { isStorableNoteId } from '../notes/utils/attachment-storage.util';
 import { byPosition } from '../notes/utils/attachment-rows.util';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 const NOTES_PAGE_SIZE = 500;
 
@@ -157,7 +158,10 @@ export class ExportService {
       select: { id: true, email: true },
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw coded(
+        new NotFoundException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
     }
 
     const tags = await this.prisma.tag.findMany({

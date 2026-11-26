@@ -1,14 +1,11 @@
 import { HTTPError } from "ky";
+import { errorCodeOf, translatedError } from "@/lib/api/error-code";
 import { translate } from "@/lib/i18n";
 
 /** The password was right; the authenticator app's code is still needed. */
 export function isTwoStepRequired(error: Error | null) {
-  return (
-    error instanceof HTTPError &&
-    error.response.status === 401 &&
-    (error.data as { error?: string } | undefined)?.error ===
-      "two_step_required"
-  );
+  const code = errorCodeOf(error);
+  return code === "TWO_STEP_REQUIRED" || code === "TWO_STEP_CODE_WRONG";
 }
 
 /** The browser's passkey prompt was closed, or timed out. */
@@ -29,17 +26,26 @@ export function signInError(error: Error | null, provider: string) {
   if (error.name === "WebAuthnError") return t("passkeyUnsupported");
   if (!(error instanceof HTTPError)) return t("unreachable");
   const status = error.response.status;
-  if ((status === 403 || status === 401) && /pending/i.test(error.message))
-    return "pending" as const;
-  if (isTwoStepRequired(error))
-    return /isn’t right/.test(error.message) ? t("wrongCode") : null;
-  if (status === 403 && /turned off for this account/i.test(error.message))
-    return t("passkeyOnly");
-  if (/passkey/i.test(error.message)) return error.message;
-  if (status === 403 && /turned off/i.test(error.message))
-    return t("providerInstead", { provider });
-  if ((status === 401 || status === 400) && /oidc/i.test(error.message))
-    return t("providerAccount", { provider });
+  switch (errorCodeOf(error)) {
+    case "ACCOUNT_PENDING":
+      return "pending" as const;
+    case "TWO_STEP_REQUIRED":
+      return null;
+    case "TWO_STEP_CODE_WRONG":
+      return t("wrongCode");
+    case "PASSKEY_ONLY":
+      return t("passkeyOnly");
+    case "PASSWORD_SIGN_IN_DISABLED":
+    case "PASSWORD_SIGN_UP_DISABLED":
+      return t("providerInstead", { provider });
+    case "OIDC_ACCOUNT":
+      return t("providerAccount", { provider });
+    case "INVALID_CREDENTIALS":
+      return t("incorrect");
+  }
+  // Passkey and other refusals the server words for this sign-in.
+  const translated = translatedError(error);
+  if (translated && status < 500 && status !== 429) return translated;
   if (status === 401) return t("incorrect");
   if (status === 429) return t("tooMany");
   if (status >= 500) return t("serverError");

@@ -21,6 +21,7 @@ import {
 } from 'openid-client';
 import { OidcConfigService } from './oidc-config.service';
 import { PRIMARY_OIDC_PROVIDER_ID } from './oidc-providers';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 /**
  * Client auth for public clients (no secret).
@@ -54,7 +55,10 @@ export class OidcClientService {
   ): Promise<Configuration> {
     const provider = await this.oidcConfigService.getProvider(providerId);
     if (!provider?.issuerUrl || !provider.clientId) {
-      throw new InternalServerErrorException('OIDC is not properly configured');
+      throw coded(
+        new InternalServerErrorException('OIDC is not properly configured'),
+        ErrorCode.OIDC_MISCONFIGURED,
+      );
     }
 
     try {
@@ -66,8 +70,11 @@ export class OidcClientService {
       );
     } catch (error) {
       this.logger.error('Failed to initialize OIDC configuration:', error);
-      throw new InternalServerErrorException(
-        'Failed to initialize OIDC configuration. Check your OIDC settings.',
+      throw coded(
+        new InternalServerErrorException(
+          'Failed to initialize OIDC configuration. Check your OIDC settings.',
+        ),
+        ErrorCode.OIDC_MISCONFIGURED,
       );
     }
   }

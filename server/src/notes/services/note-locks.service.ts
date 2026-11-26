@@ -12,6 +12,7 @@ import {
   FAILED_GUESS_WINDOW_MS,
   MAX_FAILED_GUESSES,
 } from '../../auth/constants/auth.constants';
+import { coded, ErrorCode } from '../../common/errors/coded';
 
 type SecretKind = 'pin' | 'pattern';
 
@@ -52,11 +53,15 @@ export class NoteLocksService {
     proof: { current?: string; password?: string },
   ) {
     if (!(kind === 'pin' ? LOCK_PIN : LOCK_PATTERN).test(secret)) {
-      throw new BadRequestException(
-        kind === 'pin'
-          ? 'A PIN is 4 to 12 digits'
-          : 'A pattern joins at least 4 dots',
-      );
+      throw kind === 'pin'
+        ? coded(
+            new BadRequestException('A PIN is 4 to 12 digits'),
+            ErrorCode.LOCK_PIN_INVALID,
+          )
+        : coded(
+            new BadRequestException('A pattern joins at least 4 dots'),
+            ErrorCode.LOCK_PATTERN_INVALID,
+          );
     }
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
@@ -72,10 +77,14 @@ export class NoteLocksService {
           !!user.password &&
           (await bcrypt.compare(proof.password, user.password)));
       if (!proven) {
-        throw new ForbiddenException(
-          kind === 'pin'
-            ? 'Wrong PIN or password'
-            : 'Wrong pattern or password',
+        throw coded(
+          new ForbiddenException(
+            kind === 'pin'
+              ? 'Wrong PIN or password'
+              : 'Wrong pattern or password',
+          ),
+          ErrorCode.LOCK_SECRET_WRONG,
+          { kind },
         );
       }
     }

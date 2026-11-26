@@ -29,6 +29,7 @@ import {
 } from "@/features/auth/components/auth-parts";
 import { serverSignInError } from "@/features/auth/utils/sign-in-error";
 import { signInProviders } from "@/features/auth/utils/sign-in-providers";
+import { errorCodeOf } from "@/lib/api/error-code";
 import { useDocumentTitle } from "@/lib/hooks/use-document-title";
 import { focusOnArrival } from "@/lib/platform";
 
@@ -64,10 +65,10 @@ export default function RegisterPage() {
     !!oidc.data?.enabled && !!oidc.data?.disableInternalAuth;
 
   const showRegisterError = (error: Error) => {
-    const message = error.message;
+    const code = errorCodeOf(error);
     if (
       error instanceof HTTPError &&
-      (error.response.status === 409 || /exist/i.test(message))
+      (error.response.status === 409 || code === "USER_EXISTS")
     ) {
       setErrors({
         email: t("emailTaken"),
@@ -76,7 +77,7 @@ export default function RegisterPage() {
     } else if (error instanceof HTTPError && error.response.status === 403) {
       void registrationMode.refetch();
       void oidc.refetch();
-      if (/turned off/i.test(message))
+      if (code === "PASSWORD_SIGN_UP_DISABLED")
         setErrors({
           form: t("signUpWithProvider", { provider: providerName }),
         });

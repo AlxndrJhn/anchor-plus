@@ -13,6 +13,7 @@ import {
   ERROR_MESSAGES,
   TAG_INCLUDE_NOTE_COUNT,
 } from './constants/tags.constants';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 @Injectable()
 export class TagsService {
@@ -57,7 +58,10 @@ export class TagsService {
     });
 
     if (!tag || tag.userId !== userId || tag.isDeleted) {
-      throw new NotFoundException(ERROR_MESSAGES.TAG_NOT_FOUND);
+      throw coded(
+        new NotFoundException(ERROR_MESSAGES.TAG_NOT_FOUND),
+        ErrorCode.TAG_NOT_FOUND,
+      );
     }
 
     return tag;
@@ -95,6 +99,7 @@ export class TagsService {
 
     if (result.conflict) {
       throw new ConflictException({
+        code: ErrorCode.TAG_CHANGED,
         message: ERROR_MESSAGES.TAG_CHANGED,
         serverTag: await this.findOne(userId, id),
       });
@@ -233,7 +238,10 @@ export class TagsService {
     });
 
     if (existing) {
-      throw new ConflictException(ERROR_MESSAGES.TAG_NAME_EXISTS);
+      throw coded(
+        new ConflictException(ERROR_MESSAGES.TAG_NAME_EXISTS),
+        ErrorCode.TAG_NAME_EXISTS,
+      );
     }
   }
 }

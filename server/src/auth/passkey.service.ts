@@ -27,6 +27,7 @@ import {
   PASSKEY_SIGN_IN_VALIDITY_MS,
   SECURITY_SETUP_VALIDITY_MS,
 } from './constants/auth.constants';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 interface Challenge {
   challenge: string;
@@ -78,7 +79,11 @@ export class PasskeyService implements OnModuleDestroy {
         passkeys: { select: { credentialId: true, transports: true } },
       },
     });
-    if (!user) throw new ForbiddenException('User not found');
+    if (!user)
+      throw coded(
+        new ForbiddenException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
     const site = this.siteOf(origin);
 
     const options = await generateRegistrationOptions({
@@ -119,7 +124,10 @@ export class PasskeyService implements OnModuleDestroy {
       Date.now() > pending.expiresAt ||
       pending.origin !== site.origin
     ) {
-      throw new BadRequestException('Adding the passkey took too long');
+      throw coded(
+        new BadRequestException('Adding the passkey took too long'),
+        ErrorCode.PASSKEY_TIMEOUT,
+      );
     }
 
     let verification: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
@@ -132,10 +140,16 @@ export class PasskeyService implements OnModuleDestroy {
         requireUserVerification: false,
       });
     } catch {
-      throw new BadRequestException('Couldn’t add that passkey');
+      throw coded(
+        new BadRequestException('Couldn’t add that passkey'),
+        ErrorCode.PASSKEY_NOT_ADDED,
+      );
     }
     if (!verification.verified)
-      throw new BadRequestException('Couldn’t add that passkey');
+      throw coded(
+        new BadRequestException('Couldn’t add that passkey'),
+        ErrorCode.PASSKEY_NOT_ADDED,
+      );
 
     const { credential } = verification.registrationInfo;
     const passkey = await this.prisma.passkey.create({
@@ -168,13 +182,20 @@ export class PasskeyService implements OnModuleDestroy {
         (user?.password && user.passwordSignIn) ||
         !!user?._count.oidcIdentities;
       if (count <= 1 && !otherWayIn)
-        throw new BadRequestException(
-          'Turn password sign-in back on before removing your last passkey',
+        throw coded(
+          new BadRequestException(
+            'Turn password sign-in back on before removing your last passkey',
+          ),
+          ErrorCode.LAST_PASSKEY,
         );
       const { count: removed } = await tx.passkey.deleteMany({
         where: { id, userId },
       });
-      if (removed === 0) throw new NotFoundException('Passkey not found');
+      if (removed === 0)
+        throw coded(
+          new NotFoundException('Passkey not found'),
+          ErrorCode.PASSKEY_NOT_FOUND,
+        );
     });
   }
 
@@ -212,7 +233,10 @@ export class PasskeyService implements OnModuleDestroy {
       Date.now() > pending.expiresAt ||
       pending.origin !== site.origin
     ) {
-      throw new UnauthorizedException('Signing in took too long. Try again.');
+      throw coded(
+        new UnauthorizedException('Signing in took too long. Try again.'),
+        ErrorCode.PASSKEY_TIMEOUT,
+      );
     }
 
     const passkey = await this.prisma.passkey.findUnique({
@@ -222,8 +246,11 @@ export class PasskeyService implements OnModuleDestroy {
     // The browser only offers passkeys of this host; one made on another
     // host of the same server doesn't sign in here.
     if (!passkey || passkey.rpId !== site.rpId) {
-      throw new UnauthorizedException(
-        'That passkey isn’t known here. It may have been removed.',
+      throw coded(
+        new UnauthorizedException(
+          'That passkey isn’t known here. It may have been removed.',
+        ),
+        ErrorCode.PASSKEY_UNKNOWN,
       );
     }
 
@@ -243,15 +270,24 @@ export class PasskeyService implements OnModuleDestroy {
         requireUserVerification: false,
       });
     } catch {
-      throw new UnauthorizedException('Couldn’t sign in with that passkey');
+      throw coded(
+        new UnauthorizedException('Couldn’t sign in with that passkey'),
+        ErrorCode.PASSKEY_SIGN_IN_FAILED,
+      );
     }
     if (!verification.verified)
-      throw new UnauthorizedException('Couldn’t sign in with that passkey');
+      throw coded(
+        new UnauthorizedException('Couldn’t sign in with that passkey'),
+        ErrorCode.PASSKEY_SIGN_IN_FAILED,
+      );
 
     const { user } = passkey;
     if (user.status === UserStatus.pending) {
-      throw new UnauthorizedException(
-        'Account pending approval. Please wait for an administrator to approve your account.',
+      throw coded(
+        new UnauthorizedException(
+          'Account pending approval. Please wait for an administrator to approve your account.',
+        ),
+        ErrorCode.ACCOUNT_PENDING,
       );
     }
 
@@ -289,7 +325,10 @@ export class PasskeyService implements OnModuleDestroy {
     try {
       url = new URL(origin || this.appConfig.appUrl);
     } catch {
-      throw new BadRequestException('Unknown origin');
+      throw coded(
+        new BadRequestException('Unknown origin'),
+        ErrorCode.PASSKEY_ORIGIN_UNKNOWN,
+      );
     }
     return { origin: url.origin, rpId: url.hostname };
   }

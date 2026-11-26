@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserStatus } from '../generated/prisma/enums';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 const SETTING_KEY = 'second_factor_required_since';
 /** How long people have to add a passkey or authenticator app. */
@@ -118,12 +119,18 @@ export class SecondFactorService {
     });
     if (!user || user.totpSecret) return;
     if (user._count.passkeys > 0)
-      throw new ForbiddenException(
-        'A password alone no longer signs you in. Sign in with your passkey.',
+      throw coded(
+        new ForbiddenException(
+          'A password alone no longer signs you in. Sign in with your passkey.',
+        ),
+        ErrorCode.SIGN_IN_WITH_PASSKEY,
       );
     if (user._count.oidcIdentities > 0)
-      throw new ForbiddenException(
-        'A password alone no longer signs you in. Sign in with your sign-in provider.',
+      throw coded(
+        new ForbiddenException(
+          'A password alone no longer signs you in. Sign in with your sign-in provider.',
+        ),
+        ErrorCode.SIGN_IN_WITH_PROVIDER,
       );
   }
 

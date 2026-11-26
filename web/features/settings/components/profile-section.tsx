@@ -17,6 +17,7 @@ import {
 } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/store";
 import type { User } from "@/features/auth/types";
+import { errorCodeOf } from "@/lib/api/error-code";
 import { translate } from "@/lib/i18n";
 import { Row, SaveStatus, Section, useSaveStatus } from "./settings-blocks";
 
@@ -26,7 +27,7 @@ function pictureUploadError(error: Error) {
   const t = translate("settings.profile");
   if (!(error instanceof HTTPError)) return t("uploadFailedOffline");
   const { status } = error.response;
-  if (status === 413 || (status === 400 && /file size/i.test(error.message)))
+  if (status === 413 || errorCodeOf(error) === "FILE_TOO_LARGE")
     return t("uploadFailedTooBig");
   return t("uploadFailed");
 }

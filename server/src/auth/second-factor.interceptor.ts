@@ -13,6 +13,7 @@ import {
   SECOND_FACTOR_REQUIRED,
   SecondFactorService,
 } from './second-factor.service';
+import { ErrorCode } from '../common/errors/coded';
 
 /**
  * Once the grace period is over, someone signed in with a password alone can
@@ -40,6 +41,7 @@ export class SecondFactorInterceptor implements NestInterceptor {
       throw new ForbiddenException({
         statusCode: 403,
         error: SECOND_FACTOR_REQUIRED,
+        code: ErrorCode.SECOND_FACTOR_REQUIRED,
         message:
           'Your admin asks everyone to sign in with a passkey or an authenticator app. Set one up to carry on.',
       });

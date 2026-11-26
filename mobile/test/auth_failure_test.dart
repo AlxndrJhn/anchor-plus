@@ -85,6 +85,83 @@ void main() {
     });
   });
 
+  group('the server’s codes', () {
+    Future<AuthFailure> refused(int status, Map<String, Object?> body) async {
+      final dio = Dio(BaseOptions(baseUrl: 'https://anchor.test'))
+        ..httpClientAdapter = _FakeServer(
+          () async => ResponseBody.fromString(
+            jsonEncode({'statusCode': status, ...body}),
+            status,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          ),
+        );
+      try {
+        await AuthService(dio).login('ada@example.com', 'secret');
+      } on AuthFailure catch (failure) {
+        return failure;
+      }
+      throw StateError('Signing in worked');
+    }
+
+    test('are read before the English message', () async {
+      // A message reworded on the server still reads right by its code.
+      expect(
+        await refused(401, {
+          'message': 'Reworded',
+          'code': 'INVALID_CREDENTIALS',
+        }),
+        isA<InvalidCredentialsFailure>(),
+      );
+      expect(
+        await refused(403, {'message': 'Reworded', 'code': 'ACCOUNT_PENDING'}),
+        isA<PendingApprovalFailure>(),
+      );
+      final wrong = await refused(401, {
+        'message': 'Reworded',
+        'code': 'TWO_STEP_CODE_WRONG',
+      });
+      expect((wrong as TwoStepRequiredFailure).wasWrong, isTrue);
+    });
+
+    test('carry the provider to name', () async {
+      final failure = await refused(403, {
+        'message': 'Reworded',
+        'code': 'PASSWORD_SIGN_UP_DISABLED',
+        'params': {'provider': 'Pocket ID'},
+      });
+      expect(failure, isA<PasswordSignInDisabledFailure>());
+      failure as PasswordSignInDisabledFailure;
+      expect(failure.provider, 'Pocket ID');
+      expect(failure.isSignUp, isTrue);
+    });
+
+    test('name the fields a check turned down', () async {
+      final failure = await refused(400, {
+        'message': ['email must be an email'],
+        'code': 'VALIDATION_FAILED',
+        'fields': [
+          {
+            'field': 'email',
+            'rules': ['isEmail'],
+          },
+        ],
+      });
+      expect((failure as InvalidInputFailure).fields, ['email']);
+    });
+
+    test('an unknown code falls back to the message', () async {
+      expect(
+        await refused(401, {
+          'message': 'Invalid credentials',
+          'code': 'SOMETHING_NEW',
+        }),
+        isA<InvalidCredentialsFailure>(),
+      );
+    });
+  });
+
   group('the server’s answers', () {
     test('a wrong password', () async {
       expect(

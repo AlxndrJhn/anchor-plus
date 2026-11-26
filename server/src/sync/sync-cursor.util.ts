@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 export const SNAPSHOT_PHASES = [
   'tags',
@@ -50,15 +51,24 @@ export function decodeCursor(raw: string): SyncCursor {
   try {
     wire = JSON.parse(Buffer.from(raw, 'base64url').toString('utf8'));
   } catch {
-    throw new BadRequestException('Malformed sync cursor');
+    throw coded(
+      new BadRequestException('Malformed sync cursor'),
+      ErrorCode.SYNC_CURSOR_INVALID,
+    );
   }
 
   if (typeof wire !== 'object' || wire === null) {
-    throw new BadRequestException('Malformed sync cursor');
+    throw coded(
+      new BadRequestException('Malformed sync cursor'),
+      ErrorCode.SYNC_CURSOR_INVALID,
+    );
   }
   const record = wire as Record<string, unknown>;
   if (record.v !== 3) {
-    throw new BadRequestException('Malformed sync cursor');
+    throw coded(
+      new BadRequestException('Malformed sync cursor'),
+      ErrorCode.SYNC_CURSOR_INVALID,
+    );
   }
 
   if (record.m === 'd') {
@@ -68,11 +78,17 @@ export function decodeCursor(raw: string): SyncCursor {
   if (record.m === 's') {
     const phase = record.p;
     if (!SNAPSHOT_PHASES.includes(phase as SnapshotPhase)) {
-      throw new BadRequestException('Malformed sync cursor');
+      throw coded(
+        new BadRequestException('Malformed sync cursor'),
+        ErrorCode.SYNC_CURSOR_INVALID,
+      );
     }
     const afterId = record.a;
     if (afterId !== null && typeof afterId !== 'string') {
-      throw new BadRequestException('Malformed sync cursor');
+      throw coded(
+        new BadRequestException('Malformed sync cursor'),
+        ErrorCode.SYNC_CURSOR_INVALID,
+      );
     }
     return {
       mode: 'snapshot',
@@ -82,12 +98,18 @@ export function decodeCursor(raw: string): SyncCursor {
     };
   }
 
-  throw new BadRequestException('Malformed sync cursor');
+  throw coded(
+    new BadRequestException('Malformed sync cursor'),
+    ErrorCode.SYNC_CURSOR_INVALID,
+  );
 }
 
 function parseSeq(value: unknown): bigint {
   if (typeof value !== 'string' || !/^\d+$/.test(value)) {
-    throw new BadRequestException('Malformed sync cursor');
+    throw coded(
+      new BadRequestException('Malformed sync cursor'),
+      ErrorCode.SYNC_CURSOR_INVALID,
+    );
   }
   return BigInt(value);
 }

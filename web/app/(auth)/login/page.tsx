@@ -95,7 +95,7 @@ export default function LoginPage() {
   const { failure } = oidcCallback;
   const isPending =
     errorMessage === "pending" ||
-    (failure?.by === "server" && /pending/i.test(failure.message));
+    (failure?.by === "server" && failure.code === "ACCOUNT_PENDING");
   if (failure && !isPending)
     return (
       <AuthStatusScreen

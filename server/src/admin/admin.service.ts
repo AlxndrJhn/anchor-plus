@@ -30,6 +30,7 @@ import * as crypto from 'crypto';
 import { BCRYPT_SALT_ROUNDS } from '../auth/constants/auth.constants';
 import { normalizeEmail, sameEmail } from '../common/utils/email.util';
 import { StorageQuotaService } from '../storage-quota/storage-quota.service';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 @Injectable()
 export class AdminService {
@@ -219,7 +220,10 @@ export class AdminService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User already exists');
+      throw coded(
+        new ConflictException('User already exists'),
+        ErrorCode.USER_EXISTS,
+      );
     }
 
     const hashedPassword = await bcrypt.hash(
@@ -257,7 +261,10 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw coded(
+        new NotFoundException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
     }
 
     // Check if email is being changed and if it's already taken
@@ -267,7 +274,10 @@ export class AdminService {
       });
 
       if (existingUser) {
-        throw new ConflictException('Email already in use');
+        throw coded(
+          new ConflictException('Email already in use'),
+          ErrorCode.EMAIL_IN_USE,
+        );
       }
     }
 
@@ -275,14 +285,20 @@ export class AdminService {
     // last admin. Saving a member as a member demotes nobody.
     if (updateUserDto.isAdmin === false && user.isAdmin) {
       if (id === currentUserId) {
-        throw new BadRequestException('Cannot change your own admin status');
+        throw coded(
+          new BadRequestException('Cannot change your own admin status'),
+          ErrorCode.OWN_ADMIN_STATUS,
+        );
       }
       const adminCount = await this.prisma.user.count({
         where: { isAdmin: true },
       });
       if (adminCount === 1) {
-        throw new BadRequestException(
-          'Cannot remove admin status from the last admin user',
+        throw coded(
+          new BadRequestException(
+            'Cannot remove admin status from the last admin user',
+          ),
+          ErrorCode.LAST_ADMIN,
         );
       }
     }
@@ -321,7 +337,10 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw coded(
+        new NotFoundException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
     }
 
     if (user.isAdmin) {
@@ -331,7 +350,10 @@ export class AdminService {
       });
 
       if (adminCount === 1) {
-        throw new BadRequestException('Cannot delete the last admin user');
+        throw coded(
+          new BadRequestException('Cannot delete the last admin user'),
+          ErrorCode.LAST_ADMIN,
+        );
       }
     }
 
@@ -349,7 +371,10 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw coded(
+        new NotFoundException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
     }
 
     // Generate secure random password if not provided
@@ -387,7 +412,11 @@ export class AdminService {
       where: { id },
       select: { id: true },
     });
-    if (!user) throw new NotFoundException('User not found');
+    if (!user)
+      throw coded(
+        new NotFoundException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
 
     await this.prisma.$transaction([
       this.prisma.user.update({
@@ -410,11 +439,17 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw coded(
+        new NotFoundException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
     }
 
     if (user.status !== UserStatus.pending) {
-      throw new BadRequestException('User is not pending approval');
+      throw coded(
+        new BadRequestException('User is not pending approval'),
+        ErrorCode.USER_NOT_PENDING,
+      );
     }
 
     const updatedUser = await this.prisma.user.update({
@@ -440,11 +475,17 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw coded(
+        new NotFoundException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
     }
 
     if (user.status !== UserStatus.pending) {
-      throw new BadRequestException('User is not pending approval');
+      throw coded(
+        new BadRequestException('User is not pending approval'),
+        ErrorCode.USER_NOT_PENDING,
+      );
     }
 
     // Delete the user

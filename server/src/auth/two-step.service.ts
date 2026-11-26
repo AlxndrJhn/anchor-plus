@@ -21,6 +21,7 @@ import {
 } from './constants/auth.constants';
 import { generateTotpSecret, totpUri, verifyTotp } from './utils/totp';
 import { SecretBox } from './utils/secret-box';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 /** What sign-in answers when the password was right but a code is missing. */
 export const TWO_STEP_REQUIRED = 'two_step_required';
@@ -92,9 +93,16 @@ export class TwoStepService implements OnModuleInit {
       where: { id: userId },
       select: { email: true, totpSecret: true },
     });
-    if (!user) throw new ForbiddenException('User not found');
+    if (!user)
+      throw coded(
+        new ForbiddenException('User not found'),
+        ErrorCode.USER_NOT_FOUND,
+      );
     if (user.totpSecret)
-      throw new BadRequestException('Two-step sign-in is already on');
+      throw coded(
+        new BadRequestException('Two-step sign-in is already on'),
+        ErrorCode.TWO_STEP_ALREADY_ON,
+      );
 
     const secret = generateTotpSecret();
     this.pending.set(userId, {
@@ -109,15 +117,21 @@ export class TwoStepService implements OnModuleInit {
     const pending = this.pending.get(userId);
     if (!pending || Date.now() > pending.expiresAt) {
       this.pending.delete(userId);
-      throw new BadRequestException(
-        'The setup has expired. Start it again to get a new QR code.',
+      throw coded(
+        new BadRequestException(
+          'The setup has expired. Start it again to get a new QR code.',
+        ),
+        ErrorCode.TWO_STEP_SETUP_EXPIRED,
       );
     }
     this.failedCodes.check(`setup:${userId}`);
     const step = verifyTotp(pending.secret, code);
     if (step === null) {
       this.failedCodes.fail(`setup:${userId}`);
-      throw new ForbiddenException('That code isn’t right');
+      throw coded(
+        new ForbiddenException('That code isn’t right'),
+        ErrorCode.TWO_STEP_CODE_WRONG,
+      );
     }
     this.failedCodes.succeed(`setup:${userId}`);
     this.pending.delete(userId);
@@ -166,6 +180,7 @@ export class TwoStepService implements OnModuleInit {
       throw new UnauthorizedException({
         statusCode: 401,
         error: TWO_STEP_REQUIRED,
+        code: ErrorCode.TWO_STEP_REQUIRED,
         message: 'Enter the code from your authenticator app',
       });
     await this.verifyOrThrow(userId, code);
@@ -176,6 +191,7 @@ export class TwoStepService implements OnModuleInit {
     throw new UnauthorizedException({
       statusCode: 401,
       error: TWO_STEP_REQUIRED,
+      code: ErrorCode.TWO_STEP_CODE_WRONG,
       message: 'That code isn’t right',
     });
   }
@@ -183,7 +199,10 @@ export class TwoStepService implements OnModuleInit {
   // Signed in already: a 401 would read as an ended session.
   private async verifyOrForbid(userId: string, code: string) {
     if (await this.verifyLimited(userId, code)) return;
-    throw new ForbiddenException('That code isn’t right');
+    throw coded(
+      new ForbiddenException('That code isn’t right'),
+      ErrorCode.TWO_STEP_CODE_WRONG,
+    );
   }
 
   private async verifyLimited(userId: string, code: string) {
@@ -202,7 +221,11 @@ export class TwoStepService implements OnModuleInit {
       where: { id: userId },
       select: { totpSecret: true, totpLastStep: true, totpRecoveryCodes: true },
     });
-    if (!user?.totpSecret) throw new BadRequestException('Two-step is off');
+    if (!user?.totpSecret)
+      throw coded(
+        new BadRequestException('Two-step is off'),
+        ErrorCode.TWO_STEP_OFF,
+      );
 
     // Unreadable after JWT_SECRET changed: only recovery codes work then.
     const secret = this.box.open(user.totpSecret);

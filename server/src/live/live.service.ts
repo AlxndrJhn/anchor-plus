@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SyncEmitterService } from '../sync/sync-emitter.service';
 import { SyncEventsService } from '../sync/sync-events.service';
 import { LiveSignalDto } from './dto/live-signal.dto';
+import { coded, ErrorCode } from '../common/errors/coded';
 
 // An offer with every network candidate is a few KB; this leaves room.
 export const MAX_LIVE_SIGNAL_DATA_LENGTH = 32 * 1024;
@@ -38,12 +39,18 @@ export class LiveService {
       signal.data &&
       JSON.stringify(signal.data).length > MAX_LIVE_SIGNAL_DATA_LENGTH
     ) {
-      throw new PayloadTooLargeException('Live image message too large');
+      throw coded(
+        new PayloadTooLargeException('Live image message too large'),
+        ErrorCode.LIVE_MESSAGE_TOO_LARGE,
+      );
     }
     const access = await this.access.ensureNoteAccess(userId, signal.noteId);
     // Nothing connects for a note in the trash, so it can't turn a camera on.
     if (access.state !== NoteState.active) {
-      throw new ConflictException('The note is not in use');
+      throw coded(
+        new ConflictException('The note is not in use'),
+        ErrorCode.NOTE_NOT_ACTIVE,
+      );
     }
     const recipients = await this.emitter.noteRecipients(
       this.prisma,

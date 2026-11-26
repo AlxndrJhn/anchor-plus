@@ -50,6 +50,7 @@ import {
   isLinkedTo,
   signInProviders,
 } from "@/features/auth/utils/sign-in-providers";
+import { errorText } from "@/lib/api/error-code";
 import { copyText } from "@/lib/clipboard";
 import { useRetry } from "@/lib/hooks/use-retry";
 import { dateLocale, translate } from "@/lib/i18n";
@@ -169,10 +170,14 @@ export function SecuritySection() {
     const params = new URLSearchParams(window.location.search);
     const connected = params.get("provider") === "connected";
     const failure = params.get("provider_error");
+    const failureCode = params.get("error_code");
     if (!connected && failure === null) return;
     document.getElementById("set-security")?.scrollIntoView({ block: "start" });
     if (connected) toast.success(t("providerConnected"));
-    else toast.error(failure || t("providerConnectFailed"));
+    else
+      toast.error(
+        errorText(failureCode) ?? (failure || t("providerConnectFailed")),
+      );
     params.delete("provider");
     params.delete("provider_error");
     const search = params.toString();

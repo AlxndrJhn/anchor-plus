@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { coded, ErrorCode } from '../errors/coded';
 
 interface Window {
   failures: number;
@@ -27,9 +28,16 @@ export class AttemptLimiter {
     const minutes = Math.ceil(
       (window.startedAt + this.windowMs - now) / 60_000,
     );
-    throw new HttpException(
-      `Too many attempts. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`,
-      HttpStatus.TOO_MANY_REQUESTS,
+    throw coded(
+      new HttpException(
+        {
+          statusCode: HttpStatus.TOO_MANY_REQUESTS,
+          message: `Too many attempts. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`,
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      ),
+      ErrorCode.TOO_MANY_ATTEMPTS,
+      { minutes },
     );
   }
 

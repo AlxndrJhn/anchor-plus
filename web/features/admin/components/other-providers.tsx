@@ -13,6 +13,7 @@ import { Input, InputButton, PasswordInput } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 import { Row, RowText } from "@/features/settings/components/settings-blocks";
+import { translatedError } from "@/lib/api/error-code";
 import { cn } from "@/lib/utils";
 import {
   createOidcProvider,
@@ -67,6 +68,8 @@ const emptyForm: ProviderForm = {
 
 async function messageOf(error: Error): Promise<string | undefined> {
   if (!(error instanceof HTTPError)) return undefined;
+  const translated = translatedError(error);
+  if (translated) return translated;
   try {
     const body = (await error.response.clone().json()) as {
       message?: string | string[];
