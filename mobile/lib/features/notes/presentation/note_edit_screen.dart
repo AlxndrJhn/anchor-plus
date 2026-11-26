@@ -1383,6 +1383,12 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
     final writing = _writing && !_isReadOnly;
     final density = context.density;
     final titleStyle = context.noteTypography.title;
+    final titlePadding = EdgeInsets.fromLTRB(
+      AnchorTokens.spaceGutterPhone,
+      0,
+      AnchorTokens.spaceGutterPhone,
+      density.space8,
+    );
     final safeBottom = context.safeBottomAtRest;
     final note = _draft.note;
     final isNew = _draft.isNew;
@@ -1454,54 +1460,49 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
               PageBar.heightOf(context) +
               4,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AnchorTokens.spaceGutterPhone,
-          ),
-          child: _isReadOnly
-              ? GestureDetector(
-                  onTap: _shakeReadOnly,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: density.space8),
-                    child: inTextDirection(
-                      context,
-                      note?.title ?? '',
-                      Text(
-                        displayTitleOf(note?.title ?? '', context.l10n),
-                        style: titleStyle.copyWith(color: colors.appText),
-                      ),
-                    ),
-                  ),
-                )
-              // A Hebrew or Arabic title reads from the right as it's typed.
-              : ValueListenableBuilder(
-                  valueListenable: _draft.title,
-                  builder: (context, title, _) => TextField(
-                    controller: _draft.title,
-                    focusNode: _titleFocus,
-                    showCursor: _isOpen,
-                    undoController: _titleHistory,
-                    maxLines: null,
-                    textDirection: firstStrongDirection(title.text),
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                    textCapitalization: TextCapitalization.sentences,
-                    inputFormatters: [
-                      TitleInputFormatter(onEnter: _splitTitle),
-                    ],
-                    onEditingComplete: _splitTitle,
-                    style: titleStyle.copyWith(color: colors.appText),
-                    cursorColor: colors.accentStrong,
-                    decoration: InputDecoration(
-                      hintText: context.l10n.noteTitleHint,
-                      hintStyle: titleStyle.copyWith(
-                        color: appearance.colors.muted,
-                      ),
-                      contentPadding: EdgeInsets.only(bottom: density.space8),
+        _isReadOnly
+            ? GestureDetector(
+                onTap: _shakeReadOnly,
+                child: Padding(
+                  padding: titlePadding,
+                  child: inTextDirection(
+                    context,
+                    note?.title ?? '',
+                    Text(
+                      displayTitleOf(note?.title ?? '', context.l10n),
+                      style: titleStyle.copyWith(color: colors.appText),
                     ),
                   ),
                 ),
-        ),
+              )
+            // A Hebrew or Arabic title reads from the right as it's typed.
+            : ValueListenableBuilder(
+                valueListenable: _draft.title,
+                builder: (context, title, _) => TextField(
+                  controller: _draft.title,
+                  focusNode: _titleFocus,
+                  showCursor: _isOpen,
+                  undoController: _titleHistory,
+                  maxLines: null,
+                  textDirection: firstStrongDirection(title.text),
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  textCapitalization: TextCapitalization.sentences,
+                  inputFormatters: [TitleInputFormatter(onEnter: _splitTitle)],
+                  onEditingComplete: _splitTitle,
+                  style: titleStyle.copyWith(color: colors.appText),
+                  cursorColor: colors.accentStrong,
+                  // The gutters are part of the field, so a tap beside the
+                  // title puts the caret in it.
+                  decoration: InputDecoration(
+                    hintText: context.l10n.noteTitleHint,
+                    hintStyle: titleStyle.copyWith(
+                      color: appearance.colors.muted,
+                    ),
+                    contentPadding: titlePadding,
+                  ),
+                ),
+              ),
         if (note != null)
           Padding(
             padding: EdgeInsets.fromLTRB(
@@ -1553,26 +1554,44 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen>
           builder: (context, showsEmptyNoteActions, editor) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AnchorTokens.spaceGutterPhone,
-                  AnchorTokens.space4,
-                  AnchorTokens.spaceGutterPhone,
-                  0,
-                ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: showsEmptyNoteActions
-                        ? 40
-                        : 140, // off-scale: spacer
+              Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AnchorTokens.spaceGutterPhone,
+                      AnchorTokens.space4,
+                      AnchorTokens.spaceGutterPhone,
+                      0,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: showsEmptyNoteActions
+                            ? 40
+                            : 140, // off-scale: spacer
+                      ),
+                      child: ValueListenableBuilder(
+                        valueListenable: _zoom,
+                        builder: (context, zoom, editor) =>
+                            ZoomedBox(key: _zoomBox, zoom: zoom, child: editor),
+                        child: editor,
+                      ),
+                    ),
                   ),
-                  child: ValueListenableBuilder(
-                    valueListenable: _zoom,
-                    builder: (context, zoom, editor) =>
-                        ZoomedBox(key: _zoomBox, zoom: zoom, child: editor),
-                    child: editor,
-                  ),
-                ),
+                  // A tap in the margin beside the words goes to that line.
+                  for (final isLeft in [true, false])
+                    Positioned(
+                      left: isLeft ? 0 : null,
+                      right: isLeft ? null : 0,
+                      top: 0,
+                      bottom: 0,
+                      width: AnchorTokens.spaceGutterPhone,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTapUp: (details) =>
+                            _editor?.tapBeside(details.globalPosition),
+                      ),
+                    ),
+                ],
               ),
               if (showsEmptyNoteActions)
                 Padding(
