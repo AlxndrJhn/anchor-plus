@@ -9,7 +9,12 @@
  * Ctrl+Shift+; stays itself on any layout.
  */
 
+import { translate } from "@/lib/i18n";
+
 const MODIFIERS = ["ctrl", "shift", "alt", "meta"] as const;
+
+/** Why a rule can't be read, in the language on screen. */
+const problem = () => translate("keybindings.errors");
 type Modifier = (typeof MODIFIERS)[number];
 
 const MODIFIER_ALIASES: Record<string, Modifier | "mod"> = {
@@ -155,7 +160,7 @@ export function strokeToString(s: Stroke): string {
  */
 export function parseStroke(text: string, mac: boolean): Stroke {
   const trimmed = text.trim().toLowerCase();
-  if (!trimmed) throw new Error("empty key");
+  if (!trimmed) throw new Error(problem()("emptyKey"));
   const parts = trimmed.endsWith("++")
     ? [...trimmed.slice(0, -2).split("+"), "+"]
     : trimmed === "+"
@@ -173,13 +178,13 @@ export function parseStroke(text: string, mac: boolean): Stroke {
     const last = i === parts.length - 1;
     const modifier = MODIFIER_ALIASES[part];
     if (!last) {
-      if (!modifier) throw new Error(`unknown modifier "${part}"`);
+      if (!modifier) throw new Error(problem()("unknownModifier", { part }));
       stroke[modifier === "mod" ? (mac ? "meta" : "ctrl") : modifier] = true;
       return;
     }
     const key = KEY_ALIASES[part] ?? part;
     if (!(key.length === 1 || NAMED.has(key)))
-      throw new Error(`unknown key "${part}"`);
+      throw new Error(problem()("unknownKey", { part }));
     stroke.key = key;
   });
   return stroke;
@@ -188,7 +193,7 @@ export function parseStroke(text: string, mac: boolean): Stroke {
 /** A written chord in its one way of writing, e.g. "Ctrl+K" → "ctrl+k". */
 export function normalizeChord(text: string, mac: boolean): string {
   const strokes = text.trim().split(/\s+/);
-  if (strokes.length > 2) throw new Error("a chord has at most two strokes");
+  if (strokes.length > 2) throw new Error(problem()("chordTooLong"));
   return strokes.map((s) => strokeToString(parseStroke(s, mac))).join(" ");
 }
 

@@ -1,0 +1,365 @@
+{
+  "page": {
+    "title": "Pokazy funkcji"
+  },
+  "list": {
+    "search": "Znajdź funkcję",
+    "demosTitle": "Odtwórz pokaz",
+    "demosText": "Każdy odtwarza krótki pokaz z własnymi przykładowymi notatkami; potem twoja kolej. Nic nie jest zapisywane: odświeżenie zaczyna pokaz od nowa.",
+    "featuresTitle": "Bez pokazu",
+    "featuresText": "Te funkcje potrzebują serwera lub innej aplikacji, więc nie ma tu czego odtworzyć.",
+    "noMatch": "Żadna funkcja nie pasuje do „{query}”."
+  },
+  "copyLink": {
+    "demo": "Kopiuj link do tego pokazu",
+    "feature": "Kopiuj link do tej funkcji",
+    "copied": "Skopiowano link",
+    "failed": "Nie udało się skopiować linku"
+  },
+  "player": {
+    "nudge": "Krótkie pokazy przedstawiają każdą funkcję, potem twoja kolej.",
+    "openList": "Otwórz listę pokazów",
+    "panel": "Pokaz funkcji",
+    "playing": "Trwa pokaz",
+    "yourTurn": "Twoja kolej",
+    "goingBack": "Wracam…",
+    "previous": "Poprzedni krok",
+    "play": "Odtwórz",
+    "pause": "Wstrzymaj",
+    "next": "Następny krok",
+    "progress": "{step} / {total}",
+    "skip": "Przejdź do wypróbowania",
+    "playAgain": "Odtwórz ponownie",
+    "all": "Wszystkie pokazy funkcji"
+  },
+  "needs": {
+    "server": "Wymaga serwera.",
+    "android": "Wymaga aplikacji na Androida.",
+    "desktop": "Wymaga aplikacji na komputer."
+  },
+  "items": {
+    "freeze": {
+      "title": "Zamroź notatkę",
+      "summary": "Nikt nie może jej zmienić, przenieść do kosza ani usunąć, dopóki właściciel jej nie odmrozi.",
+      "outro": "Wypróbuj: zamroź notatkę, a potem spróbuj w niej pisać albo przenieść ją do kosza.",
+      "say": {
+        "s1": "Otwórz notatkę, która ma zostać taka, jaka jest.",
+        "s2": "W menu Więcej wybierz Zamroź.",
+        "s3": "Zamrożona: tekstu nie da się edytować, a notatki nie można przenieść do kosza ani usunąć.",
+        "s4": "Odmroź ją w tym samym menu.",
+        "s5": "Teraz znów można ją edytować."
+      }
+    },
+    "copy": {
+      "title": "Utwórz kopię",
+      "summary": "Skopiuj notatkę razem z jej zdjęciami i załącznikami.",
+      "outro": "Wypróbuj: skopiuj notatkę, a potem zmień kopię.",
+      "say": {
+        "s1": "Otwórz notatkę.",
+        "s2": "Więcej › Utwórz kopię.",
+        "s3": "Kopia leży obok oryginału."
+      }
+    },
+    "drag": {
+      "title": "Przeciągaj notatki w kolejności",
+      "summary": "Układaj notatki jak w Google Keep: pozostałe robią miejsce, a przeniesiona notatka zostaje na miejscu.",
+      "outro": "Wypróbuj: przeciągnij notatkę w inne miejsce. Zostanie tam, dopóki jej nie edytujesz.",
+      "say": {
+        "s1": "Chwyć notatkę i przeciągnij ją tam, gdzie chcesz.",
+        "s2": "Pozostałe notatki zrobiły miejsce, a kolejność zostaje."
+      }
+    },
+    "bulk-colour": {
+      "title": "Koloruj wiele notatek naraz",
+      "summary": "Zaznacz kilka notatek i nadaj im jeden kolor.",
+      "outro": "Wypróbuj: zaznacz notatki, a potem użyj paska na dole.",
+      "say": {
+        "s1": "Wybierz Zaznacz…",
+        "s2": "…a potem kilka notatek.",
+        "s3": "Kolor zmienia wszystkie naraz."
+      }
+    },
+    "tick-from-list": {
+      "title": "Odhaczaj pozycje z listy",
+      "summary": "Odhaczaj pozycje list kontrolnych prosto z listy notatek.",
+      "outro": "Wypróbuj: odhaczaj i odznaczaj pozycje na kartach.",
+      "say": {
+        "s1": "Nie trzeba otwierać listy kontrolnej, żeby ją odhaczyć.",
+        "s2": "Odhaczenia są zapisane; karty zostają na miejscu."
+      }
+    },
+    "checkboxes": {
+      "title": "Narzędzia pól wyboru",
+      "summary": "Pokaż lub ukryj pola wyboru, odznacz wszystkie pozycje, usuń zaznaczone pozycje.",
+      "outro": "Wypróbuj: odhacz kilka pozycji, a potem użyj Więcej › Usuń zaznaczone pozycje albo Odznacz wszystko.",
+      "say": {
+        "s1": "Otwórz listę kontrolną.",
+        "s2": "Więcej › Odznacz wszystko zaczyna od nowa.",
+        "s3": "Ukryj pola wyboru zamienia ją w zwykłe wiersze…",
+        "s4": "…a Pokaż pola wyboru z powrotem w listę.",
+        "s5": "Gdy pozycje są odhaczone, Więcej › Usuń zaznaczone pozycje je usuwa."
+      }
+    },
+    "filters": {
+      "title": "Filtry wyszukiwania",
+      "summary": "Filtruj według koloru, tagu, zdjęć, list kontrolnych i przypomnień.",
+      "outro": "Wypróbuj: połącz filtry z wyszukiwaniem.",
+      "say": {
+        "s1": "Filtr zawęża listę.",
+        "s2": "Teraz tylko listy kontrolne.",
+        "s3": "Dodaj kolor…",
+        "s4": "…albo tag. Filtry są zapisane w adresie, więc Wstecz do nich wraca."
+      }
+    },
+    "search-archive": {
+      "title": "Wyszukiwanie znajduje zarchiwizowane notatki",
+      "summary": "Wyszukiwanie pokazuje też zarchiwizowane notatki; Archiwum i Kosz można przeszukiwać.",
+      "outro": "Wypróbuj: zarchiwizuj notatkę, a potem wyszukaj ją w Notatkach.",
+      "say": {
+        "s1": "Wyszukiwanie w Notatkach znajduje też zarchiwizowane…",
+        "s2": "…a Archiwum i Kosz mają własne wyszukiwanie."
+      }
+    },
+    "search-marks": {
+      "title": "Wyszukane słowa zaznaczone",
+      "summary": "Wyszukane słowa są zaznaczone w otwartej notatce.",
+      "outro": "Wypróbuj: wyszukaj coś, a potem otwórz wynik.",
+      "say": {
+        "s1": "Wyszukaj słowo…",
+        "s2": "…i otwórz znalezioną notatkę.",
+        "s3": "Słowo jest zaznaczone w tekście. Pisanie usuwa zaznaczenia."
+      }
+    },
+    "search-kept": {
+      "title": "Wyszukiwanie zostaje po powrocie",
+      "summary": "Otwórz notatkę z wyszukiwania; Wstecz wraca do tego samego wyszukiwania.",
+      "outro": "Wypróbuj: wyszukaj coś, otwórz notatkę, a potem naciśnij Wstecz.",
+      "say": {
+        "s1": "Wyszukaj coś…",
+        "s2": "…otwórz znalezioną notatkę…",
+        "s3": "…i wróć: wyszukiwanie wciąż tam jest."
+      }
+    },
+    "tag-archived": {
+      "title": "Tagi liczą zarchiwizowane notatki",
+      "summary": "Liczba przy tagu obejmuje jego zarchiwizowane notatki, a tag je pokazuje.",
+      "outro": "Wypróbuj: zarchiwizuj notatkę z tagiem, a potem otwórz ten tag.",
+      "say": {
+        "s1": "Travel liczy 2 notatki: jedna z nich jest zarchiwizowana.",
+        "s2": "Tag pokazuje obie…",
+        "s3": "…łącznie z zarchiwizowaną, więc nic z tagiem nie ginie."
+      }
+    },
+    "paste-picture": {
+      "title": "Wklej zdjęcie",
+      "summary": "Wklej zdjęcie do tekstu notatki, a potem zmień jego rozmiar za róg.",
+      "outro": "Wypróbuj: skopiuj zdjęcie lub zrób zrzut ekranu, wklej do notatki, a potem przeciągnij jego róg.",
+      "say": {
+        "s1": "Skopiuj zdjęcie, otwórz notatkę…",
+        "s2": "…i wklej je skrótem Ctrl+V: trafi tam, gdzie jest kursor.",
+        "s3": "Za duże? Przeciągnij kropkę w jego rogu…",
+        "s4": "…a zachowa ten rozmiar na każdym urządzeniu.",
+        "s5": "Karta też je pokazuje."
+      }
+    },
+    "attach-file": {
+      "title": "Załącz dowolny plik",
+      "summary": "Załączaj do notatki pliki dowolnego rodzaju, nie tylko zdjęcia i dźwięk.",
+      "outro": "Wypróbuj: załącz plik do notatki albo upuść go na nią.",
+      "say": {
+        "s1": "W notatce Obraz lub dźwięk…",
+        "s2": "…przyjmuje każdy rodzaj pliku, nie tylko zdjęcia i nagrania.",
+        "s3": "Zostają przy notatce i pobierają się jednym kliknięciem."
+      }
+    },
+    "tags": {
+      "title": "Kolory i kolejność tagów",
+      "summary": "Zmień kolor tagu w jego menu; przeciągaj tagi w dowolnej kolejności.",
+      "outro": "Wypróbuj: najedź na tag, a potem przeciągnij jego uchwyt lub otwórz jego menu.",
+      "say": {
+        "s1": "Menu każdego tagu ma jego kolor.",
+        "s2": "Przenieś tag, przeciągając jego uchwyt, albo klawiszami strzałek.",
+        "s3": "Nowa kolejność synchronizuje się z twoimi innymi urządzeniami."
+      }
+    },
+    "text-style": {
+      "title": "Kolor tekstu, czcionki i wyróżnienia",
+      "summary": "Koloruj tekst, zmieniaj jego czcionkę i wyróżniaj w dowolnym kolorze.",
+      "outro": "Wypróbuj: zaznacz tekst, a potem użyj paska narzędzi lub dymka nad nim.",
+      "say": {
+        "s1": "Otwórz notatkę i zaznacz kilka słów.",
+        "s2": "Kolor tekstu i czcionka…",
+        "s3": "…i czcionka.",
+        "s4": "Wyróżnienia są w każdym kolorze."
+      }
+    },
+    "burn": {
+      "title": "Notatki spalają się",
+      "summary": "Usunięta notatka spala się jak zniszczona karta w Balatro.",
+      "outro": "Wypróbuj: usuń notatkę. Ustawienia › Edytor wyłączają ten efekt.",
+      "say": {
+        "s1": "Zaznacz notatkę…",
+        "s2": "…i usuń ją.",
+        "s3": "Trafiła do kosza; Cofnij przywraca ją."
+      }
+    },
+    "pictures": {
+      "title": "Zdjęcia na kartach",
+      "summary": "Obejrzyj zdjęcie z karty w pełnym rozmiarze albo ukryj zdjęcia na kartach.",
+      "outro": "Wypróbuj: otwórz zdjęcie albo wklej je do notatki.",
+      "say": {
+        "s1": "Kliknij zdjęcie na karcie, aby zobaczyć je w pełnym rozmiarze.",
+        "s2": "Przeglądaj zdjęcia notatki.",
+        "s3": "Widok › Zdjęcia na kartach je ukrywa.",
+        "s4": "I znów pokazuje."
+      }
+    },
+    "pictures-in-text": {
+      "title": "Zdjęcia w tekście",
+      "summary": "Wstawiaj zdjęcia do tekstu; zmieniaj ich rozmiar za róg, prawym kliknięciem przycinaj, odbijaj lub podpisuj.",
+      "outro": "Wypróbuj: przytnij zdjęcie prawym kliknięciem albo wstaw je do tekstu przyciskiem zdjęcia.",
+      "say": {
+        "s1": "Otwórz notatkę ze zdjęciami w tekście.",
+        "s2": "Najedź na zdjęcie: przeciągnij kropkę w rogu, aby zmienić rozmiar.",
+        "s3": "Kliknij je prawym przyciskiem (lub przytrzymaj), aby zobaczyć więcej.",
+        "s4": "Odbite, przycięte czy podmienione, zachowuje rozmiar i podpis.",
+        "s5": "Nadaj mu podpis…",
+        "s6": "…a przycisk zdjęcia na lewo od stylów tekstu wstawia nowe w miejscu kursora."
+      }
+    },
+    "image-text": {
+      "title": "Pobierz tekst ze zdjęcia",
+      "summary": "Zaznacz tekst na zdjęciu, skopiuj go albo wstaw do notatki.",
+      "outro": "Wypróbuj: otwórz zdjęcie i obrysuj ramką kilka słów.",
+      "say": {
+        "s1": "Otwórz zdjęcie…",
+        "s2": "…i pobierz jego tekst. Jest odczytywany w twojej przeglądarce.",
+        "s3": "Zaznacz słowa przeciągając, albo wszystkie.",
+        "s4": "Wstaw do notatki dodaje tekst do notatki."
+      }
+    },
+    "history": {
+      "title": "Historia wersji",
+      "summary": "Każda wersja pokazuje dodane i usunięte wiersze; przywróć dowolną z nich.",
+      "outro": "Wypróbuj: edytuj notatkę, a potem znów zajrzyj do jej historii.",
+      "say": {
+        "s1": "Otwórz notatkę z historią.",
+        "s2": "Więcej › Historia wersji.",
+        "s3": "Każda wersja pokazuje, co dodano (+) i usunięto (−).",
+        "s4": "Przywróć przywraca wersję; Cofnij jest pod ręką."
+      }
+    },
+    "appearance": {
+      "title": "Schematy kolorów i motywy",
+      "summary": "Nord, Dracula, OLED i inne, a także własne motywy.",
+      "outro": "Wypróbuj: Ustawienia › Wygląd. Odświeżenie przywraca domyślne.",
+      "say": {
+        "s1": "Wybierz schemat kolorów…",
+        "s2": "OLED w trybie ciemnym to czysta czerń.",
+        "s3": "Własny motyw można też wkleić jako JSON."
+      }
+    },
+    "custom-theme": {
+      "title": "Własny motyw z JSON",
+      "summary": "Wklej motyw jako JSON; ten sam JSON działa na Androidzie.",
+      "outro": "Wypróbuj: Ustawienia › Wygląd › Kopiuj bieżący motyw jako JSON, a potem zmień kolor.",
+      "say": {
+        "s1": "Ustawienia › Wygląd › Własny motyw przyjmuje motyw jako JSON.",
+        "s2": "Zastosuj, a jego kolory zastąpią kolory schematu.",
+        "s3": "Kolory, których brakuje, pochodzą ze schematu. Resetuj go usuwa."
+      }
+    },
+    "shortcuts": {
+      "title": "Skróty klawiszowe",
+      "summary": "Skróty z Google Keep: c dla nowej notatki, / do wyszukiwania, Esc, e, f, #.",
+      "outro": "Wypróbuj: naciśnij c, napisz coś, a potem Esc.",
+      "say": {
+        "s1": "c zaczyna nową notatkę…",
+        "s2": "…Esc ją zamyka.",
+        "s3": "/ przechodzi do wyszukiwania.",
+        "s4": "W otwartej notatce: e archiwizuje, f przypina, # przenosi do kosza."
+      }
+    },
+    "date": {
+      "title": "Wstaw dzisiejszą datę",
+      "summary": "Wpisz /date albo naciśnij Ctrl+; dla daty (Ctrl+Shift+; z godziną).",
+      "outro": "Wypróbuj: wpisz /date w notatce.",
+      "say": {
+        "s1": "W notatce…",
+        "s2": "…Ctrl+; wstawia dzisiejszą datę…",
+        "s3": "…podobnie jak /date.",
+        "s4": "Ustawienia › Edytor oferują zamiast tego 2026-10-28 oraz własny skrót."
+      }
+    },
+    "lock": {
+      "title": "Zablokuj notatkę",
+      "summary": "Zablokuj notatkę dotknięciem, PIN-em, wzorem lub odciskiem palca.",
+      "outro": "Wypróbuj: w Ustawienia › Blokady notatek ustawisz PIN lub wzór.",
+      "say": {
+        "s1": "Otwórz notatkę…",
+        "s2": "…wybierz Więcej › Zablokuj…",
+        "s3": "Zablokowana notatka pokazuje tylko tytuł…",
+        "s4": "…i otwiera się dotknięciem (albo PIN-em, wzorem lub hasłem)."
+      }
+    },
+    "quick-writing": {
+      "title": "Pisanie od razu",
+      "summary": "Nowa notatka otwiera się z kursorem w tekście; Tab przechodzi z tytułu do tekstu.",
+      "outro": "Wypróbuj: naciśnij n w dowolnym miejscu, aby utworzyć nową notatkę.",
+      "say": {
+        "s1": "Nowa notatka otwiera się gotowa do pisania.",
+        "s2": "W tytule…",
+        "s3": "…Tab przechodzi do tekstu."
+      }
+    },
+    "send": {
+      "title": "Wyślij notatkę jako tekst",
+      "summary": "Wysyłaj notatkę do innych aplikacji jako tekst, listy kontrolne jako ☐ i ☑.",
+      "outro": "Wypróbuj: wyślij notatkę, a potem wklej ją gdzieś.",
+      "say": {
+        "s1": "Otwórz notatkę.",
+        "s2": "Więcej › Wyślij udostępnia ją jako tekst albo kopiuje.",
+        "s3": "Listy kontrolne wychodzą jako wiersze ☐ i ☑."
+      }
+    }
+  },
+  "features": {
+    "mcp": {
+      "title": "Claude i inne aplikacje MCP",
+      "summary": "Claude i inne aplikacje obsługujące MCP mogą przez twój serwer wyszukiwać, czytać i zapisywać twoje notatki."
+    },
+    "sync": {
+      "title": "Synchronizacja między urządzeniami",
+      "summary": "Edytuj offline w przeglądarce lub na telefonie; zmiany synchronizują się, gdy wrócisz do sieci."
+    },
+    "sharing": {
+      "title": "Udostępnianie notatek",
+      "summary": "Udostępnij notatkę innym osobom na swoim serwerze, do czytania lub edycji."
+    },
+    "picture-text-search": {
+      "title": "Wyszukiwanie tekstu na zdjęciach",
+      "summary": "Wyszukiwanie znajduje słowa na zrzutach ekranu i paragonach, odczytane na serwerze."
+    },
+    "picture-search": {
+      "title": "Znajdowanie notatek po zdjęciach",
+      "summary": "Opcjonalnie: szukaj tego, co pokazują zdjęcia („paragon”, „Katzen”), w większości języków."
+    },
+    "oidc": {
+      "title": "Logowanie przez OIDC",
+      "summary": "Loguj się przez Pocket ID, Authelia, Keycloak i podobne."
+    },
+    "reminders": {
+      "title": "Przypomnienia",
+      "summary": "Ustaw godzinę przy dowolnej notatce i dostań powiadomienie na telefonie, jednorazowo lub cyklicznie."
+    },
+    "share-to": {
+      "title": "Udostępnij do Anchor+",
+      "summary": "Wysyłaj tekst, linki, zdjęcia i pliki do Anchor+ z innych aplikacji."
+    },
+    "desktop-app": {
+      "title": "Aplikacja na komputer",
+      "summary": "Klient webowy twojego serwera we własnym oknie na Windows i macOS, aktualizujący się sam.",
+      "link": "Pobierz najnowsze wydanie"
+    }
+  }
+}

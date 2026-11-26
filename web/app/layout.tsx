@@ -9,6 +9,7 @@ import {
 import { appearanceScript } from "@/lib/appearance-script";
 import { memoryStorageScript } from "@/lib/demo/memory-storage-script";
 import { isDemo } from "@/lib/local-backend/mode";
+import en from "@/messages/en";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -50,7 +51,8 @@ const patrickHand = Patrick_Hand({
 export const metadata: Metadata = {
   // Pages name themselves first: "Settings · Anchor+" (lib/hooks/use-document-title).
   title: { default: "Anchor+", template: "%s · Anchor+" },
-  description: "Your thoughts, secured",
+  // In English as built; I18nProvider says it in the language on screen.
+  description: en.common.appDescription,
   other: {
     "apple-mobile-web-app-title": "Anchor+",
   },

@@ -31,6 +31,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         if (!isCurrent) return;
         setCurrentMessages(locale, messages);
         document.documentElement.lang = locale;
+        document
+          .querySelector('meta[name="description"]')
+          ?.setAttribute("content", messages.common.appDescription);
         setState({ locale, messages });
       },
       () => {

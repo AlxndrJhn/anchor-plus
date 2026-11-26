@@ -129,5 +129,26 @@
       "insertDateTime": "Datum und Uhrzeit einfügen",
       "insertLink": "Markierten Text verlinken"
     }
+  },
+  "errors": {
+    "mustBeList": "muss eine Liste sein: {shape}",
+    "mustBeRule": "muss {shape} sein",
+    "needsCommand": "braucht ein \"command\"",
+    "noCommand": "kein Befehl \"{id}\"",
+    "needsKey": "braucht einen \"key\"",
+    "keyNotText": "\"key\" muss Text sein",
+    "inKey": "\"{key}\": {problem}",
+    "whenNotText": "\"when\" muss Text sein",
+    "unknownContext": "unbekannter Kontextschlüssel \"{key}\"",
+    "inWhen": "\"when\": {problem}",
+    "emptyKey": "leere Taste",
+    "unknownModifier": "unbekannte Zusatztaste \"{part}\"",
+    "unknownKey": "unbekannte Taste \"{part}\"",
+    "chordTooLong": "eine Tastenfolge hat höchstens zwei Anschläge",
+    "quoteOpen": "ein Anführungszeichen ist nicht geschlossen",
+    "unexpected": "unerwartetes \"{text}\"",
+    "expectedValue": "Wert erwartet",
+    "parenOpen": "eine Klammer ist nicht geschlossen",
+    "endsTooSoon": "endet zu früh"
   }
 }

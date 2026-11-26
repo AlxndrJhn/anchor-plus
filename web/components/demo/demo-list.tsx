@@ -2,12 +2,14 @@
 
 import { ChevronRight, ExternalLink, Info, Play, Search } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { CopyDemoLink } from "@/components/demo/copy-demo-link";
 import { Input } from "@/components/ui/input";
 import { Section } from "@/features/settings";
 import { demos } from "@/lib/demo/demos";
 import { features } from "@/lib/demo/features";
+import { demoKey, featureKey } from "@/lib/demo/text";
 import { prefersReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -24,16 +26,24 @@ function linkedFeature() {
  * Features that can't be demoed follow, each linked at #feature-<slug>.
  */
 export function DemoList() {
+  const t = useTranslations("demos");
   const [query, setQuery] = React.useState("");
   const [highlighted, setHighlighted] = React.useState<string | null>(null);
   // Every word has to appear in the title or summary.
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-  const matches = (item: { title: string; summary: string }) => {
-    const text = `${item.title} ${item.summary}`.toLowerCase();
+  const matches = (title: string, summary: string) => {
+    const text = `${title} ${summary}`.toLowerCase();
     return words.every((word) => text.includes(word));
   };
-  const shownDemos = demos.filter(matches);
-  const shownFeatures = features.filter(matches);
+  const shownDemos = demos.filter((demo) =>
+    matches(t(demoKey(demo.slug, "title")), t(demoKey(demo.slug, "summary"))),
+  );
+  const shownFeatures = features.filter((feature) =>
+    matches(
+      t(featureKey(feature.slug, "title")),
+      t(featureKey(feature.slug, "summary")),
+    ),
+  );
 
   // A link to a feature clears the search, so its entry is there to show.
   React.useEffect(() => {
@@ -63,8 +73,8 @@ export function DemoList() {
       <Input
         type="search"
         icon={<Search aria-hidden />}
-        placeholder="Find a feature"
-        aria-label="Find a feature"
+        placeholder={t("list.search")}
+        aria-label={t("list.search")}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         boxClassName="h-10 w-full"
@@ -72,8 +82,8 @@ export function DemoList() {
       {shownDemos.length > 0 && (
         <Section
           id="demos"
-          title="Play a demo"
-          description="Each one plays a short demo with its own sample notes; then it's your turn. Nothing is saved: a reload starts the demo over."
+          title={t("list.demosTitle")}
+          description={t("list.demosText")}
         >
           {shownDemos.map((demo) => (
             <div
@@ -88,9 +98,11 @@ export function DemoList() {
                   <Play aria-hidden className="size-3.5 fill-current" />
                 </span>
                 <span className="grid min-w-0 flex-1 gap-0.5">
-                  <b className="font-semibold text-ui">{demo.title}</b>
+                  <b className="font-semibold text-ui">
+                    {t(demoKey(demo.slug, "title"))}
+                  </b>
                   <span className="text-meta text-muted-foreground leading-[1.45]">
-                    {demo.summary}
+                    {t(demoKey(demo.slug, "summary"))}
                   </span>
                 </span>
                 <ChevronRight
@@ -106,8 +118,8 @@ export function DemoList() {
       {shownFeatures.length > 0 && (
         <Section
           id="no-demo"
-          title="Without a demo"
-          description="These need a server or another app, so there's nothing to play here."
+          title={t("list.featuresTitle")}
+          description={t("list.featuresText")}
         >
           {shownFeatures.map((feature) => (
             <div
@@ -124,21 +136,23 @@ export function DemoList() {
                   <Info aria-hidden className="size-4" />
                 </span>
                 <span className="grid min-w-0 flex-1 gap-0.5">
-                  <b className="font-semibold text-ui">{feature.title}</b>
+                  <b className="font-semibold text-ui">
+                    {t(featureKey(feature.slug, "title"))}
+                  </b>
                   <span className="text-meta text-muted-foreground leading-[1.45]">
-                    {feature.summary}
+                    {t(featureKey(feature.slug, "summary"))}
                   </span>
                   <span className="text-meta text-muted-foreground/80 italic">
-                    {feature.needs}.
+                    {t(`needs.${feature.needs}`)}
                   </span>
-                  {feature.link && (
+                  {feature.href && (
                     <a
-                      href={feature.link.href}
+                      href={feature.href}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex w-fit items-center gap-1 text-meta"
                     >
-                      {feature.link.label}
+                      {t(featureKey(feature.slug, "link"))}
                       <ExternalLink aria-hidden className="size-3" />
                     </a>
                   )}
@@ -151,7 +165,7 @@ export function DemoList() {
       )}
       {shownDemos.length + shownFeatures.length === 0 && (
         <p className="m-0 px-1 text-control text-muted-foreground">
-          No feature matches “{query.trim()}”.
+          {t("list.noMatch", { query: query.trim() })}
         </p>
       )}
     </div>

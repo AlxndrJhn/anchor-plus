@@ -6,6 +6,11 @@
  *   view == 'notes' || view == archive
  */
 
+import { translate } from "@/lib/i18n";
+
+/** Why a rule can't be read, in the language on screen. */
+const problem = () => translate("keybindings.errors");
+
 export type ContextValue = string | number | boolean | null | undefined;
 export type Context = (key: string) => ContextValue;
 export type When = (context: Context) => boolean;
@@ -37,13 +42,13 @@ function tokenize(source: string): Token[] {
     }
     if (c === "'" || c === '"') {
       const end = source.indexOf(c, i + 1);
-      if (end < 0) throw new Error("a quote isn't closed");
+      if (end < 0) throw new Error(problem()("quoteOpen"));
       tokens.push({ kind: "string", text: source.slice(i + 1, end) });
       i = end + 1;
       continue;
     }
     const name = /^[\w.:-]+/.exec(source.slice(i));
-    if (!name) throw new Error(`unexpected "${c}"`);
+    if (!name) throw new Error(problem()("unexpected", { text: c }));
     tokens.push({ kind: "name", text: name[0] });
     i += name[0].length;
   }
@@ -60,7 +65,8 @@ export function parseWhen(source: string | undefined): When {
   const take = () => tokens[at++];
 
   const literal = (token: Token | undefined): ContextValue => {
-    if (!token || token.kind === "op") throw new Error("expected a value");
+    if (!token || token.kind === "op")
+      throw new Error(problem()("expectedValue"));
     if (token.kind === "string") return token.text;
     if (token.text === "true") return true;
     if (token.text === "false") return false;
@@ -77,13 +83,17 @@ export function parseWhen(source: string | undefined): When {
     if (isOp("(")) {
       take();
       const inner = or();
-      if (!isOp(")")) throw new Error("a parenthesis isn't closed");
+      if (!isOp(")")) throw new Error(problem()("parenOpen"));
       take();
       return inner;
     }
     const token = take();
     if (token?.kind !== "name")
-      throw new Error(token ? `unexpected "${token.text}"` : "ends too soon");
+      throw new Error(
+        token
+          ? problem()("unexpected", { text: token.text })
+          : problem()("endsTooSoon"),
+      );
     const key = token.text;
     if (key === "true") return () => true;
     if (key === "false") return () => false;
@@ -119,7 +129,8 @@ export function parseWhen(source: string | undefined): When {
   };
 
   const when = or();
-  if (at < tokens.length) throw new Error(`unexpected "${peek().text}"`);
+  if (at < tokens.length)
+    throw new Error(problem()("unexpected", { text: peek().text }));
   return when;
 }
 

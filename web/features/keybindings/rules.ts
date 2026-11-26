@@ -1,9 +1,13 @@
+import { translate } from "@/lib/i18n";
 import { COMMAND_IDS, COMMANDS, CONTEXT_KEYS, commandById } from "./commands";
 import { normalizeChord } from "./keys";
 import type { KeybindingRule } from "./store";
 import { parseWhen, type When, whenKeys } from "./when";
 
 export type Source = "default" | "user";
+
+/** Why a rule can't be read, in the language on screen. */
+const problem = () => translate("keybindings.errors");
 
 /** A rule in force: its key written one way, its when clause read. */
 export interface ActiveRule {
@@ -96,42 +100,48 @@ export interface RuleProblem {
 /** What is wrong with each of the user's rules, for the JSON view. */
 export function validateRules(value: unknown, mac: boolean): RuleProblem[] {
   if (!Array.isArray(value))
-    return [{ index: -1, message: "must be a list: [ { … }, … ]" }];
+    return [
+      {
+        index: -1,
+        message: problem()("mustBeList", { shape: "[ { … }, … ]" }),
+      },
+    ];
   const problems: RuleProblem[] = [];
   value.forEach((rule, index) => {
     const say = (message: string) => problems.push({ index, message });
     if (!rule || typeof rule !== "object" || Array.isArray(rule)) {
-      say('must be { "key": …, "command": … }');
+      say(problem()("mustBeRule", { shape: '{ "key": …, "command": … }' }));
       return;
     }
     const { key, command, when } = rule as Record<string, unknown>;
     if (typeof command !== "string" || !command) {
-      say('needs a "command"');
+      say(problem()("needsCommand"));
       return;
     }
     const id = command.replace(/^-/, "");
-    if (!COMMAND_IDS.has(id)) say(`no command "${id}"`);
+    if (!COMMAND_IDS.has(id)) say(problem()("noCommand", { id }));
     if (key === undefined) {
-      if (!command.startsWith("-")) say('needs a "key"');
-    } else if (typeof key !== "string") say('"key" must be text');
+      if (!command.startsWith("-")) say(problem()("needsKey"));
+    } else if (typeof key !== "string") say(problem()("keyNotText"));
     else {
       try {
         normalizeChord(key, mac);
       } catch (e) {
-        say(`"${key}": ${(e as Error).message}`);
+        say(problem()("inKey", { key, problem: (e as Error).message }));
       }
     }
     if (when !== undefined) {
-      if (typeof when !== "string") say('"when" must be text');
+      if (typeof when !== "string") say(problem()("whenNotText"));
       else {
         try {
           parseWhen(when);
           const unknown = whenKeys(when).filter(
             (k) => !(CONTEXT_KEYS as readonly string[]).includes(k),
           );
-          if (unknown.length) say(`unknown context key "${unknown[0]}"`);
+          if (unknown.length)
+            say(problem()("unknownContext", { key: unknown[0] }));
         } catch (e) {
-          say(`"when": ${(e as Error).message}`);
+          say(problem()("inWhen", { problem: (e as Error).message }));
         }
       }
     }

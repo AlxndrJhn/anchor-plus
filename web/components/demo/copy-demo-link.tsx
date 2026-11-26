@@ -1,6 +1,7 @@
 "use client";
 
 import { Link2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { IconButton } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { copyText } from "@/lib/clipboard";
@@ -28,9 +29,8 @@ export function CopyDemoLink({
   feature?: boolean;
   className?: string;
 }) {
-  const label = feature
-    ? "Copy link to this feature"
-    : "Copy link to this demo";
+  const t = useTranslations("demos.copyLink");
+  const label = feature ? t("feature") : t("demo");
   return (
     <IconButton
       size="sm"
@@ -39,8 +39,8 @@ export function CopyDemoLink({
       className={className}
       onClick={() =>
         copyText(feature ? featureUrl(slug) : demoUrl(slug)).then(
-          () => toast.success("Link copied"),
-          () => toast.error("Couldn’t copy the link"),
+          () => toast.success(t("copied")),
+          () => toast.error(t("failed")),
         )
       }
     >

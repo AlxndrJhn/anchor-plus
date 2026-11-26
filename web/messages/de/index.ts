@@ -3,6 +3,7 @@ import admin from "./admin.json";
 import auth from "./auth.json";
 import common from "./common.json";
 import debugRecorder from "./debugRecorder.json";
+import demos from "./demos.json";
 import editor from "./editor.json";
 import editorMedia from "./editorMedia.json";
 import errors from "./errors.json";
@@ -18,6 +19,7 @@ const messages = {
   auth,
   common,
   debugRecorder,
+  demos,
   editor,
   editorMedia,
   errors,

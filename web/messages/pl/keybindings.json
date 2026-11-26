@@ -129,5 +129,26 @@
       "insertDateTime": "Wstaw datę i godzinę",
       "insertLink": "Dodaj link do zaznaczonego tekstu"
     }
+  },
+  "errors": {
+    "mustBeList": "musi być listą: {shape}",
+    "mustBeRule": "musi mieć postać {shape}",
+    "needsCommand": "brakuje \"command\"",
+    "noCommand": "nie ma polecenia \"{id}\"",
+    "needsKey": "brakuje \"key\"",
+    "keyNotText": "\"key\" musi być tekstem",
+    "inKey": "\"{key}\": {problem}",
+    "whenNotText": "\"when\" musi być tekstem",
+    "unknownContext": "nieznany klucz kontekstu \"{key}\"",
+    "inWhen": "\"when\": {problem}",
+    "emptyKey": "pusty klawisz",
+    "unknownModifier": "nieznany modyfikator \"{part}\"",
+    "unknownKey": "nieznany klawisz \"{part}\"",
+    "chordTooLong": "sekwencja ma najwyżej dwa naciśnięcia",
+    "quoteOpen": "cudzysłów nie jest zamknięty",
+    "unexpected": "nieoczekiwane \"{text}\"",
+    "expectedValue": "oczekiwano wartości",
+    "parenOpen": "nawias nie jest zamknięty",
+    "endsTooSoon": "kończy się za wcześnie"
   }
 }
