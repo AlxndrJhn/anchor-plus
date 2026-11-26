@@ -6,13 +6,15 @@ import { ImportFileError } from "./types";
 export type ZipArchive = {
   names: string[];
   has(path: string): boolean;
-  /** Notes and manifests (.json, .md, .markdown), read when the archive opens. */
+  /** Notes and manifests (.json, .md, .markdown, .txt), read when the archive opens. */
   text(path: string): string;
   /** Any entry, read only when asked for. */
   blob(path: string): Blob | Promise<Blob>;
+  /** When the file was last changed, as an ISO string, if the archive says. */
+  modifiedAt?(path: string): string | undefined;
 };
 
-const TEXT_ENTRY = /\.(json|md|markdown)$/i;
+const TEXT_ENTRY = /\.(json|md|markdown|txt)$/i;
 /** A note or manifest larger than this is not one; it stays unread. */
 const MAX_TEXT_ENTRY = 256 * 1024 * 1024;
 /** Text entries read at the same time while the archive opens. */
@@ -34,6 +36,7 @@ type Entry = {
   compressedSize: number;
   size: number;
   localOffset: number;
+  modifiedAt?: string;
 };
 
 /** Not a ZIP this reader understands; the message can be shown as it is. */
@@ -54,6 +57,30 @@ const view = (bytes: Uint8Array) =>
 
 const u64 = (data: DataView, offset: number) =>
   Number(data.getBigUint64(offset, true));
+
+/** Before this a zip carries no real date, only the format's zero. */
+const EARLIEST_DATE = Date.UTC(1981, 0, 1);
+const ONE_DAY = 86_400_000;
+
+const isoIfPlausible = (ms: number) =>
+  Number.isFinite(ms) && ms >= EARLIEST_DATE && ms <= Date.now() + ONE_DAY
+    ? new Date(ms).toISOString()
+    : undefined;
+
+/** The MS-DOS date and time every entry carries, in the zipper's local time. */
+function dosDateTime(date: number, time: number): string | undefined {
+  if (!date) return undefined;
+  return isoIfPlausible(
+    new Date(
+      1980 + (date >> 9),
+      ((date >> 5) & 0x0f) - 1,
+      date & 0x1f,
+      time >> 11,
+      (time >> 5) & 0x3f,
+      (time & 0x1f) * 2,
+    ).getTime(),
+  );
+}
 
 /**
  * Reads a ZIP from a picked file without loading it: the central directory
@@ -122,6 +149,7 @@ export async function openZip(source: Blob): Promise<ZipArchive> {
         throw new Error(`Zip entry not readable: ${path}`);
       return text;
     },
+    modifiedAt: (path) => entries.get(path)?.modifiedAt,
     blob: async (path) => {
       const entry = entries.get(path);
       if (!entry) throw new Error(`Zip entry not found: ${path}`);
@@ -199,6 +227,10 @@ async function readCentralDirectory(source: Blob): Promise<Map<string, Entry>> {
     }
     const flags = dirView.getUint16(at + 8, true);
     const method = dirView.getUint16(at + 10, true);
+    let modifiedAt = dosDateTime(
+      dirView.getUint16(at + 14, true),
+      dirView.getUint16(at + 12, true),
+    );
     let compressedSize = dirView.getUint32(at + 20, true);
     let size = dirView.getUint32(at + 24, true);
     const nameLength = dirView.getUint16(at + 28, true);
@@ -226,6 +258,12 @@ async function readCentralDirectory(source: Blob): Promise<Map<string, Entry>> {
         }
         if (localOffset === U32_MAX) localOffset = u64(dirView, field);
       }
+      // Extended timestamp: a UTC Unix time, more exact than the DOS one
+      if (id === 0x5455 && length >= 5 && dirView.getUint8(extra + 4) & 1) {
+        modifiedAt =
+          isoIfPlausible(dirView.getUint32(extra + 5, true) * 1000) ??
+          modifiedAt;
+      }
       extra += 4 + length;
     }
 
@@ -236,6 +274,7 @@ async function readCentralDirectory(source: Blob): Promise<Map<string, Entry>> {
         compressedSize,
         size,
         localOffset,
+        modifiedAt,
       });
     }
     at = extraEnd + commentLength;
@@ -267,6 +306,10 @@ export async function readFiles(picked: PickedFile[]): Promise<ZipArchive> {
       const text = texts.get(path);
       if (text === undefined) throw new Error(`Text file not found: ${path}`);
       return text;
+    },
+    modifiedAt: (path) => {
+      const file = files.get(path);
+      return file ? isoIfPlausible(file.lastModified) : undefined;
     },
     blob: (path) => {
       const file = files.get(path);

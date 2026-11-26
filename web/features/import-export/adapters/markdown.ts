@@ -17,7 +17,8 @@ import {
 import type { ImportAdapter } from "./types";
 import type { ZipArchive } from "./zip";
 
-const MARKDOWN_EXT = /\.(md|markdown)$/i;
+/** Nextcloud Notes saved notes as .txt before it switched to .md. */
+const NOTE_EXT = /\.(md|markdown|txt)$/i;
 
 const MIME_BY_EXTENSION: Record<string, string> = {
   jpg: "image/jpeg",
@@ -57,7 +58,7 @@ function decodePath(value: string): string {
 }
 
 function stemOf(path: string): string {
-  return decodePath(basename(path)).replace(MARKDOWN_EXT, "").trim();
+  return decodePath(basename(path)).replace(NOTE_EXT, "").trim();
 }
 
 function mimeOf(path: string): string | undefined {
@@ -96,7 +97,7 @@ function commonRootSegments(paths: string[]): string[] {
 
 function markdownEntries(zip: ZipArchive): string[] {
   return zip.names
-    .filter((path) => MARKDOWN_EXT.test(path) && !isIgnored(path))
+    .filter((path) => NOTE_EXT.test(path) && !isIgnored(path))
     .sort();
 }
 
@@ -266,6 +267,10 @@ export const markdownAdapter: ImportAdapter = {
       const isArchived = segments[0] === "Archived";
       if (isArchived || segments[0] === "Shared") segments.shift();
 
+      // A file knows only when it was last changed; that is the best guess
+      // for its creation too, and keeps it from showing up as new today.
+      const modifiedAt = zip.modifiedAt?.(path);
+
       notes.push({
         ref: `markdown:${path}`,
         title: /^untitled$/i.test(stem) ? "" : stem,
@@ -276,6 +281,7 @@ export const markdownAdapter: ImportAdapter = {
         background: null,
         tagNames: [],
         folderTags: segments,
+        ...(modifiedAt ? { createdAt: modifiedAt, updatedAt: modifiedAt } : {}),
         attachments: extracted.attachments,
       });
     }

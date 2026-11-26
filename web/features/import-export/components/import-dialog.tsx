@@ -346,7 +346,7 @@ function DropArea({
           type="file"
           multiple
           hidden
-          accept=".zip,application/zip,.md,.markdown,text/markdown,image/*,audio/*"
+          accept=".zip,application/zip,.md,.markdown,text/markdown,.txt,text/plain,image/*,audio/*"
           onChange={(e) => {
             const files = fromFileList(e.target.files);
             e.target.value = "";

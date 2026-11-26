@@ -86,6 +86,21 @@ describe("fromDataTransfer", () => {
     expect(await droppedPaths(transfer)).toEqual(["Vault/Note.md"]);
   });
 
+  it("keeps the hidden folders Nextcloud Notes puts pictures in", async () => {
+    const transfer = transferOf([
+      dirEntry("Notes", [
+        fileEntry("Beds.md"),
+        dirEntry(".attachments.4711", [fileEntry("bed.png")]),
+        dirEntry(".attachments.backup", [fileEntry("old.png")]),
+      ]),
+    ]);
+
+    expect(await droppedPaths(transfer)).toEqual([
+      "Notes/Beds.md",
+      "Notes/.attachments.4711/bed.png",
+    ]);
+  });
+
   it("stops at the file limit and says so", async () => {
     const files = Array.from({ length: MAX_PICKED_FILES + 1 }, (_, index) =>
       fileEntry(`${index}.md`),
