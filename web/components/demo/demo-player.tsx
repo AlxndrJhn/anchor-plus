@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Button, IconButton } from "@/components/ui/button";
 import { demoBySlug } from "@/lib/demo/demos";
@@ -31,6 +32,8 @@ import {
   typeCharacter,
 } from "@/lib/demo/runner";
 import { startDemo, useDemo } from "@/lib/demo/store";
+import { type DemoKey, demoKey } from "@/lib/demo/text";
+import { translate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { CopyDemoLink } from "./copy-demo-link";
 
@@ -49,6 +52,8 @@ const HURRY_MS = 120;
  */
 export function DemoPlayer() {
   const router = useRouter();
+  const t = useTranslations("demos");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const { slug, status, caption, run, step, paused, waiting, set } = useDemo();
   const [cursor, setCursor] = React.useState<{
@@ -154,7 +159,7 @@ export function DemoPlayer() {
         setCursor({ ...position, pressed: false });
         await pause(MOVE_MS);
       },
-      say: (text) => set({ caption: text }),
+      say: (key) => set({ caption: demoKey(playing.slug, `say.${key}`) }),
       go: (path) => router.push(path),
       cursor: (x, y, pressed = false) => {
         avoidPoint(x, y);
@@ -250,7 +255,10 @@ export function DemoPlayer() {
         await step.run(play);
         await pause(500);
       } else if ("say" in step) {
-        await pause(Math.min(4500, 1400 + step.say.length * 38));
+        const words = translate("demos")(
+          demoKey(playing.slug, `say.${step.say}`),
+        );
+        await pause(Math.min(4500, 1400 + words.length * 38));
       }
     };
 
@@ -272,11 +280,11 @@ export function DemoPlayer() {
           else await gate(i);
           await perform(step);
         }
-        set({ status: "done", caption: playing.outro });
+        set({ status: "done", caption: demoKey(playing.slug, "outro") });
       } catch (error) {
         if (error instanceof Stopped) return;
         console.warn("Demo stopped:", error);
-        set({ status: "done", caption: playing.outro });
+        set({ status: "done", caption: demoKey(playing.slug, "outro") });
       } finally {
         for (const touched of touchedTargets) leaveElement(touched);
         if (!stopped) {
@@ -366,21 +374,21 @@ export function DemoPlayer() {
       {status === "idle" && !isNudgeClosed && pathname !== "/demos" && (
         // Above a phone's New note button.
         <section
-          aria-label="Feature demos"
+          aria-label={t("page.title")}
           className="pointer-events-auto fixed bottom-4 left-1/2 z-[2147483001] flex w-[min(560px,calc(100vw-32px))] max-md:bottom-24 -translate-x-1/2 items-center gap-3 rounded-xl bg-popover p-3 pl-4 text-popover-foreground shadow-[0_0_0_1px_var(--border),var(--sh-lg,0_12px_32px_rgb(0_0_0/.25))] animate-pop-up"
         >
           <p className="m-0 min-w-0 flex-1 text-ui leading-snug">
-            Short demos show each feature, then it’s your turn.
+            {t("player.nudge")}
           </p>
           <Button size="sm" asChild>
             <Link href="/demos">
               <Play />
-              Open demo list
+              {t("player.openList")}
             </Link>
           </Button>
           <button
             type="button"
-            aria-label="Close"
+            aria-label={tc("close")}
             onClick={() => setIsNudgeClosed(true)}
             className="grid size-7 flex-none cursor-pointer place-items-center rounded-md text-muted-foreground hover:bg-foreground/6"
           >
@@ -404,7 +412,7 @@ export function DemoPlayer() {
             e.stopPropagation();
           }}
           aria-live="polite"
-          aria-label="Feature demo"
+          aria-label={t("player.panel")}
           className="pointer-events-auto fixed bottom-4 left-1/2 z-[2147483001] grid w-[min(560px,calc(100vw-32px))] -translate-x-1/2 gap-2.5 transition-transform duration-300 ease-[cubic-bezier(.3,.7,.3,1)] motion-reduce:transition-none rounded-xl bg-popover p-4 text-popover-foreground shadow-[0_0_0_1px_var(--border),var(--sh-lg,0_12px_32px_rgb(0_0_0/.25))]"
           style={
             isRaised
@@ -415,16 +423,16 @@ export function DemoPlayer() {
         >
           <div className="flex items-center gap-2">
             <span className="rounded-pill bg-accent-strong/15 px-2 py-0.5 font-semibold text-accent-ink text-small">
-              {isPlaying ? "Demo playing" : "Your turn"}
+              {isPlaying ? t("player.playing") : t("player.yourTurn")}
             </span>
             <b className="min-w-0 flex-1 truncate font-semibold text-ui">
-              {demo.title}
+              {t(demoKey(demo.slug, "title"))}
             </b>
             <CopyDemoLink slug={demo.slug} />
             {!isPlaying && (
               <button
                 type="button"
-                aria-label="Close"
+                aria-label={tc("close")}
                 onClick={() => setIsHidden(true)}
                 className="grid size-7 cursor-pointer place-items-center rounded-md text-muted-foreground hover:bg-foreground/6"
               >
@@ -433,14 +441,16 @@ export function DemoPlayer() {
             )}
           </div>
           <p className="text-ui leading-snug">
-            {isHurrying ? "Going back…" : caption}
+            {isHurrying
+              ? t("player.goingBack")
+              : caption && t(caption as DemoKey)}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-0.5">
               <IconButton
                 size="sm"
-                label="Previous step"
-                title="Previous step"
+                label={t("player.previous")}
+                title={t("player.previous")}
                 disabled={
                   status === "loading" ||
                   isHurrying ||
@@ -453,8 +463,8 @@ export function DemoPlayer() {
               {isPlaying && (
                 <IconButton
                   size="sm"
-                  label={paused ? "Play" : "Pause"}
-                  title={paused ? "Play" : "Pause"}
+                  label={paused ? t("player.play") : t("player.pause")}
+                  title={paused ? t("player.play") : t("player.pause")}
                   disabled={isHurrying}
                   onClick={() => set({ paused: !paused })}
                 >
@@ -464,8 +474,8 @@ export function DemoPlayer() {
               {isPlaying && (
                 <IconButton
                   size="sm"
-                  label="Next step"
-                  title="Next step"
+                  label={t("player.next")}
+                  title={t("player.next")}
                   disabled={isHurrying}
                   onClick={stepOn}
                 >
@@ -474,7 +484,10 @@ export function DemoPlayer() {
               )}
               {isPlaying && (
                 <span className="px-1.5 text-meta text-muted-foreground tabular-nums">
-                  {Math.min(step + 1, steps)} / {steps}
+                  {t("player.progress", {
+                    step: Math.min(step + 1, steps),
+                    total: steps,
+                  })}
                 </span>
               )}
             </div>
@@ -482,9 +495,14 @@ export function DemoPlayer() {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => set({ status: "done", caption: demo.outro })}
+                onClick={() =>
+                  set({
+                    status: "done",
+                    caption: demoKey(demo.slug, "outro"),
+                  })
+                }
               >
-                Skip to trying it
+                {t("player.skip")}
               </Button>
             ) : (
               <>
@@ -494,12 +512,12 @@ export function DemoPlayer() {
                   onClick={() => router.push(`/${demo.slug}`)}
                 >
                   <RotateCcw />
-                  Play again
+                  {t("player.playAgain")}
                 </Button>
                 <Button variant="quiet" size="sm" asChild>
                   <Link href="/demos" onClick={() => setIsHidden(true)}>
                     <Play />
-                    All feature demos
+                    {t("player.all")}
                   </Link>
                 </Button>
               </>

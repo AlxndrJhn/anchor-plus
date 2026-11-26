@@ -2,19 +2,45 @@
 // clicks it, and text is typed in, through the same DOM events a person's
 // clicks and keys send.
 
+import type { MessageKeys, NestedKeyOf } from "next-intl";
+import { type Messages, translate } from "@/lib/i18n";
+
+/**
+ * Text to look for on screen: as written, or looked up when the step plays,
+ * so that it is in the language on screen (see `ui`).
+ */
+export type Text = string | (() => string);
+
+type UiKey = MessageKeys<Messages, NestedKeyOf<Messages>>;
+
+/**
+ * A message of the app's own, in the language on screen when the step plays:
+ * ui("common.back"), ui("notes.noteCard.selectNote", { label: "Groceries" }).
+ */
+export const ui =
+  (key: UiKey, values?: Record<string, string>): (() => string) =>
+  () =>
+    translate()(key, values);
+
+function resolve(text: Text): string;
+function resolve(text: Text | undefined): string | undefined;
+function resolve(text: Text | undefined) {
+  return typeof text === "function" ? text() : text;
+}
+
 /** A control on screen: its accessible name, its text, or a selector. */
 export type Target =
-  | string
+  | Text
   | {
-      label?: string;
-      text?: string;
+      label?: Text;
+      text?: Text;
       /** The control's text starts with this. */
-      textStarts?: string;
-      css?: string;
+      textStarts?: Text;
+      css?: Text;
       /** Also when not shown yet, e.g. until its row is hovered. */
       hidden?: boolean;
       /** Only inside the element this selector finds. */
-      within?: string;
+      within?: Text;
       /** Which one, when several match; the first by default. */
       nth?: number;
     };
@@ -34,7 +60,10 @@ export interface Fallback {
 }
 
 export type Step =
-  /** Shows a caption. */
+  /**
+   * Shows a caption. Each `say` is a key: the words are the demo's
+   * items.<slug>.say.<key> in messages/<locale>/demos.json.
+   */
   | { say: string }
   | ({ click: Target; say?: string } & Fallback)
   | ({ hover: Target; say?: string } & Fallback)
@@ -81,7 +110,16 @@ function isLaidOut(element: Element) {
 }
 
 function matches(target: Target): HTMLElement[] {
-  const spec = typeof target === "string" ? { label: target } : target;
+  const plain = typeof target !== "object";
+  const given = plain ? { label: target } : target;
+  const spec = {
+    ...given,
+    label: resolve(given.label),
+    text: resolve(given.text),
+    textStarts: resolve(given.textStarts),
+    css: resolve(given.css),
+    within: resolve(given.within),
+  };
   const roots = spec.within
     ? Array.from(document.querySelectorAll(spec.within))
     : [document];
@@ -100,7 +138,7 @@ function matches(target: Target): HTMLElement[] {
           element.getAttribute("aria-label") ?? element.getAttribute("title");
         if (normalize(label) !== spec.label) {
           // A plain string also matches a control's own text.
-          if (typeof target !== "string") continue;
+          if (!plain) continue;
           if (normalize(element.textContent) !== spec.label) continue;
         }
       }
@@ -129,7 +167,10 @@ function matches(target: Target): HTMLElement[] {
 }
 
 export function describe(target: Target) {
-  return typeof target === "string" ? target : JSON.stringify(target);
+  if (typeof target !== "object") return resolve(target);
+  return JSON.stringify(target, (_, value) =>
+    typeof value === "function" ? value() : value,
+  );
 }
 
 export async function findTarget(
@@ -138,7 +179,7 @@ export async function findTarget(
   timeout = 6000,
 ): Promise<HTMLElement> {
   const until = Date.now() + timeout;
-  const nth = typeof target === "string" ? 0 : (target.nth ?? 0);
+  const nth = typeof target === "object" ? (target.nth ?? 0) : 0;
   for (;;) {
     check();
     const element = matches(target)[nth];

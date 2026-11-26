@@ -1,0 +1,365 @@
+{
+  "page": {
+    "title": "Funktionsdemos"
+  },
+  "list": {
+    "search": "Funktion suchen",
+    "demosTitle": "Demo abspielen",
+    "demosText": "Jede spielt eine kurze Demo mit eigenen Beispielnotizen ab; danach bist du dran. Nichts wird gespeichert: Neu laden startet die Demo von vorn.",
+    "featuresTitle": "Ohne Demo",
+    "featuresText": "Diese brauchen einen Server oder eine andere App, deshalb gibt es hier nichts abzuspielen.",
+    "noMatch": "Keine Funktion passt zu „{query}“."
+  },
+  "copyLink": {
+    "demo": "Link zu dieser Demo kopieren",
+    "feature": "Link zu dieser Funktion kopieren",
+    "copied": "Link kopiert",
+    "failed": "Link konnte nicht kopiert werden"
+  },
+  "player": {
+    "nudge": "Kurze Demos zeigen jede Funktion, danach bist du dran.",
+    "openList": "Demoliste öffnen",
+    "panel": "Funktionsdemo",
+    "playing": "Demo läuft",
+    "yourTurn": "Du bist dran",
+    "goingBack": "Zurück…",
+    "previous": "Vorheriger Schritt",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "next": "Nächster Schritt",
+    "progress": "{step} / {total}",
+    "skip": "Gleich selbst ausprobieren",
+    "playAgain": "Noch einmal",
+    "all": "Alle Funktionsdemos"
+  },
+  "needs": {
+    "server": "Braucht einen Server.",
+    "android": "Braucht die Android-App.",
+    "desktop": "Braucht die Desktop-App."
+  },
+  "items": {
+    "freeze": {
+      "title": "Notiz einfrieren",
+      "summary": "Niemand kann sie ändern, in den Papierkorb legen oder löschen, bis ihr Besitzer sie auftaut.",
+      "outro": "Probier es aus: Friere eine Notiz ein und versuche dann, darin zu tippen oder sie in den Papierkorb zu legen.",
+      "say": {
+        "s1": "Öffne eine Notiz, die so bleiben soll, wie sie ist.",
+        "s2": "Wähle im Menü Mehr den Punkt Einfrieren.",
+        "s3": "Eingefroren: Der Text lässt sich nicht bearbeiten, und die Notiz kann weder in den Papierkorb noch gelöscht werden.",
+        "s4": "Im selben Menü taust du sie wieder auf.",
+        "s5": "Jetzt lässt sie sich wieder bearbeiten."
+      }
+    },
+    "copy": {
+      "title": "Kopie erstellen",
+      "summary": "Kopiere eine Notiz samt Bildern und Anhängen.",
+      "outro": "Probier es aus: Kopiere eine Notiz und ändere dann die Kopie.",
+      "say": {
+        "s1": "Öffne eine Notiz.",
+        "s2": "Mehr › Kopie erstellen.",
+        "s3": "Die Kopie liegt neben dem Original."
+      }
+    },
+    "drag": {
+      "title": "Notizen in Reihenfolge ziehen",
+      "summary": "Ordne Notizen wie in Google Keep: Die anderen machen Platz, und eine verschobene Notiz bleibt, wo sie ist.",
+      "outro": "Probier es aus: Zieh eine Notiz an eine andere Stelle. Dort bleibt sie, bis du sie bearbeitest.",
+      "say": {
+        "s1": "Nimm eine Notiz und zieh sie dorthin, wo du sie haben willst.",
+        "s2": "Die anderen Notizen haben Platz gemacht, und die Reihenfolge bleibt."
+      }
+    },
+    "bulk-colour": {
+      "title": "Viele Notizen auf einmal färben",
+      "summary": "Wähle mehrere Notizen aus und gib ihnen eine Farbe.",
+      "outro": "Probier es aus: Wähle Notizen aus und nutze dann die Leiste unten.",
+      "say": {
+        "s1": "Wähle Auswählen …",
+        "s2": "… und dann ein paar Notizen.",
+        "s3": "Farbe ändert alle auf einmal."
+      }
+    },
+    "tick-from-list": {
+      "title": "Einträge in der Liste abhaken",
+      "summary": "Hake Einträge von Checklisten direkt in der Notizenliste ab.",
+      "outro": "Probier es aus: Hake Einträge auf den Karten ab und wieder an.",
+      "say": {
+        "s1": "Zum Abhaken musst du eine Checkliste nicht öffnen.",
+        "s2": "Die Haken sind gespeichert; die Karten bleiben, wo sie sind."
+      }
+    },
+    "checkboxes": {
+      "title": "Werkzeuge für Kästchen",
+      "summary": "Kästchen ein- und ausblenden, alle Einträge abwählen, abgehakte Einträge löschen.",
+      "outro": "Probier es aus: Hake ein paar Einträge ab und nutze dann Mehr › Abgehakte Einträge löschen oder Alle abwählen.",
+      "say": {
+        "s1": "Öffne eine Checkliste.",
+        "s2": "Mehr › Alle abwählen fängt von vorn an.",
+        "s3": "Kästchen ausblenden macht daraus einfache Zeilen …",
+        "s4": "… und Kästchen anzeigen wieder eine Liste.",
+        "s5": "Sind Einträge abgehakt, räumt Mehr › Abgehakte Einträge löschen sie weg."
+      }
+    },
+    "filters": {
+      "title": "Suchfilter",
+      "summary": "Filtere nach Farbe, Tag, Bildern, Checklisten und Erinnerungen.",
+      "outro": "Probier es aus: Kombiniere Filter mit einer Suche.",
+      "say": {
+        "s1": "Der Filter grenzt die Liste ein.",
+        "s2": "Jetzt nur noch Checklisten.",
+        "s3": "Füge eine Farbe hinzu …",
+        "s4": "… oder ein Tag. Filter stehen in der Adresse, also führt Zurück wieder zu ihnen."
+      }
+    },
+    "search-archive": {
+      "title": "Suche findet archivierte Notizen",
+      "summary": "Die Suche listet auch archivierte Notizen; Archiv und Papierkorb lassen sich durchsuchen.",
+      "outro": "Probier es aus: Archiviere eine Notiz und suche sie dann unter Notizen.",
+      "say": {
+        "s1": "Eine Suche unter Notizen findet auch archivierte …",
+        "s2": "… und Archiv und Papierkorb haben ihre eigene Suche."
+      }
+    },
+    "search-marks": {
+      "title": "Gesuchte Wörter markiert",
+      "summary": "Die gesuchten Wörter sind in der geöffneten Notiz markiert.",
+      "outro": "Probier es aus: Suche etwas und öffne dann einen Treffer.",
+      "say": {
+        "s1": "Suche nach einem Wort …",
+        "s2": "… und öffne eine gefundene Notiz.",
+        "s3": "Das Wort ist im Text markiert. Beim Tippen verschwinden die Markierungen."
+      }
+    },
+    "search-kept": {
+      "title": "Suche bleibt auf dem Rückweg",
+      "summary": "Öffne eine Notiz aus einer Suche; Zurück führt zur selben Suche.",
+      "outro": "Probier es aus: Suche etwas, öffne eine Notiz und drück dann Zurück.",
+      "say": {
+        "s1": "Suche nach etwas …",
+        "s2": "… öffne eine gefundene Notiz …",
+        "s3": "… und geh zurück: Die Suche ist noch da."
+      }
+    },
+    "tag-archived": {
+      "title": "Tags zählen archivierte Notizen",
+      "summary": "Die Anzahl eines Tags enthält seine archivierten Notizen, und das Tag listet sie.",
+      "outro": "Probier es aus: Archiviere eine Notiz mit Tag und öffne dann das Tag.",
+      "say": {
+        "s1": "Travel zählt 2 Notizen: Eine davon ist archiviert.",
+        "s2": "Das Tag listet beide …",
+        "s3": "… auch die archivierte, damit nichts mit Tag verloren geht."
+      }
+    },
+    "paste-picture": {
+      "title": "Bild einfügen",
+      "summary": "Füge ein Bild in den Text einer Notiz ein und ändere dann seine Größe an der Ecke.",
+      "outro": "Probier es aus: Kopiere ein Bild oder mach einen Screenshot, füge es in eine Notiz ein und zieh dann an seiner Ecke.",
+      "say": {
+        "s1": "Kopiere ein Bild, öffne eine Notiz …",
+        "s2": "… und füge es mit Strg+V ein: Es landet dort, wo der Cursor steht.",
+        "s3": "Zu groß? Zieh den Punkt an seiner Ecke …",
+        "s4": "… und es behält diese Größe, auf jedem Gerät.",
+        "s5": "Auch die Karte zeigt es."
+      }
+    },
+    "attach-file": {
+      "title": "Beliebige Dateien anhängen",
+      "summary": "Hänge Dateien jeder Art an eine Notiz an, nicht nur Bilder und Audio.",
+      "outro": "Probier es aus: Hänge eine Datei an eine Notiz an oder zieh eine darauf.",
+      "say": {
+        "s1": "In einer Notiz nimmt Bild oder Audio …",
+        "s2": "… jede Art von Datei, nicht nur Bilder und Aufnahmen.",
+        "s3": "Sie bleiben bei der Notiz und lassen sich mit einem Klick herunterladen."
+      }
+    },
+    "tags": {
+      "title": "Tag-Farben und Reihenfolge",
+      "summary": "Ändere die Farbe eines Tags in seinem Menü; zieh Tags in jede Reihenfolge.",
+      "outro": "Probier es aus: Fahre über ein Tag und zieh dann an seinem Griff oder öffne sein Menü.",
+      "say": {
+        "s1": "Im Menü jedes Tags steht seine Farbe.",
+        "s2": "Verschiebe ein Tag, indem du es am Griff ziehst, oder mit den Pfeiltasten.",
+        "s3": "Die neue Reihenfolge wird mit deinen anderen Geräten synchronisiert."
+      }
+    },
+    "text-style": {
+      "title": "Textfarbe, Schriften und Hervorhebungen",
+      "summary": "Färbe Text, ändere seine Schrift und hebe in jeder Farbe hervor.",
+      "outro": "Probier es aus: Markiere Text und nutze dann die Werkzeugleiste oder die Blase darüber.",
+      "say": {
+        "s1": "Öffne eine Notiz und markiere ein paar Wörter.",
+        "s2": "Textfarbe und Schrift …",
+        "s3": "… und eine Schrift.",
+        "s4": "Hervorhebungen gibt es in jeder Farbe."
+      }
+    },
+    "burn": {
+      "title": "Notizen verbrennen",
+      "summary": "Eine gelöschte Notiz verbrennt wie eine zerstörte Karte in Balatro.",
+      "outro": "Probier es aus: Lösche eine Notiz. Unter Einstellungen › Editor schaltest du den Effekt aus.",
+      "say": {
+        "s1": "Wähle eine Notiz aus …",
+        "s2": "… und lösche sie.",
+        "s3": "Sie liegt im Papierkorb; Rückgängig holt sie zurück."
+      }
+    },
+    "pictures": {
+      "title": "Bilder auf Karten",
+      "summary": "Sieh dir das Bild einer Karte in voller Größe an oder blende Bilder auf Karten aus.",
+      "outro": "Probier es aus: Öffne ein Bild oder füge eines in eine Notiz ein.",
+      "say": {
+        "s1": "Klicke auf das Bild einer Karte, um es in voller Größe zu sehen.",
+        "s2": "Blättere durch die Bilder der Notiz.",
+        "s3": "Ansicht › Bilder auf Karten blendet sie aus.",
+        "s4": "Und wieder ein."
+      }
+    },
+    "pictures-in-text": {
+      "title": "Bilder im Text",
+      "summary": "Setze Bilder in den Text; ändere ihre Größe an einer Ecke, mit Rechtsklick zuschneiden, spiegeln oder beschriften.",
+      "outro": "Probier es aus: Schneide ein Bild per Rechtsklick zu oder setze eines mit der Bild-Schaltfläche in den Text.",
+      "say": {
+        "s1": "Öffne eine Notiz mit Bildern im Text.",
+        "s2": "Fahre über ein Bild: Zieh den Punkt an seiner Ecke, um die Größe zu ändern.",
+        "s3": "Rechtsklick auf eines (oder gedrückt halten) für mehr.",
+        "s4": "Gespiegelt, zugeschnitten oder ersetzt, es behält Größe und Bildunterschrift.",
+        "s5": "Gib ihm eine Bildunterschrift …",
+        "s6": "… und die Bild-Schaltfläche links neben den Textstilen setzt neue an den Cursor."
+      }
+    },
+    "image-text": {
+      "title": "Text aus einem Bild übernehmen",
+      "summary": "Markiere den Text in einem Bild, kopiere ihn oder füge ihn in die Notiz ein.",
+      "outro": "Probier es aus: Öffne das Bild und zieh einen Rahmen um ein paar Wörter.",
+      "say": {
+        "s1": "Öffne ein Bild …",
+        "s2": "… und übernimm seinen Text. Er wird in deinem Browser gelesen.",
+        "s3": "Markiere Wörter durch Ziehen, oder alle.",
+        "s4": "In Notiz einfügen fügt den Text der Notiz hinzu."
+      }
+    },
+    "history": {
+      "title": "Versionsverlauf",
+      "summary": "Jede Version zeigt ihre hinzugefügten und entfernten Zeilen; stelle jede davon wieder her.",
+      "outro": "Probier es aus: Bearbeite die Notiz und sieh dir dann wieder ihren Verlauf an.",
+      "say": {
+        "s1": "Öffne eine Notiz mit etwas Verlauf.",
+        "s2": "Mehr › Versionsverlauf.",
+        "s3": "Jede Version zeigt, was hinzugefügt (+) und entfernt (−) wurde.",
+        "s4": "Wiederherstellen holt eine Version zurück; Rückgängig ist zur Hand."
+      }
+    },
+    "appearance": {
+      "title": "Farbschemas und Designs",
+      "summary": "Nord, Dracula, OLED und mehr, und eigene Designs.",
+      "outro": "Probier es aus: Einstellungen › Darstellung. Neu laden stellt den Standard wieder her.",
+      "say": {
+        "s1": "Wähle ein Farbschema …",
+        "s2": "OLED ist im dunklen Modus reines Schwarz.",
+        "s3": "Ein eigenes Design lässt sich auch als JSON einfügen."
+      }
+    },
+    "custom-theme": {
+      "title": "Eigenes Design aus JSON",
+      "summary": "Füge ein Design als JSON ein; dasselbe JSON funktioniert unter Android.",
+      "outro": "Probier es aus: Einstellungen › Darstellung › Aktuelles Design als JSON kopieren, dann eine Farbe ändern.",
+      "say": {
+        "s1": "Einstellungen › Darstellung › Eigenes Design nimmt ein Design als JSON.",
+        "s2": "Anwenden, und seine Farben ersetzen die des Schemas.",
+        "s3": "Farben, die es weglässt, kommen vom Schema. Zurücksetzen entfernt es."
+      }
+    },
+    "shortcuts": {
+      "title": "Tastenkürzel",
+      "summary": "Die Kürzel von Google Keep: c für eine neue Notiz, / zum Suchen, Esc, e, f, #.",
+      "outro": "Probier es aus: Drück c, schreib etwas und dann Esc.",
+      "say": {
+        "s1": "c beginnt eine neue Notiz …",
+        "s2": "… Esc schließt sie.",
+        "s3": "/ springt zur Suche.",
+        "s4": "In einer geöffneten Notiz: e archiviert, f heftet an, # legt sie in den Papierkorb."
+      }
+    },
+    "date": {
+      "title": "Heutiges Datum einfügen",
+      "summary": "Tippe /date oder drück Strg+; für das Datum (Strg+Umschalt+; mit Uhrzeit).",
+      "outro": "Probier es aus: Tippe /date in eine Notiz.",
+      "say": {
+        "s1": "In einer Notiz …",
+        "s2": "… fügt Strg+; das heutige Datum ein …",
+        "s3": "… und /date ebenso.",
+        "s4": "Unter Einstellungen › Editor gibt es stattdessen 2026-10-28 und ein eigenes Kürzel."
+      }
+    },
+    "lock": {
+      "title": "Notiz sperren",
+      "summary": "Sperre eine Notiz mit einem Tippen, einer PIN, einem Muster oder deinem Fingerabdruck.",
+      "outro": "Probier es aus: Unter Einstellungen › Notizsperren legst du eine PIN oder ein Muster fest.",
+      "say": {
+        "s1": "Öffne eine Notiz …",
+        "s2": "… wähle Mehr › Sperren …",
+        "s3": "Eine gesperrte Notiz zeigt nur ihren Titel …",
+        "s4": "… und öffnet sich mit einem Tippen (oder deiner PIN, deinem Muster oder Passwort)."
+      }
+    },
+    "quick-writing": {
+      "title": "Sofort schreiben",
+      "summary": "Eine neue Notiz öffnet sich mit dem Cursor im Text; Tab geht vom Titel zum Text.",
+      "outro": "Probier es aus: Drück irgendwo n für eine neue Notiz.",
+      "say": {
+        "s1": "Eine neue Notiz öffnet sich bereit zum Tippen.",
+        "s2": "Im Titel …",
+        "s3": "… geht Tab weiter zum Text."
+      }
+    },
+    "send": {
+      "title": "Notiz als Text senden",
+      "summary": "Sende eine Notiz als Text an andere Apps, Checklisten als ☐ und ☑.",
+      "outro": "Probier es aus: Sende eine Notiz und füge sie dann irgendwo ein.",
+      "say": {
+        "s1": "Öffne eine Notiz.",
+        "s2": "Mehr › Senden teilt sie als Text oder kopiert sie.",
+        "s3": "Checklisten werden zu Zeilen mit ☐ und ☑."
+      }
+    }
+  },
+  "features": {
+    "mcp": {
+      "title": "Claude und andere MCP-Apps",
+      "summary": "Claude und andere Apps, die MCP sprechen, können über deinen Server deine Notizen durchsuchen, lesen und schreiben."
+    },
+    "sync": {
+      "title": "Synchronisierung zwischen Geräten",
+      "summary": "Bearbeite offline im Web oder auf dem Handy; Änderungen werden synchronisiert, sobald du wieder online bist."
+    },
+    "sharing": {
+      "title": "Notizen teilen",
+      "summary": "Teile eine Notiz mit anderen auf deinem Server, zum Lesen oder Bearbeiten."
+    },
+    "picture-text-search": {
+      "title": "Text in Bildern durchsuchen",
+      "summary": "Die Suche findet die Wörter in Screenshots und Kassenbons, gelesen auf dem Server."
+    },
+    "picture-search": {
+      "title": "Notizen über ihre Bilder finden",
+      "summary": "Optional: Suche danach, was Bilder zeigen („Kassenbon“, „receipt“), in den meisten Sprachen."
+    },
+    "oidc": {
+      "title": "Anmelden mit OIDC",
+      "summary": "Melde dich über Pocket ID, Authelia, Keycloak und Ähnliche an."
+    },
+    "reminders": {
+      "title": "Erinnerungen",
+      "summary": "Gib jeder Notiz eine Uhrzeit und bekomme eine Benachrichtigung auf dem Handy, einmal oder wiederholt."
+    },
+    "share-to": {
+      "title": "An Anchor+ teilen",
+      "summary": "Schicke Text, Links, Bilder und Dateien aus anderen Apps an Anchor+."
+    },
+    "desktop-app": {
+      "title": "Desktop-App",
+      "summary": "Der Webclient deines Servers in einem eigenen Fenster unter Windows und macOS, der sich selbst aktualisiert.",
+      "link": "Neueste Version herunterladen"
+    }
+  }
+}

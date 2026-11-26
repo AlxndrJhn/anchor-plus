@@ -129,5 +129,26 @@
       "insertDateTime": "Insert the date and time",
       "insertLink": "Add a link to the selected text"
     }
+  },
+  "errors": {
+    "mustBeList": "must be a list: {shape}",
+    "mustBeRule": "must be {shape}",
+    "needsCommand": "needs a \"command\"",
+    "noCommand": "no command \"{id}\"",
+    "needsKey": "needs a \"key\"",
+    "keyNotText": "\"key\" must be text",
+    "inKey": "\"{key}\": {problem}",
+    "whenNotText": "\"when\" must be text",
+    "unknownContext": "unknown context key \"{key}\"",
+    "inWhen": "\"when\": {problem}",
+    "emptyKey": "empty key",
+    "unknownModifier": "unknown modifier \"{part}\"",
+    "unknownKey": "unknown key \"{part}\"",
+    "chordTooLong": "a chord has at most two strokes",
+    "quoteOpen": "a quote isn’t closed",
+    "unexpected": "unexpected \"{text}\"",
+    "expectedValue": "expected a value",
+    "parenOpen": "a parenthesis isn’t closed",
+    "endsTooSoon": "ends too soon"
   }
 }

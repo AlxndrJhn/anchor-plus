@@ -1,0 +1,365 @@
+{
+  "page": {
+    "title": "Feature demos"
+  },
+  "list": {
+    "search": "Find a feature",
+    "demosTitle": "Play a demo",
+    "demosText": "Each one plays a short demo with its own sample notes; then it’s your turn. Nothing is saved: a reload starts the demo over.",
+    "featuresTitle": "Without a demo",
+    "featuresText": "These need a server or another app, so there’s nothing to play here.",
+    "noMatch": "No feature matches “{query}”."
+  },
+  "copyLink": {
+    "demo": "Copy link to this demo",
+    "feature": "Copy link to this feature",
+    "copied": "Link copied",
+    "failed": "Couldn’t copy the link"
+  },
+  "player": {
+    "nudge": "Short demos show each feature, then it’s your turn.",
+    "openList": "Open demo list",
+    "panel": "Feature demo",
+    "playing": "Demo playing",
+    "yourTurn": "Your turn",
+    "goingBack": "Going back…",
+    "previous": "Previous step",
+    "play": "Play",
+    "pause": "Pause",
+    "next": "Next step",
+    "progress": "{step} / {total}",
+    "skip": "Skip to trying it",
+    "playAgain": "Play again",
+    "all": "All feature demos"
+  },
+  "needs": {
+    "server": "Needs a server.",
+    "android": "Needs the Android app.",
+    "desktop": "Needs the desktop app."
+  },
+  "items": {
+    "freeze": {
+      "title": "Freeze a note",
+      "summary": "Nobody can change, trash or delete it until its owner unfreezes it.",
+      "outro": "Try it: freeze a note, then try to type in it or move it to the trash.",
+      "say": {
+        "s1": "Open a note you want to keep as it is.",
+        "s2": "In the More menu, choose Freeze.",
+        "s3": "Frozen: the text can’t be edited, and the note can’t be trashed or deleted.",
+        "s4": "Unfreeze it from the same menu.",
+        "s5": "Now it can be edited again."
+      }
+    },
+    "copy": {
+      "title": "Make a copy",
+      "summary": "Copy a note, with its pictures and attachments.",
+      "outro": "Try it: copy a note, then change the copy.",
+      "say": {
+        "s1": "Open a note.",
+        "s2": "More › Make a copy.",
+        "s3": "The copy sits next to the original."
+      }
+    },
+    "drag": {
+      "title": "Drag notes into order",
+      "summary": "Arrange notes as in Google Keep: the others make room, and a moved note stays put.",
+      "outro": "Try it: drag a note to another place. It stays there until you edit it.",
+      "say": {
+        "s1": "Pick a note up and drag it where you want it.",
+        "s2": "The other notes made room, and the order is kept."
+      }
+    },
+    "bulk-colour": {
+      "title": "Colour many notes at once",
+      "summary": "Select several notes and give them one colour.",
+      "outro": "Try it: select notes, then use the bar at the bottom.",
+      "say": {
+        "s1": "Choose Select…",
+        "s2": "…then pick some notes.",
+        "s3": "Colour changes all of them at once."
+      }
+    },
+    "tick-from-list": {
+      "title": "Tick items from the list",
+      "summary": "Tick checklist items straight from the notes list.",
+      "outro": "Try it: tick and untick items on the cards.",
+      "say": {
+        "s1": "No need to open a checklist to tick it off.",
+        "s2": "The ticks are saved; the cards stay where they are."
+      }
+    },
+    "checkboxes": {
+      "title": "Checkbox tools",
+      "summary": "Show or hide checkboxes, uncheck all items, delete checked items.",
+      "outro": "Try it: tick some items, then use More › Delete checked items or Uncheck all.",
+      "say": {
+        "s1": "Open a checklist.",
+        "s2": "More › Uncheck all starts over.",
+        "s3": "Hide checkboxes turns it into plain lines…",
+        "s4": "…and Show checkboxes back into a list.",
+        "s5": "With items ticked, More › Delete checked items clears them away."
+      }
+    },
+    "filters": {
+      "title": "Search filters",
+      "summary": "Filter by colour, tag, pictures, checklists and reminders.",
+      "outro": "Try it: combine filters with a search.",
+      "say": {
+        "s1": "Filter narrows the list down.",
+        "s2": "Only checklists now.",
+        "s3": "Add a colour…",
+        "s4": "…or a tag. Filters are kept in the address, so Back returns to them."
+      }
+    },
+    "search-archive": {
+      "title": "Search finds archived notes",
+      "summary": "Search also lists archived notes; Archive and Trash can be searched.",
+      "outro": "Try it: archive a note, then search for it from Notes.",
+      "say": {
+        "s1": "A search on Notes also finds archived ones…",
+        "s2": "…and Archive and Trash have their own search."
+      }
+    },
+    "search-marks": {
+      "title": "Searched words marked",
+      "summary": "The words you searched for are marked in the note you open.",
+      "outro": "Try it: search, then open a result.",
+      "say": {
+        "s1": "Search for a word…",
+        "s2": "…and open a note it found.",
+        "s3": "The word is marked in the text. Typing clears the marks."
+      }
+    },
+    "search-kept": {
+      "title": "Search kept on the way back",
+      "summary": "Open a note from a search; Back returns to the same search.",
+      "outro": "Try it: search, open a note, then press Back.",
+      "say": {
+        "s1": "Search for something…",
+        "s2": "…open a note it found…",
+        "s3": "…and go back: the search is still there."
+      }
+    },
+    "tag-archived": {
+      "title": "Tags count archived notes",
+      "summary": "A tag’s count includes its archived notes, and the tag lists them.",
+      "outro": "Try it: archive a tagged note, then open its tag.",
+      "say": {
+        "s1": "Travel counts 2 notes: one of them is archived.",
+        "s2": "The tag lists both…",
+        "s3": "…the archived one included, so nothing tagged goes missing."
+      }
+    },
+    "paste-picture": {
+      "title": "Paste a picture",
+      "summary": "Paste a picture into a note’s text, then resize it by its corner.",
+      "outro": "Try it: copy a picture or take a screenshot, paste it in a note, then drag its corner.",
+      "say": {
+        "s1": "Copy a picture, open a note…",
+        "s2": "…and paste it with Ctrl+V: it goes in where the caret is.",
+        "s3": "Too big? Drag the dot at its corner…",
+        "s4": "…and it keeps that size, on every device.",
+        "s5": "The card shows it, too."
+      }
+    },
+    "attach-file": {
+      "title": "Attach any file",
+      "summary": "Attach files of any kind to a note, not only pictures and audio.",
+      "outro": "Try it: attach a file to a note, or drop one on it.",
+      "say": {
+        "s1": "In a note, Picture or audio…",
+        "s2": "…takes any kind of file, not only pictures and recordings.",
+        "s3": "They sit with the note and download with a click."
+      }
+    },
+    "tags": {
+      "title": "Tag colours and order",
+      "summary": "Change a tag’s colour from its menu; drag tags into any order.",
+      "outro": "Try it: hover a tag, then drag its handle or open its menu.",
+      "say": {
+        "s1": "Each tag’s menu has its colour.",
+        "s2": "Move a tag by dragging its handle, or with the arrow keys.",
+        "s3": "The new order syncs to your other devices."
+      }
+    },
+    "text-style": {
+      "title": "Text colour, fonts and highlights",
+      "summary": "Colour text, change its font, and highlight in any colour.",
+      "outro": "Try it: select text, then use the toolbar or the bubble above it.",
+      "say": {
+        "s1": "Open a note and select some words.",
+        "s2": "Text colour and font…",
+        "s3": "…and a font.",
+        "s4": "Highlights come in any colour."
+      }
+    },
+    "burn": {
+      "title": "Notes burn away",
+      "summary": "A deleted note burns away like a destroyed card in Balatro.",
+      "outro": "Try it: delete a note. Settings › Editor turns the effect off.",
+      "say": {
+        "s1": "Select a note…",
+        "s2": "…and delete it.",
+        "s3": "It went to the trash; Undo brings it back."
+      }
+    },
+    "pictures": {
+      "title": "Pictures on cards",
+      "summary": "View a card’s picture full size, or hide pictures on cards.",
+      "outro": "Try it: open a picture, or paste one into a note.",
+      "say": {
+        "s1": "Click a card’s picture to see it full size.",
+        "s2": "Step through the note’s pictures.",
+        "s3": "View › Pictures on cards hides them.",
+        "s4": "And shows them again."
+      }
+    },
+    "pictures-in-text": {
+      "title": "Pictures in the text",
+      "summary": "Put pictures in the text; resize them by a corner, right-click to crop, mirror or caption them.",
+      "outro": "Try it: right-click a picture to crop it, or put one in the text with the picture button.",
+      "say": {
+        "s1": "Open a note with pictures in its text.",
+        "s2": "Hover a picture: drag the dot at its corner to resize it.",
+        "s3": "Right-click one (or hold it) for more.",
+        "s4": "Mirrored, cropped or replaced, it keeps its size and caption.",
+        "s5": "Give it a caption…",
+        "s6": "…and the picture button left of the text styles puts new ones at the caret."
+      }
+    },
+    "image-text": {
+      "title": "Grab text from a picture",
+      "summary": "Select the text in a picture, copy it or insert it in the note.",
+      "outro": "Try it: open the picture and draw a box around some words.",
+      "say": {
+        "s1": "Open a picture…",
+        "s2": "…and grab its text. It is read in your browser.",
+        "s3": "Select words by dragging, or all of them.",
+        "s4": "Insert in note adds the text to the note."
+      }
+    },
+    "history": {
+      "title": "Version history",
+      "summary": "Each version shows its added and removed lines; restore any of them.",
+      "outro": "Try it: edit the note, then look at its history again.",
+      "say": {
+        "s1": "Open a note with some history.",
+        "s2": "More › Version history.",
+        "s3": "Each version shows what was added (+) and removed (−).",
+        "s4": "Restore brings a version back; Undo is at hand."
+      }
+    },
+    "appearance": {
+      "title": "Colour schemes and themes",
+      "summary": "Nord, Dracula, OLED and more, and themes of your own.",
+      "outro": "Try it: Settings › Appearance. A reload goes back to the default.",
+      "say": {
+        "s1": "Pick a colour scheme…",
+        "s2": "OLED is pure black in dark mode.",
+        "s3": "A custom theme can be pasted as JSON, too."
+      }
+    },
+    "custom-theme": {
+      "title": "Custom theme from JSON",
+      "summary": "Paste a theme as JSON; the same JSON works on Android.",
+      "outro": "Try it: Settings › Appearance › Copy current theme as JSON, then change a colour.",
+      "say": {
+        "s1": "Settings › Appearance › Custom theme takes a theme as JSON.",
+        "s2": "Apply, and its colours replace the scheme’s.",
+        "s3": "Colours it leaves out are the scheme’s. Reset removes it."
+      }
+    },
+    "shortcuts": {
+      "title": "Keyboard shortcuts",
+      "summary": "Google Keep’s shortcuts: c for a new note, / to search, Esc, e, f, #.",
+      "outro": "Try it: press c, write something, then Esc.",
+      "say": {
+        "s1": "c starts a new note…",
+        "s2": "…Esc closes it.",
+        "s3": "/ jumps to the search.",
+        "s4": "In an opened note: e archives, f pins, # moves it to the trash."
+      }
+    },
+    "date": {
+      "title": "Insert today’s date",
+      "summary": "Type /date, or press Ctrl+; for the date (Ctrl+Shift+; with the time).",
+      "outro": "Try it: type /date in a note.",
+      "say": {
+        "s1": "In a note…",
+        "s2": "…Ctrl+; inserts today’s date…",
+        "s3": "…and so does /date.",
+        "s4": "Settings › Editor offers 2026-10-28 instead, and your own shortcut."
+      }
+    },
+    "lock": {
+      "title": "Lock a note",
+      "summary": "Lock a note with a tap, a PIN, a pattern or your fingerprint.",
+      "outro": "Try it: Settings › Note locks sets a PIN or pattern.",
+      "say": {
+        "s1": "Open a note…",
+        "s2": "…choose More › Lock…",
+        "s3": "A locked note shows only its title…",
+        "s4": "…and opens with a tap (or your PIN, pattern or password)."
+      }
+    },
+    "quick-writing": {
+      "title": "Writing straight away",
+      "summary": "A new note opens with the cursor in its text; Tab goes from the title to the text.",
+      "outro": "Try it: press n anywhere for a new note.",
+      "say": {
+        "s1": "A new note opens ready to type.",
+        "s2": "In the title…",
+        "s3": "…Tab goes on to the text."
+      }
+    },
+    "send": {
+      "title": "Send a note as text",
+      "summary": "Send a note to other apps as text, checklists as ☐ and ☑.",
+      "outro": "Try it: send a note, then paste it somewhere.",
+      "say": {
+        "s1": "Open a note.",
+        "s2": "More › Send shares it as text, or copies it.",
+        "s3": "Checklists come out as ☐ and ☑ lines."
+      }
+    }
+  },
+  "features": {
+    "mcp": {
+      "title": "Claude and other MCP apps",
+      "summary": "Claude, and other apps that speak MCP, can search, read and write your notes through your server."
+    },
+    "sync": {
+      "title": "Sync across devices",
+      "summary": "Edit offline on the web or your phone; changes sync when you’re back online."
+    },
+    "sharing": {
+      "title": "Share notes",
+      "summary": "Share a note with other people on your server, to read or edit."
+    },
+    "picture-text-search": {
+      "title": "Search the text in pictures",
+      "summary": "Search finds the words in screenshots and receipts, read on the server."
+    },
+    "picture-search": {
+      "title": "Find notes by their pictures",
+      "summary": "Opt-in: search for what pictures show (“receipt”, “Katzen”), in most languages."
+    },
+    "oidc": {
+      "title": "Sign in with OIDC",
+      "summary": "Sign in through Pocket ID, Authelia, Keycloak and the like."
+    },
+    "reminders": {
+      "title": "Reminders",
+      "summary": "Set a time on any note and get a notification on your phone, once or repeating."
+    },
+    "share-to": {
+      "title": "Share to Anchor+",
+      "summary": "Send text, links, pictures and files to Anchor+ from other apps."
+    },
+    "desktop-app": {
+      "title": "Desktop app",
+      "summary": "Your server’s web client in its own window on Windows and macOS, updating itself.",
+      "link": "Download the latest release"
+    }
+  }
+}
