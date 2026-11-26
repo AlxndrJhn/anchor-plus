@@ -25,6 +25,7 @@
     "password": "Passwort",
     "phone": "Handy verbinden",
     "devices": "Geräte",
+    "deleteAccount": "Konto löschen",
     "about": "Über"
   },
   "blocks": {
@@ -328,6 +329,22 @@
     "signOutOthersButton": "Andere abmelden",
     "confirmTitle": "Deine anderen Geräte abmelden?",
     "confirmText": "Innerhalb von 15 Minuten werden sie aufgefordert, sich neu anzumelden. Dieses Gerät bleibt angemeldet."
+  },
+  "deleteAccount": {
+    "title": "Konto löschen",
+    "rowTitle": "Das lässt sich nicht rückgängig machen",
+    "rowText": "Lösche dein Konto und alles darin endgültig von diesem Server. Wenn du eine Kopie deiner Notizen behalten möchtest, exportiere sie vorher.",
+    "button": "Konto löschen",
+    "dialogTitle": "Dein Konto löschen?",
+    "dialogText": "Das lässt sich nicht rückgängig machen. Dein Konto, deine Notizen, Tags, Anhänge und Erinnerungen werden endgültig von diesem Server gelöscht, und du wirst auf allen Geräten abgemeldet. Notizen, die du geteilt hast, und ihre öffentlichen Links funktionieren für niemanden mehr. Bilder und Dateien, die du zu Notizen anderer hinzugefügt hast, bleiben bei diesen Notizen.",
+    "password": "Passwort",
+    "passwordHelp": "Gib zur Bestätigung dein Passwort ein.",
+    "wrongPassword": "Das ist nicht dein Passwort.",
+    "onlyAdmin": "Du bist der einzige Admin auf diesem Server. Mache zuerst jemand anderen zum Admin.",
+    "failed": "Dein Konto konnte nicht gelöscht werden. Versuche es gleich noch einmal.",
+    "offline": "Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuche es noch einmal.",
+    "deleting": "Wird gelöscht…",
+    "deleted": "Konto gelöscht"
   },
   "magicLogin": {
     "qrFailed": "QR-Code konnte nicht erstellt werden",

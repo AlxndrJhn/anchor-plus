@@ -6602,5 +6602,57 @@
   "nativePhotoLibraryUse": "Anchor uses your photo library to add pictures to notes and to choose your profile photo.",
   "@nativePhotoLibraryUse": {
     "description": "iPhone permission prompt, shown the first time Anchor asks for the photo library."
+  },
+  "authLastAdmin": "You’re the only admin on this server. Make someone else an admin first.",
+  "@authLastAdmin": {
+    "description": "Error at the top of the delete account page when the server would be left with no admin."
+  },
+  "deleteAccountTitle": "Delete account",
+  "@deleteAccountTitle": {
+    "description": "Title of the delete account page."
+  },
+  "deleteAccountWarning": "This can’t be undone.",
+  "@deleteAccountWarning": {
+    "description": "Heading of the warning on the delete account page."
+  },
+  "deleteAccountMessage": "Your account, notes, tags, attachments and reminders will be permanently deleted from this server, and you’ll be signed out on every device. Notes you shared and their public links stop working for everyone. Pictures and files you added to other people’s notes stay with those notes.",
+  "@deleteAccountMessage": {
+    "description": "Warning on the delete account page: what gets deleted, and what other people see."
+  },
+  "deleteAccountExport": "To keep a copy of your notes, export them from Settings on the web first.",
+  "@deleteAccountExport": {
+    "description": "Hint on the delete account page. Export is only on the web app, not on the phone."
+  },
+  "deleteAccountPasswordHelp": "Enter your password to confirm.",
+  "@deleteAccountPasswordHelp": {
+    "description": "Under the password field on the delete account page."
+  },
+  "deleteAccountConfirm": "Delete account",
+  "@deleteAccountConfirm": {
+    "description": "Button that permanently deletes the account, on the page and in its dialog."
+  },
+  "deleteAccountDeleting": "Deleting…",
+  "@deleteAccountDeleting": {
+    "description": "Text on the Delete account button while the account is being deleted."
+  },
+  "deleteAccountDone": "Account deleted",
+  "@deleteAccountDone": {
+    "description": "Toast on the sign-in page after the account was deleted."
+  },
+  "deleteAccountOffline": "You’re offline. Connect to the internet to delete your account.",
+  "@deleteAccountOffline": {
+    "description": "Notice at the top of the delete account page while the phone is offline."
+  },
+  "deleteAccountDialogTitle": "Delete your account?",
+  "@deleteAccountDialogTitle": {
+    "description": "Title of the dialog that confirms deleting an account with no password, one from a sign-in provider."
+  },
+  "deleteAccountDialogMessage": "Your account and notes will be permanently deleted from this server.",
+  "@deleteAccountDialogMessage": {
+    "description": "Text of the dialog that confirms deleting an account with no password."
+  },
+  "settingsDeleteAccount": "Delete account",
+  "@settingsDeleteAccount": {
+    "description": "Row in Settings, under Sign out, that opens the page for permanently deleting the account."
   }
 }

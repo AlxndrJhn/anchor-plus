@@ -21,8 +21,8 @@ import {
   assertValidAttachmentFile,
   attachmentTypeForMime,
   clientAttachmentId,
-  isStorableNoteId,
   noteAttachmentDir,
+  removeNoteAttachmentDir,
   writeAttachmentFile,
 } from '../utils/attachment-storage.util';
 import { toAttachmentResponse } from '../dto/attachment-response.dto';
@@ -397,23 +397,11 @@ export class NoteAttachmentsService {
     return this.findAll(userId, noteId);
   }
 
-  async deleteAllForNote(noteId: string) {
-    // A note saved with a non-UUID id (before ids were checked) has no
-    // folder of its own; removing its "folder" could reach outside.
-    if (!isStorableNoteId(noteId)) {
-      this.logger.warn(`Not deleting files for note with bad id ${noteId}`);
-      return;
-    }
-    const noteDir = this.attachmentDir(noteId);
-    try {
-      await fs.rm(noteDir, { recursive: true, force: true });
-    } catch (error) {
-      // Directory may not exist, log only if it's not ENOENT
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-        this.logger.error(
-          `Failed to delete attachments directory for note ${noteId}: ${String(error)}`,
-        );
-      }
-    }
+  deleteAllForNote(noteId: string): Promise<void> {
+    return removeNoteAttachmentDir(
+      this.storageConfig.attachmentsDir,
+      noteId,
+      this.logger,
+    );
   }
 }

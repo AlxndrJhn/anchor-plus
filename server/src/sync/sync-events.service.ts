@@ -106,6 +106,13 @@ export class SyncEventsService implements OnModuleDestroy {
     }
   }
 
+  /** Ends every open event stream of the user's (an account deleted). */
+  disconnect(userId: string): void {
+    for (const stream of [...(this.streams.get(userId) ?? [])]) {
+      stream.closed.next();
+    }
+  }
+
   connectionCount(userId: string): number {
     return this.streams.get(userId)?.size ?? 0;
   }

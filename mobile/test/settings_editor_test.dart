@@ -467,4 +467,21 @@ void main() {
     );
     expect(privacyPolicyUrl, 'https://anchor-plus.app/privacy');
   });
+
+  testWidgets('Account has Delete account, under Sign out', (tester) async {
+    await pumpSettings(tester);
+
+    final signOut = find.text('Sign out');
+    final delete = find.text('Delete account');
+    await tester.scrollUntilVisible(
+      delete,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    expect(
+      tester.getTopLeft(signOut).dy,
+      lessThan(tester.getTopLeft(delete).dy),
+    );
+  });
 }

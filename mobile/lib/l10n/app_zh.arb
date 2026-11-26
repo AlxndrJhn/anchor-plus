@@ -1246,5 +1246,18 @@
   "nativeLocalNetworkUse": "当你的服务器在本地网络中时，Anchor 会连接到它。",
   "nativeMicrophoneUse": "Anchor 使用麦克风录制语音笔记。",
   "nativePhotoLibraryAddUse": "Anchor 将笔记中的图片存储到你的照片图库。",
-  "nativePhotoLibraryUse": "Anchor 使用你的照片图库为笔记添加图片并选择头像。"
+  "nativePhotoLibraryUse": "Anchor 使用你的照片图库为笔记添加图片并选择头像。",
+  "authLastAdmin": "你是此服务器上唯一的管理员。请先将其他人设为管理员。",
+  "deleteAccountTitle": "删除账户",
+  "deleteAccountWarning": "此操作无法撤销。",
+  "deleteAccountMessage": "你的账户、笔记、标签、附件和提醒将从此服务器上永久删除，你将在所有设备上退出登录。你共享的笔记及其公开链接将对所有人失效。你添加到他人笔记中的图片和文件会保留在那些笔记中。",
+  "deleteAccountExport": "如需保留笔记副本，请先在网页版的设置中导出。",
+  "deleteAccountPasswordHelp": "输入密码以确认。",
+  "deleteAccountConfirm": "删除账户",
+  "deleteAccountDeleting": "正在删除…",
+  "deleteAccountDone": "账户已删除",
+  "deleteAccountOffline": "你已离线。请连接网络后再删除账户。",
+  "deleteAccountDialogTitle": "删除你的账户？",
+  "deleteAccountDialogMessage": "你的账户和笔记将从此服务器上永久删除。",
+  "settingsDeleteAccount": "删除账户"
 }

@@ -15,6 +15,7 @@ import { OidcConfigService } from './oidc/oidc-config.service';
 import { TwoStepService } from './two-step.service';
 import { SecondFactorService } from './second-factor.service';
 import { REFRESH_TOKEN_REUSE_WINDOW_MS } from './constants/auth.constants';
+import { UserDeletionService } from '../users/user-deletion.service';
 
 /**
  * AuthService against in-memory user/refresh-token stores with real bcrypt.
@@ -289,6 +290,10 @@ describe('AuthService', () => {
     attachmentsDir: '/data/uploads/attachments',
   };
 
+  const userDeletion = {
+    deleteUser: vi.fn(() => Promise.resolve()),
+  };
+
   beforeEach(() => {
     users = new Map();
     refreshTokens = new Map();
@@ -302,6 +307,7 @@ describe('AuthService', () => {
       twoStepService,
       secondFactorService,
       storageConfig,
+      userDeletion as unknown as UserDeletionService,
     );
     vi.clearAllMocks();
   });
@@ -749,6 +755,73 @@ describe('AuthService', () => {
         'this-new',
         'this-old',
       ]);
+    });
+  });
+
+  describe('deleteAccount', () => {
+    it('deletes the account with the right password', async () => {
+      addUser({ id: 'u1' });
+
+      await service.deleteAccount('u1', 'correct horse');
+
+      expect(userDeletion.deleteUser).toHaveBeenCalledWith('u1');
+    });
+
+    it.each([['wrong'], [undefined], ['']])(
+      'keeps the account with the password %s',
+      async (password) => {
+        addUser({ id: 'u1' });
+
+        await expect(
+          service.deleteAccount('u1', password),
+        ).rejects.toMatchObject({
+          constructor: ForbiddenException,
+          response: {
+            message: 'Current password is incorrect',
+            code: 'CURRENT_PASSWORD_INCORRECT',
+          },
+        });
+        expect(userDeletion.deleteUser).not.toHaveBeenCalled();
+      },
+    );
+
+    it('asks no password of an account that has none', async () => {
+      addUser({ id: 'u1', password: null });
+
+      await service.deleteAccount('u1');
+
+      expect(userDeletion.deleteUser).toHaveBeenCalledWith('u1');
+    });
+
+    it('keeps the only admin while other people use the server', async () => {
+      addUser({ id: 'admin', isAdmin: true });
+      addUser({ id: 'u1' });
+
+      await expect(
+        service.deleteAccount('admin', 'correct horse'),
+      ).rejects.toMatchObject({
+        constructor: ConflictException,
+        response: { code: 'LAST_ADMIN' },
+      });
+      expect(userDeletion.deleteUser).not.toHaveBeenCalled();
+    });
+
+    it('lets an admin go when another admin stays', async () => {
+      addUser({ id: 'admin', isAdmin: true });
+      addUser({ id: 'other', isAdmin: true });
+      addUser({ id: 'u1' });
+
+      await service.deleteAccount('admin', 'correct horse');
+
+      expect(userDeletion.deleteUser).toHaveBeenCalledWith('admin');
+    });
+
+    it('lets the only person on the server go', async () => {
+      addUser({ id: 'admin', isAdmin: true });
+
+      await service.deleteAccount('admin', 'correct horse');
+
+      expect(userDeletion.deleteUser).toHaveBeenCalledWith('admin');
     });
   });
 

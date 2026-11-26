@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Smartphone,
   SunMoon,
+  Trash2,
   UserRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -42,11 +43,12 @@ const ALL_SECTIONS = [
   { id: "password", labelKey: "password", icon: Lock },
   { id: "phone", labelKey: "phone", icon: Smartphone },
   { id: "devices", labelKey: "devices", icon: MonitorSmartphone },
+  { id: "delete-account", labelKey: "deleteAccount", icon: Trash2 },
   { id: "about", labelKey: "about", icon: Info },
 ] as const;
 
 // Without a server there is no phone sign-in, API token, sign-in security,
-// password, device sign-out, storage use or picture search.
+// password, device sign-out, account deletion, storage use or picture search.
 const SECTIONS = ALL_SECTIONS.filter(
   (section) =>
     !(
@@ -58,6 +60,7 @@ const SECTIONS = ALL_SECTIONS.filter(
         "security",
         "password",
         "devices",
+        "delete-account",
         "search",
       ].includes(section.id)
     ),

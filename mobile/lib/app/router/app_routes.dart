@@ -52,6 +52,7 @@ class AppRoutes {
   static const settingsQuickActions = '$settings?section=$quickActionsSection';
   static const quickActionsSection = 'quick-actions';
   static const changePassword = '$settings/change-password';
+  static const deleteAccount = '$settings/delete-account';
   static const editProfile = '$settings/edit-profile';
   static const logs = '$settings/logs';
   static const devices = '$settings/devices';

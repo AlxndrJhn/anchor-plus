@@ -6,6 +6,7 @@ import { SecondFactorService } from '../auth/second-factor.service';
 import { OidcClientService } from '../auth/oidc/oidc-client.service';
 import { OidcConfigService } from '../auth/oidc/oidc-config.service';
 import { StorageQuotaService } from '../storage-quota/storage-quota.service';
+import { UserDeletionService } from '../users/user-deletion.service';
 
 const noQuota = {
   usedBytesByUser: () => Promise.resolve(new Map([['u1', 2048]])),
@@ -48,6 +49,7 @@ describe('AdminService.findUsers', () => {
       {} as SecondFactorService,
       {} as OidcClientService,
       noQuota,
+      {} as UserDeletionService,
     );
   });
 
@@ -162,6 +164,7 @@ describe('AdminService.resetSignInSecurity', () => {
       {} as SecondFactorService,
       {} as OidcClientService,
       noQuota,
+      {} as UserDeletionService,
     );
     return { prisma, service };
   };
@@ -221,6 +224,7 @@ describe('AdminService.getPendingUsers', () => {
       {} as SecondFactorService,
       {} as OidcClientService,
       noQuota,
+      {} as UserDeletionService,
     );
 
     const waiting = await service.getPendingUsers();

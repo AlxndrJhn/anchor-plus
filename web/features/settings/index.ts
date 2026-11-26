@@ -1,6 +1,7 @@
 export { ApiTokenSection } from "./components/api-token-section";
 export { AppearanceSection } from "./components/appearance-section";
 export { DateTimeSection } from "./components/date-time-section";
+export { DeleteAccountSection } from "./components/delete-account-section";
 export { DevicesSection } from "./components/devices-section";
 export { EditorSection } from "./components/editor-section";
 export { ImportExportSection } from "./components/import-export-section";

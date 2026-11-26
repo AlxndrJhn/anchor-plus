@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -68,6 +68,32 @@ export function noteAttachmentDir(attachmentsDir: string, noteId: string) {
 
 export function isStorableNoteId(noteId: string): boolean {
   return UUID.test(noteId);
+}
+
+/**
+ * Deletes a note's attachments folder. Never throws: a failure is logged.
+ * A note saved with a non-UUID id (before ids were checked) has no folder of
+ * its own, and removing its "folder" could reach outside, so it's skipped.
+ */
+export async function removeNoteAttachmentDir(
+  attachmentsDir: string,
+  noteId: string,
+  logger: Logger,
+): Promise<void> {
+  if (!isStorableNoteId(noteId)) {
+    logger.warn(`Not deleting files for note with bad id ${noteId}`);
+    return;
+  }
+  try {
+    await fs.rm(path.join(attachmentsDir, noteId), {
+      recursive: true,
+      force: true,
+    });
+  } catch (error) {
+    logger.error(
+      `Failed to delete attachments directory for note ${noteId}: ${String(error)}`,
+    );
+  }
 }
 
 /** An id a client picked for its upload, if it is a usable one. */

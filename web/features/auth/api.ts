@@ -50,6 +50,11 @@ export async function getRegistrationMode(): Promise<{
     .json<{ mode: RegistrationMode }>();
 }
 
+/** Deletes the signed-in person's account, with everything in it. */
+export async function deleteAccount(password?: string): Promise<void> {
+  await api.post("api/auth/delete-account", { json: { password } });
+}
+
 export async function changePassword(
   credentials: ChangePasswordCredentials,
 ): Promise<{ message: string }> {

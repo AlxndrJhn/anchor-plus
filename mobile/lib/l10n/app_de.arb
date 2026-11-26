@@ -1246,5 +1246,18 @@
   "nativeLocalNetworkUse": "Anchor verbindet sich mit deinem Server, wenn er in deinem lokalen Netzwerk ist.",
   "nativeMicrophoneUse": "Anchor nutzt das Mikrofon, um Sprachnotizen aufzunehmen.",
   "nativePhotoLibraryAddUse": "Anchor speichert Bilder aus deinen Notizen in deiner Fotomediathek.",
-  "nativePhotoLibraryUse": "Anchor nutzt deine Fotomediathek, um Bilder zu Notizen hinzuzufügen und dein Profilfoto auszuwählen."
+  "nativePhotoLibraryUse": "Anchor nutzt deine Fotomediathek, um Bilder zu Notizen hinzuzufügen und dein Profilfoto auszuwählen.",
+  "authLastAdmin": "Du bist der einzige Admin auf diesem Server. Mache zuerst jemand anderen zum Admin.",
+  "deleteAccountTitle": "Konto löschen",
+  "deleteAccountWarning": "Das lässt sich nicht rückgängig machen.",
+  "deleteAccountMessage": "Dein Konto, deine Notizen, Tags, Anhänge und Erinnerungen werden endgültig von diesem Server gelöscht, und du wirst auf allen Geräten abgemeldet. Notizen, die du geteilt hast, und ihre öffentlichen Links funktionieren für niemanden mehr. Bilder und Dateien, die du zu Notizen anderer hinzugefügt hast, bleiben bei diesen Notizen.",
+  "deleteAccountExport": "Wenn du eine Kopie deiner Notizen behalten möchtest, exportiere sie vorher in den Einstellungen im Web.",
+  "deleteAccountPasswordHelp": "Gib zur Bestätigung dein Passwort ein.",
+  "deleteAccountConfirm": "Konto löschen",
+  "deleteAccountDeleting": "Wird gelöscht…",
+  "deleteAccountDone": "Konto gelöscht",
+  "deleteAccountOffline": "Du bist offline. Verbinde dich mit dem Internet, um dein Konto zu löschen.",
+  "deleteAccountDialogTitle": "Dein Konto löschen?",
+  "deleteAccountDialogMessage": "Dein Konto und deine Notizen werden endgültig von diesem Server gelöscht.",
+  "settingsDeleteAccount": "Konto löschen"
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -8,7 +9,9 @@ import '../../../core/logging/log_tags.dart';
 import '../../../core/network/server_config_provider.dart';
 import '../../../core/session/active_user_id_provider.dart';
 import '../../../core/session/session_expired_provider.dart';
+import '../../notes/data/repository/note_attachments_repository.dart';
 import '../../sync/data/sync_manager.dart';
+import '../data/local_account_data.dart';
 import '../data/repository/auth_repository.dart';
 import '../domain/auth_failure.dart';
 import '../domain/user.dart';
@@ -158,5 +161,28 @@ class AuthController extends _$AuthController {
       ref.read(sessionExpiredProvider.notifier).clear();
       return null;
     });
+  }
+
+  /// Deletes the account on the server, signs out, and removes what it left
+  /// on this phone. Throws an [AuthFailure] when the server says no; nothing
+  /// changes then.
+  Future<void> deleteAccount({String? password}) async {
+    await ref.read(authRepositoryProvider).deleteAccount(password);
+    await ref.read(syncManagerProvider.notifier).stop();
+
+    final userId = ref.read(activeUserIdProvider);
+    final localData = userId == null || userId == localUserId
+        ? null
+        : await LocalAccountData.read(
+            userId,
+            db: ref.read(appDatabaseProvider),
+            attachments: ref.read(noteAttachmentsRepositoryProvider),
+          );
+
+    ref.read(activeUserIdProvider.notifier).set(null);
+    ref.read(sessionExpiredProvider.notifier).clear();
+    state = const AsyncData(null);
+
+    unawaited(localData?.remove());
   }
 }

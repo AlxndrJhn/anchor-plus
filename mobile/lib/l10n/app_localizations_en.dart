@@ -4999,4 +4999,48 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nativePhotoLibraryUse =>
       'Anchor uses your photo library to add pictures to notes and to choose your profile photo.';
+
+  @override
+  String get authLastAdmin =>
+      'You’re the only admin on this server. Make someone else an admin first.';
+
+  @override
+  String get deleteAccountTitle => 'Delete account';
+
+  @override
+  String get deleteAccountWarning => 'This can’t be undone.';
+
+  @override
+  String get deleteAccountMessage =>
+      'Your account, notes, tags, attachments and reminders will be permanently deleted from this server, and you’ll be signed out on every device. Notes you shared and their public links stop working for everyone. Pictures and files you added to other people’s notes stay with those notes.';
+
+  @override
+  String get deleteAccountExport =>
+      'To keep a copy of your notes, export them from Settings on the web first.';
+
+  @override
+  String get deleteAccountPasswordHelp => 'Enter your password to confirm.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete account';
+
+  @override
+  String get deleteAccountDeleting => 'Deleting…';
+
+  @override
+  String get deleteAccountDone => 'Account deleted';
+
+  @override
+  String get deleteAccountOffline =>
+      'You’re offline. Connect to the internet to delete your account.';
+
+  @override
+  String get deleteAccountDialogTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountDialogMessage =>
+      'Your account and notes will be permanently deleted from this server.';
+
+  @override
+  String get settingsDeleteAccount => 'Delete account';
 }

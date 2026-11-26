@@ -820,6 +820,13 @@ class _AccountSection extends ConsumerWidget {
             isDanger: true,
             onTap: () => _signOut(context, ref),
           ),
+          GroupedListTile(
+            icon: LucideIcons.trash2,
+            label: l10n.settingsDeleteAccount,
+            isDanger: true,
+            showChevron: true,
+            onTap: () => context.push(AppRoutes.deleteAccount),
+          ),
         ],
       ),
     );

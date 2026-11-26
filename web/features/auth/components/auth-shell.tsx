@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Brand } from "@/components/layout/brand";
 import { LegalNotice } from "@/components/layout/legal-notice";
+import { Toaster } from "@/components/ui/toast";
 import { NoteBody } from "@/features/notes/components/note-body";
 import { ReminderChip } from "@/features/notes/components/reminder-chip";
 import type { NoteBlock } from "@/features/notes/note-blocks";
@@ -374,6 +375,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           </span>
         </div>
       </div>
+      {/* For "Account deleted", said on the way out. */}
+      <Toaster />
     </div>
   );
 }

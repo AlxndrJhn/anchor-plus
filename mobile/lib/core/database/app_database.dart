@@ -33,6 +33,12 @@ class AppDatabase extends _$AppDatabase {
 
   AppDatabase.forTesting(super.e);
 
+  Future<void>? _closing;
+
+  /// Drift's close throws if a second call starts before the first finishes.
+  @override
+  Future<void> close() => _closing ??= super.close();
+
   @override
   int get schemaVersion => 20;
 
@@ -261,6 +267,16 @@ class AppDatabase extends _$AppDatabase {
 Future<File> databaseFileOf(String userId) async {
   final dbFolder = await getApplicationDocumentsDirectory();
   return File(path.join(dbFolder.path, 'db_$userId.sqlite'));
+}
+
+/// Removes [userId]'s database from the phone. Close the database first:
+/// SQLite can corrupt a file removed while open.
+Future<void> deleteUserDatabaseFiles(String userId) async {
+  final database = (await databaseFileOf(userId)).path;
+  for (final suffix in const ['', '-journal', '-wal', '-shm']) {
+    final file = File('$database$suffix');
+    if (file.existsSync()) await file.delete();
+  }
 }
 
 /// Moves the notes kept on this device without an account into [userId]'s

@@ -5224,4 +5224,48 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get nativePhotoLibraryUse =>
       'Anchor używa biblioteki zdjęć, aby dodawać obrazy do notatek i wybierać zdjęcie profilowe.';
+
+  @override
+  String get authLastAdmin =>
+      'Jesteś jedynym administratorem na tym serwerze. Najpierw nadaj komuś innemu uprawnienia administratora.';
+
+  @override
+  String get deleteAccountTitle => 'Usuń konto';
+
+  @override
+  String get deleteAccountWarning => 'Tego nie można cofnąć.';
+
+  @override
+  String get deleteAccountMessage =>
+      'Twoje konto, notatki, tagi, załączniki i przypomnienia zostaną trwale usunięte z tego serwera, a na wszystkich urządzeniach nastąpi wylogowanie. Udostępnione przez Ciebie notatki i ich publiczne linki przestaną działać dla wszystkich. Zdjęcia i pliki dodane przez Ciebie do notatek innych osób zostaną przy tych notatkach.';
+
+  @override
+  String get deleteAccountExport =>
+      'Jeśli chcesz zachować kopię notatek, najpierw wyeksportuj je w Ustawieniach w wersji webowej.';
+
+  @override
+  String get deleteAccountPasswordHelp => 'Wpisz hasło, aby potwierdzić.';
+
+  @override
+  String get deleteAccountConfirm => 'Usuń konto';
+
+  @override
+  String get deleteAccountDeleting => 'Usuwanie…';
+
+  @override
+  String get deleteAccountDone => 'Konto zostało usunięte';
+
+  @override
+  String get deleteAccountOffline =>
+      'Jesteś offline. Połącz się z internetem, aby usunąć konto.';
+
+  @override
+  String get deleteAccountDialogTitle => 'Usunąć konto?';
+
+  @override
+  String get deleteAccountDialogMessage =>
+      'Twoje konto i notatki zostaną trwale usunięte z tego serwera.';
+
+  @override
+  String get settingsDeleteAccount => 'Usuń konto';
 }
