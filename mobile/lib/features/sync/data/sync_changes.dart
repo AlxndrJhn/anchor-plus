@@ -84,6 +84,7 @@ class SyncNoteChange extends SyncChange {
     this.lock,
     this.sendsLock = true,
     this.placedAfterEdit = false,
+    this.createdAt,
     this.revisions = const [],
     this.isRevisionsOnly = false,
   });
@@ -112,6 +113,10 @@ class SyncNoteChange extends SyncChange {
   /// Sent for a shared note only when it is being removed.
   final String? state;
   final List<String> tagIds;
+
+  /// When the note was made here, possibly offline; sent only while the
+  /// server doesn't have the note yet.
+  final DateTime? createdAt;
   final List<SyncNoteRevision> revisions;
 
   /// True when the row itself is already synced and this change only carries
@@ -144,6 +149,8 @@ class SyncNoteChange extends SyncChange {
     if (position != null) 'position': position,
     if (sendsLock) 'lock': lock,
     if (placedAfterEdit) 'placedAfterEdit': true,
+    if (baseVersion == null && createdAt != null)
+      'createdAt': createdAt!.toUtc().toIso8601String(),
     if (revisions.isNotEmpty)
       'revisions': [for (final revision in revisions) revision.toJson()],
     if (isRevisionsOnly) 'revisionsOnly': true,
