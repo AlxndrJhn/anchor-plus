@@ -154,7 +154,7 @@ and has ready-made themes to paste: Skeuomorphism, Neo-Brutalism and Lo-fi.
 - **Search** - Search notes locally by title or content
 - **Trash** - Soft delete notes with recovery period
 - **Automatic Sync** - Sync changes across devices when online
-- **Import & Export** - Back up your full library, or move notes in and out as plain Markdown
+- **Import & Export** - Back up your full library, move notes in and out as plain Markdown, or bring them over from Google Keep, Evernote, Notion, Joplin, Simplenote, Standard Notes, Obsidian, Bear and other Markdown or text files
 - **Home Screen Widget** - Quick access to your notes from the Android home screen
 - **Admin Panel** - User management, registration control, and system statistics
 - **OIDC Authentication** - Sign in with OpenID Connect providers (Pocket ID, Authelia, Keycloak, etc.)

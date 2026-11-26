@@ -37,7 +37,7 @@
     "export": "Export",
     "exportText": "Download all your notes as a backup, or to move them to another app.",
     "import": "Import",
-    "importText": "Import from an Anchor backup, Google Keep, or Markdown files from Obsidian and Nextcloud Notes."
+    "importText": "Bring notes over from Google Keep, Evernote, Notion, Joplin, Simplenote, Standard Notes, Obsidian and other Markdown apps, or restore an Anchor backup."
   },
   "searchSection": {
     "title": "Search",
@@ -462,10 +462,15 @@
       "noteTooLarge": "Note is too large (over 1 MB of formatted content)",
       "notZip": "This is not a ZIP file.",
       "zipDamaged": "This ZIP file is damaged.",
-      "zipPassword": "Password-protected ZIP files can’t be imported."
+      "zipPassword": "Password-protected ZIP files can’t be imported.",
+      "trashedInApp": "In the trash in {app}",
+      "encryptedText": "Encrypted text in this note was left out",
+      "encryptedNote": "This note is encrypted",
+      "encryptedBackup": "This backup is encrypted. Download a decrypted backup from Standard Notes, then try again.",
+      "tarDamaged": "This Joplin export is damaged."
     },
     "run": {
-      "nothingToImport": "Nothing to import here. Drop an Anchor backup, a Google Takeout zip, or a folder of Markdown (.md) files.",
+      "nothingToImport": "Nothing to import here. Drop an export from one of the apps listed, or a folder of Markdown (.md) or text (.txt) files.",
       "noNotes": "No importable notes found in this file.",
       "couldNotRead": "Couldn’t read this file.",
       "noteFailed": "Couldn’t import this note",
@@ -480,11 +485,16 @@
     "dialog": {
       "filesCount": "{count, plural, one {# file} other {# files}}",
       "title": "Import notes",
-      "description": "Import from an Anchor backup, a Google Keep export, or Markdown files.",
+      "description": "Bring your notes over from another app, or restore an Anchor backup.",
       "formats": {
         "anchor": "Anchor backup",
         "google-keep": "Google Keep",
-        "markdown": "Markdown files"
+        "markdown": "Markdown files",
+        "evernote": "Evernote",
+        "simplenote": "Simplenote",
+        "standard-notes": "Standard Notes",
+        "joplin": "Joplin",
+        "notion": "Notion"
       },
       "change": "Change",
       "noteLabel": "{count, plural, one {note} other {notes}}",
@@ -494,8 +504,8 @@
       "willBeSkipped": "{count, plural, one {# item will be skipped} other {# items will be skipped}}",
       "skipExisting": "Skip notes that already exist",
       "skipExistingHint": "Otherwise they are imported as copies.",
-      "folderTags": "Use folder names as tags",
-      "folderTagsHint": "Nextcloud categories and Obsidian folders become tags.",
+      "folderTags": "Use folders and notebooks as tags",
+      "folderTagsHint": "Notebooks, folders and categories become tags.",
       "uploadingAttachments": "Uploading attachments {done} of {total}",
       "importingNotes": "Importing notes {done} of {total}",
       "progress": "Import",
@@ -503,7 +513,7 @@
       "importNotes": "{count, plural, one {Import # note} other {Import # notes}}",
       "reading": "Reading {name}…",
       "readingHint": "Large exports can take a few seconds.",
-      "drop": "Drop a zip or a folder here",
+      "drop": "Drop an export or a folder here",
       "orClick": "or click to choose files",
       "pillImported": "imported",
       "pillCopies": "imported as copies",
@@ -516,7 +526,17 @@
       "nothingImported": "Nothing was imported",
       "needAttention": "{count, plural, one {# item needs attention} other {# items need attention}}",
       "restoredTrashed": "Notes restored to the trash get a fresh 30 days there.",
-      "keepHint": "Moving from Google Keep? <link>Export it with Google Takeout</link> (only Keep is selected), download the ZIP from Google’s email and drop it here. Large exports with many pictures work too."
+      "keepHint": "Moving from Google Keep? <link>Export it with Google Takeout</link> (only Keep is selected), download the ZIP from Google’s email and drop it here. Large exports with many pictures work too.",
+      "exportHelp": "How do I export my notes?",
+      "howTo": {
+        "evernote": "<b>Evernote</b>: right-click a notebook, choose Export notebook and keep the ENEX format. Drop one or more .enex files.",
+        "notion": "<b>Notion</b>: in Settings, choose Export all workspace content as Markdown & CSV. Drop the ZIP.",
+        "markdown": "<b>Obsidian, Bear, Logseq</b> and other Markdown apps: drop the vault folder or the exported .md files. Tags and dates in front matter come along.",
+        "joplin": "<b>Joplin</b>: File → Export all → JEX. Drop the .jex file.",
+        "simplenote": "<b>Simplenote</b>: Settings → Export notes. Drop the ZIP.",
+        "standardNotes": "<b>Standard Notes</b>: Settings → Backups, download a decrypted backup. Drop the .txt file or the ZIP.",
+        "other": "<b>Apple Notes, OneNote</b> and others: save your notes as Markdown or text files first, then drop the folder."
+      }
     },
     "localMove": {
       "movedTitle": "Your notes moved",

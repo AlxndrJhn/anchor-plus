@@ -37,7 +37,7 @@
     "export": "Eksportuj",
     "exportText": "Pobierz wszystkie notatki jako kopię zapasową albo przenieś je do innej aplikacji.",
     "import": "Importuj",
-    "importText": "Importuj z kopii zapasowej Anchor, Google Keep lub plików Markdown z Obsidiana i Nextcloud Notes."
+    "importText": "Przenieś notatki z Google Keep, Evernote, Notion, Joplina, Simplenote, Standard Notes, Obsidiana i innych aplikacji Markdown albo przywróć kopię zapasową Anchor."
   },
   "searchSection": {
     "title": "Wyszukiwanie",
@@ -462,10 +462,15 @@
       "noteTooLarge": "Notatka jest za duża (ponad 1 MB sformatowanej treści)",
       "notZip": "To nie jest plik ZIP.",
       "zipDamaged": "Ten plik ZIP jest uszkodzony.",
-      "zipPassword": "Nie można zaimportować plików ZIP chronionych hasłem."
+      "zipPassword": "Nie można zaimportować plików ZIP chronionych hasłem.",
+      "trashedInApp": "W koszu w {app}",
+      "encryptedText": "Zaszyfrowany tekst w tej notatce został pominięty",
+      "encryptedNote": "Ta notatka jest zaszyfrowana",
+      "encryptedBackup": "Ta kopia zapasowa jest zaszyfrowana. Pobierz odszyfrowaną kopię zapasową ze Standard Notes i spróbuj ponownie.",
+      "tarDamaged": "Ten eksport z Joplina jest uszkodzony."
     },
     "run": {
-      "nothingToImport": "Nie ma tu nic do zaimportowania. Upuść kopię zapasową Anchor, plik zip z Google Takeout lub folder z plikami Markdown (.md).",
+      "nothingToImport": "Nie ma tu nic do zaimportowania. Upuść eksport z jednej z wymienionych aplikacji albo folder z plikami Markdown (.md) lub tekstowymi (.txt).",
       "noNotes": "W tym pliku nie znaleziono notatek do zaimportowania.",
       "couldNotRead": "Nie udało się odczytać tego pliku.",
       "noteFailed": "Nie udało się zaimportować tej notatki",
@@ -480,11 +485,16 @@
     "dialog": {
       "filesCount": "{count, plural, one {# plik} few {# pliki} many {# plików} other {# pliku}}",
       "title": "Importuj notatki",
-      "description": "Importuj z kopii zapasowej Anchor, eksportu Google Keep lub plików Markdown.",
+      "description": "Przenieś notatki z innej aplikacji albo przywróć kopię zapasową Anchor.",
       "formats": {
         "anchor": "Kopia zapasowa Anchor",
         "google-keep": "Google Keep",
-        "markdown": "Pliki Markdown"
+        "markdown": "Pliki Markdown",
+        "evernote": "Evernote",
+        "simplenote": "Simplenote",
+        "standard-notes": "Standard Notes",
+        "joplin": "Joplin",
+        "notion": "Notion"
       },
       "change": "Zmień",
       "noteLabel": "{count, plural, one {notatka} few {notatki} many {notatek} other {notatki}}",
@@ -494,8 +504,8 @@
       "willBeSkipped": "{count, plural, one {# pozycja zostanie pominięta} few {# pozycje zostaną pominięte} many {# pozycji zostanie pominiętych} other {# pozycji zostanie pominiętych}}",
       "skipExisting": "Pomiń notatki, które już istnieją",
       "skipExistingHint": "W przeciwnym razie zostaną zaimportowane jako kopie.",
-      "folderTags": "Użyj nazw folderów jako tagów",
-      "folderTagsHint": "Kategorie Nextcloud i foldery Obsidiana zamieniają się w tagi.",
+      "folderTags": "Używaj folderów i notesów jako tagów",
+      "folderTagsHint": "Notesy, foldery i kategorie zamieniają się w tagi.",
       "uploadingAttachments": "Przesyłanie załączników: {done} z {total}",
       "importingNotes": "Importowanie notatek: {done} z {total}",
       "progress": "Import",
@@ -503,7 +513,7 @@
       "importNotes": "{count, plural, one {Importuj # notatkę} few {Importuj # notatki} many {Importuj # notatek} other {Importuj # notatki}}",
       "reading": "Odczytywanie {name}…",
       "readingHint": "Duże eksporty mogą potrwać kilka sekund.",
-      "drop": "Upuść tutaj plik zip lub folder",
+      "drop": "Upuść tutaj eksport lub folder",
       "orClick": "albo kliknij, aby wybrać pliki",
       "pillImported": "zaimportowano",
       "pillCopies": "zaimportowano jako kopie",
@@ -516,7 +526,17 @@
       "nothingImported": "Nic nie zaimportowano",
       "needAttention": "{count, plural, one {# pozycja wymaga uwagi} few {# pozycje wymagają uwagi} many {# pozycji wymaga uwagi} other {# pozycji wymaga uwagi}}",
       "restoredTrashed": "Notatki przywrócone do kosza dostają tam nowe 30 dni.",
-      "keepHint": "Przenosisz się z Google Keep? <link>Wyeksportuj dane przez Google Takeout</link> (zaznaczony jest tylko Keep), pobierz plik ZIP z e-maila od Google i upuść go tutaj. Duże eksporty z wieloma zdjęciami też działają."
+      "keepHint": "Przenosisz się z Google Keep? <link>Wyeksportuj dane przez Google Takeout</link> (zaznaczony jest tylko Keep), pobierz plik ZIP z e-maila od Google i upuść go tutaj. Duże eksporty z wieloma zdjęciami też działają.",
+      "exportHelp": "Jak wyeksportować notatki?",
+      "howTo": {
+        "evernote": "<b>Evernote</b>: kliknij notes prawym przyciskiem, wybierz Eksportuj notes i zostaw format ENEX. Upuść jeden lub kilka plików .enex.",
+        "notion": "<b>Notion</b>: w Ustawieniach wybierz eksport całej zawartości przestrzeni roboczej jako Markdown & CSV. Upuść plik ZIP.",
+        "markdown": "<b>Obsidian, Bear, Logseq</b> i inne aplikacje Markdown: upuść folder sejfu albo wyeksportowane pliki .md. Tagi i daty z front matter zostaną zachowane.",
+        "joplin": "<b>Joplin</b>: Plik → Eksportuj wszystko → JEX. Upuść plik .jex.",
+        "simplenote": "<b>Simplenote</b>: Ustawienia → Eksportuj notatki. Upuść plik ZIP.",
+        "standardNotes": "<b>Standard Notes</b>: Ustawienia → Kopie zapasowe, pobierz odszyfrowaną kopię. Upuść plik .txt lub ZIP.",
+        "other": "<b>Apple Notes, OneNote</b> i inne: najpierw zapisz notatki jako pliki Markdown lub tekstowe, a potem upuść folder."
+      }
     },
     "localMove": {
       "movedTitle": "Twoje notatki zostały przeniesione",

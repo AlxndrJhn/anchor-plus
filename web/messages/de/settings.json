@@ -37,7 +37,7 @@
     "export": "Exportieren",
     "exportText": "Lade alle deine Notizen als Backup herunter oder nimm sie mit in eine andere App.",
     "import": "Importieren",
-    "importText": "Importiere aus einem Anchor-Backup, Google Keep oder Markdown-Dateien von Obsidian und Nextcloud Notes."
+    "importText": "Hol deine Notizen aus Google Keep, Evernote, Notion, Joplin, Simplenote, Standard Notes, Obsidian und anderen Markdown-Apps oder stelle ein Anchor-Backup wieder her."
   },
   "searchSection": {
     "title": "Suche",
@@ -462,10 +462,15 @@
       "noteTooLarge": "Notiz ist zu groß (über 1 MB formatierter Inhalt)",
       "notZip": "Das ist keine ZIP-Datei.",
       "zipDamaged": "Diese ZIP-Datei ist beschädigt.",
-      "zipPassword": "Passwortgeschützte ZIP-Dateien können nicht importiert werden."
+      "zipPassword": "Passwortgeschützte ZIP-Dateien können nicht importiert werden.",
+      "trashedInApp": "Im Papierkorb von {app}",
+      "encryptedText": "Verschlüsselter Text in dieser Notiz wurde weggelassen",
+      "encryptedNote": "Diese Notiz ist verschlüsselt",
+      "encryptedBackup": "Dieses Backup ist verschlüsselt. Lade in Standard Notes ein entschlüsseltes Backup herunter und versuche es dann erneut.",
+      "tarDamaged": "Dieser Joplin-Export ist beschädigt."
     },
     "run": {
-      "nothingToImport": "Hier gibt es nichts zu importieren. Ziehe ein Anchor-Backup, eine Google-Takeout-Zip-Datei oder einen Ordner mit Markdown-Dateien (.md) hierher.",
+      "nothingToImport": "Hier gibt es nichts zu importieren. Ziehe einen Export aus einer der genannten Apps oder einen Ordner mit Markdown- (.md) oder Textdateien (.txt) hierher.",
       "noNotes": "In dieser Datei wurden keine importierbaren Notizen gefunden.",
       "couldNotRead": "Diese Datei konnte nicht gelesen werden.",
       "noteFailed": "Diese Notiz konnte nicht importiert werden",
@@ -480,11 +485,16 @@
     "dialog": {
       "filesCount": "{count, plural, one {# Datei} other {# Dateien}}",
       "title": "Notizen importieren",
-      "description": "Importiere aus einem Anchor-Backup, einem Google-Keep-Export oder Markdown-Dateien.",
+      "description": "Hol deine Notizen aus einer anderen App oder stelle ein Anchor-Backup wieder her.",
       "formats": {
         "anchor": "Anchor-Backup",
         "google-keep": "Google Keep",
-        "markdown": "Markdown-Dateien"
+        "markdown": "Markdown-Dateien",
+        "evernote": "Evernote",
+        "simplenote": "Simplenote",
+        "standard-notes": "Standard Notes",
+        "joplin": "Joplin",
+        "notion": "Notion"
       },
       "change": "Ändern",
       "noteLabel": "{count, plural, one {Notiz} other {Notizen}}",
@@ -494,8 +504,8 @@
       "willBeSkipped": "{count, plural, one {# Eintrag wird übersprungen} other {# Einträge werden übersprungen}}",
       "skipExisting": "Bereits vorhandene Notizen überspringen",
       "skipExistingHint": "Sonst werden sie als Kopien importiert.",
-      "folderTags": "Ordnernamen als Tags verwenden",
-      "folderTagsHint": "Nextcloud-Kategorien und Obsidian-Ordner werden zu Tags.",
+      "folderTags": "Ordner und Notizbücher als Tags verwenden",
+      "folderTagsHint": "Notizbücher, Ordner und Kategorien werden zu Tags.",
       "uploadingAttachments": "Anhänge werden hochgeladen: {done} von {total}",
       "importingNotes": "Notizen werden importiert: {done} von {total}",
       "progress": "Import",
@@ -503,7 +513,7 @@
       "importNotes": "{count, plural, one {# Notiz importieren} other {# Notizen importieren}}",
       "reading": "{name} wird gelesen …",
       "readingHint": "Große Exporte können ein paar Sekunden dauern.",
-      "drop": "Zip-Datei oder Ordner hierher ziehen",
+      "drop": "Export oder Ordner hierher ziehen",
       "orClick": "oder klicken, um Dateien auszuwählen",
       "pillImported": "importiert",
       "pillCopies": "als Kopien importiert",
@@ -516,7 +526,17 @@
       "nothingImported": "Es wurde nichts importiert",
       "needAttention": "{count, plural, one {# Eintrag braucht Aufmerksamkeit} other {# Einträge brauchen Aufmerksamkeit}}",
       "restoredTrashed": "Notizen, die in den Papierkorb wiederhergestellt werden, bekommen dort neue 30 Tage.",
-      "keepHint": "Du kommst von Google Keep? <link>Exportiere es mit Google Takeout</link> (nur Keep ist ausgewählt), lade die ZIP-Datei aus der E-Mail von Google herunter und zieh sie hierher. Auch große Exporte mit vielen Bildern funktionieren."
+      "keepHint": "Du kommst von Google Keep? <link>Exportiere es mit Google Takeout</link> (nur Keep ist ausgewählt), lade die ZIP-Datei aus der E-Mail von Google herunter und zieh sie hierher. Auch große Exporte mit vielen Bildern funktionieren.",
+      "exportHelp": "Wie exportiere ich meine Notizen?",
+      "howTo": {
+        "evernote": "<b>Evernote</b>: Rechtsklick auf ein Notizbuch, Notizbuch exportieren wählen und das ENEX-Format lassen. Zieh eine oder mehrere .enex-Dateien hierher.",
+        "notion": "<b>Notion</b>: In den Einstellungen Gesamten Workspace-Inhalt exportieren wählen, als Markdown & CSV. Zieh die ZIP-Datei hierher.",
+        "markdown": "<b>Obsidian, Bear, Logseq</b> und andere Markdown-Apps: Zieh den Vault-Ordner oder die exportierten .md-Dateien hierher. Tags und Daten aus dem Front Matter kommen mit.",
+        "joplin": "<b>Joplin</b>: Datei → Alles exportieren → JEX. Zieh die .jex-Datei hierher.",
+        "simplenote": "<b>Simplenote</b>: Einstellungen → Notizen exportieren. Zieh die ZIP-Datei hierher.",
+        "standardNotes": "<b>Standard Notes</b>: Einstellungen → Backups, ein entschlüsseltes Backup herunterladen. Zieh die .txt-Datei oder die ZIP-Datei hierher.",
+        "other": "<b>Apple Notes, OneNote</b> und andere: Speichere deine Notizen zuerst als Markdown- oder Textdateien und zieh dann den Ordner hierher."
+      }
     },
     "localMove": {
       "movedTitle": "Deine Notizen sind umgezogen",
