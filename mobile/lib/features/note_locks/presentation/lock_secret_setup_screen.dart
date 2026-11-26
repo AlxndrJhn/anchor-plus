@@ -248,7 +248,7 @@ class _PasswordSheetState extends State<_PasswordSheet> {
   void initState() {
     super.initState();
     _controller.addListener(() => setState(() {}));
-    Future.delayed(const Duration(milliseconds: 320), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _focus.requestFocus();
     });
   }
