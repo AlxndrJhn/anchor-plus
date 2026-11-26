@@ -11,7 +11,12 @@ export function fromFileList(files: FileList | null): PickedFile[] {
   }));
 }
 
-const isIgnored = (name: string) => name.startsWith(".") || name === "__MACOSX";
+/** Nextcloud Notes keeps each note's pictures in a hidden folder beside it. */
+const NEXTCLOUD_ATTACHMENTS = /^\.attachments\.\d+$/;
+
+const isIgnored = (name: string) =>
+  (name.startsWith(".") && !NEXTCLOUD_ATTACHMENTS.test(name)) ||
+  name === "__MACOSX";
 
 type DroppedFiles = { files: PickedFile[]; isTruncated: boolean };
 

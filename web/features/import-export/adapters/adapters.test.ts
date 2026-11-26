@@ -226,7 +226,33 @@ describe("openZip", () => {
     expect(
       new Uint8Array(await (await zip.blob("Notes/shot.png")).arrayBuffer()),
     ).toEqual(new Uint8Array([1, 2, 3]));
+    expect(zip.text("Notes/readme.txt")).toBe("plain");
     expect(() => zip.text("Notes/missing.md")).toThrow();
+  });
+
+  it("knows when each entry was last changed", async () => {
+    const changed = new Date("2024-03-05T14:22:10Z");
+    // Extended timestamp field: flags (mtime set), then UTC seconds
+    const utc = new Uint8Array(5);
+    utc[0] = 1;
+    new DataView(utc.buffer).setUint32(1, Date.UTC(2023, 6, 1) / 1000, true);
+
+    const zip = await readZip(
+      zipSync({
+        "Notes/dos.md": [strToU8("a"), { mtime: changed }],
+        "Notes/utc.md": [
+          strToU8("b"),
+          { mtime: changed, extra: { 21589: utc } },
+        ],
+        "Notes/zero.md": [strToU8("c"), { mtime: new Date(1980, 0, 1) }],
+      }),
+    );
+
+    expect(zip.modifiedAt?.("Notes/dos.md")).toBe(changed.toISOString());
+    expect(zip.modifiedAt?.("Notes/utc.md")).toBe("2023-07-01T00:00:00.000Z");
+    // The format's zero date means "unknown", not 1980
+    expect(zip.modifiedAt?.("Notes/zero.md")).toBeUndefined();
+    expect(zip.modifiedAt?.("Notes/missing.md")).toBeUndefined();
   });
 
   it("opens a large export without reading it whole", async () => {
@@ -284,6 +310,21 @@ describe("readFiles", () => {
     expect(zip.names).toEqual(["Vault/Note.md", "Vault/shot.png"]);
     expect(zip.text("Vault/Note.md")).toBe("body");
     expect(await zip.blob("Vault/shot.png")).toBe(image);
+  });
+
+  it("takes each file's date from the file itself", async () => {
+    const lastModified = Date.UTC(2022, 1, 3, 4, 5, 6);
+    const zip = await readFiles([
+      {
+        path: "Notes/Old.txt",
+        file: new File(["old"], "Old.txt", { lastModified }),
+      },
+    ]);
+
+    expect(zip.text("Notes/Old.txt")).toBe("old");
+    expect(zip.modifiedAt?.("Notes/Old.txt")).toBe(
+      new Date(lastModified).toISOString(),
+    );
   });
 });
 
@@ -429,6 +470,48 @@ describe("markdownAdapter.parse", () => {
     });
   });
 
+  it("reads a Nextcloud Notes folder: .txt notes, hidden picture folders and dates", async () => {
+    const changed = new Date("2025-09-14T08:30:00Z");
+    const parsed = await markdownAdapter.parse(
+      await readZip(
+        zipSync({
+          // Older Nextcloud Notes saved notes as .txt
+          "Notes/Shopping.txt": [strToU8("milk\nbread\n"), { mtime: changed }],
+          // Since Notes 6.1 pictures sit in .attachments.<note id>
+          "Notes/Garden/Beds.md": strToU8(
+            "Tomatoes left.\n\n![bed.png](.attachments.4711/bed%20one.png)\n",
+          ),
+          "Notes/Garden/.attachments.4711/bed one.png": new Uint8Array([
+            1, 2, 3,
+          ]),
+          // Notes 6.0 and older kept them flat beside the note
+          "Notes/Garden/Shed.md": strToU8(
+            "![](d8aef2005b4f815fec8ade5388240f2c.png)\n\nTools.\n",
+          ),
+          "Notes/Garden/d8aef2005b4f815fec8ade5388240f2c.png": new Uint8Array([
+            4, 5,
+          ]),
+        }),
+      ),
+    );
+    const byTitle = new Map(parsed.notes.map((note) => [note.title, note]));
+
+    expect([...byTitle.keys()].sort()).toEqual(["Beds", "Shed", "Shopping"]);
+    expect(byTitle.get("Shopping")?.createdAt).toBe(changed.toISOString());
+    expect(byTitle.get("Shopping")?.updatedAt).toBe(changed.toISOString());
+    expect(byTitle.get("Shopping")?.folderTags).toEqual([]);
+
+    const beds = byTitle.get("Beds");
+    expect(beds?.folderTags).toEqual(["Garden"]);
+    expect(beds?.attachments.map((a) => a.filename)).toEqual(["bed one.png"]);
+    expect(await beds?.attachments[0].getBlob().then((b) => b.size)).toBe(3);
+    expect(byTitle.get("Shed")?.attachments.map((a) => a.filename)).toEqual([
+      "d8aef2005b4f815fec8ade5388240f2c.png",
+    ]);
+    expect(parsed.attachmentCount).toBe(2);
+    expect(parsed.skipped).toEqual([]);
+  });
+
   it("drops a title heading that repeats the filename", async () => {
     const parsed = await markdownAdapter.parse(await appleZip());
     const byTitle = new Map(parsed.notes.map((note) => [note.title, note]));
@@ -534,7 +617,7 @@ describe("markdownAdapter.parse", () => {
       await markdownZip({
         "Blank.md": blankFile,
         "Real.md": "![missing](gone.png)\n\ntext\n",
-        "Notes.txt": "ignored",
+        "Notes.json": "{}",
       }),
     );
 
