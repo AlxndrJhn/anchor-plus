@@ -478,36 +478,64 @@ class AppLocalizationsPl extends AppLocalizations {
   String get serverHeaders => 'Dodatkowe nagłówki';
 
   @override
-  String get serverHeadersHint => 'CF-Access-Client-Id: …';
-
-  @override
   String get serverHeadersHelp =>
-      'Dla proxy przed Twoim serwerem, np. Cloudflare Access. Po jednym w wierszu, w formie Nazwa: wartość. Wysyłane tylko do tego serwera.';
+      'Dla proxy przed Twoim serwerem, np. Cloudflare Access. Wysyłane tylko do tego serwera. Wklej wiersze Nazwa: wartość w pole nazwy, by wypełnić kilka naraz.';
 
   @override
-  String serverHeaderNotNameValue(int line) {
-    return 'Wiersz $line wymaga nazwy i wartości, w formie Nazwa: wartość.';
+  String get serverHeaderNameHint => 'Nazwa';
+
+  @override
+  String get serverHeaderValueHint => 'Wartość';
+
+  @override
+  String get serverHeaderNameLabel => 'Nazwa nagłówka';
+
+  @override
+  String get serverHeaderValueLabel => 'Wartość nagłówka';
+
+  @override
+  String get serverShowHeaderValue => 'Pokaż wartość';
+
+  @override
+  String get serverHideHeaderValue => 'Ukryj wartość';
+
+  @override
+  String get serverAddHeader => 'Dodaj nagłówek';
+
+  @override
+  String get serverRemoveHeader => 'Usuń nagłówek';
+
+  @override
+  String serverRemoveNamedHeader(String name) {
+    return 'Usuń $name';
   }
 
   @override
-  String serverHeaderBadName(int line) {
-    return 'Wiersz $line: nazwa może zawierać tylko litery, cyfry oraz - _ .';
+  String get serverHeaderRemoved => 'Usunięto nagłówek';
+
+  @override
+  String serverHeaderLimit(int max) {
+    return 'Maksymalnie $max nagłówków.';
   }
 
   @override
-  String serverHeaderBadValue(int line) {
-    return 'Wiersz $line: wartość zawiera znaki, których nagłówek nie może przenosić.';
-  }
+  String get serverHeaderNeedsName => 'Wpisz nazwę.';
 
   @override
-  String serverHeaderReserved(int line) {
-    return 'Wiersz $line: Anchor sam ustawia ten nagłówek.';
-  }
+  String get serverHeaderNeedsValue => 'Wpisz wartość.';
 
   @override
-  String serverHeaderRepeated(int line) {
-    return 'Wiersz $line powtarza nazwę z wyżej.';
-  }
+  String get serverHeaderBadName => 'Tylko litery, cyfry oraz - _ .';
+
+  @override
+  String get serverHeaderBadValue =>
+      'Zawiera znaki, których nagłówek nie może przenosić.';
+
+  @override
+  String get serverHeaderReserved => 'Anchor sam ustawia ten nagłówek.';
+
+  @override
+  String get serverHeaderRepeated => 'Już dodany wyżej.';
 
   @override
   String get serverSelfHosted =>
