@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
-import { LOCK_PATTERN, LOCK_PIN } from '../dto/note-lock.dto';
+import { isLockPattern, isLockPin } from '../dto/note-lock.dto';
 import { hashLockSecret, lockSecretMatches } from '../utils/note-lock.util';
 import { AttemptLimiter } from '../../common/utils/attempt-limiter';
 import {
@@ -52,7 +52,7 @@ export class NoteLocksService {
     secret: string,
     proof: { current?: string; password?: string },
   ) {
-    if (!(kind === 'pin' ? LOCK_PIN : LOCK_PATTERN).test(secret)) {
+    if (!(kind === 'pin' ? isLockPin : isLockPattern)(secret)) {
       throw kind === 'pin'
         ? coded(
             new BadRequestException('A PIN is 4 to 12 digits'),

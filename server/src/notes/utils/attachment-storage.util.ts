@@ -9,6 +9,7 @@ import {
   ATTACHMENT_MAX_FILE_SIZE,
 } from '../constants/notes.constants';
 import { coded, ErrorCode } from '../../common/errors/coded';
+import { pathInside } from '../../common/utils/file-system.util';
 
 export function assertValidAttachmentFile(file?: Express.Multer.File): void {
   if (!file) {
@@ -63,7 +64,7 @@ export function noteAttachmentDir(attachmentsDir: string, noteId: string) {
       ErrorCode.NOTE_ID_INVALID,
     );
   }
-  return path.join(attachmentsDir, noteId);
+  return pathInside(attachmentsDir, noteId);
 }
 
 export function isStorableNoteId(noteId: string): boolean {
@@ -85,7 +86,7 @@ export async function removeNoteAttachmentDir(
     return;
   }
   try {
-    await fs.rm(path.join(attachmentsDir, noteId), {
+    await fs.rm(pathInside(attachmentsDir, noteId), {
       recursive: true,
       force: true,
     });
@@ -101,6 +102,15 @@ export function clientAttachmentId(id: unknown): string | undefined {
   return typeof id === 'string' && UUID.test(id) ? id : undefined;
 }
 
+/**
+ * The uploaded name's extension, kept on the stored file when it is a plain
+ * one (`.jpg`, `.tar.gz`'s `.gz`); anything else is dropped.
+ */
+export function storedExtension(originalName: string): string {
+  const ext = path.extname(originalName).toLowerCase();
+  return /^.[a-z0-9]{1,16}$/.test(ext) ? ext : '';
+}
+
 export async function writeAttachmentFile(
   noteDir: string,
   originalName: string,
@@ -108,9 +118,8 @@ export async function writeAttachmentFile(
 ): Promise<{ storedFilename: string; filePath: string }> {
   await fs.mkdir(noteDir, { recursive: true });
 
-  const ext = path.extname(originalName).toLowerCase();
-  const storedFilename = `${crypto.randomUUID()}-${Date.now()}${ext}`;
-  const filePath = path.join(noteDir, storedFilename);
+  const storedFilename = `${crypto.randomUUID()}-${Date.now()}${storedExtension(originalName)}`;
+  const filePath = pathInside(noteDir, storedFilename);
 
   await fs.writeFile(filePath, data);
   return { storedFilename, filePath };

@@ -43,8 +43,17 @@ type PersonErrors = Partial<Record<AccountField, string>>;
 
 function makePassword() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  return [...bytes].map((b) => alphabet[b % alphabet.length]).join("");
+  // Bytes past the last whole multiple of the alphabet are skipped, so every
+  // letter is equally likely.
+  const limit = 256 - (256 % alphabet.length);
+  let password = "";
+  while (password.length < 16) {
+    for (const b of crypto.getRandomValues(new Uint8Array(32))) {
+      if (b < limit && password.length < 16)
+        password += alphabet[b % alphabet.length];
+    }
+  }
+  return password;
 }
 
 export function AddPersonDialog({

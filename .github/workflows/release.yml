@@ -74,7 +74,7 @@ jobs:
       desktop_tag: ${{ steps.changes.outputs.desktop_tag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -214,16 +214,16 @@ jobs:
       ORG_GRADLE_PROJECT_anchorPlus: "true"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up Java
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
         with:
           distribution: temurin
           java-version: "25"
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
           flutter-version: 3.47.9
@@ -280,7 +280,7 @@ jobs:
           mv app-x86_64-release.apk anchor-plus-x86_64.apk
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: anchor-plus-apk
           path: mobile/build/app/outputs/flutter-apk/anchor-plus*.apk
@@ -302,7 +302,7 @@ jobs:
             --build-number=$((7000 + BUILD))
 
       - name: Upload app bundle artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: anchor-plus-play-aab
           path: mobile/build/app/outputs/bundle/release/app-release.aab
@@ -330,15 +330,15 @@ jobs:
         shell: bash
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
         with:
           package_json_file: desktop/package.json
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 26
           cache: pnpm
@@ -429,7 +429,7 @@ jobs:
           spctl --assess --type execute --verbose=2 "$app"
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: anchor-desktop-${{ matrix.name }}
           path: |
@@ -471,7 +471,7 @@ jobs:
 
       - name: Sign with SignPath
         if: steps.artifact.outputs.id != ''
-        uses: signpath/github-action-submit-signing-request@v2
+        uses: signpath/github-action-submit-signing-request@c92b958760219087e01f8d67a1669ed57afe2627 # v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
@@ -486,7 +486,7 @@ jobs:
 
       - name: Replace the unsigned installer
         if: steps.artifact.outputs.id != ''
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: anchor-desktop-windows
           path: signed/Anchor-Setup-*.exe
@@ -518,19 +518,19 @@ jobs:
       artifact-metadata: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
       - name: Download APK
         if: needs.version.outputs.apk == 'true'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: anchor-plus-apk
 
       - name: Download desktop installers
         if: needs.version.outputs.desktop == 'true'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         continue-on-error: true
         with:
           pattern: anchor-desktop-*
@@ -542,7 +542,7 @@ jobs:
       # secrets are set, and the Windows installer when sign-windows signed it.
       - name: Attest the release files
         if: hashFiles('anchor-plus*.apk', 'Anchor-*.exe', 'Anchor-*.dmg') != ''
-        uses: actions/attest@v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: |
             anchor-plus*.apk
@@ -736,11 +736,11 @@ jobs:
         shell: bash
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # Missing when only the macOS one built.
       - name: Download Windows installer
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         continue-on-error: true
         with:
           name: anchor-desktop-windows

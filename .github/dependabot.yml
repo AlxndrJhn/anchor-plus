@@ -41,7 +41,8 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: docker
-    directory: /
+    # The dev images are pinned to the same digest as the release one.
+    directories: ["/", "/server", "/web"]
     schedule:
       interval: weekly
     groups:
