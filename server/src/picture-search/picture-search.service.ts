@@ -318,8 +318,9 @@ export class PictureSearchService implements OnApplicationBootstrap {
       const words = LABELS.map((en) => labelPrompt(en));
       const key = createHash('sha256').update(words.join('\n')).digest('hex');
       const file = path.join(this.modelDir, `labels-${key.slice(0, 16)}.f32`);
-      if (fs.existsSync(file)) {
-        const all = toFloats(fs.readFileSync(file));
+      const cached = readIfExists(file);
+      if (cached) {
+        const all = toFloats(cached);
         const size = all.length / words.length;
         return words.map((_, i) => all.slice(i * size, (i + 1) * size));
       }
@@ -394,6 +395,16 @@ function dot(a: Float32Array | undefined, b: Float32Array): number {
   let sum = 0;
   for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
   return sum;
+}
+
+/** A file's bytes, or null when there is no such file. */
+function readIfExists(file: string): Buffer | null {
+  try {
+    return fs.readFileSync(file);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
+  }
 }
 
 function toFloats(bytes: Uint8Array): Float32Array {

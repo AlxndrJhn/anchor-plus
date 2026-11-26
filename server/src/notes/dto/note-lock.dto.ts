@@ -31,8 +31,9 @@ export class BulkLockDto extends NoteLockDto {
  * A PIN is 4 to 12 digits. A pattern is the dots it joins, in order, as
  * digits 0 to 8 (left to right, top to bottom): 4 to 9 of them, none twice.
  */
-export const LOCK_PIN = /^\d{4,12}$/;
-export const LOCK_PATTERN = /^(?!.*(.).*\1)[0-8]{4,9}$/;
+export const isLockPin = (secret: string) => /^\d{4,12}$/.test(secret);
+export const isLockPattern = (secret: string) =>
+  /^[0-8]{4,9}$/.test(secret) && new Set(secret).size === secret.length;
 
 export class SetLockSecretDto {
   @IsString()

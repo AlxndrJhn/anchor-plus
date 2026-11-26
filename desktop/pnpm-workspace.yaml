@@ -9,3 +9,12 @@ allowBuilds:
   electron: true
   # Only for Squirrel.Windows installers; the app ships an NSIS one.
   electron-winstaller: false
+
+# Patched versions of transitive dependencies whose parents pin a vulnerable
+# one. Drop an entry once its parent catches up.
+overrides:
+  # electron-builder's tooling (undici 6 and 7)
+  'undici@<6.29.1': ^6.29.1
+  'undici@>=7 <7.30.1': ^7.30.1
+  # glob 10 (via electron-builder) pins minimatch 9
+  'minimatch@>=7 <11.0.1': ^11.0.1

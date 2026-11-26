@@ -56,7 +56,12 @@ for (const file of walk(out)) {
 rmSync(join(out, "sw.js"), { force: true });
 
 if (mode === "local") {
-  const route = `(function(){var b=${JSON.stringify(base)},p=location.pathname.replace(/\\/+$/,"");if(p===b+"/demo"||p.indexOf(b+"/demo/")===0)location.replace(b+"/demo/");else if(!/^\\/notes\\/[^/]+$/.test(p.slice(b.length)))location.replace(b+"/missing");})()`;
+  // The base goes into an inline <script>: escaped so it can't end the tag.
+  const baseLiteral = JSON.stringify(base).replace(
+    /[/<>]/g,
+    (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`,
+  );
+  const route = `(function(){var b=${baseLiteral},p=location.pathname.replace(/\\/+$/,"");if(p===b+"/demo"||p.indexOf(b+"/demo/")===0)location.replace(b+"/demo/");else if(!/^\\/notes\\/[^/]+$/.test(p.slice(b.length)))location.replace(b+"/missing");})()`;
   const page = readFileSync(join(out, "notes", "new.html"), "utf8");
   writeFileSync(
     join(out, "404.html"),

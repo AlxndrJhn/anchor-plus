@@ -117,7 +117,10 @@ export class LocalServer {
     } catch (error) {
       if (error instanceof HttpError) return json(error.body, error.status);
       console.error("Local backend:", error);
-      return json({ statusCode: 500, message: String(error) }, 500);
+      // The details are in the console; the app gets only the message.
+      const message =
+        error instanceof Error ? error.message : "Internal server error";
+      return json({ statusCode: 500, message }, 500);
     }
   }
 

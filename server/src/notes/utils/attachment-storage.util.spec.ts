@@ -7,6 +7,7 @@ import {
   attachmentTypeForMime,
   clientAttachmentId,
   servedMimeType,
+  storedExtension,
 } from './attachment-storage.util';
 
 const fileOf = (overrides: Partial<Express.Multer.File>): Express.Multer.File =>
@@ -74,5 +75,19 @@ describe('clientAttachmentId', () => {
     expect(clientAttachmentId('../etc')).toBeUndefined();
     expect(clientAttachmentId(undefined)).toBeUndefined();
     expect(clientAttachmentId(42)).toBeUndefined();
+  });
+});
+
+describe('storedExtension', () => {
+  it('keeps a plain extension, lower-cased', () => {
+    expect(storedExtension('Photo.JPG')).toBe('.jpg');
+    expect(storedExtension('backup.tar.gz')).toBe('.gz');
+  });
+
+  it('drops anything that is not a plain extension', () => {
+    expect(storedExtension('README')).toBe('');
+    expect(storedExtension('a.b c')).toBe('');
+    expect(storedExtension('x.<b>')).toBe('');
+    expect(storedExtension('x.' + 'a'.repeat(17))).toBe('');
   });
 });

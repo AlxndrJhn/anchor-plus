@@ -16,7 +16,10 @@ import {
 } from '../../sync/sync-emitter.service';
 import { NoteSharePermission } from 'src/generated/prisma/enums';
 import { StorageConfig } from '../../config/configuration';
-import { deleteFileIfExists } from '../../common/utils/file-system.util';
+import {
+  deleteFileIfExists,
+  pathInside,
+} from '../../common/utils/file-system.util';
 import {
   assertValidAttachmentFile,
   attachmentTypeForMime,
@@ -42,7 +45,6 @@ import { StorageQuotaService } from '../../storage-quota/storage-quota.service';
 import { replaceAttachmentIds } from '../utils/inline-images.util';
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import { createReadStream, existsSync } from 'fs';
 import { coded, ErrorCode } from '../../common/errors/coded';
 
@@ -81,7 +83,7 @@ export class NoteAttachmentsService {
   }
 
   private attachmentPath(noteId: string, storedFilename: string): string {
-    return path.join(this.attachmentDir(noteId), storedFilename);
+    return pathInside(this.attachmentDir(noteId), storedFilename);
   }
 
   /**
