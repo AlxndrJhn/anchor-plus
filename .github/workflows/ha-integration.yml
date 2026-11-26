@@ -1,0 +1,92 @@
+name: Home Assistant integration
+
+# Runs the end-to-end suite of the Home Assistant integration
+# (felixschndr/ha-anchor-integration) against an Anchor+ server built from this
+# checkout: a real Home Assistant core adds a note as a to-do list, edits it,
+# follows the event stream and swaps the API token. The server side of that
+# contract is also pinned in server/test/e2e/specs/ha-anchor-integration.e2e-spec.ts,
+# which runs with the other e2e specs in CI.
+#
+# The integration is third-party code, so it is pinned to a reviewed commit
+# (INTEGRATION_SHA) and runs only inside a throwaway container, with no access
+# to this runner's token, cache or toolchain. To test a newer version, read
+# its changes and bump the SHA.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+      - "Dockerfile"
+      - "docker/**"
+      - ".github/workflows/ha-integration.yml"
+  pull_request:
+    branches: [main, next]
+    paths:
+      - "server/**"
+      - "Dockerfile"
+      - "docker/**"
+      - ".github/workflows/ha-integration.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # felixschndr/ha-anchor-integration main on 2026-11-19.
+  INTEGRATION_SHA: ebc8abc4dea801bb46a058eee71f630918ea1241
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Anchor+
+        uses: actions/checkout@v7
+        with:
+          path: anchor-plus
+          persist-credentials: false
+
+      - name: Build and start Anchor+
+        working-directory: anchor-plus
+        run: |
+          docker build -t anchor-plus:ha-e2e .
+          docker run -d --name anchor \
+            -e PG_USER=anchor -e PG_PASSWORD=password -e PG_DATABASE=anchor \
+            anchor-plus:ha-e2e
+
+      - name: Fetch the integration at the pinned commit
+        run: |
+          mkdir integration
+          curl -sfL "https://codeload.github.com/felixschndr/ha-anchor-integration/tar.gz/$INTEGRATION_SHA" \
+            | tar -xz --strip-components=1 -C integration
+
+      # Shares the server's network, so the suite reaches it on 127.0.0.1, the
+      # only address Home Assistant's test harness lets it connect to.
+      # The suite skips (and passes) when it can't tell where the server is,
+      # so a run that passed nothing or skipped anything counts as a failure.
+      - name: Run the integration's end-to-end tests
+        run: |
+          docker run --rm --network container:anchor \
+            -v "$PWD/integration:/src:ro" \
+            -e ANCHOR_E2E_URL=http://127.0.0.1:3000 \
+            python:3.14 bash -c '
+              set -euo pipefail
+              cp -r /src /w && cd /w
+              pip install -q poetry
+              poetry install --no-interaction --no-root
+              timeout 180 bash -c "until curl -sf \$ANCHOR_E2E_URL/api/health >/dev/null; do sleep 2; done"
+              poetry run pytest tests/e2e -rs | tee pytest.log
+              grep -qE "[0-9]+ passed" pytest.log \
+                || { echo "::error::No end-to-end test ran; update this workflow."; exit 1; }
+              if grep -qE "[0-9]+ skipped" pytest.log; then
+                echo "::error::End-to-end tests were skipped."; exit 1
+              fi'
+
+      - name: Anchor+ logs
+        if: failure()
+        run: docker logs anchor
