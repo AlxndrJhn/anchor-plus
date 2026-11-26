@@ -4929,4 +4929,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String magicLoginNeedsPlus(String host) {
     return '$host is a regular Anchor server, which can’t sign in with a code. Sign in with your password instead.';
   }
+
+  @override
+  String get nativeWidgetLabel => 'Notes';
+
+  @override
+  String get nativeWidgetDescription =>
+      'See your notes and start a new one from the home screen.';
+
+  @override
+  String get nativeNewNote => 'New note';
+
+  @override
+  String get nativeNewChecklist => 'New checklist';
+
+  @override
+  String get nativeWidgetEmpty =>
+      'No notes yet.\nTap + to write your first one.';
+
+  @override
+  String get nativeWidgetSignedOut =>
+      'Sign in to Anchor\nto see your notes here.';
+
+  @override
+  String get nativeLiveChannel => 'Live images';
+
+  @override
+  String get nativeLiveTransmitting => 'Transmitting';
+
+  @override
+  String get nativeLiveTransmittingText => 'A note shows your camera live.';
+
+  @override
+  String get nativeLiveStop => 'Stop transmission';
+
+  @override
+  String get nativeRecordingChannel => 'Voice recordings';
+
+  @override
+  String get nativeRecordingTitle => 'Recording audio';
+
+  @override
+  String get nativeRecordingText => 'Open Anchor to stop the recording.';
+
+  @override
+  String get nativeMusicUse =>
+      'Anchor uses your music library to add audio files to notes.';
+
+  @override
+  String get nativeCameraUse =>
+      'Anchor uses the camera to take pictures for your notes and your profile photo.';
+
+  @override
+  String get nativeFaceIdUse =>
+      'Anchor uses Face ID to open the notes you lock with it.';
+
+  @override
+  String get nativeLocalNetworkUse =>
+      'Anchor connects to your server when it is on your local network.';
+
+  @override
+  String get nativeMicrophoneUse =>
+      'Anchor uses the microphone to record voice notes.';
+
+  @override
+  String get nativePhotoLibraryAddUse =>
+      'Anchor saves pictures from your notes to your photo library.';
+
+  @override
+  String get nativePhotoLibraryUse =>
+      'Anchor uses your photo library to add pictures to notes and to choose your profile photo.';
 }

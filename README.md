@@ -1071,7 +1071,9 @@ To add a language, for example French (`fr`):
    in `mobile/lib/features/settings/presentation/language_controller.dart`,
    `CFBundleLocalizations` in `mobile/ios/Runner/Info.plist` and
    `mobile/android/app/src/main/res/xml/locales_config.xml`, then run
-   `dart run tool/share_extension_strings.dart` in `mobile`.
+   `dart run tool/native_strings.dart` in `mobile`. That writes the strings
+   that live outside Flutter (the iPhone share extension and permission prompts,
+   and Android's widget, shortcuts and notifications) from the ARB files.
 
 Tests check that every language has the same keys, placeholders and plurals as
 English: `pnpm test messages` in `web` and `flutter test test/l10n_test.dart` in

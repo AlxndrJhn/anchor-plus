@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Written by tool/native_strings.dart from lib/l10n. -->
+<resources>
+    <string name="widget_label">Notatki</string>
+    <string name="widget_description">Przeglądaj notatki i zaczynaj nowe z ekranu głównego.</string>
+    <string name="widget_new_note">Nowa notatka</string>
+    <string name="shortcut_new_note">Nowa notatka</string>
+    <string name="shortcut_new_checklist">Nowa lista kontrolna</string>
+    <string name="widget_empty">Nie ma jeszcze notatek.\nDotknij +, aby napisać pierwszą.</string>
+    <string name="widget_logged_out">Zaloguj się do Anchor,\naby zobaczyć tu swoje notatki.</string>
+    <string name="live_channel_name">Obrazy na żywo</string>
+    <string name="live_transmitting">Trwa transmisja</string>
+    <string name="live_transmitting_text">Notatka pokazuje obraz z aparatu na żywo.</string>
+    <string name="live_stop_transmission">Zatrzymaj transmisję</string>
+    <string name="recording_channel_name">Nagrania głosowe</string>
+    <string name="recording_title">Nagrywanie dźwięku</string>
+    <string name="recording_text">Otwórz Anchor, aby zatrzymać nagrywanie.</string>
+</resources>

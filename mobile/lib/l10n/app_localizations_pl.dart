@@ -5153,4 +5153,75 @@ class AppLocalizationsPl extends AppLocalizations {
   String magicLoginNeedsPlus(String host) {
     return '$host to zwykły serwer Anchor, który nie obsługuje logowania kodem. Zaloguj się hasłem.';
   }
+
+  @override
+  String get nativeWidgetLabel => 'Notatki';
+
+  @override
+  String get nativeWidgetDescription =>
+      'Przeglądaj notatki i zaczynaj nowe z ekranu głównego.';
+
+  @override
+  String get nativeNewNote => 'Nowa notatka';
+
+  @override
+  String get nativeNewChecklist => 'Nowa lista kontrolna';
+
+  @override
+  String get nativeWidgetEmpty =>
+      'Nie ma jeszcze notatek.\nDotknij +, aby napisać pierwszą.';
+
+  @override
+  String get nativeWidgetSignedOut =>
+      'Zaloguj się do Anchor,\naby zobaczyć tu swoje notatki.';
+
+  @override
+  String get nativeLiveChannel => 'Obrazy na żywo';
+
+  @override
+  String get nativeLiveTransmitting => 'Trwa transmisja';
+
+  @override
+  String get nativeLiveTransmittingText =>
+      'Notatka pokazuje obraz z aparatu na żywo.';
+
+  @override
+  String get nativeLiveStop => 'Zatrzymaj transmisję';
+
+  @override
+  String get nativeRecordingChannel => 'Nagrania głosowe';
+
+  @override
+  String get nativeRecordingTitle => 'Nagrywanie dźwięku';
+
+  @override
+  String get nativeRecordingText => 'Otwórz Anchor, aby zatrzymać nagrywanie.';
+
+  @override
+  String get nativeMusicUse =>
+      'Anchor używa biblioteki muzyki, aby dodawać pliki audio do notatek.';
+
+  @override
+  String get nativeCameraUse =>
+      'Anchor używa aparatu do robienia zdjęć do notatek i zdjęcia profilowego.';
+
+  @override
+  String get nativeFaceIdUse =>
+      'Anchor używa Face ID do otwierania notatek, które nim blokujesz.';
+
+  @override
+  String get nativeLocalNetworkUse =>
+      'Anchor łączy się z serwerem, gdy jest on w sieci lokalnej.';
+
+  @override
+  String get nativeMicrophoneUse =>
+      'Anchor używa mikrofonu do nagrywania notatek głosowych.';
+
+  @override
+  String get nativePhotoLibraryAddUse =>
+      'Anchor zapisuje obrazy z notatek w bibliotece zdjęć.';
+
+  @override
+  String get nativePhotoLibraryUse =>
+      'Anchor używa biblioteki zdjęć, aby dodawać obrazy do notatek i wybierać zdjęcie profilowe.';
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Written by tool/native_strings.dart from lib/l10n. -->
+<resources>
+    <string name="widget_label">Notizen</string>
+    <string name="widget_description">Sieh deine Notizen und beginne eine neue vom Startbildschirm aus.</string>
+    <string name="widget_new_note">Neue Notiz</string>
+    <string name="shortcut_new_note">Neue Notiz</string>
+    <string name="shortcut_new_checklist">Neue Checkliste</string>
+    <string name="widget_empty">Noch keine Notizen.\nTippe auf +, um deine erste zu schreiben.</string>
+    <string name="widget_logged_out">Melde dich bei Anchor an,\num deine Notizen hier zu sehen.</string>
+    <string name="live_channel_name">Live-Bilder</string>
+    <string name="live_transmitting">Übertragung läuft</string>
+    <string name="live_transmitting_text">Eine Notiz zeigt deine Kamera live.</string>
+    <string name="live_stop_transmission">Übertragung beenden</string>
+    <string name="recording_channel_name">Sprachaufnahmen</string>
+    <string name="recording_title">Audio wird aufgenommen</string>
+    <string name="recording_text">Öffne Anchor, um die Aufnahme zu beenden.</string>
+</resources>
