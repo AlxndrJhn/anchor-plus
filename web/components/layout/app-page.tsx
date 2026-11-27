@@ -25,6 +25,7 @@ import {
   useKeysFor,
 } from "@/features/keybindings";
 import { tagColorStyle } from "@/features/tags";
+import { pushInPage } from "@/lib/in-page-nav";
 import { isMac } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { DesktopUpdateButton } from "./desktop-update";
@@ -226,7 +227,7 @@ export const SearchField = React.forwardRef<
     const place = places[Math.min(active, places.length - 1)];
     const goTo = (target: GoToTarget) => {
       input.current?.blur();
-      router.push(target.href);
+      if (!pushInPage(target.href)) router.push(target.href);
     };
 
     // At once where the field is shown, so letters typed right after the key
