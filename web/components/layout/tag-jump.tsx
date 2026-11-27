@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { tagColorStyle } from "@/features/tags";
+import { pushInPage } from "@/lib/in-page-nav";
 import { cn } from "@/lib/utils";
 import { type GoToTarget, matchTargets, useGoToTargets } from "./go-to";
 
@@ -31,7 +32,7 @@ export function TagJump({
 
   const go = (tag: GoToTarget) => {
     onOpenChange(false);
-    router.push(tag.href);
+    if (!pushInPage(tag.href)) router.push(tag.href);
   };
   const type = (value: string) => {
     setQuery(value);

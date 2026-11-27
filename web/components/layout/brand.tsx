@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { followInPage } from "@/lib/in-page-nav";
 import { cn } from "@/lib/utils";
 import { AnchorLogo } from "./anchor-logo";
 import { PlusMark } from "./plus-mark";
@@ -42,7 +43,14 @@ export function Brand({
     className,
   );
   return href ? (
-    <Link href={href} className={classes} onClick={onNavigate}>
+    <Link
+      href={href}
+      className={classes}
+      onClick={(e) => {
+        followInPage(e, href);
+        onNavigate?.();
+      }}
+    >
       {content}
     </Link>
   ) : (

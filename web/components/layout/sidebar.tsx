@@ -81,6 +81,7 @@ import {
 } from "@/features/tags";
 import { TAG_COLORS } from "@/lib/design/tokens";
 import { useLastShown } from "@/lib/hooks/use-last-shown";
+import { followInPage, pushInPage } from "@/lib/in-page-nav";
 import { isDemo, isServerless } from "@/lib/local-backend/mode";
 import { rememberNewNoteButton } from "@/lib/morph";
 import { glidePill, prefersReducedMotion } from "@/lib/motion";
@@ -266,7 +267,7 @@ export function Sidebar({
         queryClient.invalidateQueries({ queryKey: ["tags"] }),
         queryClient.invalidateQueries({ queryKey: ["notes"] }),
       ]);
-      if (tagId === tag.id) router.push("/notes");
+      if (tagId === tag.id && !pushInPage("/notes")) router.push("/notes");
       setTagToDelete(null);
     },
     onError: (_, tag) => toast.error(t("deleteFailed", { name: tag.name })),
@@ -436,7 +437,10 @@ export function Sidebar({
           >
             <Link
               href={href}
-              onClick={onNavigate}
+              onClick={(e) => {
+                followInPage(e, href);
+                onNavigate?.();
+              }}
               data-row={href}
               data-note-drop={
                 href === "/archive" || href === "/trash"
@@ -577,7 +581,10 @@ export function Sidebar({
               >
                 <Link
                   href={`/notes?tagId=${tag.id}`}
-                  onClick={onNavigate}
+                  onClick={(e) => {
+                    followInPage(e, `/notes?tagId=${tag.id}`);
+                    onNavigate?.();
+                  }}
                   aria-current={isCurrent ? "page" : undefined}
                   className="flex h-full min-w-0 flex-1 items-center gap-3 pl-[11.5px] text-inherit no-underline"
                 >
