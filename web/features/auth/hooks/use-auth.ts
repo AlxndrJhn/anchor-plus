@@ -5,6 +5,7 @@ import { HTTPError } from "ky";
 import { useCallback } from "react";
 import { toast } from "@/components/ui/toast";
 import { translate } from "@/lib/i18n";
+import { isPageClosing } from "@/lib/page-close";
 import { firstName } from "@/lib/utils";
 import {
   getMe,
@@ -66,6 +67,8 @@ async function checkSession() {
       (error.response.status === 401 || error.response.status === 403)
     )
       logout();
+    // Cut off by a reload: the next page asks again.
+    else if (isPageClosing()) return;
     else {
       setUnreachable(true);
       // Offline with a session kept on this device: work from what it holds,

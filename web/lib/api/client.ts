@@ -101,6 +101,9 @@ function reached() {
 
 /** The server didn't answer: offline until it does, asked every few seconds. */
 function notReached() {
+  // A page on its way out says nothing about the server, and what it
+  // stores here is where the next page starts.
+  if (isPageClosing()) return;
   if (!useAuthStore.getState().unreachable) {
     useAuthStore.getState().setUnreachable(true);
     // They would only hold "Saving…" up until they gave up; they fail now
@@ -120,6 +123,35 @@ function notReached() {
     }, RECHECK_MS);
   };
   recheck();
+}
+
+let confirming: Promise<void> | null = null;
+
+/**
+ * A request failed without an answer. Reloading or leaving the page cancels
+ * requests the same way, sometimes before the page hears it is closing, so
+ * the server is asked once more before the app calls itself offline: on a
+ * page that is going away, that question gets no answer either.
+ */
+function failedToReach() {
+  if (useAuthStore.getState().unreachable) {
+    notReached();
+    return;
+  }
+  if (confirming) return;
+  confirming = globalThis
+    .fetch("/api/health", { signal: AbortSignal.timeout(RECHECK_MS) })
+    .then(
+      (response) => response.ok,
+      () => false,
+    )
+    .then((ok) => {
+      if (ok) reached();
+      else notReached();
+    })
+    .finally(() => {
+      confirming = null;
+    });
 }
 
 function fetchNoticingServer(input: RequestInfo | URL, init?: RequestInit) {
@@ -147,7 +179,7 @@ function fetchNoticingServer(input: RequestInfo | URL, init?: RequestInit) {
       waiting.delete(controller);
       // Cut off on purpose (left the page, or a timeout) says nothing new.
       if (!(error instanceof DOMException && error.name === "AbortError"))
-        notReached();
+        failedToReach();
       throw error;
     },
   );
